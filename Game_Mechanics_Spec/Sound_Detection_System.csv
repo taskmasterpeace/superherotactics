@@ -1,0 +1,130 @@
+Section,Description
+---SOUND DETECTION SYSTEM---,Everything generates sound; characters can hear and react; decibel-based
+
+===SOUND GENERATION BY ACTION===
+Action_Type,Base_Decibels,Hearing_Range_Squares,Can_Penetrate_Walls,Notes
+Standing_Still,0 dB,0,No,Silent
+Walking_Normal,30 dB,3,No,Normal footsteps
+Walking_Careful,15 dB,1,No,Stealth movement (half speed)
+Running,50 dB,8,Muffled,Heavy footsteps
+Sprinting,60 dB,12,Muffled,Very loud movement
+Crawling,20 dB,2,No,Low slow movement
+Door_Open_Normal,40 dB,5,Yes (same floor),Standard door operation
+Door_Open_Quiet,20 dB,2,No,Careful door opening (Stealth check)
+Door_Close_Normal,40 dB,5,Yes (same floor),Standard door close
+Door_Slam,70 dB,15,Yes,Loud door impact
+Door_Break,80 dB,20,Yes,Breaking down door
+Window_Break,75 dB,18,Yes,Glass shattering
+Melee_Attack_Miss,30 dB,3,No,Swing and miss
+Melee_Attack_Hit,60 dB,10,Muffled,Impact sound
+Unarmed_Strike,50 dB,8,Muffled,Punch/kick impact
+Grappling_Struggle,55 dB,9,Muffled,Wrestling sounds
+Pistol_Shot,140 dB,50,Yes (reduced to 30 sq),Gunfire
+Rifle_Shot,160 dB,75,Yes (reduced to 50 sq),Louder gunfire
+Shotgun_Blast,155 dB,70,Yes (reduced to 45 sq),Spread shot
+SMG_Burst,150 dB,60,Yes (reduced to 40 sq),Automatic fire
+Heavy_Weapon,165 dB,80,Yes (reduced to 55 sq),Machine gun/rocket
+Explosion_Small,170 dB,100,Yes (reduced to 70 sq),Grenade
+Explosion_Large,180 dB,150,Yes (reduced to 100 sq),Large bomb
+Talking_Whisper,20 dB,2,No,Quiet communication
+Talking_Normal,50 dB,6,Muffled,Conversation
+Talking_Loud,65 dB,12,Yes (muffled),Shouting
+Scream,80 dB,25,Yes,Alert/pain cry
+Super_Power_Low,70 dB,15,Varies,Power-dependent
+Super_Power_High,100 dB,30,Yes,Major power use
+Flight_Low,45 dB,6,No,Quiet flight
+Flight_High,80 dB,20,Yes,Supersonic boom possible
+Climbing,35 dB,4,No,Scaling walls
+Swimming,40 dB,5,No (water only),Water movement
+
+===MATERIAL DAMPENING===
+Material_Type,Decibel_Reduction,Range_Reduction_Percent,Notes
+Open_Air,0 dB,0%,No obstruction
+Wooden_Wall,−20 dB,40%,Standard interior wall
+Brick_Wall,−40 dB,60%,Exterior wall
+Concrete_Wall,−50 dB,70%,Reinforced structure
+Steel_Wall,−35 dB,55%,Metal barrier
+Glass_Window,−10 dB,20%,Transparent barrier
+Wooden_Door_Closed,−25 dB,45%,Standard door
+Metal_Door_Closed,−30 dB,50%,Reinforced door
+Steel_Security_Door,−40 dB,65%,High security
+Floor/Ceiling,−30 dB,50%,Between Z levels
+Multiple_Walls,Cumulative,Cumulative,Each wall adds reduction
+
+===CHARACTER HEARING===
+Stat,Base_Hearing_Range,Formula,Notes
+INS (Instinct),INS/5 squares at 30 dB,Hearing_Range = (INS/5) × (Sound_dB/30),Higher INS = better hearing
+Normal_Human,6 squares at 30 dB,Average INS 30,Standard perception
+Enhanced_Hearing_Power,×2 hearing range,Double all hearing ranges,Super senses
+Deaf_Status,0 hearing,Cannot hear any sounds,Status effect
+Helmet/Armor,−1 to −3 squares,Reduces hearing range,Equipment penalty
+
+===HEARING RANGE CALCULATION===
+Step,Description,Formula
+1,Get action's base decibels,From Sound Generation table
+2,Apply material dampening,Subtract dB for walls/doors between source and listener
+3,Calculate effective decibels,Effective_dB = Base_dB - Dampening
+4,Calculate hearing range,Range = (INS/5) × (Effective_dB / 30)
+5,Compare to distance,If distance <= Range then heard
+
+===EXAMPLE CALCULATIONS===
+Scenario,Calculation,Result
+Pistol through wooden wall,140 dB - 20 dB = 120 dB effective; Range = 6 × (120/30) = 24 squares,Heard at 24 sq through wood
+Running heard through brick,50 dB - 40 dB = 10 dB effective; Range = 6 × (10/30) = 2 squares,Only heard within 2 sq
+Door open same room,40 dB; Range = 6 × (40/30) = 8 squares,Heard at 8 squares
+Whisper through door,20 dB - 25 dB = -5 dB (cannot hear),Not heard through door
+
+===ACTIVE LISTENING===
+Action,AP_Cost,Effect,Duration,Requirements
+Passive_Hearing,0,Normal hearing range,Always on,None
+Active_Listen,2,+50% hearing range; identify sound type,1 turn,Cannot attack same turn
+Focused_Listen,4,+100% hearing range; pinpoint location exactly,1 turn,Cannot move or attack
+Sound_Identification,0,Roll INS to identify sound type,Instant,Must hear the sound
+
+===SOUND IDENTIFICATION===
+Roll_Result,Information_Gained,Examples
+Failed,Know something made noise but not what,Heard something
+Minor,General category of sound,Footsteps vs gunshot vs door
+Success,Specific sound type and direction,Running footsteps from north
+Major,Exact identification and distance estimate,Two people running 15 squares north
+
+===SOUND CONES (UI VISUALIZATION)===
+Certainty_Level,Cone_Width,Color_Code,Meaning
+Exact_Location,Point,Green,Pinpointed sound source
+General_Direction,45 degrees,Yellow,Know direction but not exact spot
+Vague_Direction,90 degrees,Orange,Rough idea of direction
+Unknown_Direction,360 degrees,Red,Heard but no direction info
+
+===SOUND-BASED ALERTS===
+Alert_Type,Trigger,Player_Info,AI_Reaction
+Footsteps,Walking/running detected,Sound icon + cone,Investigate or prepare
+Combat,Gunfire or fighting,Loud sound icon + cone,Alert + respond
+Alarm,Triggered alarm system,Flashing alert,Full alert status
+Scream,Character scream,Urgent sound icon,Priority response
+Explosion,Blast detected,Major alert + cone,Full combat response
+
+===STEALTH VS SOUND===
+Stealth_Action,Sound_Generated,Counter_Measure
+Stealth_Movement,15 dB (vs normal 30 dB),Half speed required
+Silent_Takedown,20 dB (vs normal 60 dB),Ninjitsu skill bonus
+Silenced_Weapon,80 dB (vs normal 140 dB),Still audible but reduced
+Sound_Absorption_Power,Nullifies up to 140 dB,Creates silent zone
+Invisibility,Does not affect sound,Still makes noise when moving
+
+===POWERS AFFECTING SOUND===
+Power,Effect_on_Sound,Range,Notes
+Sound_Absorption_Low,−20 dB in 3×3 area,10 squares,Cannot communicate in zone
+Sound_Absorption_High,−140 dB in 7×7 area,20 squares,Complete silence
+Harmonic_Resonance,Creates 100+ dB vibrations,25 squares,Can damage/disrupt
+Super_Speed_Sonic_Boom,+80 dB when breaking sound barrier,30 squares,Unavoidable noise
+Enhanced_Senses,×2 hearing range,Self,Super hearing
+
+===ENVIRONMENTAL SOUND SOURCES===
+Source,Decibels,Range,Notes
+City_Ambient,40 dB,Background,Masks quieter sounds
+Rain,35 dB,Background,−10% hearing range
+Heavy_Rain/Storm,55 dB,Background,−30% hearing range
+Vehicle_Running,70 dB,15 squares,Engine noise
+Alarm_System,90 dB,40 squares,Building security
+Crowd_Noise,60 dB,Variable,Covers movement sounds
+Combat_Zone,80+ dB,Variable,Constant noise

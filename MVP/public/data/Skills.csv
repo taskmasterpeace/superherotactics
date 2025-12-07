@@ -1,0 +1,75 @@
+Skill_Name,Skill_Type,Column_Shift_Bonus,Prerequisites,Description,Combat_Application,Range_Combat_Bonus,Melee_Combat_Bonus,Investigation_Bonus,Special_Effects
+Shooting,Combat,+2CS,None,General firearms proficiency covering pistols and rifles,Accuracy with ranged weapons,+2CS all ranged weapons,None,+1,Reduces reload time by 1 second
+Sniper,Combat,+3CS,Shooting skill,Specialized long-range precision shooting,Extreme range accuracy,+4CS rifles at 50+ range,None,+2,Can target specific body parts at long range
+Heavy Weapons,Combat,+2CS,STR>20,Operation of heavy military weapons,Machine guns and rocket launchers,+3CS heavy weapons,None,None,Can use weapons normally restricted by strength
+Energy Weapons,Combat,+2CS,None,Training with laser and plasma weapons,Advanced energy weapon systems,+2CS energy weapons,None,+1,Energy weapons have no reload time when used by skilled operators
+Flamethrower,Combat,+2CS,None,Specialized incendiary weapon training,Flame weapon operation,+3CS flame weapons,None,None,Area effect weapons hit additional targets
+Rocketman,Combat,+3CS,Heavy Weapons,Explosive ordnance specialist,Rocket and grenade launcher expertise,+4CS explosive weapons,None,None,Explosive weapons deal maximum area damage
+Bowmaster,Combat,+2CS,None,Traditional archery and crossbow mastery,Silent ranged weapon proficiency,+3CS bows and crossbows,None,+2,Can use specialized arrows with status effects
+Throwing,Combat,+1CS,None,Accuracy with thrown objects and weapons,Knife and improvised weapon throwing,+2CS thrown weapons,+1CS improvised weapons,None,Range increases with STR modifier
+Quick Draw,Combat,+1CS,Any ranged weapon skill,Rapid weapon deployment,Fast weapon readiness,+1CS initiative with ranged weapons,+1CS initiative with melee weapons,None,Can draw and fire in same action
+Gunslinger,Combat,+3CS,Shooting + Quick Draw,Dual-wielding firearms expertise,Two-weapon ranged combat,+2CS when dual-wielding,None,None,Can fire two weapons in single action
+Katana,Martial Arts,+2CS,None,Traditional Japanese swordsmanship,Precision blade combat,None,+3CS with katana,None,Critical hits cause bleeding status
+Staff,Martial Arts,+2CS,None,Martial arts staff fighting techniques,Defensive weapon mastery,None,+2CS with staff weapons,None,+1CS dodge when using staff
+Martial Arts,Martial Arts,+2CS,None,General hand-to-hand combat training,Unarmed fighting proficiency,None,+2CS unarmed combat,None,Unarmed attacks count as armed for damage purposes
+Boxing,Martial Arts,+2CS,None,Western boxing techniques,Punching and defensive training,None,+2CS punching attacks,None,Boxing attacks have chance to stun opponent
+Wrestling,Martial Arts,+2CS,None,Grappling and submission techniques,Close-quarters control,None,+2CS grappling attempts,None,Successful grapples can pin opponents
+Judo,Martial Arts,+2CS,None,Throws and defensive techniques,Redirection of enemy force,None,+1CS defense; +2CS throws,None,Can throw opponents using their own strength against them
+Krav Maga,Martial Arts,+3CS,None,Military close-quarters combat,Lethal hand-to-hand techniques,None,+3CS unarmed; +1CS improvised weapons,+1,Attacks target vital points for extra damage
+Capoeira,Martial Arts,+2CS,Agility>30,Acrobatic fighting style,Movement-based combat,None,+2CS kicks; +1CS dodge,None,Can attack while moving
+Aikido,Martial Arts,+1CS,None,Defensive martial art,Redirection and control,None,+3CS defense; +1CS disarming,None,Can redirect attacks back at attackers
+Ninjitsu,Martial Arts,+2CS,None,Stealth and infiltration techniques,Silent combat methods,+1CS thrown weapons,+2CS stealth attacks,+3,Stealth attacks from behind get damage bonus
+Escape Artist,Talent,+2CS,None,Ability to escape restraints and tight spaces,Getting out of dangerous situations,None,+2CS vs grapples,+2,Can exit combat without opportunity attacks when unseen
+Acrobatics,Talent,+1CS,Agility>25,Athletic movement and tumbling,Combat mobility,None,+1CS dodge,None,Can move through enemy-occupied squares without penalty
+Stealth,Talent,+2CS,None,Moving unseen and unheard,Avoiding detection,+2CS ambush attacks,+2CS surprise attacks,+3,First attack from stealth gets damage bonus
+Perception,Talent,+2CS,None,Noticing details and spotting hidden things,Situational awareness,+1CS vs ambush,+1CS vs surprise,+3,Can detect hidden enemies and traps
+First Aid,Talent,+2CS,None,Basic medical treatment,Battlefield medicine,None,None,+1,Can stabilize dying characters and treat minor wounds
+Leadership,Talent,+1CS,None,Inspiring and coordinating others,Team coordination,+1CS team accuracy,+1CS team morale,+2,Team members get bonus when leader is present
+Intimidation,Talent,+2CS,None,Using fear as a weapon,Psychological warfare,None,+1CS vs frightened enemies,+2,Can cause fear status in weak-willed opponents
+Pilot,Talent,+2CS,None,Operating aircraft and flying vehicles,Aerial vehicle control,None,None,None,Required for flying vehicles; +2CS to all aerial maneuvers
+Navigation,Talent,+1CS,None,Finding direction and planning routes,Avoiding getting lost,None,None,+2,Reduces travel time and finds efficient routes
+Engineer,Talent,+2CS,None,Building and repairing mechanical devices,Technical construction,None,None,+2,Can repair equipment and build temporary fortifications
+Reverse Engineer,Talent,+3CS,Engineer,Understanding alien and unknown technology,Technology analysis,None,None,+3,Can research destroyed robotic and alien tech
+Computer,Talent,+2CS,None,Operating and programming computers,Digital systems,None,None,+2,Can hack systems and analyze digital evidence
+Electronics,Talent,+2CS,None,Working with electronic devices,Circuit and system repair,None,None,+2,Can disable security systems and repair electronics
+Demolitions,Talent,+3CS,None,Explosives handling and placement,Controlled destruction,+2CS explosive weapons,None,+1,Can set timed explosives and shaped charges
+Lockpicking,Talent,+2CS,None,Opening locks without keys,Bypassing security,None,None,+3,Can open mechanical locks and some electronic ones
+Driving,Talent,+2CS,None,Operating ground vehicles,Vehicle operation,None,None,None,Required for ground vehicles; +2CS to vehicle maneuvers
+Boating,Talent,+2CS,None,Operating watercraft,Naval operations,None,None,None,Required for water vehicles; +2CS to naval maneuvers
+Surveillance,Talent,+2CS,None,Observing targets without detection,Intelligence gathering,None,None,+3,Can maintain long-term observation of targets
+Tracking,Talent,+2CS,None,Following trails and finding quarry,Pursuit and hunting,None,None,+3,Can follow tracks and predict target movement
+Detective,Talent,+2CS,None,Investigating crimes and solving mysteries,Gathering evidence,None,None,+3,Can piece together clues and solve complex cases
+Forensics,Talent,+2CS,Detective,Scientific crime scene analysis,Physical evidence analysis,None,None,+4,Can determine cause of death and analyze evidence
+Psychology,Talent,+2CS,None,Understanding human behavior and motivation,Reading people,None,None,+3,Can predict behavior and detect deception
+Research,Talent,+2CS,None,Finding information in databases and libraries,Information gathering,None,None,+3,Can find obscure information and historical data
+Teaching,Talent,+1CS,None,Instructing others in skills and knowledge,Knowledge transfer,None,None,+1,Can train other characters in skills you possess
+Languages,Talent,+1CS,None,Speaking and reading foreign languages,Communication,None,None,+2,Each level allows fluency in additional languages
+Diplomacy,Talent,+2CS,None,Negotiation and peaceful conflict resolution,Non-violent solutions,None,None,+3,Can resolve conflicts without combat
+Streetwise,Talent,+2CS,None,Understanding criminal underworld,Criminal contacts,None,None,+3,Can find black market goods and criminal information
+Business,Talent,+2CS,None,Understanding commerce and economics,Financial operations,None,None,+2,Can manage resources and predict market trends
+Law,Talent,+2CS,None,Understanding legal systems and procedures,Legal knowledge,None,None,+2,Can navigate legal challenges and court procedures
+Military Tactics,Talent,+3CS,None,Understanding strategy and battlefield control,Combat coordination,+2CS when commanding,+2CS when commanding,+3,Can coordinate team attacks for bonus damage
+Survival,Talent,+2CS,None,Living in wilderness and hostile environments,Environmental adaptation,None,None,+2,Can find food and shelter in wilderness
+Animal Handling,Talent,+2CS,None,Training and controlling animals,Working with animals,None,None,+2,Can train animals and calm hostile wildlife
+Performance,Talent,+1CS,None,Acting and entertaining others,Social manipulation,None,None,+2,Can assume false identities and gather information
+Art,Talent,+1CS,None,Creating visual art and recognizing artistic value,Cultural understanding,None,None,+1,Can forge documents and understand cultural contexts
+Music,Talent,+1CS,None,Playing instruments and musical composition,Social connections,None,None,+1,Can use music for social influence and cultural access
+Sports,Talent,+1CS,None,Athletic games and physical competitions,Physical conditioning,None,+1CS physical actions,None,Provides general athletic ability bonus
+Gambling,Talent,+2CS,None,Games of chance and reading opponents,Risk assessment,None,None,+2,Can earn money gambling and read opponent intentions
+Cooking,Talent,+1CS,None,Preparing food and understanding nutrition,Sustenance preparation,None,None,None,Can prepare food that provides temporary stat bonuses
+Fashion,Talent,+1CS,None,Understanding clothing and appearance,Social presentation,None,None,+1,Can create disguises and understand social hierarchies
+History,Talent,+2CS,None,Knowledge of past events and their significance,Historical context,None,None,+2,Can provide historical background for investigations
+Geography,Talent,+2CS,None,Knowledge of world locations and terrain,Location knowledge,None,None,+2,Can navigate unfamiliar terrain and plan routes
+Science,Talent,+2CS,None,Understanding scientific principles and methods,Technical analysis,None,None,+3,Can analyze scientific phenomena and technology
+Medicine,Talent,+3CS,None,Advanced medical knowledge and treatment,Healing expertise,None,None,+2,Can treat serious injuries and identify biological agents
+Chemistry,Talent,+2CS,Science,Understanding chemical compounds and reactions,Chemical analysis,None,None,+2,Can identify poisons and create chemical compounds
+Physics,Talent,+2CS,Science,Understanding matter and energy,Physical analysis,None,None,+2,Can analyze physical phenomena and energy effects
+Biology,Talent,+2CS,Science,Understanding living organisms,Life science analysis,None,None,+2,Can analyze biological threats and understand ecosystems
+Occult,Talent,+2CS,None,Knowledge of supernatural and mystical topics,Mystical understanding,None,None,+2,Can identify supernatural phenomena and mystical artifacts
+Religion,Talent,+2CS,None,Understanding religious beliefs and practices,Spiritual knowledge,None,None,+2,Can interact with religious communities and understand motivations
+Philosophy,Talent,+2CS,None,Understanding complex ideas and ethical systems,Ethical reasoning,None,None,+1,Can understand complex motivations and predict behavior
+Reflex,Physical,+1CS,None,Quick reactions to danger,Combat reflexes,+1CS initiative,+1CS initiative,None,Can react faster in combat situations
+Roll With Blow,Physical,+2CS,Reflex,Reducing impact damage,Damage mitigation,None,Halve blunt damage,None,Can reduce bashing damage by rolling with impact
+Dodge,Physical,+2CS,Agility>20,Avoiding attacks through movement,Evasion,+2CS dodge ranged,+2CS dodge melee,None,Adds agility bonus to all dodge attempts
+Block,Physical,+2CS,None,Using shields and weapons to stop attacks,Active defense,None,+2CS with shield/weapon,None,Can use weapons or shields to block attacks
+Parry,Physical,+2CS,Any melee weapon skill,Deflecting attacks with weapons,Weapon defense,None,+2CS weapon parry,None,Can deflect attacks using melee weapons

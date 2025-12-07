@@ -1,0 +1,138 @@
+Section,Description
+---INJURY SYSTEM---,Critical injury table triggered by Major damage results or specific combat outcomes
+
+===INJURY CATEGORIES===
+Category,Roll_Range,Description,Severity
+Fatal,1,Instant death or unsurvivable injury,10
+Permanent_Disability,2-9,Permanent loss of body part requiring regeneration,9
+Critical_Injury,10-18,Life-threatening requiring immediate medical attention,8
+Severe_Injury,19-35,Major wounds requiring magical healing or extended recovery,7
+Moderate_Injury,36-55,Significant wounds requiring medical attention,6
+Minor_Injury,56-75,Temporary impairments lasting days,5
+Light_Injury,76-91,Brief impairments lasting until rest,4
+Memorable_Scars,92-93,Cosmetic scars with social effects,3
+Survivability,94-100,Beneficial outcomes (adrenaline/luck),2
+
+===INJURY TABLE===
+d100_Roll,Injury_Name,Category,Effect_Description,Mechanical_Effect,Cure_Method,Duration_Untreated,Notes
+1,Crushed Skull/Decapitation,Fatal,Instant death,Death - character removed from play,Resurrection/Reincarnate,Forever,No save allowed
+2,Lose an Eye,Permanent_Disability,Eye destroyed or removed,-2CS perception (sight); -2CS ranged attacks,Regenerate,Forever,Depth perception lost
+3,Lose Nose,Permanent_Disability,Nose destroyed or removed,-1CS Charisma; -2CS perception (smell),Regenerate,Forever,Breathing affected
+4,Lose Ear,Permanent_Disability,Ear destroyed or removed,-1CS Charisma; -2CS perception (hearing),Regenerate,Forever,Balance affected
+5,Lose Teeth,Permanent_Disability,Multiple teeth knocked out,-1CS Charisma checks,Regenerate,Forever,Speech affected
+6,Lose an Arm,Permanent_Disability,Arm severed or destroyed,Cannot use two-handed weapons; -50% carry capacity,Regenerate or Prosthetic,Forever,Dominant arm = additional -1CS
+7,Lose a Leg,Permanent_Disability,Leg severed or destroyed,Movement requires AGL check DC15 or fall prone; half movement,Regenerate or Prosthetic,Forever,Cannot run
+8,Lose a Hand,Permanent_Disability,Hand severed or destroyed,Cannot use two-handed weapons or bows; -1 item slot,Regenerate or Prosthetic,Forever,Affects grip
+9,Lose a Foot,Permanent_Disability,Foot severed or destroyed,Movement speed halved,Regenerate or Prosthetic,Forever,Cannot jump
+10,Ending Your Misery+,Critical_Injury,Injuries so severe enemies pity you,Enemies within 10sq must pass INT check or refuse to attack you,None (psychological),Until conscious,Tactical advantage if conscious
+11,Ending Your Misery,Critical_Injury,Your attacker hesitates,Attacker must pass INT check or stop attacking,None (psychological),Until conscious,Single target effect
+12,Ruptured Aorta,Critical_Injury,Major arterial damage,-2CS death saves; instant failed death save,Magical healing,Until stable,Bleeds 10 damage/turn
+13,Arm Artery Cut,Critical_Injury,Arterial bleed in arm,-2CS death saves,Magical healing,Until stable,Bleeds 5 damage/turn
+14,Leg Artery Cut,Critical_Injury,Arterial bleed in leg,-2CS death saves; CON check or prone,Magical healing,Until stable,Bleeds 5 damage/turn
+15,Broken Spine,Critical_Injury,Spinal damage,Concentration check every turn; paralysis risk,Magical healing,2d8 weeks,May become permanent
+16,Severed Muscles,Critical_Injury,Major muscle group destroyed,-2CS STR checks and attacks,Magical healing,2d8 weeks,Affects specific limb
+17,Severed Tendons,Critical_Injury,Tendons cut,-2CS AGL checks and attacks,Magical healing,2d8 weeks,Affects specific limb
+18,Broken Arm,Severe_Injury,Arm bone fractured,Cannot use two-handed weapons or bows,Magical healing,2d8 weeks,Splint reduces penalty
+19,Broken Leg,Severe_Injury,Leg bone fractured,Movement speed halved,Magical healing,2d8 weeks,Crutch required
+20,Internal Bleeding,Severe_Injury,Internal hemorrhage,Attack/dash action causes 1d6 damage,Magical healing,2d8 weeks,Rest stops bleeding
+21,Punctured Lung,Severe_Injury,Lung perforated,Concentration check DC10 every turn,Magical healing,2d8 weeks,Cannot hold breath
+22,Broken Rib,Severe_Injury,Rib fractured,-2CS perception checks,Magical healing,2d8 weeks,Breathing painful
+23,Fractured Spine,Severe_Injury,Minor spinal damage,-2CS perception (smell),Magical healing,2d8 weeks,Risk of paralysis
+24,Busted Kidney,Severe_Injury,Kidney damaged,CON check or fall unconscious on attack,Magical healing,2d8 weeks,Poisoned condition
+25,Severe Concussion,Severe_Injury,Major head trauma,CON check or fall prone on attack,DC15 Medicine or healing,2d6 days,Memory issues
+26,Ruptured Jugular,Severe_Injury,Neck vessel damaged,Bleeds; concentration required,DC10 Medicine or healing,2d6 days,Speaking difficult
+27,Ruptured Liver,Severe_Injury,Liver damaged,Poisoned status,DC10 Medicine or healing,2d6 days,Toxin processing impaired
+28,Busted Kneecap,Severe_Injury,Knee shattered,Reaction requires CON check or wasted,DC10 Medicine or healing,2d6 days,Movement painful
+29,Major Concussion,Severe_Injury,Significant head impact,End of turn: 1d6 damage if conscious,DC5 Medicine check,2d6 days,Rest required
+30,Overstretched Muscle,Moderate_Injury,Muscle strain,-2CS INT saving throws,DC5 Medicine check,2d6 days,Heat helps recovery
+31,Overstretched Tendon,Moderate_Injury,Tendon strain,-2CS AGL skill checks,DC5 Medicine check,2d6 days,Rest required
+32,Fractured Hand,Moderate_Injury,Hand bone cracked,STR check or drop held item end of turn,DC5 Medicine check,2d6 days,Cannot grip tightly
+33,Fractured Foot,Moderate_Injury,Foot bone cracked,INT check or movement = 0 start of turn,DC5 Medicine check,2d6 days,Cannot run
+34,Ruptured Intestines,Moderate_Injury,Intestinal damage,INT check or attack nearest creature,First Aid,2d6 days,Infection risk
+35,Mild Concussion,Moderate_Injury,Light head impact,INT check or flee combat,First Aid,1d4 days,Headaches
+36,Dazed,Minor_Injury,Stunned briefly,INT check or attack nearest creature,Rest,1d4 days,Temporary confusion
+37,Muscle Cramp,Minor_Injury,Muscle spasm,Movement -10 squares,Rest,1d4 days,Stretching helps
+38,Sprain,Minor_Injury,Joint twisted,Movement -5 squares,Rest,1d4 days,Ice helps
+39,Hearing Damage,Minor_Injury,Temporary hearing loss,-2CS perception (hearing),Rest,Long rest,Ringing in ears
+40,Voice Damage,Minor_Injury,Vocal cord strain,Cannot speak,Rest,Long rest,Whispering only
+41,Dizzy Spell,Minor_Injury,Balance disrupted,Movement requires CON check,Rest,Long rest,Vertigo
+42,Winded,Minor_Injury,Breath knocked out,Reaction requires CON check,Rest,Long rest,Gasping
+43,Bruised Ribs,Minor_Injury,Rib contusion,-2CS concentration checks,Rest,Long rest,Breathing hurts
+44,Twisted Ankle,Minor_Injury,Ankle sprained,Movement penalty,Rest,Long rest,Limping
+45,Jammed Finger,Minor_Injury,Finger injured,-1CS manipulation,Rest,Long rest,Grip affected
+46,Black Eye,Minor_Injury,Orbital bruising,-1CS perception (sight),Rest,Long rest,Swelling
+47,Split Lip,Minor_Injury,Lip cut,-1CS Charisma,Rest,Long rest,Speaking hurts
+48,Bloody Nose,Minor_Injury,Nose bleeding,-1CS perception (smell),Rest,Long rest,Distracting
+49,Ringing Ears,Minor_Injury,Tinnitus,-1CS perception (hearing),Rest,Long rest,Temporary
+50,Headache,Minor_Injury,Pain in head,-1CS INT checks,Rest,Long rest,Concentration difficult
+51-75,Minor Bruise,Light_Injury,Surface contusion,No mechanical effect,None,Short rest,Cosmetic only
+76-85,Scratch,Light_Injury,Surface cut,No mechanical effect,None,Short rest,Cosmetic only
+86-91,Close Call,Light_Injury,Near miss,No mechanical effect; attacker has -1CS next attack on you,None,1 round,Lucky dodge
+92,Impressive Scar (Body),Memorable_Scars,Visible battle scar,+1CS Intimidation checks,None (permanent),Forever,Badge of honor
+93,Impressive Scar (Armor),Memorable_Scars,Armor shows battle damage,+1CS Intimidation and Persuasion,Prestidigitation removes,Forever,Must wear armor
+94,Exaggerated Wound,Survivability,Looks worse than it is,+1CS next attack roll,None,1 round,Attacker overconfident
+95,Exaggerated Wound+,Survivability,Enemy assumes you're down,+1CS next saving throw,None,1 round,Play dead option
+96,Second Wind-,Survivability,Catch breath,Advantage on Intimidation,None,Until short rest,Adrenaline surge
+97,Second Wind,Survivability,Rally,Advantage on Intimidation and Persuasion,None,Until short rest,Fighting spirit
+98,Second Wind+,Survivability,Major rally,Attacker won't attack while incapacitated,None,Until conscious,Assumed dead
+99,Unexpected KO,Survivability,Dramatic recovery,Enemies won't attack while incapacitated,None,Until conscious,Regain consciousness in 1d4 hours
+100,Adrenaline Rush,Survivability,Surge of energy,Start with 1 success on death saves; +1CS death saves; instant stabilize; heal 1 hit die + CON,None,Immediate,Major survival boost
+
+===INJURY TRIGGER CONDITIONS===
+Trigger,Roll_Modifier,Description
+Major_Success_Against_You,+0,Opponent rolls 98-100 on attack
+Critical_Hit,+0,Natural critical with weapon
+Overkill_Damage,-20,Damage exceeds max HP in single hit
+Called_Shot_Success,-30,Successful targeted attack at body part
+Falling_Damage,-10 per 10ft,Fall from height
+Explosion_Caught,+10,Caught in explosion radius
+Crushing_Damage,-15,Crushed by heavy object
+
+===INJURY RESISTANCE===
+Source,Modifier,Notes
+Durability_Power,+20 to roll,Resistant to permanent injury
+Regeneration_Power,Auto-cure,Injuries heal between combats
+Armor_DR,+1 per 5 DR,Armor absorbs impact
+Shield_Block,+30 if blocked,Shield prevents injury
+Defensive_Stance,+10,Prepared for impact
+
+===MEDICAL TREATMENT===
+Treatment_Type,Effect,Time_Required,Skill_Check
+First_Aid,Stabilize + stop bleeding,2 AP,Medicine DC10
+Field_Surgery,Reduce duration by half,10 minutes,Medicine DC15
+Hospital_Care,Reduce duration to 1/4,1 day,Professional care
+Magical_Healing,Cure moderate/minor instantly,1 action,Healing power
+Regenerate,Cure permanent disabilities,1 action,Regeneration power
+Clone_Replacement,Full recovery,Varies,Technology/money
+
+===RECOVERY TIMES===
+Injury_Category,Base_Duration,With_Treatment,Hospital_Care
+Fatal,Permanent,Resurrection only,N/A
+Permanent_Disability,Permanent,Regenerate/Prosthetic,N/A
+Critical_Injury,Until stable,Magical healing,1 week
+Severe_Injury,2d8 weeks,1d8 weeks,1d4 weeks
+Moderate_Injury,2d6 days,1d6 days,1d3 days
+Minor_Injury,1d4 days,1d2 days,1 day
+Light_Injury,Long rest,Short rest,Immediate
+Memorable_Scars,Permanent,Optional removal,N/A
+Survivability,Immediate,N/A,N/A
+
+===PROSTHETICS===
+Prosthetic_Type,Replaces,Function,Cost_Level,Notes
+Basic_Wooden_Leg,Leg,50% movement; cannot run,Low,Medieval tech
+Basic_Hook_Hand,Hand,Cannot use two-handed; -1CS manipulation,Low,Pirate classic
+Modern_Prosthetic_Leg,Leg,75% movement; can jog,Medium,Modern tech
+Modern_Prosthetic_Arm,Arm,Basic function; -1CS fine manipulation,Medium,Modern tech
+Cybernetic_Leg,Leg,100% movement; +5 squares,High,Enhanced
+Cybernetic_Arm,Arm,Full function; +1CS STR,High,Enhanced
+Cybernetic_Eye,Eye,Full function; +1CS perception (sight),High,May include zoom/IR
+
+===DESIGNER NOTES===
+Topic,Note
+Balance_Intent,Injuries add consequence to combat without being crippling for gameplay
+Survivability_Rolls,High rolls (94-100) reward luck; bad injuries can become narrative moments
+Permanent_Disabilities,Require significant resources to cure; create character development
+Medical_Economy,Healing powers become valuable; encourages team composition variety
+Clone_System,Ultimate recovery option at high cost; prevents permanent loss of invested characters
+Prosthetics,Technology tree integration; cybernetics as upgrade path
+Called_Shots,Optional rule; increases injury chance for tactical targeting

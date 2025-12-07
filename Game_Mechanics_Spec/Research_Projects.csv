@@ -1,0 +1,224 @@
+Section,Description
+---RESEARCH PROJECTS DATABASE---,Complete research project definitions with requirements and outputs
+
+===RESEARCH TIERS===
+Tier,Education_Min,Description
+Basic,Trade_School,Simple projects anyone with technical training can do
+Intermediate,Bachelors,Standard research requiring formal education
+Advanced,Masters,Complex research requiring advanced degrees
+Expert,Doctorate,Cutting-edge research requiring PhD-level expertise
+Experimental,Post_Doc,Bleeding-edge research only top researchers can attempt
+
+===RESEARCH TREES===
+Tree_ID,Tree_Name,Description
+TREE_ARMOR,Armor Design,Armor construction and materials
+TREE_METAL,Metallurgy,Metal processing and alloys
+TREE_MAT,Materials Science,Advanced synthetic materials
+TREE_ELEC,Electronics,Electronic systems and sensors
+TREE_CYBER,Cyber Systems,Hacking and software
+TREE_ROBOT,Robotics,Mechanical automation
+TREE_AI,Artificial Intelligence,AI and machine learning
+TREE_PROP,Propulsion,Movement and flight systems
+TREE_STEALTH,Stealth Technology,Concealment and evasion
+TREE_WEAP,Weapons,Weapon design and ammunition
+TREE_MED,Medical,Medical technology
+TREE_BIO,Biological,Genetic and biological research
+TREE_MUTA,Mutagenics,Power-granting research
+TREE_PSI,Psi-Tech,Psychic enhancement technology
+TREE_ALIEN,Alien Technology,Reverse-engineering alien artifacts
+
+===TECH UNLOCK NODES===
+Node_ID,Node_Name,Tree_ID,Base_Days,Tier,Career_Required,Career_Rank,Facility_Required,Prerequisite_Nodes,Unlocks_Projects,Description
+NODE_001,Basic_Armor_Knowledge,TREE_ARMOR,5,Basic,TECH,1,Workshop,None,PRJ_001;PRJ_002,Fundamental armor construction
+NODE_002,Armor_1,TREE_ARMOR,10,Intermediate,TECH,2,Armor_Workshop,NODE_001,PRJ_010;PRJ_011,Intermediate armor design
+NODE_003,Armor_2,TREE_ARMOR,15,Advanced,TECH,3,Armor_Workshop,NODE_002,PRJ_020;PRJ_021,Advanced armor systems
+NODE_004,Armor_3,TREE_ARMOR,20,Expert,TECH,4,Armor_Workshop,NODE_003,PRJ_030,Cutting-edge armor technology
+NODE_010,Metallurgy_1,TREE_METAL,7,Intermediate,TECH,2,Armor_Workshop,None,PRJ_012;PRJ_013,Basic metal alloys
+NODE_011,Metallurgy_2,TREE_METAL,14,Advanced,TECH,3,Armor_Workshop,NODE_010,PRJ_022,Advanced metal processing
+NODE_020,Materials_1,TREE_MAT,10,Intermediate,TECH,2,Armor_Workshop,None,PRJ_014,Synthetic material basics
+NODE_021,Materials_2,TREE_MAT,14,Advanced,TECH,3,Armor_Workshop,NODE_020,PRJ_023,Carbon composites
+NODE_022,Materials_3,TREE_MAT,21,Expert,TECH,4,Armor_Workshop,NODE_021,PRJ_031,Graphene and nanotech
+NODE_030,Basic_Electronics,TREE_ELEC,5,Basic,TECH,1,Electronics_Lab,None,PRJ_003,Fundamental electronics
+NODE_031,Electronics_1,TREE_ELEC,7,Intermediate,TECH,2,Electronics_Lab,NODE_030,PRJ_015;PRJ_016,Sensor systems
+NODE_032,Electronics_2,TREE_ELEC,14,Advanced,TECH,3,Electronics_Lab,NODE_031,PRJ_024;PRJ_025,Advanced electronics
+NODE_040,Cyber_1,TREE_CYBER,10,Intermediate,TECH,3,Cyber_Lab,NODE_030,PRJ_017,Basic hacking tools
+NODE_041,Cyber_2,TREE_CYBER,14,Advanced,TECH,3,Cyber_Lab,NODE_040,PRJ_026,Advanced intrusion
+NODE_050,Robotics_1,TREE_ROBOT,10,Intermediate,TECH,3,Robotics_Lab,NODE_031,PRJ_018,Basic robotics
+NODE_051,Robotics_2,TREE_ROBOT,21,Advanced,TECH,4,Robotics_Lab,NODE_050,PRJ_027;PRJ_028;PRJ_029,Advanced robotics
+NODE_060,AI_1,TREE_AI,21,Advanced,TECH,4,Cyber_Lab,NODE_041,PRJ_032,Basic AI systems
+NODE_061,AI_2,TREE_AI,30,Expert,TECH,5,Cyber_Lab,NODE_060,PRJ_040,Advanced AI
+NODE_070,Propulsion_1,TREE_PROP,10,Intermediate,TECH,3,Aerospace_Lab,None,PRJ_019,Basic propulsion
+NODE_071,Propulsion_2,TREE_PROP,21,Advanced,TECH,4,Aerospace_Lab,NODE_070,PRJ_033;PRJ_034,Advanced propulsion
+NODE_072,Propulsion_3,TREE_PROP,30,Expert,TECH,5,Aerospace_Lab,NODE_071,PRJ_041,Flight systems
+NODE_080,Stealth_1,TREE_STEALTH,14,Advanced,TECH,3,Armor_Workshop,NODE_070,PRJ_035,Basic stealth
+NODE_081,Stealth_2,TREE_STEALTH,28,Expert,TECH,4,Armor_Workshop,NODE_080,PRJ_042,Advanced stealth
+NODE_090,Basic_Weapons,TREE_WEAP,5,Basic,TECH,1,Workshop,None,PRJ_004,Weapon fundamentals
+NODE_091,Weapons_1,TREE_WEAP,7,Intermediate,TECH,2,Weapons_Lab,NODE_090,PRJ_050;PRJ_051,Weapon design
+NODE_092,Weapons_2,TREE_WEAP,14,Advanced,TECH,3,Weapons_Lab,NODE_091,PRJ_052,Advanced weapons
+NODE_093,Weapons_3,TREE_WEAP,21,Expert,TECH,4,Weapons_Lab,NODE_092,PRJ_053,Heavy weapons
+NODE_094,Energy_Weapons,TREE_WEAP,30,Expert,TECH,5,Weapons_Lab,NODE_093,PRJ_054,Energy weapon systems
+NODE_100,Ammo_1,TREE_WEAP,10,Intermediate,TECH,2,Weapons_Lab,NODE_090,PRJ_055,Custom ammunition
+NODE_101,Ammo_2,TREE_WEAP,14,Advanced,TECH,3,Weapons_Lab,NODE_100,PRJ_056,Exotic ammunition
+NODE_110,Basic_Medical,TREE_MED,5,Basic,MED,1,Medical_Lab,None,PRJ_005,Medical fundamentals
+NODE_111,Medical_1,TREE_MED,7,Intermediate,MED,2,Medical_Lab,NODE_110,PRJ_060,Medical equipment
+NODE_112,Medical_2,TREE_MED,14,Advanced,MED,3,Medical_Lab,NODE_111,PRJ_061,Advanced medicine
+NODE_113,Neuro_1,TREE_MED,21,Expert,MED,4,Medical_Lab,NODE_112,PRJ_062,Neurotechnology
+NODE_114,Neuro_2,TREE_MED,30,Expert,MED,5,Medical_Lab,NODE_113,PRJ_063,Neural interfaces
+NODE_120,Bio_1,TREE_BIO,14,Advanced,MED,3,Genetics_Lab,NODE_111,PRJ_070,Genetic basics
+NODE_121,Bio_2,TREE_BIO,21,Expert,MED,4,Genetics_Lab,NODE_120,PRJ_071,Gene modification
+NODE_130,Mutagenics_1,TREE_MUTA,45,Experimental,MED,5,Mutagenics_Lab,NODE_121,PRJ_080,Power creation
+NODE_140,Psi_1,TREE_PSI,21,Expert,PSY,4,Psi_Lab,None,PRJ_090,Psychic enhancement
+NODE_141,Psi_2,TREE_PSI,30,Expert,PSY,5,Psi_Lab,NODE_140,PRJ_091,Advanced psionics
+NODE_150,Alien_Basic,TREE_ALIEN,30,Expert,TECH,5,Alien_Tech_Lab,None,PRJ_100,Alien tech analysis
+NODE_151,Alien_Advanced,TREE_ALIEN,60,Experimental,TECH,5,Alien_Tech_Lab,NODE_150,PRJ_101,Alien adaptation
+
+===RESEARCH PROJECTS - BASIC===
+Project_ID,Project_Name,Tree_ID,Base_Days,Tier,Career_Required,Career_Rank,Facility_Required,Prerequisite_Nodes,Resource_Cost,Output_Type,Output_ID,Output_Description
+PRJ_001,Basic_Armor_Repair,TREE_ARMOR,3,Basic,TECH,1,Workshop,None,Materials:Basic:10,Skill_Unlock,SKILL_REPAIR_1,Repair armor to 75% condition
+PRJ_002,Armor_Maintenance,TREE_ARMOR,2,Basic,TECH,1,Workshop,None,Materials:Basic:5,Skill_Unlock,SKILL_MAINT_1,+1CS armor reliability
+PRJ_003,Electronics_Basics,TREE_ELEC,5,Basic,TECH,1,Electronics_Lab,None,Components:Basic:10,Node_Unlock,NODE_031,Unlocks Electronics_1
+PRJ_004,Weapon_Maintenance,TREE_WEAP,2,Basic,TECH,1,Workshop,None,Materials:Basic:5,Skill_Unlock,SKILL_WEAP_1,+1CS weapon reliability
+PRJ_005,Field_Medicine,TREE_MED,3,Basic,MED,1,Medical_Lab,None,Supplies:Medical:10,Skill_Unlock,SKILL_MED_1,+1CS field medicine
+PRJ_006,Ammo_Crafting,TREE_WEAP,1,Basic,TECH,1,Workshop,None,Materials:Basic:20,Crafting_Unlock,CRAFT_AMMO,Craft standard ammunition
+PRJ_007,Basic_Tool_Making,TREE_ARMOR,2,Basic,TECH,1,Workshop,None,Materials:Basic:5,Crafting_Unlock,CRAFT_TOOLS,Create basic tools
+
+===RESEARCH PROJECTS - INTERMEDIATE===
+Project_ID,Project_Name,Tree_ID,Base_Days,Tier,Career_Required,Career_Rank,Facility_Required,Prerequisite_Nodes,Resource_Cost,Output_Type,Output_ID,Output_Description
+PRJ_010,Ceramic_Plate,TREE_ARMOR,7,Intermediate,TECH,2,Armor_Workshop,NODE_002,Materials:Advanced:20,Component,COMP_CERAM,+8 DR_Phys armor component
+PRJ_011,Ballistic_Weave,TREE_ARMOR,10,Intermediate,TECH,2,Armor_Workshop,NODE_002,Materials:Advanced:15,Component,COMP_WEAVE,+4 DR_Phys light component
+PRJ_012,Titanium_Plate,TREE_METAL,10,Intermediate,TECH,2,Armor_Workshop,NODE_010,Materials:Advanced:25,Component,COMP_TITAN,+12 DR_Phys component
+PRJ_013,Hardened_Steel,TREE_METAL,7,Intermediate,TECH,2,Armor_Workshop,NODE_010,Materials:Basic:30,Material,MAT_HSTEEL,1.3x DR_Phys multiplier
+PRJ_014,Carbon_Fiber,TREE_MAT,14,Intermediate,TECH,2,Armor_Workshop,NODE_020,Materials:Advanced:30,Material,MAT_CARBON,0.5x weight multiplier
+PRJ_015,Night_Vision_Mod,TREE_ELEC,7,Intermediate,TECH,2,Electronics_Lab,NODE_031,Components:Advanced:10,Weapon_Mod,MOD_NV,See in darkness
+PRJ_016,Motion_Sensor,TREE_ELEC,5,Intermediate,TECH,2,Electronics_Lab,NODE_031,Components:Advanced:5,Equipment,SEN_001,50ft motion detection
+PRJ_017,Decryption_Kit,TREE_CYBER,10,Intermediate,TECH,3,Cyber_Lab,NODE_040,Components:Advanced:15,Equipment,HCK_003,+3CS vs encryption
+PRJ_018,Recon_Drone,TREE_ROBOT,10,Intermediate,TECH,3,Robotics_Lab,NODE_050,Components:Advanced:20,Equipment,DRN_001,Small surveillance drone
+PRJ_019,Jump_Boots,TREE_PROP,14,Intermediate,TECH,3,Aerospace_Lab,NODE_070,Components:Advanced:25,Equipment,BOOT_JUMP,Jump 3 squares
+PRJ_050,Silencer,TREE_WEAP,5,Intermediate,TECH,2,Weapons_Lab,NODE_091,Materials:Advanced:10,Weapon_Mod,MOD_006,-30dB sound
+PRJ_051,Extended_Magazine,TREE_WEAP,3,Intermediate,TECH,2,Weapons_Lab,NODE_091,Materials:Advanced:5,Weapon_Mod,MOD_009,+50% ammo capacity
+PRJ_055,AP_Rounds,TREE_WEAP,7,Intermediate,TECH,2,Weapons_Lab,NODE_100,Materials:Advanced:15,Ammo_Type,AMMO_AP,50% armor penetration
+PRJ_060,Trauma_Kit,TREE_MED,7,Intermediate,MED,2,Medical_Lab,NODE_111,Supplies:Medical:20,Equipment,MED_002,+3CS Medicine checks
+
+===RESEARCH PROJECTS - ADVANCED===
+Project_ID,Project_Name,Tree_ID,Base_Days,Tier,Career_Required,Career_Rank,Facility_Required,Prerequisite_Nodes,Resource_Cost,Output_Type,Output_ID,Output_Description
+PRJ_020,Combat_Armor_Frame,TREE_ARMOR,15,Advanced,TECH,3,Armor_Workshop,NODE_003,Materials:Advanced:40,Frame,FRAME_COMBAT,Medium armor base: 10/3 DR
+PRJ_021,Heavy_Armor_Frame,TREE_ARMOR,20,Advanced,TECH,3,Armor_Workshop,NODE_003,Materials:Advanced:60,Frame,FRAME_HEAVY,Heavy armor base: 15/5 DR
+PRJ_022,Titanium_Alloy,TREE_METAL,14,Advanced,TECH,3,Armor_Workshop,NODE_011,Materials:Advanced:50,Material,MAT_TITANIUM,1.2x DR with 0.7x weight
+PRJ_023,Carbon_Composite,TREE_MAT,14,Advanced,TECH,3,Armor_Workshop,NODE_021,Materials:Exotic:30,Material,MAT_COMPOSITE,1.1x DR with 0.5x weight
+PRJ_024,Thermal_Scope,TREE_ELEC,10,Advanced,TECH,3,Electronics_Lab,NODE_032,Components:Advanced:20,Weapon_Mod,MOD_004,See heat signatures
+PRJ_025,Visor_HUD,TREE_ELEC,14,Advanced,TECH,3,Electronics_Lab,NODE_032,Components:Advanced:25,Component,COMP_HUD,+1CS targeting
+PRJ_026,Signal_Jammer,TREE_CYBER,14,Advanced,TECH,3,Cyber_Lab,NODE_041,Components:Advanced:30,Equipment,HCK_004,Block 500ft radius
+PRJ_027,Exo_Assist_Arms,TREE_ROBOT,21,Advanced,TECH,4,Robotics_Lab,NODE_051,Components:Exotic:40,Component,COMP_EXO_ARM,+15 STR
+PRJ_028,Exo_Assist_Legs,TREE_ROBOT,21,Advanced,TECH,4,Robotics_Lab,NODE_051,Components:Exotic:40,Component,COMP_EXO_LEG,+2 movement
+PRJ_029,Medical_Drone,TREE_ROBOT,14,Advanced,TECH,3,Robotics_Lab,NODE_050,Components:Advanced:25,Equipment,DRN_005,Medical supply delivery
+PRJ_032,Combat_Drone,TREE_AI,30,Advanced,TECH,4,Robotics_Lab,NODE_060;NODE_051,Components:Exotic:60,Equipment,DRN_003,Armed surveillance drone
+PRJ_033,Jump_Jets,TREE_PROP,21,Advanced,TECH,4,Aerospace_Lab,NODE_071,Components:Exotic:50,Component,COMP_JETS,Jump 10 squares
+PRJ_034,Hover_System,TREE_PROP,21,Advanced,TECH,4,Aerospace_Lab,NODE_071,Components:Exotic:60,Component,COMP_HOVER,Low-altitude hover
+PRJ_035,Stealth_Coating,TREE_STEALTH,28,Advanced,TECH,3,Armor_Workshop,NODE_080,Materials:Exotic:40,Component,COMP_STEALTH,+2CS stealth
+PRJ_052,Advanced_Silencer,TREE_WEAP,14,Advanced,TECH,3,Weapons_Lab,NODE_092,Materials:Exotic:20,Weapon_Mod,MOD_SILENCE2,-50dB sound
+PRJ_056,Incendiary_Rounds,TREE_WEAP,14,Advanced,TECH,3,Weapons_Lab,NODE_101,Materials:Exotic:25,Ammo_Type,AMMO_FIRE,Fire damage on hit
+PRJ_061,Surgical_Kit,TREE_MED,14,Advanced,MED,3,Medical_Lab,NODE_112,Supplies:Medical:30,Equipment,MED_003,Field surgery capable
+PRJ_070,Genetic_Analysis,TREE_BIO,21,Advanced,MED,3,Genetics_Lab,NODE_120,Samples:DNA:5,Skill_Unlock,SKILL_GENE,Analyze DNA samples
+
+===RESEARCH PROJECTS - EXPERT===
+Project_ID,Project_Name,Tree_ID,Base_Days,Tier,Career_Required,Career_Rank,Facility_Required,Prerequisite_Nodes,Resource_Cost,Output_Type,Output_ID,Output_Description
+PRJ_030,Exo_Frame,TREE_ARMOR,20,Expert,TECH,4,Armor_Workshop,NODE_004,Materials:Exotic:80,Frame,FRAME_EXO,Power armor base: 10/10 DR
+PRJ_031,Graphene_Layer,TREE_MAT,21,Expert,TECH,4,Armor_Workshop,NODE_022,Materials:Exotic:60,Material,MAT_GRAPHENE,1.5x DR with 0.3x weight
+PRJ_040,Power_Armor_Mk1,TREE_ROBOT,30,Expert,TECH,4,Robotics_Lab,NODE_051;NODE_003,Materials:Exotic:100;Components:Exotic:80,Armor,ARM_POWER1,Full power armor: 25/15 DR +20 STR
+PRJ_041,Flight_Pack,TREE_PROP,45,Expert,TECH,5,Aerospace_Lab,NODE_072,Components:Exotic:100,Component,COMP_FLIGHT,Full flight capability
+PRJ_042,Stealth_Suit,TREE_STEALTH,45,Expert,TECH,4,Armor_Workshop,NODE_081;NODE_003,Materials:Exotic:80,Armor,ARM_STEALTH,Stealth armor: 5/5 DR +4CS stealth
+PRJ_043,AI_Assistant,TREE_AI,60,Expert,TECH,5,Cyber_Lab,NODE_061,Components:Exotic:120,Equipment,AI_ASSIST,+1CS all research
+PRJ_053,Heavy_Weapon_System,TREE_WEAP,21,Expert,TECH,4,Weapons_Lab,NODE_093,Materials:Exotic:50,Weapon,WPN_HEAVY,Portable heavy weapon
+PRJ_054,Energy_Rifle,TREE_WEAP,30,Expert,TECH,5,Weapons_Lab,NODE_094,Components:Exotic:80,Weapon,WPN_ENERGY,35 energy damage
+PRJ_062,Neuro_Stimulator,TREE_MED,21,Expert,MED,4,Medical_Lab,NODE_113,Components:Exotic:40;Samples:Neural:5,Equipment,MED_NEURO,+2CS mental recovery
+PRJ_063,Neural_Interface,TREE_MED,30,Expert,MED,5,Medical_Lab,NODE_114,Components:Exotic:100;Samples:Neural:10,Implant,IMP_NEURAL,Direct tech control
+PRJ_071,Gene_Therapy,TREE_BIO,30,Expert,MED,4,Genetics_Lab,NODE_121,Samples:DNA:20;Supplies:Medical:50,Treatment,TREAT_GENE,Cure genetic diseases
+PRJ_090,Psi_Amplifier,TREE_PSI,21,Expert,PSY,4,Psi_Lab,NODE_140,Components:Exotic:60,Equipment,PSI_AMP,+2CS psychic abilities
+PRJ_100,Alien_Analysis,TREE_ALIEN,30,Expert,TECH,5,Alien_Tech_Lab,NODE_150,Samples:Alien:3,Skill_Unlock,SKILL_ALIEN,Analyze alien technology
+
+===RESEARCH PROJECTS - EXPERIMENTAL===
+Project_ID,Project_Name,Tree_ID,Base_Days,Tier,Career_Required,Career_Rank,Facility_Required,Prerequisite_Nodes,Resource_Cost,Output_Type,Output_ID,Output_Description
+PRJ_044,Power_Armor_Mk2,TREE_ROBOT,45,Experimental,TECH,5,Robotics_Lab,PRJ_040,Materials:Exotic:150;Components:Exotic:120,Armor,ARM_POWER2,Enhanced power armor: 35/25 DR +30 STR flight
+PRJ_045,Power_Armor_Mk3,TREE_ROBOT,90,Experimental,TECH,5,Robotics_Lab,PRJ_044,Materials:Alien:100;Components:Exotic:200,Armor,ARM_POWER3,Super power armor: 50/40 DR +50 STR
+PRJ_046,Quantum_Decryptor,TREE_AI,90,Experimental,TECH,5,Alien_Tech_Lab,NODE_061;NODE_150,Components:Alien:80,Equipment,HCK_010,Unbreakable decryption
+PRJ_080,LSW_Serum,TREE_MUTA,120,Experimental,MED,5,Mutagenics_Lab,NODE_130,Samples:LSW_DNA:10;Supplies:Medical:100,Serum,SER_LSW,Grants random power (dangerous)
+PRJ_081,Controlled_Mutation,TREE_MUTA,180,Experimental,MED,5,Mutagenics_Lab,PRJ_080,Samples:LSW_DNA:20;Samples:Target_DNA:5,Serum,SER_CONTROL,Choose power type (still risky)
+PRJ_091,Psi_Null_Field,TREE_PSI,30,Experimental,PSY,5,Psi_Lab,NODE_141,Components:Exotic:80,Equipment,PSI_NULL,Block psychic powers 50ft
+PRJ_101,Vibranium_Armor,TREE_ALIEN,120,Experimental,TECH,5,Alien_Tech_Lab,NODE_151;NODE_022,Materials:Alien:50,Material,MAT_VIBRANIUM,2.0x DR multiplier
+PRJ_102,Alien_Weapon,TREE_ALIEN,90,Experimental,TECH,5,Alien_Tech_Lab,NODE_151,Samples:Alien:10;Components:Alien:50,Weapon,WPN_ALIEN,50+ exotic damage
+
+===FACILITIES===
+Facility_ID,Facility_Name,Build_Cost_USD,Monthly_Cost_USD,Max_Team_Size,Research_Types_Enabled,Upgrade_Cost_Advanced,Upgrade_Cost_Cutting,Upgrade_Cost_Experimental
+FAC_001,Workshop,50000,2000,2,Basic_Armor;Weapon_Mods;Field_Gear;Tools,25000,50000,100000
+FAC_002,Electronics_Lab,100000,5000,3,Electronics;Sensors;Communications,50000,100000,200000
+FAC_003,Medical_Lab,150000,8000,3,Medical;Basic_Bio,75000,150000,300000
+FAC_004,Cyber_Lab,200000,10000,4,Hacking;Software;AI_Basic,100000,200000,400000
+FAC_005,Weapons_Lab,250000,12000,4,Weapons;Ammunition;Explosives,125000,250000,500000
+FAC_006,Armor_Workshop,200000,10000,4,All_Armor;Materials;Stealth,100000,200000,400000
+FAC_007,Robotics_Lab,500000,25000,5,Robotics;Drones;Exoskeletons;Power_Armor,250000,500000,1000000
+FAC_008,Aerospace_Lab,750000,30000,5,Propulsion;Flight;Vehicles,375000,750000,1500000
+FAC_009,Genetics_Lab,500000,25000,4,Biological;Genetic,250000,500000,1000000
+FAC_010,Mutagenics_Lab,1000000,50000,4,Mutagenics;LSW_Research,500000,1000000,2000000
+FAC_011,Psi_Lab,500000,25000,3,Psi_Tech;Psychic,250000,500000,1000000
+FAC_012,Alien_Tech_Lab,2000000,100000,6,Alien_Tech;Exotic,1000000,2000000,4000000
+
+===RESOURCE TYPES===
+Resource_Type,Category,Examples,Acquisition_Method,Base_Cost_Per_Unit
+Materials:Basic,Construction,Steel; Plastic; Copper; Aluminum,Purchase,10
+Materials:Advanced,Construction,Titanium; Carbon Fiber; Ceramics,Purchase,50
+Materials:Exotic,Construction,Graphene; Aerogel; Metamaterials,Black_Market;Missions,200
+Materials:Alien,Construction,Vibranium; Unknown Alloys,Missions_Only,1000
+Components:Basic,Electronics,Wires; Resistors; Basic Chips,Purchase,5
+Components:Advanced,Electronics,Processors; Sensors; Motors,Purchase,25
+Components:Exotic,Electronics,AI Cores; Quantum Chips; Alien Parts,Black_Market;Missions,100
+Components:Alien,Electronics,Alien Technology Parts,Missions_Only,500
+Samples:DNA,Biological,Human DNA; Animal DNA,Medical_Labs,20
+Samples:LSW_DNA,Biological,DNA from powered individuals,Missions;Capture,500
+Samples:Neural,Biological,Brain tissue; Neural samples,Medical_Labs,100
+Samples:Alien,Biological,Alien biological material,Missions_Only,1000
+Supplies:Medical,Consumable,Bandages; Medicines; Surgical Supplies,Purchase,10
+
+===TEAM COMPOSITION===
+Role,Education_Required,Career_Required,Speed_Bonus,Max_Per_Team,Notes
+Lead_Researcher,Bachelors+,Matching_Career,Base,1,Required - sets base speed
+Assistant_Researcher,Bachelors+,Any_TECH_or_MED,+0.25x,3,General research help
+Technician,Trade_School+,Any,+0.10x,2,Lab maintenance and operation
+Specialist,Bachelors+,Matching_Career,+0.15x,2,Specific expertise bonus
+Safety_Officer,Any,Any,+0.00x,1,Required for dangerous research
+
+===SPEED MODIFIERS===
+Factor,Modifier_Type,Value
+Education_Trade_School,Multiplier,0.5
+Education_Associates,Multiplier,0.75
+Education_Bachelors,Multiplier,1.0
+Education_Masters,Multiplier,1.25
+Education_Doctorate,Multiplier,1.5
+Education_Post_Doc,Multiplier,2.0
+Facility_Basic,Multiplier,1.0
+Facility_Advanced,Multiplier,1.25
+Facility_Cutting_Edge,Multiplier,1.5
+Facility_Experimental,Multiplier,1.75
+AI_Assistant,Flat_Bonus,+1CS_to_rolls
+
+===COMPLICATIONS TABLE===
+Roll_Range,Complication,Effect
+01-20,Minor_Delay,+25% time remaining
+21-40,Resource_Waste,Need extra materials (25% more)
+41-55,Equipment_Damage,Facility needs 1-3 day repair
+56-70,Partial_Success,Output is -1 tier quality
+71-80,Breakthrough,Research completes 25% faster
+81-90,Minor_Injury,Researcher injured (1d6 days recovery)
+91-95,Catastrophic_Failure,Research must restart from 0%
+96-99,Explosion_Accident,Major facility damage plus injuries
+00,Unexpected_Discovery,Bonus related research unlocked free
+
+===DESIGNER NOTES===
+Topic,Note
+Research_Balance,High tier research takes real-world weeks; creates meaningful progression
+Facility_Investment,Facilities are major investments; drive base-building decisions
+Team_Optimization,Optimal teams reduce time by 50-75%; solo research is slow
+Education_Gate,Education requirements prevent new players from rushing end-game tech
+Career_Specialization,TECH covers most research; specialists needed for Bio/Psi/Alien
+Resource_Scarcity,Exotic and Alien materials are mission rewards; not purchasable
+Risk_vs_Reward,Experimental research has failure chance; big rewards but dangerous
+Integration,Research unlocks tie directly to Equipment CSVs for output items

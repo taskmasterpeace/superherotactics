@@ -1,0 +1,56 @@
+Weapon type,Weapon,"Dmg per
+shot/hit","Damage per
+FAST turn",Damage type,Sub-type,Specific,Secs for shot/hit,Range,"Accuracy 
+(Column Shift)",Reload secs,Effects,"Effects
+FAST",Requirements,Comments
+regular melee,Knife,10,12,PHYSICAL,EDGED MELEE,Piercing,1,1,-0CS,0,"easy to hide and take to closed areas (worldmap effect)
+fast to get out/in",,no,common cheap weapon for low strengthened characters
+,Lead Pipe,5,3,PHYSICAL,SMASHING MELEE,Blunt Weapon,2,2,-0CS,0,damage sums with character's STR,,no,"most common free weapon for regular melee characters
+- dealt damage=weapon damage + STR"
+skill-demanding melee,Katana,15,12,PHYSICAL,EDGED MELEE,Slashing,1.5,2,-0CS,0,,,Katana skill,"expensive rare weapon for fast-moving characters
+- ""cut off body parts"" complex effect not for MVP version"
+,Battle Staff,8,7,PHYSICAL,SMASHING MELEE,Blunt Weapon,1.5,3,-0CS,0,"damage sums with character's STR
+chance to hit enemies near the target",,Staff skill,"common cheap weapon for skilled melee characters with high dodge
+- dealt damage=weapon damage + STR
+- chance=N% to deal same damage to characters standing near the target"
+regular ranged,Throwing Knife,10,6,BLEED PHYSICAL,PIERCING PROJECTILE,Thrown object,2,5,-2CS,0,range sums with character's STR,,no,"common cheap weapon
+- range=weapon range + STR*koef"
+,Pistol,20,13,BLEED PHYSICAL,GUNFIRE,Shot,1.5,25,-2CS,2,"easy to hide and take to closed areas (worldmap effect)
+fast to get out/in",,no,"common firearm for everyone
+- "
+,Shotgun,30,7,PHYSICAL,GUNFIRE,Buckshot,3,5,-3CS,5,accuracy inversely depends on range,,no,
+,Submachine Gun,20,22,BLEED PHYSICAL,GUNFIRE,Shot,0.8,20,-3CS,3,fast to get out/in,,no,
+skill-demanding ranged,Assault Rifle,30,48,BLEED PHYSICAL,GUNFIRE,Shot,0.5,60,-1CS,4,-,,Shooting skill,
+,Combat Rifle,35,12,BLEED PHYSICAL,GUNFIRE,Shot,2,70,-1CS,5,-,,Shooting skill,
+,Sniper Rifle,40,8,BLEED PHYSICAL,GUNFIRE,Shot,3,100,-1CS,6,low chance to ignore armor (not force shield and durability),,"Shooting skill
+Sniper skill",
+,Bow,10,6,BLEED PHYSICAL,PIERCING PROJECTILE,Thrown object,2,40,-0CS,0,ability to use arrows with special effects,,Bowmaster skill,
+,Machine Gun,30,90,BLEED PHYSICAL,GUNFIRE,Shot,0.2,30,-3CS,6,-,,"Shooting skill
+STR>20 to carry",
+special ranged,Flamethrower,-,-,ENERGY,WILD ENERGY,Fire,0.1,5,-0CS,10,makes characters in big area burn (not force shielded),attacks only target,"Flamethrower skill
+STR>20 to carry",
+,Minigun,30,60,BLEED PHYSICAL,GUNFIRE,Shot,0.1,20,-4CS,10,low chance to knockback,,"Shooting skill
+STR>20 to carry",
+,Rocket Launcher,50,10,PHYSICAL,EXPLOSION,Concussion Blast,6,50,-2CS,8,"damages in area
+medium chance to knockback",attacks all enemy team,"Rocketman skill
+STR>20 to carry",
+,Sonic Rifle,30,18,PHYSICAL,SOUND,Sonic,2,70,-1CS,0,,,Shooting skill,
+grenades,Combat Grenade,50,25,PHYSICAL,EXPLOSION,Concussion Blast,2,10,-2CS,0,"range sums with character's STR
+deals area damage
+chance to knockback (depends on distantion)",attacks target and additionally one random,no,
+,Sticky Grenage,50,35,PHYSICAL,EXPLOSION,Concussion Blast,2,10,-2CS,0,"range sums with character's STR
+stops moving after first contact with anything
+deals area damage
+chance to knockback (depends on distantion)",attacks only target,no,
+,Flash Grenade,-,-,-,-,-,2,10,-2CS,0,"range sums with character's STR
+makes characters blind (depends on distance and sight direction)",,no,
+,Stun Grenade,-,-,-,-,-,2,10,-2CS,0,"range sums with character's STR
+makes characters dazed (depends on distance)",,no,
+,Shrapnel Grenade,50,30,BLEED PHYSICAL,EXPLOSION,Shrapnel Explosion,2,10,-2CS,0,range sums with character's STR,attacks target and additionally one random,no,
+energy weapons,Thermal Rifle,-,-,ENERGY,WILD ENERGY,Thermal,-,50,-1CS,5,-,,Energy Weapons skill,
+,Plasma Rifle,-,-,ENERGY,WILD ENERGY,Plasma,-,30,-2CS,5,-,,Energy Weapons skill,
+,Ice Rifle,-,-,ENERGY,WILD ENERGY,Ice,-,20,-1CS,5,-,,Energy Weapons skill,
+,Energy Rifle,-,-,ENERGY,ELECTROMAGNETIC,Pure Energy,-,40,-2CS,5,-,,Energy Weapons skill,
+,Electric Rifle,-,-,ENERGY,ELECTROMAGNETIC,Еlectricity,-,30,-2CS,5,-,,Energy Weapons skill,
+,Laser Rifle,-,-,ENERGY,ELECTROMAGNETIC,Laser,-,50,-1CS,5,-,,Energy Weapons skill,
+,,,,,,,,,counted for each bullet,,,,,

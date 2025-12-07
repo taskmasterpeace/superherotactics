@@ -1,0 +1,59 @@
+Power_Name,Attack_Type,Hit_Stat,Damage_Stat,Notes
+---PHYSICAL POWERS---,,,,
+Super Strength,Physical,MEL,STR,MEL determines if hit lands; STR+Power determines damage and knockback
+Super Speed,Movement,N/A,N/A,Not an attack power; provides +CS to actions
+Super Durability,Defense,N/A,N/A,Passive defense; no attack roll needed
+Flight,Movement,N/A,N/A,Not an attack power; enables aerial positioning
+
+---ENERGY POWERS---,,,,
+Fire Generation,Energy,AGL,Power Rank,Ranged attack uses AGL to hit; power rank determines damage
+Fire Manipulation,Energy,CON,Power Rank,Mental control uses CON; redirect existing fire
+Psychic Blast,Mental,CON,Power Rank,Mental attack uses CON to hit; bypasses physical armor
+Bio-Energy Projection,Energy,CON,Health Spent,User sacrifices health for damage
+
+---MENTAL POWERS---,,,,
+Psychic Persuasion,Mental,CON,N/A,Contested CON vs target CON; no damage
+Memory Imprinting,Mental,CON,N/A,Contested CON vs target CON; no damage
+Telepathy,Mental,CON,N/A,CON determines range and clarity
+
+---PHYSICAL MANIPULATION---,,,,
+Telekinesis,Physical,CON,Power Rank,Mental control uses CON; treated as ranged attack
+Metal Manipulation,Physical,CON,Variable,CON to control; damage based on what's thrown
+Gravitational Field,Physical,CON,Variable,CON to control; damage from gravity crush or impact
+Molecular Disintegration,Physical,CON,Power Rank,CON to target; power rank determines destruction
+
+---UTILITY POWERS---,,,,
+Invisibility,Utility,N/A,N/A,No attack; provides stealth bonus
+Sound Absorption,Utility,N/A,Variable,Passive; may release stored sound as attack
+Adaptive Camouflage,Utility,N/A,N/A,No attack; provides stealth bonus
+Dimensional Storage,Utility,N/A,N/A,No attack; storage only
+Enhanced Inventing,Utility,N/A,N/A,No attack; creates equipment
+
+---EXOTIC POWERS---,,,,
+Reality Warping,Reality,CON,Variable,CON determines control; effects vary wildly
+Time Travel,Reality,CON,N/A,CON to navigate timeline; no direct damage
+Chrono-Spatial Manipulation,Reality,CON,Variable,CON for control; displacement can cause damage
+Probability Manipulation,Reality,CON,Variable,CON to alter probability; indirect effects
+Quantum Entanglement,Reality,CON,N/A,CON to establish link; no direct damage
+
+---TECH POWERS---,,,,
+Technopathy,Utility,INT,Variable,INT to interface; damage through controlled devices
+Enhanced Inventing,Utility,INT,N/A,INT determines invention quality
+
+---ATTACK STAT RULES---,,,,
+Rule,Application,,
+Physical attacks at touch range,Use MEL to hit,,
+Physical attacks thrown/ranged,Use AGL to hit,,
+Energy projection attacks,Use AGL to hit (like aiming),,
+Mental/Psychic attacks,Use CON to hit (mental focus),,
+Technology-based attacks,Use INT or AGL depending on interface type,,
+Grappling/Wrestling,Use MEL; contested by target MEL or STR,,
+
+---DAMAGE STAT RULES---,,,,
+Rule,Application,,
+Super Strength adds to melee,STR + Power bonus = total damage,,
+Ranged weapons,Weapon damage only (no STR),,
+Thrown weapons,STR + Weapon damage; range = STR/5,,
+Energy powers,Power Rank determines damage,,
+Mental powers,Power Rank determines damage; bypasses physical armor,,
+Knockback calculation,Always uses STR rank regardless of power type,,

@@ -1,0 +1,18 @@
+,,,MELEE KNOCK BACK CHART,
+Impact Strength,Spaces knocked back,Punch thru Wall,Comparison,Threat Level Designation
+1-9,0,No,Little Human,none
+10-19,1,No,Above Avg Human,none
+20-29,2,No,Exceptional Human,none
+30-39,3,No,Max Human Limit,Threat Level Alpha
+40-49,4,,Low Superhuman,Threat Level 1
+50-59,6,,Superhuman,Threat Level 2
+60-69,8,,Superhuman,Threat Level 3
+70-79,10,,Superhuman,Threat Level 4
+80-99,9,,High Superhuman,Threat Level 5
+100-150,10,,Low Cosmic,Earthshaker
+150-250,15,,Cosmic,Earthbreaker
+250-500,20,,High Cosmic,Eartheater
+500-999,,,Supreme Cosmic,Sunbreaker
+1000-1499,,,Deity,Suneater
+2500-4999,,,Supreme Being,Omnipotent
+END,,,,END

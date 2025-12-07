@@ -1,0 +1,54 @@
+{
+  "name": "superhero-tactics-mvp",
+  "version": "1.0.0",
+  "description": "SuperHero Tactics - Triple A Game Demo",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "vite dev --host",
+    "migrate": "node scripts/migrate-to-supabase.js",
+    "generate-data": "node scripts/generate-data.js"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.56.0",
+    "@react-three/fiber": "^8.12.0",
+    "@supabase/supabase-js": "^2.86.2",
+    "@types/sql.js": "^1.4.9",
+    "@types/three": "^0.150.1",
+    "framer-motion": "^10.0.1",
+    "lucide-react": "^0.263.1",
+    "papaparse": "^5.4.1",
+    "pg": "^8.16.3",
+    "phaser": "^3.70.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.0",
+    "react-router-dom": "^6.8.1",
+    "react-simple-maps": "^3.0.0",
+    "socket.io-client": "^4.6.1",
+    "sql.js": "^1.13.0",
+    "three": "^0.150.1",
+    "zustand": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@vitejs/plugin-react": "^3.1.0",
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.2.7",
+    "typescript": "^4.9.3",
+    "vite": "^4.1.0"
+  },
+  "keywords": [
+    "superhero",
+    "tactics",
+    "strategy",
+    "mmorpg",
+    "political-simulation"
+  ],
+  "author": "SuperHero Tactics Team",
+  "license": "MIT"
+}

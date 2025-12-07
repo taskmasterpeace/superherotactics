@@ -1,0 +1,232 @@
+Section,Description
+---EDUCATION AND CAREER COMPLETE SYSTEM---,Comprehensive education levels; career paths; skill grants; research capabilities; and system integration
+
+===EDUCATION LEVELS===
+Level_ID,Level_Name,Years,Age_Min,Stat_Requirements,Description,Unlocks
+EDU_00,No_Formal_Education,0,0,None,No schooling - street learned or self-taught,Basic jobs only
+EDU_01,Elementary,6,6,None,Basic reading/writing/math,Entry labor jobs
+EDU_02,High_School,12,14,INT 8+,Standard secondary education,Rank 1 jobs; Basic training
+EDU_03,Trade_School,14,18,INT 10+,Vocational/technical training,Skilled labor; Rank 1-2 technical jobs
+EDU_04,Associates_Degree,14,18,INT 12+,2-year college degree,Rank 1-2 professional jobs
+EDU_05,Bachelors_Degree,16,18,INT 15+,4-year university degree,Rank 2-3 professional jobs; Research Assistant
+EDU_06,Masters_Degree,18,22,INT 20+,Graduate degree specialization,Rank 3-4 jobs; Lead Researcher
+EDU_07,Doctorate_PhD,22,26,INT 30+,Highest academic achievement,Rank 4-5 jobs; Principal Investigator; Any research
+EDU_08,Post_Doctoral,24+,28,INT 35+,Advanced research position,Rank 5 jobs; Cutting-edge research
+EDU_09,Military_Basic,0.5,18,STA 12+,Basic military training,Military Rank 1 jobs
+EDU_10,Military_Advanced,2,20,STA 15+ MEL 15+,Advanced military training,Military Rank 2-3 jobs
+EDU_11,Military_Special_Ops,4,22,STA 20+ MEL 20+ AGL 20+,Elite forces training,Military Rank 4 jobs; Special operations
+EDU_12,Intelligence_Training,3,21,INT 20+ INS 20+,Spy/intelligence training,Intelligence jobs; Covert operations
+
+===EDUCATION STAT BONUSES===
+Level_ID,INT_Bonus,INS_Bonus,Other_Bonuses,Research_Capability,Notes
+EDU_00,+0,+0,Streetwise +1CS,None,Learn from experience
+EDU_01,+1,+0,None,None,Basic literacy
+EDU_02,+2,+1,None,None,Well-rounded education
+EDU_03,+2,+2,Technical +1CS,Basic_Tech,Hands-on skills
+EDU_04,+3,+1,Specialty +1CS,Basic,College foundation
+EDU_05,+4,+2,Specialty +2CS,Intermediate,Professional competence
+EDU_06,+5,+3,Specialty +3CS; Research +1CS,Advanced,Expert level
+EDU_07,+7,+4,Specialty +4CS; Research +2CS,Expert,World-class knowledge
+EDU_08,+8,+5,Specialty +5CS; Research +3CS,Cutting_Edge,Frontier of knowledge
+EDU_09,+0,+2,Combat +1CS; Tactics +1CS,None,Military fundamentals
+EDU_10,+1,+3,Combat +2CS; Tactics +2CS,Basic_Military,Combat specialist
+EDU_11,+2,+4,Combat +3CS; Tactics +3CS; Stealth +2CS,Military_Tech,Elite warrior
+EDU_12,+3,+5,Espionage +3CS; Deception +2CS; Languages +2CS,Intelligence,Spy training
+
+===CAREER CATEGORIES===
+Category_ID,Category_Name,Code,Description,Key_Skills,Research_Types,Investigation_Types
+CAT_01,Medical_Life_Sciences,MED,"Doctors, researchers, biologists",Medicine; Forensics; Chemistry; Biology,Bio_Tech; Medical; Mutagenics,Forensic; Biological; Medical
+CAT_02,Visual_Performance_Arts,ART,"Artists, performers, media",Performance; Deception; Social; Media,None,Social; Media; Cultural
+CAT_03,Liberal_Arts_Education,EDU,"Teachers, politicians, journalists",Research; Persuasion; Writing; History,Historical; Social,Political; Academic; Historical
+CAT_04,Engineering_Technology,TECH,"Engineers, programmers, scientists",Engineering; Computers; Physics; Electronics,All_Tech; Weapons; Armor; Vehicles,Technical; Cyber; Scientific
+CAT_05,Business_Finance,BIZ,"Corporate, finance, economics",Finance; Negotiation; Management; Economics,None,Corporate; Financial; White_Collar
+CAT_06,Psychology_Social,PSY,"Psychologists, counselors, mentalists",Psychology; Interrogation; Insight; Therapy,Psi_Tech; Social,Psychological; Criminal; Cult
+CAT_07,Physical_Combat,PHY,"Military, police, athletes",Combat; Athletics; Tactics; Survival,Basic_Military,Criminal; Security; Gang
+
+===CAREER PATHS - MEDICAL & LIFE SCIENCES (CAT_01)===
+Job_ID,Job_Title,Category,Rank,Education_Required,Stat_Requirements,Skills_Granted,Research_Unlocks,Investigation_Bonus,Equipment_Access,Income_Level,Notes
+JOB_MED_001,EMT,MED,1,Trade_School,STA 12+,First_Aid +2CS; Emergency +1CS,None,+1CS Medical investigations,Medical_Basic,Low,Emergency responder
+JOB_MED_002,Nurse,MED,1,Associates,INT 12+ INS 12+,Medicine +1CS; First_Aid +2CS; Patient_Care +1CS,None,+1CS Medical investigations,Medical_Basic,Medium,Healthcare support
+JOB_MED_003,Clinical_Physician,MED,1,Bachelors,INT 15+,Medicine +2CS; Diagnosis +2CS; First_Aid +1CS,Basic_Medical,+2CS Medical investigations,Medical_Full,High,General practitioner
+JOB_MED_004,Veterinarian,MED,1,Bachelors,INT 15+ INS 12+,Medicine +1CS; Animal_Handling +3CS; Biology +1CS,Basic_Bio,+1CS Animal-related investigations,Medical_Basic,Medium,Animal medicine
+JOB_MED_005,Botanist,MED,1,Bachelors,INT 15+,Biology +2CS; Chemistry +1CS; Nature +2CS,Basic_Bio,+2CS Environmental investigations,Lab_Basic,Medium,Plant specialist
+JOB_MED_006,Pharmacist,MED,1,Bachelors,INT 18+,Chemistry +2CS; Medicine +1CS; Toxicology +2CS,Basic_Chem,+2CS Poison/drug investigations,Pharmacy_Access,High,Drug specialist
+JOB_MED_007,Radiologist,MED,2,Masters,INT 20+,Medicine +2CS; Imaging +3CS; Diagnosis +2CS,Medical_Imaging,+2CS Internal injury analysis,Medical_Imaging,Very_High,Imaging specialist
+JOB_MED_008,Surgeon,MED,2,Doctorate,INT 25+ AGL 15+,Medicine +3CS; Surgery +4CS; First_Aid +2CS,Advanced_Medical,+2CS Injury analysis,Surgical_Suite,Very_High,Surgical specialist
+JOB_MED_009,Forensic_Pathologist,MED,2,Doctorate,INT 25+,Forensics +4CS; Medicine +2CS; Investigation +2CS,Forensic_Tech,+4CS Murder investigations,Forensics_Lab,Very_High,Death investigator
+JOB_MED_010,Neurosurgeon,MED,3,Doctorate,INT 30+ AGL 18+,Medicine +3CS; Surgery +4CS; Neurology +4CS,Neuro_Tech,+3CS Brain-related cases,Neuro_Lab,Elite,Brain specialist
+JOB_MED_011,Pharmaceutical_Researcher,MED,3,Doctorate,INT 30+,Chemistry +4CS; Biology +3CS; Research +3CS,Pharma_Research,+3CS Drug investigations,Pharma_Lab,Elite,Drug development
+JOB_MED_012,Virology_Researcher,MED,4,Post_Doc,INT 35+,Biology +4CS; Medicine +3CS; Research +4CS,Virus_Research; Bio_Weapons,+4CS Disease investigations,BSL4_Lab,Elite,Virus specialist
+JOB_MED_013,Biotech_Researcher,MED,4,Post_Doc,INT 35+,Biology +4CS; Engineering +3CS; Research +4CS,Bio_Tech; Genetic_Engineering,+4CS Biotech investigations,Biotech_Lab,Elite,Bio-engineering
+JOB_MED_014,Mutagenics_Researcher,MED,5,Post_Doc,INT 40+,Biology +5CS; Genetics +5CS; Research +5CS,Mutagenics; Origin_Research,+5CS LSW origin investigations,Mutagenics_Lab,Elite,Power origin research
+JOB_MED_015,Coroner,MED,2,Bachelors,INT 20+ CON 15+,Forensics +3CS; Medicine +2CS; Investigation +2CS,Forensic_Tech,+4CS Death investigations,Morgue_Access,High,Death examination
+
+===CAREER PATHS - VISUAL & PERFORMANCE ARTS (CAT_02)===
+Job_ID,Job_Title,Category,Rank,Education_Required,Stat_Requirements,Skills_Granted,Research_Unlocks,Investigation_Bonus,Equipment_Access,Income_Level,Notes
+JOB_ART_001,Waiter,ART,1,High_School,AGL 10+,Social +1CS; Observation +1CS; Service +1CS,None,+1CS Social surveillance,None,Low,Service industry
+JOB_ART_002,Fashion_Model,ART,1,High_School,AGL 12+,Social +2CS; Appearance +2CS; Deception +1CS,None,+2CS High society infiltration,Fashion_Access,Variable,Appearance-based career
+JOB_ART_003,Dancer,ART,1,Trade_School,AGL 15+ STA 12+,Performance +2CS; Athletics +1CS; Social +1CS,None,+1CS Entertainment investigations,None,Low,Performance artist
+JOB_ART_004,Indie_Musician,ART,1,High_School,INS 12+,Performance +2CS; Social +1CS; Streetwise +1CS,None,+1CS Underground scene investigations,Music_Gear,Low,Independent artist
+JOB_ART_005,Actor,ART,2,Trade_School,INS 15+ CON 12+,Performance +3CS; Deception +3CS; Social +2CS,None,+3CS Undercover work; +2CS Social,Disguise_Kit,High,Professional performer
+JOB_ART_006,Musician,ART,2,Trade_School,INS 15+,Performance +3CS; Social +2CS; Creativity +2CS,None,+2CS Entertainment investigations,Music_Gear_Pro,High,Professional musician
+JOB_ART_007,Ballet_Dancer,ART,2,Trade_School,AGL 20+ STA 15+,Performance +3CS; Athletics +2CS; Discipline +2CS,None,+2CS Cultural investigations,None,High,Elite dancer
+JOB_ART_008,Stunt_Performer,ART,2,Trade_School,AGL 20+ STA 15+,Athletics +3CS; Combat +1CS; Performance +2CS,None,+2CS Action scene analysis,Stunt_Gear,High,Action specialist
+JOB_ART_009,Script_Writer,ART,3,Bachelors,INT 18+ INS 15+,Writing +3CS; Research +2CS; Psychology +2CS,None,+2CS Narrative/motive analysis,None,High,Story creator
+JOB_ART_010,Film_Director,ART,4,Bachelors,INT 20+ INS 20+ CON 15+,Leadership +3CS; Social +3CS; Creativity +3CS; Media +3CS,Media_Production,+3CS Media manipulation analysis,Film_Production,Elite,Entertainment leader
+JOB_ART_011,Special_Effects_Artist,ART,3,Trade_School,INT 18+ AGL 15+,Engineering +2CS; Chemistry +2CS; Creativity +3CS,Basic_Explosives; Illusion_Tech,+3CS Staged crime analysis,SFX_Equipment,High,Practical effects
+
+===CAREER PATHS - LIBERAL ARTS & EDUCATION (CAT_03)===
+Job_ID,Job_Title,Category,Rank,Education_Required,Stat_Requirements,Skills_Granted,Research_Unlocks,Investigation_Bonus,Equipment_Access,Income_Level,Notes
+JOB_EDU_001,Librarian,EDU,1,Bachelors,INT 15+,Research +3CS; Organization +2CS; History +1CS,Historical_Research,+3CS Research investigations,Library_Access,Low,Information specialist
+JOB_EDU_002,School_Teacher,EDU,1,Bachelors,INT 15+ INS 12+,Teaching +2CS; Psychology +1CS; Research +1CS,None,+1CS Youth-related investigations,School_Access,Medium,Educator
+JOB_EDU_003,Journalist,EDU,1,Bachelors,INT 15+ INS 15+,Investigation +3CS; Writing +2CS; Social +2CS,None,+4CS All investigations; Media contacts,Press_Credentials,Medium,News gatherer
+JOB_EDU_004,Photographer,EDU,1,Trade_School,INS 15+ AGL 12+,Observation +3CS; Stealth +1CS; Technology +1CS,None,+3CS Surveillance; Evidence documentation,Camera_Equipment,Medium,Visual documentation
+JOB_EDU_005,Illustrator,EDU,1,Trade_School,INS 15+,Art +3CS; Observation +2CS; Creativity +2CS,None,+2CS Composite sketches; Symbol analysis,Art_Supplies,Low,Visual artist
+JOB_EDU_006,Historian,EDU,2,Masters,INT 25+,History +4CS; Research +3CS; Languages +2CS,Historical_Research,+4CS Historical investigations,Archive_Access,Medium,History specialist
+JOB_EDU_007,Career_Politician,EDU,2,Bachelors,INT 18+ INS 18+ CON 15+,Persuasion +3CS; Deception +2CS; Politics +3CS; Social +2CS,None,+3CS Political investigations,Political_Access,High,Elected official
+JOB_EDU_008,Linguist,EDU,2,Masters,INT 25+,Languages +5CS; Research +2CS; Culture +2CS,Translation_Tech,+3CS International investigations,None,Medium,Language expert
+JOB_EDU_009,Professor,EDU,3,Doctorate,INT 30+,Teaching +3CS; Research +4CS; Specialty +4CS,Academic_Research,+3CS Academic investigations; +2CS any specialty,University_Access,High,Academic expert
+JOB_EDU_010,Archaeologist,EDU,3,Doctorate,INT 25+ STA 15+,History +4CS; Research +3CS; Survival +2CS,Archaeological_Research,+4CS Artifact investigations,Expedition_Gear,High,Ancient studies
+JOB_EDU_011,THE_PRESIDENT,EDU,5,Varies,INT 25+ INS 25+ CON 20+,Politics +5CS; Leadership +5CS; Persuasion +4CS; All Social +3CS,All_Government,+5CS Political; Full government access,Full_Government,Elite,National leader
+
+===CAREER PATHS - ENGINEERING & TECHNOLOGY (CAT_04)===
+Job_ID,Job_Title,Category,Rank,Education_Required,Stat_Requirements,Skills_Granted,Research_Unlocks,Investigation_Bonus,Equipment_Access,Income_Level,Notes
+JOB_TECH_001,IT_Technician,TECH,1,Trade_School,INT 12+,Computers +2CS; Electronics +1CS; Repair +1CS,Basic_Electronics,+2CS Cyber investigations,Computer_Tools,Medium,Tech support
+JOB_TECH_002,Motor_Mechanic,TECH,1,Trade_School,INT 12+ STR 12+,Mechanics +3CS; Repair +2CS; Vehicles +1CS,Basic_Mechanical,+2CS Vehicle investigations,Garage_Access,Medium,Vehicle repair
+JOB_TECH_003,Electrician,TECH,1,Trade_School,INT 12+ AGL 12+,Electronics +3CS; Repair +2CS; Safety +1CS,Basic_Electronics,+2CS Electrical investigations,Electrical_Tools,Medium,Electrical systems
+JOB_TECH_004,Architect,TECH,2,Bachelors,INT 20+,Engineering +2CS; Design +3CS; Construction +2CS,Construction_Tech,+2CS Building investigations,Design_Software,High,Building design
+JOB_TECH_005,Web_Developer,TECH,2,Associates,INT 18+,Computers +3CS; Programming +2CS; Design +1CS,Software_Development,+2CS Website investigations,Development_Tools,High,Web specialist
+JOB_TECH_006,Software_Developer,TECH,3,Bachelors,INT 22+,Computers +4CS; Programming +4CS; Logic +2CS,Software_Development; Basic_AI,+3CS Software investigations,Development_Suite,Very_High,Software creation
+JOB_TECH_007,Cyber_Security,TECH,3,Bachelors,INT 25+ INS 18+,Computers +4CS; Hacking +4CS; Security +3CS,Cyber_Security_Tech,+4CS Cyber crime investigations,Hacking_Tools,Very_High,Digital security
+JOB_TECH_008,Hacker,TECH,3,Varies,INT 25+ INS 20+,Computers +4CS; Hacking +5CS; Stealth +2CS,Hacking_Tech; Exploit_Development,+5CS Cyber investigations,Hacking_Suite,Variable,Digital infiltration
+JOB_TECH_009,Weapon_Designer,TECH,3,Masters,INT 28+,Engineering +4CS; Weapons +4CS; Physics +2CS,Weapons_Research,+3CS Weapons investigations,Weapons_Lab,Very_High,Weapons development
+JOB_TECH_010,AI_Researcher,TECH,4,Doctorate,INT 35+,Computers +4CS; Programming +4CS; Research +4CS; AI +4CS,AI_Research; Robotics,+4CS AI-related investigations,AI_Lab,Elite,Artificial intelligence
+JOB_TECH_011,Robotics_Engineer,TECH,4,Doctorate,INT 35+,Engineering +4CS; Robotics +4CS; Electronics +3CS,Robotics_Research; Automation,+4CS Robot investigations,Robotics_Lab,Elite,Robot development
+JOB_TECH_012,Aerospace_Engineer,TECH,4,Doctorate,INT 35+,Engineering +4CS; Physics +4CS; Propulsion +3CS,Aerospace_Research; Propulsion,+3CS Aircraft investigations,Aerospace_Lab,Elite,Flight systems
+JOB_TECH_013,Astrophysicist,TECH,4,Doctorate,INT 38+,Physics +5CS; Astronomy +4CS; Research +3CS,Space_Research; Alien_Tech_Basic,+4CS Space/alien investigations,Observatory_Access,Elite,Space science
+JOB_TECH_014,Rocket_Scientist,TECH,5,Post_Doc,INT 40+,Engineering +5CS; Physics +5CS; Propulsion +5CS,Advanced_Propulsion; Space_Tech,+5CS Space technology investigations,Space_Lab,Elite,Space propulsion
+JOB_TECH_015,Nuclear_Physicist,TECH,5,Post_Doc,INT 40+,Physics +5CS; Radiation +5CS; Research +4CS,Nuclear_Research; Energy_Tech,+5CS Nuclear/radiation investigations,Nuclear_Lab,Elite,Nuclear science
+JOB_TECH_016,Quantum_Physicist,TECH,5,Post_Doc,INT 45+,Physics +5CS; Quantum +5CS; Research +5CS,Quantum_Research; Exotic_Tech,+5CS Reality-bending investigations,Quantum_Lab,Elite,Quantum science
+
+===CAREER PATHS - BUSINESS & FINANCE (CAT_05)===
+Job_ID,Job_Title,Category,Rank,Education_Required,Stat_Requirements,Skills_Granted,Research_Unlocks,Investigation_Bonus,Equipment_Access,Income_Level,Notes
+JOB_BIZ_001,Retail_Worker,BIZ,1,High_School,None,Social +1CS; Sales +1CS; Observation +1CS,None,+1CS Theft investigations,None,Low,Store employee
+JOB_BIZ_002,Bank_Teller,BIZ,1,High_School,INT 10+,Finance +1CS; Social +1CS; Observation +2CS,None,+2CS Financial investigations,Bank_Access,Low,Bank employee
+JOB_BIZ_003,Accountant,BIZ,1,Bachelors,INT 15+,Finance +3CS; Mathematics +2CS; Investigation +1CS,None,+3CS Financial fraud investigations,Financial_Software,Medium,Financial tracking
+JOB_BIZ_004,Store_Manager,BIZ,1,Associates,INT 12+ INS 12+,Management +2CS; Social +2CS; Organization +1CS,None,+1CS Retail investigations,None,Medium,Retail management
+JOB_BIZ_005,HR_Manager,BIZ,2,Bachelors,INT 15+ INS 15+,Psychology +2CS; Social +2CS; Management +2CS; Investigation +1CS,None,+2CS Personnel investigations,Corporate_Access,High,Human resources
+JOB_BIZ_006,Economist,BIZ,2,Masters,INT 25+,Finance +4CS; Mathematics +3CS; Research +2CS; Politics +1CS,Economic_Research,+3CS Economic crime investigations,Economic_Data,High,Economic analysis
+JOB_BIZ_007,Insurance_Agent,BIZ,2,Associates,INT 15+ INS 15+,Finance +2CS; Investigation +3CS; Social +2CS,None,+4CS Insurance fraud investigations,Insurance_Database,Medium,Fraud investigation
+JOB_BIZ_008,Lawyer,BIZ,2,Doctorate,INT 25+ INS 18+,Law +4CS; Research +3CS; Persuasion +3CS; Investigation +2CS,Legal_Research,+4CS Legal investigations,Legal_Database,Very_High,Legal expertise
+JOB_BIZ_009,Marketing_Manager,BIZ,3,Bachelors,INT 18+ INS 18+,Social +3CS; Psychology +2CS; Media +3CS; Persuasion +2CS,None,+2CS Media manipulation investigations,Marketing_Tools,Very_High,Marketing expertise
+JOB_BIZ_010,Investment_Banker,BIZ,3,Masters,INT 25+,Finance +4CS; Negotiation +3CS; Risk +3CS,None,+3CS Financial investigations,Financial_Markets,Elite,High finance
+JOB_BIZ_011,Corporate_CEO,BIZ,4,Masters,INT 25+ INS 20+ CON 18+,Leadership +4CS; Finance +3CS; Negotiation +4CS; Social +3CS,Corporate_Research,+3CS Corporate investigations,Corporate_Full,Elite,Corporate leader
+JOB_BIZ_012,Megacorp_Owner,BIZ,5,Varies,INT 25+ INS 25+ CON 20+,Leadership +5CS; Finance +5CS; All Business +4CS,All_Corporate; Economic_Influence,+5CS All corporate/financial,Unlimited_Corporate,Elite,Industry titan
+
+===CAREER PATHS - PSYCHOLOGY & SOCIAL (CAT_06)===
+Job_ID,Job_Title,Category,Rank,Education_Required,Stat_Requirements,Skills_Granted,Research_Unlocks,Investigation_Bonus,Equipment_Access,Income_Level,Notes
+JOB_PSY_001,School_Counselor,PSY,1,Bachelors,INT 15+ INS 15+,Psychology +2CS; Social +2CS; Counseling +2CS,None,+2CS Youth-related investigations,School_Access,Medium,Youth counselor
+JOB_PSY_002,Priest_Religious,PSY,1,Trade_School,INS 18+ CON 15+,Theology +2CS; Counseling +2CS; Social +2CS; Community +2CS,None,+2CS Religious/cult investigations,Religious_Access,Low,Religious leader
+JOB_PSY_003,Fortune_Teller,PSY,1,No_Formal,INS 20+,Deception +2CS; Psychology +2CS; Cold_Reading +3CS; Social +1CS,None,+3CS Occult/fraud investigations,Occult_Props,Low,Mystic fraud or real psychic
+JOB_PSY_004,Social_Worker,PSY,1,Bachelors,INT 15+ INS 18+,Psychology +2CS; Investigation +2CS; Social +2CS; Community +2CS,None,+3CS Family/abuse investigations,Social_Services_Access,Medium,Community support
+JOB_PSY_005,Psychiatrist,PSY,2,Doctorate,INT 25+ INS 20+,Psychology +4CS; Medicine +2CS; Counseling +3CS; Investigation +1CS,Psychological_Research,+4CS Mental health investigations,Medical_Access,Very_High,Mental health doctor
+JOB_PSY_006,Criminal_Psychologist,PSY,3,Doctorate,INT 28+ INS 25+,Psychology +4CS; Investigation +4CS; Criminal_Profiling +4CS,Criminal_Psychology_Research,+5CS Criminal profiling; +3CS all criminal cases,Law_Enforcement_Access,Very_High,Criminal profiler
+JOB_PSY_007,Interrogator,PSY,3,Military_Advanced,INS 25+ CON 20+,Interrogation +5CS; Psychology +3CS; Intimidation +3CS,Interrogation_Tech,+5CS Interrogation; +3CS extracting info,Interrogation_Facility,High,Information extraction
+JOB_PSY_008,Cult_Expert,PSY,3,Masters,INT 25+ INS 25+,Psychology +3CS; Theology +3CS; Investigation +3CS; Persuasion +3CS,Cult_Psychology,+5CS Cult investigations,None,High,Cult deprogramming
+JOB_PSY_009,Psionics_Researcher,PSY,4,Doctorate,INT 35+ CON 25+,Psychology +4CS; Psionics +4CS; Research +4CS,Psi_Tech; Psychic_Research,+4CS Psychic investigations,Psi_Lab,Elite,Psychic research
+JOB_PSY_010,Mentalist,PSY,4,Varies,INS 30+ CON 30+,Psychology +4CS; Deception +4CS; Cold_Reading +5CS; Performance +3CS,None,+4CS Deception investigations; +3CS mental cases,None,Variable,Mind reading (real or fake)
+JOB_PSY_011,Wizard_Mystic,PSY,5,Varies,CON 35+ INT 30+,Mysticism +5CS; Psychology +3CS; Occult +5CS; Research +3CS,Mystical_Research; Arcane_Tech,+5CS Mystical/supernatural investigations,Mystical_Access,Variable,Actual magic user
+
+===CAREER PATHS - PHYSICAL & COMBAT (CAT_07)===
+Job_ID,Job_Title,Category,Rank,Education_Required,Stat_Requirements,Skills_Granted,Research_Unlocks,Investigation_Bonus,Equipment_Access,Income_Level,Notes
+JOB_PHY_001,Construction_Worker,PHY,1,No_Formal,STR 15+ STA 12+,Construction +2CS; Strength_Feats +2CS; Repair +1CS,None,+1CS Construction site investigations,Construction_Tools,Low,Manual labor
+JOB_PHY_002,Security_Guard,PHY,1,High_School,STA 12+ INS 12+,Security +2CS; Observation +2CS; Combat +1CS,None,+2CS Security investigations,Security_Gear,Low,Building security
+JOB_PHY_003,Police_Patrol,PHY,1,High_School,STA 15+ MEL 12+,Law +1CS; Combat +2CS; Investigation +2CS; Driving +1CS,None,+3CS Street crime investigations,Police_Gear,Medium,Beat cop
+JOB_PHY_004,Pro_Athlete,PHY,1,High_School,STR 20+ or AGL 20+ or STA 20+,Athletics +4CS; Specialty_Sport +3CS; Performance +1CS,None,+1CS Sports investigations,Sports_Gear,Variable,Professional sports
+JOB_PHY_005,Salesman,PHY,1,High_School,INS 15+,Social +2CS; Persuasion +3CS; Deception +1CS,None,+2CS Fraud investigations,None,Variable,Sales expertise
+JOB_PHY_006,PMC_Soldier,PHY,2,Military_Basic,STR 15+ MEL 15+ AGL 15+,Combat +3CS; Tactics +2CS; Weapons +2CS; Survival +1CS,Basic_Military_Tech,+2CS Military investigations,Military_Gear,High,Private military
+JOB_PHY_007,Prison_Guard,PHY,2,High_School,STR 15+ STA 15+ CON 12+,Combat +2CS; Intimidation +2CS; Observation +2CS; Security +2CS,None,+3CS Criminal investigations,Security_Gear,Medium,Corrections officer
+JOB_PHY_008,Construction_Foreman,PHY,2,Trade_School,STR 15+ INT 12+,Construction +3CS; Management +2CS; Safety +2CS,Construction_Tech,+2CS Construction investigations,Construction_Full,Medium,Site supervisor
+JOB_PHY_009,Pro_MMA_Fighter,PHY,2,No_Formal,MEL 25+ AGL 20+ STA 20+,Combat +4CS; Martial_Arts +4CS; Athletics +2CS,None,+2CS Combat-related investigations,Training_Facility,High,Professional fighter
+JOB_PHY_010,Detective,PHY,2,Associates,INT 18+ INS 20+,Investigation +4CS; Interrogation +2CS; Combat +2CS; Law +2CS,None,+5CS All criminal investigations,Police_Full,High,Investigator
+JOB_PHY_011,SWAT_Officer,PHY,3,Military_Basic,STR 18+ MEL 20+ AGL 18+,Combat +4CS; Tactics +3CS; Breaching +3CS; Weapons +3CS,Tactical_Tech,+3CS High-risk investigations,SWAT_Gear,High,Tactical officer
+JOB_PHY_012,Special_Forces,PHY,4,Military_Special_Ops,STR 20+ MEL 25+ AGL 25+ STA 20+,Combat +5CS; Tactics +4CS; Stealth +4CS; Survival +3CS; Weapons +4CS,Military_Tech; Weapons_Research,+4CS Military investigations,Special_Ops_Gear,Very_High,Elite soldier
+JOB_PHY_013,Secret_Agent,PHY,4,Intelligence_Training,INT 20+ INS 25+ AGL 20+,Espionage +5CS; Combat +3CS; Deception +4CS; Languages +3CS; Stealth +4CS,Intelligence_Tech,+5CS Espionage investigations,Spy_Gear,High,Intelligence operative
+JOB_PHY_014,Assassin,PHY,4,Varies,MEL 25+ AGL 25+ INS 20+,Combat +4CS; Stealth +5CS; Assassination +5CS; Infiltration +4CS,None,+3CS Assassination investigations,Assassin_Gear,Variable,Professional killer
+JOB_PHY_015,Bodyguard,PHY,3,Military_Basic,MEL 20+ INS 20+ STA 18+,Combat +3CS; Protection +4CS; Observation +3CS; Driving +2CS,None,+3CS Protection-related investigations,Security_Advanced,High,Personal protection
+
+===RESEARCH CAPABILITY BY EDUCATION===
+Research_Level,Education_Required,Research_Types_Available,Research_Speed_Modifier,Notes
+None,No_Formal/High_School,Cannot research,N/A,Can assist only
+Basic,Trade_School/Associates,Basic tech only,0.5x,Slow learner
+Intermediate,Bachelors,Basic + Intermediate,0.75x,Standard researcher
+Advanced,Masters,All except Cutting Edge,1.0x,Full speed research
+Expert,Doctorate,All research types,1.25x,Fast researcher
+Cutting_Edge,Post_Doc,All + Experimental,1.5x,Frontier research
+
+===RESEARCH REQUIREMENTS BY TYPE===
+Research_Type,Min_Education,Min_Career_Rank,Required_Category,Required_Facility,Example_Projects
+Basic_Medical,Associates,1,MED,Medical_Lab,First aid improvements
+Advanced_Medical,Masters,2,MED,Hospital_Lab,Surgical techniques
+Neuro_Tech,Doctorate,3,MED,Neuro_Lab,Brain-computer interfaces
+Mutagenics,Post_Doc,5,MED,Mutagenics_Lab,LSW origin research
+Basic_Electronics,Trade_School,1,TECH,Electronics_Shop,Simple gadgets
+Cyber_Security_Tech,Bachelors,3,TECH,Cyber_Lab,Security systems
+AI_Research,Doctorate,4,TECH,AI_Lab,Artificial intelligence
+Robotics_Research,Doctorate,4,TECH,Robotics_Lab,Combat robots
+Weapons_Research,Masters,3,TECH,Weapons_Lab,New weapons
+Armor_Research,Bachelors,2,TECH,Armor_Workshop,Custom armor
+Propulsion_Research,Doctorate,4,TECH,Aerospace_Lab,Flight systems
+Psi_Tech,Doctorate,4,PSY,Psi_Lab,Psychic amplifiers
+Alien_Tech,Post_Doc,5,TECH,Secure_Lab,Reverse engineering
+
+===EDUCATION COST AND TIME===
+Level_ID,Time_Years,Cost_Level,Faction_Scholarship,Notes
+EDU_00,0,Free,N/A,No formal education
+EDU_01,6,Free,N/A,Compulsory education
+EDU_02,6,Free,N/A,Compulsory education
+EDU_03,2,Low,50% available,Vocational training
+EDU_04,2,Medium,75% available,Community college
+EDU_05,4,High,Full scholarship possible,University
+EDU_06,2,Very_High,Research assistantship,Graduate school
+EDU_07,4-6,Very_High,Full funding possible,Doctoral program
+EDU_08,2-4,Funded,Usually funded,Research position
+EDU_09,0.5,Free (Military),Mandatory,Basic training
+EDU_10,2,Free (Military),Mandatory,Advanced training
+EDU_11,2,Free (Military),Selective,Elite training
+EDU_12,3,Faction_Funded,Selective,Intelligence training
+
+===SKILL CATEGORIES===
+Skill_Category,Skills_Included,Primary_Stat,Career_Categories
+Combat,Melee; Ranged; Martial_Arts; Wrestling; Weapons,MEL/AGL,PHY
+Technical,Computers; Electronics; Engineering; Repair; Robotics,INT,TECH
+Medical,Medicine; Surgery; First_Aid; Forensics; Biology,INT,MED
+Social,Persuasion; Deception; Intimidation; Social; Negotiation,INS,ART/BIZ/PSY
+Investigation,Investigation; Research; Observation; Tracking,INT/INS,EDU/PHY/PSY
+Stealth,Stealth; Infiltration; Disguise; Lockpicking,AGL/INS,PHY/ART
+Survival,Survival; Navigation; Tracking; Athletics,STA/INS,PHY
+Psychic,Psychology; Interrogation; Cold_Reading; Counseling,INS/CON,PSY
+Science,Physics; Chemistry; Biology; Mathematics,INT,TECH/MED
+Leadership,Management; Tactics; Leadership; Command,INT/CON,BIZ/PHY
+
+===CROSS-CAREER BONUSES===
+Primary_Career,Secondary_Career,Bonus_Effect,Notes
+MED,TECH,+2CS Biotech research,Medical + Engineering synergy
+TECH,PHY,+2CS Equipment optimization,Technical combat expertise
+PSY,PHY,+2CS Interrogation,Psychological warfare
+BIZ,PSY,+2CS Negotiation,Business psychology
+EDU,Any,+1CS Research in that field,Academic cross-training
+ART,PSY,+2CS Deception,Performance + Psychology
+PHY,TECH,+2CS Weapons use,Military + Technical
+
+===DESIGNER NOTES===
+Topic,Note
+Education_Gates,Higher education unlocks better jobs and research; creates progression
+Career_Diversity,Multiple paths to similar outcomes; no single optimal route
+Research_Integration,Scientists needed for tech development; can't just buy everything
+Skill_Accumulation,Characters accumulate skills from education + career + training
+Stat_Requirements,Prevent unrealistic career paths; smart characters do smart jobs
+Investigation_Synergy,Different careers excel at different investigation types
+Team_Composition,Encourages diverse team with different specialists
+Income_Balance,Higher education/rank = more money for equipment
+Faction_Influence,Factions can provide scholarships/training for loyal members

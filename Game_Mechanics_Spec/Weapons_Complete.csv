@@ -1,0 +1,159 @@
+Section,Description
+---WEAPONS COMPLETE DATABASE---,Master weapon database consolidating all weapon types with penetration and ammunition
+
+===WEAPON CATEGORIES===
+Category,Description,Examples
+Melee_Regular,Basic melee weapons requiring no special training,Knife; Lead Pipe; Club
+Melee_Skill,Melee weapons requiring specialized skill training,Katana; Battle Staff; Nunchaku
+Ranged_Regular,Basic ranged weapons for untrained users,Pistol; Shotgun; Throwing Knife
+Ranged_Skill,Ranged weapons requiring specialized training,Assault Rifle; Sniper Rifle; Bow
+Special_Ranged,Heavy/special weapons with unique properties,Flamethrower; Minigun; Rocket Launcher
+Energy_Weapons,Advanced technology weapons using energy,Laser Rifle; Plasma Rifle; Energy Rifle
+Grenades,Throwable explosive/effect devices,Combat Grenade; Flash Grenade; Stun Grenade
+Improvised,Environmental objects used as weapons,Thrown Car; Chair; Fire Extinguisher
+
+===MELEE WEAPONS===
+Weapon_ID,Weapon_Name,Category,Base_Damage,Damage_Type,Sub_Type,Attack_Speed_Sec,Range_Squares,Accuracy_CS,Skill_Required,STR_Required,Special_Effects,Penetration_Mult,Cost_Level,Availability,Investigation_Bonus,Notes
+MEL_001,Knife,Melee_Regular,10,PHYSICAL,EDGED_MELEE,1.0,1,+0CS,None,None,"Easy to conceal; Fast draw/sheathe",0.5x,Low,Common,None,Common cheap weapon for low STR characters
+MEL_002,Lead Pipe,Melee_Regular,5,PHYSICAL,SMASHING_MELEE,2.0,2,+0CS,None,None,Damage adds STR bonus,0.25x,Free,Common,None,Most common improvised melee; dealt damage = weapon + STR
+MEL_003,Club,Melee_Regular,8,PHYSICAL,SMASHING_MELEE,1.5,1,+0CS,None,None,Damage adds STR bonus,0.25x,Low,Common,None,Basic bludgeon
+MEL_004,Brass Knuckles,Melee_Regular,5,PHYSICAL,SMASHING_MELEE,0.8,1,+1CS,None,None,+5 to unarmed damage,0.25x,Low,Restricted,None,Concealed; illegal in many jurisdictions
+MEL_005,Baseball Bat,Melee_Regular,12,PHYSICAL,SMASHING_MELEE,1.8,2,+0CS,None,10,Damage adds STR bonus; chance to knockback,0.5x,Low,Common,None,Good reach and damage
+MEL_006,Machete,Melee_Regular,12,PHYSICAL,EDGED_MELEE,1.2,1,+0CS,None,None,Can cause bleeding,0.75x,Low,Common,None,Utility and combat use
+MEL_007,Katana,Melee_Skill,15,PHYSICAL,EDGED_MELEE,1.5,2,+0CS,Katana,None,Critical hits cause bleeding; dismemberment on Major,1.0x,High,Specialized,+2CS cultural (Asia),Expensive weapon requiring specialized training
+MEL_008,Battle Staff,Melee_Skill,8,PHYSICAL,SMASHING_MELEE,1.5,3,+0CS,Staff,None,STR bonus; can hit adjacent enemies,0.5x,Medium,Common,None,Good reach; area potential
+MEL_009,Nunchaku,Melee_Skill,10,PHYSICAL,SMASHING_MELEE,1.0,1,+1CS,Martial_Arts,None,Fast attacks; can disarm,0.5x,Medium,Specialized,None,Requires martial arts training
+MEL_010,Tonfa,Melee_Skill,8,PHYSICAL,SMASHING_MELEE,1.2,1,+1CS,Martial_Arts,None,Can block (+1CS defense),0.5x,Medium,Specialized,None,Defensive melee option
+MEL_011,Spear,Melee_Skill,12,PHYSICAL,PIERCING_MELEE,2.0,3,+0CS,Spear,None,Longest melee reach; can be thrown,1.0x,Low,Common,None,Versatile reach weapon
+MEL_012,Axe,Melee_Regular,15,PHYSICAL,EDGED_MELEE,2.5,1,-1CS,None,15,Ignores 5 DR from armor,1.0x,Medium,Common,None,Heavy and powerful
+MEL_013,Sword,Melee_Skill,12,PHYSICAL,EDGED_MELEE,1.5,2,+0CS,Swords,None,Balanced attack and defense,1.0x,High,Specialized,None,Classic weapon
+MEL_014,Dagger,Melee_Regular,8,PHYSICAL,EDGED_MELEE,0.8,1,+1CS,None,None,Fast; easy to conceal; can be thrown,0.5x,Low,Common,None,Utility and backup weapon
+MEL_015,Hammer_War,Melee_Skill,20,PHYSICAL,SMASHING_MELEE,3.0,2,-1CS,Heavy_Weapons,25,Ignores 10 DR; high knockback,1.5x,High,Specialized,None,Devastating but slow
+
+===RANGED WEAPONS - FIREARMS===
+Weapon_ID,Weapon_Name,Category,Base_Damage,Damage_Type,Sub_Type,Attack_Speed_Sec,Range_Squares,Accuracy_CS,Reload_Sec,Skill_Required,STR_Required,Special_Effects,Penetration_Mult,Default_Ammo,Magazine_Size,Cost_Level,Availability,Investigation_Bonus,Notes
+RNG_001,Pistol_Light,Ranged_Regular,15,BLEED_PHYSICAL,GUNFIRE,1.5,20,-2CS,2,None,None,Easy to conceal; fast draw,1.0x,9mm_Standard,15,Low,Common,None,Compact sidearm
+RNG_002,Pistol_Standard,Ranged_Regular,20,BLEED_PHYSICAL,GUNFIRE,1.5,25,-2CS,2,None,None,Easy to conceal; fast draw,1.0x,9mm_Standard,17,Medium,Common,None,Standard law enforcement sidearm
+RNG_003,Pistol_Heavy,Ranged_Regular,25,BLEED_PHYSICAL,GUNFIRE,1.8,25,-2CS,2,None,10,Easy to conceal; high stopping power,1.0x,.45_Standard,8,Medium,Common,None,High caliber handgun
+RNG_004,Revolver,Ranged_Regular,25,BLEED_PHYSICAL,GUNFIRE,2.0,20,-1CS,5,None,None,Reliable; no jams; cylinder reload,1.0x,.357_Standard,6,Medium,Common,None,Classic reliable design
+RNG_005,SMG,Ranged_Regular,20,BLEED_PHYSICAL,GUNFIRE,0.8,20,-3CS,3,None,None,Fast to draw; high rate of fire,1.0x,9mm_Standard,30,High,Restricted,None,Submachine gun; burst fire capable
+RNG_006,Shotgun_Pump,Ranged_Regular,35,PHYSICAL,BUCKSHOT,3.0,5,-3CS,5,None,10,Accuracy penalty reduces with range; spread,0.5x,12ga_Buckshot,8,Medium,Common,None,Close range devastation
+RNG_007,Shotgun_Auto,Ranged_Skill,35,PHYSICAL,BUCKSHOT,2.0,5,-3CS,4,Shooting,10,Fast follow-up; spread,0.5x,12ga_Buckshot,8,High,Restricted,None,Semi-auto shotgun
+RNG_008,Shotgun_Slug,Ranged_Regular,35,PHYSICAL,SLUG,3.0,15,-2CS,5,None,10,Single projectile; better range,1.5x,12ga_Slug,8,Medium,Common,None,Rifled slug for range
+RNG_009,Assault_Rifle,Ranged_Skill,30,BLEED_PHYSICAL,GUNFIRE,0.5,60,-1CS,4,Shooting,None,Full-auto capable; versatile,1.0x,5.56_Standard,30,High,Military,+1CS military,Standard military rifle
+RNG_010,Battle_Rifle,Ranged_Skill,35,BLEED_PHYSICAL,GUNFIRE,2.0,70,-1CS,5,Shooting,None,Heavy round; semi-auto,1.2x,7.62_Standard,20,High,Military,+1CS military,Heavier caliber rifle
+RNG_011,Sniper_Rifle,Ranged_Skill,45,BLEED_PHYSICAL,GUNFIRE,3.0,100,-1CS,6,Shooting+Sniper,None,Can target body parts; ignores some armor,1.5x,.308_AP,10,Very_High,Military,+3CS surveillance,Long range precision
+RNG_012,Anti_Materiel_Rifle,Ranged_Skill,60,BLEED_PHYSICAL,GUNFIRE,4.0,150,+0CS,8,Shooting+Heavy,20,Destroys cover; extreme penetration,2.5x,.50_Tungsten,5,Ultra_High,Military_Only,+2CS anti-vehicle,Anti-vehicle rifle
+RNG_013,Machine_Gun,Ranged_Skill,30,BLEED_PHYSICAL,GUNFIRE,0.2,30,-3CS,6,Shooting,20,Suppression; high volume fire,1.0x,7.62_Standard,100,Very_High,Military,+1CS military,Support weapon
+RNG_014,Minigun,Special_Ranged,30,BLEED_PHYSICAL,GUNFIRE,0.1,20,-4CS,10,Shooting,25,Extreme rate of fire; knockback chance,1.0x,7.62_Standard,500,Ultra_High,Military_Only,None,Vehicle/power armor mounted
+
+===RANGED WEAPONS - THROWN===
+Weapon_ID,Weapon_Name,Category,Base_Damage,Damage_Type,Sub_Type,Attack_Speed_Sec,Range_Formula,Accuracy_CS,Skill_Required,STR_Required,Special_Effects,Penetration_Mult,Cost_Level,Availability,Notes
+THR_001,Throwing_Knife,Ranged_Regular,10,BLEED_PHYSICAL,THROWN,2.0,5 + STR/10,-2CS,None,None,Range adds STR bonus,0.5x,Low,Common,Silent; reusable
+THR_002,Throwing_Star,Ranged_Regular,8,BLEED_PHYSICAL,THROWN,1.5,6 + STR/10,-1CS,Martial_Arts,None,Fast throw; multiple throws per turn,0.25x,Medium,Specialized,Ninja weapon
+THR_003,Javelin,Ranged_Skill,15,PHYSICAL,THROWN,2.5,10 + STR/5,-1CS,Throwing,15,Long range thrown,1.0x,Low,Common,Athletic throw
+THR_004,Spear_Thrown,Ranged_Regular,12,PHYSICAL,THROWN,2.0,8 + STR/5,-2CS,None,10,Range adds STR bonus,1.0x,Low,Common,Can be used melee
+THR_005,Rock,Ranged_Regular,5,PHYSICAL,THROWN,1.5,STR/5,-2CS,None,None,Abundant; improvised,0.25x,Free,Abundant,Basic projectile
+THR_006,Brick,Ranged_Regular,8,PHYSICAL,THROWN,2.0,STR/5,-2CS,None,None,Improvised; causes bleeding,0.5x,Free,Urban,Construction debris
+
+===RANGED WEAPONS - SPECIAL===
+Weapon_ID,Weapon_Name,Category,Base_Damage,Damage_Type,Sub_Type,Attack_Speed_Sec,Range_Squares,Accuracy_CS,Reload_Sec,Skill_Required,STR_Required,Special_Effects,Penetration_Mult,Cost_Level,Availability,Notes
+SPC_001,Bow_Compound,Ranged_Skill,15,BLEED_PHYSICAL,ARROW,2.0,40,+0CS,0,Bowmaster,15,Special arrows; silent,1.0x,Medium,Common,Silent ranged option
+SPC_002,Crossbow,Ranged_Skill,20,BLEED_PHYSICAL,BOLT,3.0,30,-1CS,4,Crossbow,10,High damage; slow reload,1.5x,Medium,Common,Medieval tech; powerful
+SPC_003,Flamethrower,Special_Ranged,0,ENERGY,FIRE,0.1,5,+0CS,10,Flamethrower,20,Burns targets in cone; ignites area,0.75x,Very_High,Military,Area denial; 15 damage/turn burn
+SPC_004,Rocket_Launcher,Special_Ranged,50,PHYSICAL,EXPLOSION,6.0,50,-2CS,8,Rocketman,20,Area damage; high knockback,0.75x,Ultra_High,Military_Only,Explosive; 3x3 blast area
+SPC_005,Grenade_Launcher,Special_Ranged,40,PHYSICAL,EXPLOSION,3.0,40,-2CS,3,Shooting,15,Area damage,0.75x,Very_High,Military,6-round cylinder
+SPC_006,Taser,Special_Ranged,5,ENERGY,ELECTRICAL,2.0,5,-1CS,3,None,None,Stun effect; non-lethal,0.25x,Medium,Law_Enforcement,Stuns for 1d4 turns
+SPC_007,Net_Gun,Special_Ranged,0,PHYSICAL,ENTANGLE,3.0,10,-2CS,5,None,None,Entangles target; escape DC15,0x,High,Specialized,Non-lethal capture
+
+===ENERGY WEAPONS===
+Weapon_ID,Weapon_Name,Category,Base_Damage,Damage_Type,Sub_Type,Attack_Speed_Sec,Range_Squares,Accuracy_CS,Reload_Sec,Skill_Required,STR_Required,Special_Effects,Penetration_Mult,Power_Cell_Size,Cost_Level,Availability,Investigation_Bonus,Notes
+NRG_001,Laser_Rifle,Energy_Weapons,40,ENERGY,LASER,2.0,50,-1CS,5,Energy_Weapons,None,No bullet drop; ignores wind; reflects off mirrors,2.0x,20,Ultra_High,High_Tech,+2CS technology,Concentrated light beam
+NRG_002,Plasma_Rifle,Energy_Weapons,45,ENERGY,PLASMA,2.5,30,-2CS,5,Energy_Weapons,None,Burns through armor; fire damage over time,2.0x,15,Ultra_High,High_Tech,+2CS technology,Superheated matter projectile
+NRG_003,Thermal_Rifle,Energy_Weapons,35,ENERGY,THERMAL,2.0,50,-1CS,5,Energy_Weapons,None,Heat damage; ignites flammables,1.5x,20,Ultra_High,High_Tech,+2CS technology,Heat ray
+NRG_004,Ice_Rifle,Energy_Weapons,30,ENERGY,ICE,2.5,20,-1CS,5,Energy_Weapons,None,Slows target; can freeze,0.75x,15,Ultra_High,High_Tech,+2CS technology,Cryogenic beam
+NRG_005,Energy_Rifle,Energy_Weapons,35,ENERGY,PURE_ENERGY,2.0,40,-2CS,5,Energy_Weapons,None,Pure energy damage; bypasses physical DR,1.5x,18,Ultra_High,High_Tech,+2CS technology,Generic energy weapon
+NRG_006,Electric_Rifle,Energy_Weapons,30,ENERGY,ELECTRICAL,1.5,30,-2CS,5,Energy_Weapons,None,Chain lightning to nearby conductors; stun chance,1.0x (2.0x conductive),25,Very_High,High_Tech,+2CS technology,Lightning projector
+NRG_007,Sonic_Rifle,Energy_Weapons,30,PHYSICAL,SONIC,2.0,70,-1CS,0,Shooting,None,Ignores physical armor; passes through cover,0.5x,Unlimited,Very_High,High_Tech,+1CS technology,Sound wave weapon
+NRG_008,Pulse_Rifle,Energy_Weapons,35,ENERGY,CONCUSSIVE,2.0,40,-1CS,4,Energy_Weapons,None,Knockback effect,1.0x,20,Ultra_High,High_Tech,+2CS technology,Concussive energy pulse
+NRG_009,Disruptor,Energy_Weapons,50,ENERGY,DISINTEGRATION,3.0,20,-2CS,8,Energy_Weapons,None,Ignores all DR; destroys matter,3.0x,10,Alien_Tech,Alien,+3CS alien tech,Molecular disruption
+NRG_010,Stun_Rifle,Energy_Weapons,15,ENERGY,STUN,1.5,30,-1CS,3,Energy_Weapons,None,Non-lethal; stuns 1d6 turns,0.5x,30,High,Law_Enforcement,None,Police energy weapon
+
+===GRENADES===
+Weapon_ID,Weapon_Name,Category,Base_Damage,Damage_Type,Sub_Type,Attack_Speed_Sec,Range_Formula,Accuracy_CS,Skill_Required,STR_Required,Special_Effects,Blast_Radius,Penetration_Mult,Cost_Level,Availability,Notes
+GRN_001,Combat_Grenade,Grenades,50,PHYSICAL,EXPLOSION,2.0,10 + STR/10,-2CS,None,None,Area damage; knockback,3x3,0.75x,High,Military,Fragmentation grenade
+GRN_002,Sticky_Grenade,Grenades,50,PHYSICAL,EXPLOSION,2.0,10 + STR/10,-2CS,None,None,Sticks to first contact; area damage,3x3,0.75x,High,Military,Adheres to targets
+GRN_003,Flash_Grenade,Grenades,0,SPECIAL,FLASH,2.0,10 + STR/10,-2CS,None,None,Blinds targets; -4CS for 1d4 turns,5x5,0x,Medium,Law_Enforcement,Non-lethal; flashbang
+GRN_004,Stun_Grenade,Grenades,0,SPECIAL,CONCUSSION,2.0,10 + STR/10,-2CS,None,None,Dazes targets; stun 1d4 turns,4x4,0x,Medium,Law_Enforcement,Non-lethal; concussion
+GRN_005,Shrapnel_Grenade,Grenades,50,BLEED_PHYSICAL,SHRAPNEL,2.0,10 + STR/10,-2CS,None,None,Bleeding damage; anti-personnel,4x4,0.5x,High,Military,Maximum anti-personnel
+GRN_006,Smoke_Grenade,Grenades,0,SPECIAL,SMOKE,2.0,10 + STR/10,-2CS,None,None,Blocks LOS; -4CS attacks through smoke,5x5,0x,Low,Common,Concealment
+GRN_007,Incendiary_Grenade,Grenades,30,ENERGY,FIRE,2.0,10 + STR/10,-2CS,None,None,Creates fire area; 15 damage/turn in area,3x3,1.0x,High,Military,Area denial
+GRN_008,Gas_Grenade,Grenades,0,SPECIAL,GAS,2.0,10 + STR/10,-2CS,None,None,Poison/sleep effect in area,4x4,0x,High,Military,Various gas types
+GRN_009,EMP_Grenade,Grenades,0,SPECIAL,EMP,2.0,10 + STR/10,-2CS,None,None,Disables electronics; damages robots,5x5,0x,Very_High,High_Tech,Anti-tech
+GRN_010,Plasma_Grenade,Grenades,60,ENERGY,PLASMA,2.0,10 + STR/10,-2CS,None,None,High damage; burns through cover,3x3,1.5x,Ultra_High,High_Tech,Advanced explosive
+
+===AMMUNITION TYPES===
+Ammo_ID,Ammo_Name,Caliber,Damage_Modifier,Penetration_Mult,Cost_Mult,Availability,Special_Effects,Notes
+AMO_001,Standard_FMJ,Universal,+0,1.0x,1.0x,Common,None,Full metal jacket baseline
+AMO_002,Hollow_Point,Universal,+25% vs unarmored,0.5x,1.2x,Common,Expands on impact; no over-penetration,Safer for hostage situations
+AMO_003,Armor_Piercing,Universal,-25% vs unarmored,2.0x,3.0x,Restricted,Hardened core,Anti-armor rounds
+AMO_004,Tungsten_Core,Universal,-25% vs unarmored,2.5x,10.0x,Military_Only,Military anti-armor,Extreme penetration
+AMO_005,Incendiary,Universal,+Fire_DOT,1.0x,5.0x,Restricted,Ignites on impact; 5 fire damage/turn,Can ignite flammables
+AMO_006,Tracer,Universal,+0,1.0x,2.0x,Common,Visible trail; -1CS stealth,Aids team fire direction
+AMO_007,Subsonic,Universal,-10%,0.75x,1.5x,Common,-20 dB sound; -10 range,Stealth operations
+AMO_008,Frangible,Universal,+0,0.25x,2.0x,Special,Shatters on hard surfaces,Aircraft/hull safety
+AMO_009,Rubber,Universal,-75% (non-lethal),0.1x,1.5x,Law_Enforcement,Non-lethal; stun chance,Riot control
+AMO_010,Beanbag,12ga only,-50% (non-lethal),0.1x,1.0x,Law_Enforcement,Non-lethal; high knockback,Less-lethal shotgun
+AMO_011,Slug_Rifled,12ga only,+10%,1.5x,1.2x,Common,Single projectile; +range,Improved shotgun range
+AMO_012,Dragon_Breath,12ga only,Fire_Damage,0.5x,5.0x,Restricted,Incendiary spread; ignites,Exotic shotgun
+AMO_013,Silver,Universal,+100% vs supernatural,1.0x,20.0x,Specialized,Effective vs werewolves/vampires,Monster hunting
+AMO_014,Cold_Iron,Universal,+100% vs fae,1.0x,15.0x,Specialized,Effective vs fae creatures,Mythical creature hunting
+AMO_015,Blessed,Universal,+100% vs demons,1.0x,25.0x,Religious,Effective vs demonic entities,Requires blessing
+
+===IMPROVISED WEAPONS REFERENCE===
+Category,Weight_Range_Lbs,Base_Damage,Range_Formula,Accuracy_Mod,Penetration,STR_Required,Examples,Notes
+Light_Thrown,1-50,Object_Damage,Range = (STR - Weight/50) × 2,Object_Accuracy,0.5x,Weight/10,Chair; rock; trash can,STR bonus = STR/10
+Medium_Thrown,51-500,Object_Damage + STR/10,Range = (STR - Weight/25) × 1.5,Object_Accuracy - 1CS,0.75x,Weight/5,Table; motorcycle engine,Knockback chance
+Heavy_Thrown,501-5000,Object_Damage + STR/5,Range = (STR - Weight/10) × 1,Object_Accuracy - 2CS,1.0x,Weight/2,Car; dumpster,Area damage on impact
+Vehicle_Thrown,5000+,Object_Damage + STR/3,Range = (STR - Weight/5) × 0.5,Object_Accuracy - 3CS,1.5x,Weight,Bus; truck; train car,Explosion/fire risk
+Melee_Light,1-50,Object_Damage + STR,Melee (adjacent),Object_Accuracy + 1CS,0.25x,Weight/20,Chair leg; bottle,Breaks after 1d6 hits
+Melee_Heavy,101+,Object_Damage + STR × 1.5,Melee + reach,Object_Accuracy - 1CS,0.5x,Weight/10,Parking meter; mailbox,Breaks after 1d3 hits
+
+===WEAPON SKILLS===
+Skill_Name,Weapons_Covered,Bonus,Prerequisites,Notes
+None,Basic melee and ranged,No penalty,None,Anyone can use
+Shooting,Rifles; Machine guns,Required for military weapons,Training,Standard military training
+Sniper,Sniper rifles,+1CS long range; body part targeting,Shooting skill,Precision shooting
+Heavy_Weapons,Miniguns; Anti-materiel,Required for heavy weapons,Shooting + STR 20,Support weapons
+Bowmaster,Bows; Crossbows,Special arrows; +1CS,Training,Archery mastery
+Katana,Katana; Japanese swords,+1CS; dismemberment,Cultural training,Specialized blade
+Staff,Battle staff; Bo,+1CS; area attacks,Training,Pole weapon mastery
+Martial_Arts,Nunchaku; Tonfa; Unarmed,+1CS melee; special techniques,Training,Eastern martial arts
+Swords,Western swords,+1CS; parry,Training,Western swordsmanship
+Energy_Weapons,All energy weapons,Required for energy weapons,Science knowledge,Advanced weapon training
+Flamethrower,Flamethrower,Safe operation; +1CS,Training + STR 20,Incendiary specialist
+Rocketman,Rocket/Grenade launchers,+1CS; reduced splash to allies,Training + STR 20,Explosive ordinance
+
+===PENETRATION QUICK REFERENCE===
+Material,HP,Penetrated_By
+Glass,10,Any weapon
+Drywall,25,Rifle AP; Heavy weapons; STR 50+
+Plywood,30,Rifle AP; Heavy weapons; STR 50+
+Wood_Solid,40,Heavy weapons; Sniper AP; STR 60+
+Brick,80,Anti-materiel; STR 80+
+Concrete,120,Anti-materiel; STR 100+
+Steel_Thin,100,Anti-materiel; STR 100+
+Steel_Structural,150,STR 150+
+Steel_Armored,200,STR 200+ only
+Car_Door,60,Sniper; AP ammo; STR 70+
+Furniture,15-40,Most weapons
+Human_Body,Variable,Most penetrating weapons (risk of over-pen)
+
+===DESIGNER NOTES===
+Topic,Note
+Energy_Weapon_Damage,Thermal 35; Plasma 45; Ice 30; Energy 35; Electric 30; Laser 40 - balanced against firearms
+Penetration_Balance,Standard weapons should NOT penetrate brick/cars; AP ammo required
+Ammo_Tradeoffs,AP ammo better penetration but -25% vs unarmored; tactical choice
+Super_Strength_Integration,STR 80+ characters can throw cars; integrates with Penetration_Continuation_System
+Skill_Requirements,Military-grade weapons require training; prevents civilian super-loadouts
+Investigation_Bonuses,Weapons from Equipment_Complete_Database provide non-combat utility

@@ -1,0 +1,121 @@
+Section,Description
+---LIFTING/THROWING/PROJECTILE SYSTEM---,Complete mechanics for picking up throwing and projectile attacks
+
+---LIFTING CAPACITY BY STRENGTH---
+STR_Value,Lift_Weight_kg,Lift_Weight_lb,Object_Examples,FEAT_Required
+1-5,50,110,Chair / Small box,Auto success
+6-10,100,220,Person / Large TV,Auto success
+11-20,200,440,Motorcycle / Refrigerator,Minor or better
+21-30,400,880,Small car / Piano,Success or better
+31-40,1000,2200,Car / Truck bed,Success or better
+41-50,2500,5500,SUV / Small truck,Success or better
+51-75,10000,22000,Bus / Semi truck,Success or better
+76-100,50000,110000,Tank / Small building,Success or better
+101-150,200000,440000,Airplane / Large building,Success or better
+151-250,1000000,2200000,Cruise ship / Skyscraper,Success or better
+251-500,5000000,11000000,Aircraft carrier / Mountain,Major required
+501-1000,50000000,110000000,Island / Asteroid,Major required
+1001+,Unlimited,Unlimited,Planet / Star,Cosmic-level only
+
+---LIFTING MECHANICS---
+Rule,Description,Formula
+Lift_Check,STR FEAT to pick up object at your limit,Roll on Universal Table using STR column
+Auto_Lift,Objects at half your limit or less,No roll required
+Strain_Lift,Objects above limit but within 150%,Success required; 1 round to lift; -1CS penalty while holding
+Impossible_Lift,Objects above 150% of limit,Cannot lift unless power/situation allows
+
+---THROWING MECHANICS---
+Rule,Description,Formula
+Throw_Range,How far you can throw an object,STR / 10 squares (max range)
+Range_Penalty,Heavier objects reduce range,Range = (STR/10) × (Max_Lift / Object_Weight)
+Throw_Damage,Damage when object hits target,Object_Weight / 10 + STR bonus (if applicable)
+Throw_Accuracy,Hit roll for thrown objects,MEL stat + Throwing skill bonus
+Thrown_Object_Size,Affects area of impact,Small = single target; Large = 3x3 area; Huge = 5x5 area
+
+---THROWING RANGE BY STRENGTH---
+STR_Value,Max_Throw_Squares,Max_Throw_Meters,Object_Weight_Factor
+1-10,1,2m,Can throw objects up to 1/4 lift capacity at max range
+11-20,2,4m,Can throw objects up to 1/4 lift capacity at max range
+21-30,3,6m,Can throw objects up to 1/4 lift capacity at max range
+31-40,4,8m,Can throw objects up to 1/4 lift capacity at max range
+41-50,5,10m,Can throw objects up to 1/4 lift capacity at max range
+51-75,6-7,12-14m,Can throw objects up to 1/4 lift capacity at max range
+76-100,8-10,16-20m,Can throw objects up to 1/4 lift capacity at max range
+101-150,10-15,20-30m,Can throw objects up to 1/4 lift capacity at max range
+151+,15-25+,30-50m+,Cosmic throwing distances
+
+---THROWN OBJECT DAMAGE---
+Object_Type,Base_Damage,Example
+Light (1-10kg),5 + STR/10,Chair / Rock
+Medium (11-50kg),15 + STR/10,Table / Person
+Heavy (51-200kg),30 + STR/10,Motorcycle / Refrigerator
+Very_Heavy (201-1000kg),50 + STR/5,Car / Dumpster
+Massive (1001kg+),100 + STR/2,Bus / Truck
+
+---PROJECTILE WEAPONS (NON-THROWN)---
+Weapon_Type,Base_Damage,Range_Squares,AP_Cost,Accuracy_CS,Ammo
+Pistol,20,25,3,-,12
+SMG,25,20,3,+1CS vs close (3 round burst),30
+Assault_Rifle,30,60,3,0,30
+Sniper_Rifle,45,100,4,+2CS if aimed,5
+Shotgun,35,15,3,+1CS close / Cone effect,6
+Machine_Gun,40,80,4,+2CS suppressive fire,100
+Rocket_Launcher,80 + Area,50,5,0,1
+Bow,15 + STR/5,30,3,0,20
+Crossbow,25,40,4,+1CS,10
+
+---PROJECTILE ACCURACY BY RANGE---
+Range_Band,Squares,Accuracy_Modifier
+Point_Blank,0-2,+2CS
+Short,3-10,0
+Medium,11-25,-1CS
+Long,26-50,-2CS
+Extreme,51+,-3CS to -4CS (weapon dependent)
+
+---AREA ATTACK TYPES---
+Type,Shape,Size_Description,Target_Count
+Single,1 square,One target,1
+Cone,45 degree arc,Width = Range/3 at max distance,All in cone
+Line,1 square wide,Attacker to max range,All in line
+Burst_Small,3x3 squares,9 squares total,All in area
+Burst_Medium,5x5 squares,25 squares total,All in area
+Burst_Large,7x7 squares,49 squares total,All in area
+Radius_Small,2 square radius,~13 squares (circle),All in area
+Radius_Medium,4 square radius,~50 squares (circle),All in area
+Radius_Large,6 square radius,~113 squares (circle),All in area
+
+---AREA ATTACK DAMAGE FALLOFF---
+Distance_From_Center,Damage_Multiplier
+Center (0 squares),1.0x
+Edge_Inner (1-2 squares),0.75x
+Edge_Outer (3+ squares),0.5x
+
+---POWER-BASED PROJECTILES---
+Power,Range_Low,Range_High,Damage_Low,Damage_High,Area_Effect
+Fire_Generation,8,20,30,75,Single / Area 5x5
+Psychic_Blast,15,30,25,80,Single / Area 5x5
+Bio_Energy,12,25,Health-based,Health-based x3,Single / Area 7x7
+Telekinesis_Throw,12,25,Variable,Variable,Based on object
+Metal_Manipulation,15,30,Variable,Variable,Line of sight
+
+---PICKUP OBJECTS IN COMBAT---
+Action,AP_Cost,Description
+Pick_Up_Light,1 AP,Small objects (rocks chairs)
+Pick_Up_Medium,2 AP,Medium objects (furniture motorcycles)
+Pick_Up_Heavy,3 AP,Heavy objects (cars dumpsters)
+Pick_Up_Massive,4 AP,Massive objects (trucks buses)
+
+---THROW ACTION COSTS---
+Action,AP_Cost,Description
+Throw_Light,2 AP,Throw small object
+Throw_Medium,3 AP,Throw medium object
+Throw_Heavy,4 AP,Throw heavy object
+Throw_Massive,5 AP,Throw massive object
+Quick_Throw,3 AP total,Pick up + throw light object in one action
+
+---Z-AXIS THROWING---
+Rule,Description,Modifier
+Throw_Up,Throwing upward (target at higher Z),Range reduced by 50%; -1CS accuracy
+Throw_Down,Throwing downward (target at lower Z),Range increased by 25%; +1CS damage
+Throw_Horizontal,Same Z level,Normal range and accuracy
+Falling_Object,Object dropped from height,Damage = Base + (5 × Z-levels fallen)

@@ -1,0 +1,17 @@
+,,DODGE CHART,,,,,Actual Melee Dodge system,
+Agility,Column Shift,Comparison,Threat Level Designation,,,,Agility+Instinct,Column Shift
+1-9,None,Little Human,none,,,,1-19,None
+10-19,-2CS,Above Avg Human,none,,,,20-39,-1CS
+20-29,-3CS,Exceptional Human,none,,,,40-59,-2CS
+30-39,-4CS,Max Human Limit,Threat Level Alpha,,,,60-79,-3CS
+40-49,-5CS,Low Superhuman,Threat Level 1,,,,80-99,-4CS
+50-59,-6CS,Superhuman,Threat Level 2,,,,100-119,-5CS
+60-69,-7CS,Superhuman,Threat Level 3,,,,120-139,-6CS
+70-79,-8CS,Superhuman,Threat Level 4,,,,140-169,-7CS
+80-99,-9CS,High Superhuman,Threat Level 5,,,,170-199,-8CS
+100-149,-10CS,Low Cosmic,Earthshaker,,,,200-299,-9CS
+150-250,-11CS,Cosmic,Earthbreaker,,,,300-499,-10CS
+250-500,-12CS,High Cosmic,Eartheater,,,,500-999,-11CS
+500-999,-13CS,Supreme Cosmic,Sunbreaker,,,,1000-1999,-12CS
+1000-1499,-14CS,Deity,Suneater,,,,2000-4999,-13CS
+2500-4999,-14CS,Supreme Being,Omnipotent,,,,5000-9999,-14CS

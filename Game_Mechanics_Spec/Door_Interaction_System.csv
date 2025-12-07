@@ -1,0 +1,125 @@
+Section,Description
+---DOOR AND FURNITURE INTERACTION SYSTEM---,Environmental interactions for tactical depth - Wizard's Crown/Jagged Alliance style
+
+===DOOR TYPES===
+Door_Type,Material_Strength,HP,STR_To_Break,Lock_Type,Sound_Dampening,Cover_Value,Movement_When_Open,Notes
+Wooden_Interior,Poor,20,STR 20+,Simple,-25 dB,Light,1 AP to pass,Standard home/office
+Wooden_Exterior,Typical,35,STR 25+,Standard,-30 dB,Light,1 AP to pass,Standard front door
+Reinforced_Wood,Good,50,STR 35+,Standard,-35 dB,Medium,1 AP to pass,Security door
+Metal_Standard,Excellent,80,STR 50+,Standard,-30 dB,Medium,1 AP to pass,Commercial building
+Metal_Security,Remarkable,120,STR 60+,Advanced,-40 dB,Heavy,1 AP to pass,Bank/government
+Steel_Vault,Incredible,200,STR 80+,High Security,-50 dB,Full,2 AP to pass,Vault door
+Blast_Door,Amazing,350,STR 100+,Biometric,-60 dB,Full,3 AP to pass,Military bunker
+Glass_Door,Feeble,10,STR 10+,Simple,-10 dB,None,1 AP to pass,Shatters on break
+Revolving_Door,Typical,40,N/A,None,−15 dB,None,2 AP to pass,Commercial entrance
+Sliding_Door,Good,30,STR 25+,Electronic,-20 dB,None,1 AP to pass,Automatic if powered
+
+===DOOR ACTIONS===
+Action,AP_Cost,Sound_Generated,Skill_Required,Success_Condition,Notes
+Open_Door,1,40 dB,None,Auto,Standard door operation
+Close_Door,1,40 dB,None,Auto,Standard door close
+Quiet_Open,2,20 dB,Stealth check,INS roll vs difficulty,Careful silent opening
+Quiet_Close,2,20 dB,Stealth check,INS roll vs difficulty,Careful silent closing
+Slam_Door,1,70 dB,None,Auto,Loud intentional slam
+Lock_Door,1,30 dB,Key or inside lock,Auto if authorized,Secure door
+Unlock_Door,1,30 dB,Key required,Auto if have key,Standard unlock
+Pick_Lock_Simple,3,20 dB,Lockpicking,Minor success,Basic locks
+Pick_Lock_Standard,4,20 dB,Lockpicking,Success,Standard locks
+Pick_Lock_Advanced,6,20 dB,Lockpicking +2CS,Major success,High security
+Pick_Lock_High_Security,8,25 dB,Lockpicking +4CS,Major + equipment,Vault-level
+Break_Door_Light,3,80 dB,STR check,STR >= door requirement,Wooden doors
+Break_Door_Heavy,4,90 dB,STR check,STR >= door requirement,Metal doors
+Kick_In_Door,2,85 dB,STR check,STR vs door -1CS,Quick but louder
+Ram_Door,3,95 dB,STR + equipment,STR + Ram bonus,Battering ram bonus +2CS
+Breach_Door,4,100 dB,Demolitions,Explosives required,Guaranteed open
+
+===LOCK TYPES===
+Lock_Type,Lockpicking_Difficulty,Time_To_Pick,Tools_Required,Electronic,Notes
+None,Auto,0,None,No,Unlocked
+Simple,Minor Success,3 AP,Basic tools,No,Home interior
+Standard,Success,4 AP,Lockpick set,No,Standard security
+Advanced,Major Success,6 AP,Professional tools,No,High-end locks
+Electronic_Keypad,N/A,2 AP (with code),Code required,Yes,Bypass with code
+Electronic_Card,N/A,1 AP (with card),Keycard required,Yes,Or hack terminal
+Biometric,N/A,Special,Authorized bio,Yes,Fingerprint/retinal
+High_Security,Major + 2CS,8 AP,Specialized tools,Maybe,Bank/government
+Vault,Major + 4CS,10 AP,Expert tools,Yes,Maximum security
+
+===WINDOW TYPES===
+Window_Type,HP,STR_To_Break,Cover_When_Closed,Sound_Dampening,Can_See_Through,Notes
+Standard_Glass,5,STR 10+,None,-10 dB,Yes,Normal window
+Reinforced_Glass,25,STR 30+,Light,-15 dB,Yes,Security glass
+Bulletproof,60,STR 50+,Medium,-20 dB,Yes,Armored vehicle grade
+One_Way_Mirror,15,STR 15+,Light,-15 dB,One direction,Observation rooms
+Tinted,10,STR 10+,None,-10 dB,Reduced,Privacy glass
+Barred_Window,N/A,STR 40+ (bars),Light,-5 dB,Yes,Security bars
+
+===WINDOW ACTIONS===
+Action,AP_Cost,Sound_Generated,Effect,Damage_Taken,Notes
+Look_Through,0,0 dB,See other side,None,Free action if adjacent
+Open_Window,1,30 dB,Can pass through,None,If window opens
+Close_Window,1,30 dB,Seal window,None,Standard close
+Climb_Through,2,25 dB,Move to other side,None,Requires open window
+Break_Window,2,75 dB,Create opening,1d6 cutting (STR 20+ none),Standard glass
+Break_Reinforced,3,80 dB,Create opening,2d6 cutting (STR 40+ none),Security glass
+Shoot_Through,0,Weapon sound,Attack through window,None,−1CS unless broken
+
+===FURNITURE/COVER OBJECTS===
+Object_Type,Cover_Value,HP,STR_To_Move,STR_To_Flip,Can_Hide_Behind,Can_Hide_Under,Notes
+Desk_Wood,Light (+1CS),30,STR 15+,STR 25+,Yes,Yes (if space),Office furniture
+Desk_Metal,Medium (+2CS),50,STR 25+,STR 40+,Yes,Yes (if space),Heavy office desk
+Table_Wood,Light (+1CS),25,STR 12+,STR 20+,Yes,Yes,Dining/meeting table
+Table_Metal,Medium (+2CS),40,STR 20+,STR 35+,Yes,Yes,Industrial table
+Couch,Light (+1CS),20,STR 15+,STR 25+,Yes,No,Living room furniture
+Chair,None,10,STR 8+,STR 12+,No,No,Throwable object
+Bookshelf,Medium (+2CS),35,STR 30+,STR 45+,Yes,No,Can topple
+Filing_Cabinet,Light (+1CS),40,STR 20+,STR 35+,Yes,No,Office storage
+Car_Hood,Medium (+2CS),60,N/A,N/A,Yes,No,Vehicle cover
+Car_Door,Light (+1CS),40,N/A,N/A,Yes,No,Vehicle cover
+Dumpster,Heavy (+3CS),80,STR 40+,STR 60+,Yes,Yes,Large metal container
+Crate_Wood,Light (+1CS),20,STR 15+,STR 25+,Yes,No,Wooden crate
+Crate_Metal,Medium (+2CS),50,STR 25+,STR 40+,Yes,No,Metal container
+Barrel,Light (+1CS),25,STR 15+,N/A,Yes,No,May contain flammables
+Bed,Light (+1CS),15,STR 15+,STR 25+,Yes,Yes,Bedroom furniture
+Refrigerator,Medium (+2CS),70,STR 35+,STR 55+,Yes,No,Kitchen appliance
+
+===FURNITURE ACTIONS===
+Action,AP_Cost,Sound_Generated,STR_Required,Notes
+Move_Light_Furniture,2,45 dB,STR 15+,Relocate for cover
+Move_Heavy_Furniture,3,55 dB,STR 30+,Heavy objects
+Flip_Table,2,50 dB,STR 20+,Quick cover creation
+Topple_Bookshelf,3,70 dB,STR 35+,Can crush enemies (2d6 damage)
+Push_Furniture,2,45 dB,STR 15+,Move 1-2 squares
+Throw_Furniture,4,60 dB,STR 30+,See Lifting_Throwing_System
+Hide_Behind,1,10 dB,None,Take cover position
+Hide_Under,2,15 dB,None,Concealment position
+Search_Furniture,2,20 dB,None,Look for items
+
+===STAIRS AND VERTICAL MOVEMENT===
+Movement_Type,AP_Cost,Sound_Generated,Movement_Speed,Notes
+Walk_Up_Stairs,2 per floor,35 dB,1 floor per 2 AP,Standard pace
+Walk_Down_Stairs,2 per floor,35 dB,1 floor per 2 AP,Same as up
+Run_Up_Stairs,1 per floor,55 dB,1 floor per 1 AP,Faster but louder
+Run_Down_Stairs,1 per floor,55 dB,1 floor per 1 AP,Risk of fall (AGL check)
+Climb_Ladder,3 per floor,40 dB,1 floor per 3 AP,Requires free hands
+Climb_Rope,3 per floor,35 dB,1 floor per 3 AP,STR check if combat
+Elevator_Ride,1 (call) + 0 (ride),60 dB (ding),Floor per turn,May require keycard
+Jump_Down,1,45 dB,Instant,Falling damage per Tactical_Grid_System
+Flight_Up/Down,2 per floor,See Flight sounds,Per power,Flight power required
+
+===DOOR STATES===
+State,Can_See_Through,Can_Move_Through,Can_Hear_Through,Can_Shoot_Through,Notes
+Open,Yes,Yes,Yes,Yes,No obstruction
+Closed,No (unless glass),No,Muffled,No,Barrier in place
+Locked,No (unless glass),No,Muffled,No,Requires unlock
+Barricaded,No,No,Muffled,No,Furniture blocking (+HP)
+Destroyed,Yes,Yes,Yes,Yes,Rubble may slow movement
+
+===TACTICAL USES===
+Tactic,Description,Mechanical_Effect
+Stack_on_Door,Team positions beside closed door,+2CS entry; coordinated breach
+Pie_the_Corner,Gradually expose doorway,Reduce ambush penalty
+Breach_and_Clear,Explosive entry + rush,+3CS surprise on first turn
+Hold_Door,Character blocks doorway,Others cannot pass without grapple/push
+Block_with_Furniture,Push furniture against door,+20-50 HP to door
+Sniper_Window,Position at window for long shots,+1CS accuracy; cover available

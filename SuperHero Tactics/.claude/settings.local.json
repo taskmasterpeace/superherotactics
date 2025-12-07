@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(head:*)",
+      "Bash(findstr:*)",
+      "Bash(dir:*)",
+      "Bash(node:*)",
+      "WebSearch",
+      "WebFetch(domain:sebashwa.github.io)",
+      "Bash(iconv:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

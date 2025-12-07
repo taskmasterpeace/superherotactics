@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHT Combat Laboratory - Batch Testing System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a15;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #eee;
+            padding: 20px;
+            line-height: 1.4;
+        }
+        h1 { color: #4ecdc4; margin-bottom: 10px; }
+        h2 { color: #f39c12; margin: 20px 0 10px 0; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        h3 { color: #3498db; margin: 15px 0 8px 0; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .controls {
+            background: #1a1a2e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(180deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover { transform: scale(1.02); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button.danger { background: linear-gradient(180deg, #e74c3c, #c0392b); }
+        button.success { background: linear-gradient(180deg, #27ae60, #2ecc71); }
+        button.purple { background: linear-gradient(180deg, #9b59b6, #8e44ad); }
+        select, input {
+            padding: 8px 12px;
+            background: #2a2a4a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 14px;
+        }
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        .result-box {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #4ecdc4;
+        }
+        .result-box.winner-a { border-left-color: #3498db; }
+        .result-box.winner-b { border-left-color: #e74c3c; }
+        .result-box h3 { margin-top: 0; }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #333;
+        }
+        .stat-label { color: #888; }
+        .stat-value { color: #fff; font-weight: bold; }
+        .stat-value.blue { color: #3498db; }
+        .stat-value.red { color: #e74c3c; }
+        .stat-value.green { color: #2ecc71; }
+        .stat-value.yellow { color: #f1c40f; }
+        .progress-bar {
+            height: 20px;
+            background: #333;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .log-area {
+            background: #0f0f23;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 11px;
+            margin-top: 10px;
+        }
+        .log-entry { padding: 2px 0; }
+        .log-entry.highlight { color: #f1c40f; font-weight: bold; }
+        .log-entry.error { color: #e74c3c; }
+        .log-entry.success { color: #2ecc71; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        th { background: #2a2a4a; color: #4ecdc4; }
+        tr:hover { background: rgba(255,255,255,0.05); }
+        .emoji { font-size: 16px; }
+        .findings {
+            background: #1a2a1a;
+            border: 2px solid #2ecc71;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .findings h2 { color: #2ecc71; border-color: #2ecc71; }
+        .suggestion {
+            background: #2a1a2a;
+            border-left: 4px solid #9b59b6;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #2a2a1a;
+            border-left: 4px solid #f1c40f;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 SHT Combat Laboratory</h1>
+        <p style="color: #888; margin-bottom: 20px;">Automated batch testing system for combat mechanics analysis</p>
+
+        <div class="controls">
+            <button onclick="runExperiment('1v1_origins')">🧬 Test All Origins (1v1)</button>
+            <button onclick="runExperiment('weapons')">🔫 Test All Weapons</button>
+            <button onclick="runExperiment('robot_vs_humans')">🤖 Robot vs Humans</button>
+            <button onclick="runExperiment('team_battle')" class="purple">⚔️ Team Battle (4v4)</button>
+            <button onclick="runExperiment('ffa')" class="danger">💀 Free-For-All (8)</button>
+            <button onclick="runExperiment('personality_test')">🧠 Personality Test</button>
+            <button onclick="runExperiment('full_suite')" class="success">🔬 Full Test Suite</button>
+            <span style="color: #888; margin-left: 20px;">Iterations:</span>
+            <input type="number" id="iterations" value="20" min="1" max="100" style="width: 60px;">
+        </div>
+
+        <div class="progress-bar" id="progress-container" style="display: none;">
+            <div class="progress-fill" id="progress-fill" style="width: 0%;">0%</div>
+        </div>
+
+        <div id="results"></div>
+
+        <div class="findings" id="findings" style="display: none;">
+            <h2>📋 Analysis & Findings</h2>
+            <div id="findings-content"></div>
+        </div>
+    </div>
+
+    <script>
+    // ============================================================
+    // COMBAT LABORATORY - Headless Battle Simulation System
+    // ============================================================
+
+    // ============ DATA DEFINITIONS (same as main prototype) ============
+    const ORIGINS = {
+        skilled_human: { id: 'skilled_human', name: 'Skilled Human', emoji: '🧑', bleeds: true, burns: true, freezes: true, stuns: true, empVulnerable: false, poisonable: true },
+        altered_human: { id: 'altered_human', name: 'Altered Human', emoji: '🧬', bleeds: true, burns: true, freezes: true, stuns: true, empVulnerable: false, poisonable: true },
+        mutant: { id: 'mutant', name: 'Mutant', emoji: '🧪', bleeds: true, burns: true, freezes: true, stuns: true, empVulnerable: false, poisonable: true },
+        tech_enhanced: { id: 'tech_enhanced', name: 'Tech Enhanced', emoji: '🦾', bleeds: 'partial', burns: true, freezes: true, stuns: true, empVulnerable: true, poisonable: 'partial' },
+        mystic: { id: 'mystic', name: 'Mystic', emoji: '🔮', bleeds: true, burns: true, freezes: true, stuns: true, empVulnerable: false, poisonable: true },
+        alien: { id: 'alien', name: 'Alien', emoji: '👽', bleeds: 'ichor', burns: 'varies', freezes: 'varies', stuns: true, empVulnerable: false, poisonable: 'varies' },
+        cosmic: { id: 'cosmic', name: 'Cosmic', emoji: '✨', bleeds: false, burns: false, freezes: false, stuns: 'resistant', empVulnerable: false, poisonable: false },
+        divine: { id: 'divine', name: 'Divine', emoji: '👼', bleeds: 'ichor', burns: false, freezes: false, stuns: 'resistant', empVulnerable: false, poisonable: false },
+        construct: { id: 'construct', name: 'Construct', emoji: '🤖', bleeds: false, burns: false, freezes: 'resistant', stuns: false, empVulnerable: true, poisonable: false }
+    };
+
+    const PERSONALITIES = {
+        aggressive: { id: 'aggressive', name: 'Aggressive', emoji: '😠', targetPref: 3, aiStyle: 'rush' },
+        cautious: { id: 'cautious', name: 'Cautious', emoji: '😰', targetPref: 4, aiStyle: 'defensive' },
+        bloodthirsty: { id: 'bloodthirsty', name: 'Bloodthirsty', emoji: '🩸', targetPref: 2, aiStyle: 'rush' },
+        tactical: { id: 'tactical', name: 'Tactical', emoji: '🎯', targetPref: 3, aiStyle: 'balanced' },
+        protective: { id: 'protective', name: 'Protective', emoji: '🛡️', targetPref: 3, aiStyle: 'defensive' },
+        berserker: { id: 'berserker', name: 'Berserker', emoji: '🔥', targetPref: 1, aiStyle: 'rush' },
+        sniper: { id: 'sniper', name: 'Sniper', emoji: '🔭', targetPref: 2, aiStyle: 'ranged' },
+        opportunist: { id: 'opportunist', name: 'Opportunist', emoji: '🦊', targetPref: 2, aiStyle: 'balanced' },
+        cold: { id: 'cold', name: 'Cold', emoji: '🧊', targetPref: 3, aiStyle: 'balanced' },
+        calculating: { id: 'calculating', name: 'Calculating', emoji: '🧠', targetPref: 3, aiStyle: 'balanced' }
+    };
+
+    const WEAPONS = {
+        pistol: { name: 'Pistol', emoji: '🔫', damage: 20, range: 5, accuracy: 0, ap: 2, drPen: 0 },
+        rifle: { name: 'Assault Rifle', emoji: '🔫', damage: 25, range: 8, accuracy: 0, ap: 2, drPen: 2 },
+        smg: { name: 'SMG', emoji: '🔫', damage: 15, range: 4, accuracy: 0, ap: 1, drPen: 0 },
+        shotgun: { name: 'Shotgun', emoji: '💥', damage: 35, range: 3, accuracy: 0, ap: 2, drPen: 0, closeBonus: 2 },
+        sniper: { name: 'Sniper Rifle', emoji: '🎯', damage: 45, range: 12, accuracy: 2, ap: 3, drPen: 5 },
+        beam: { name: 'Energy Beam', emoji: '⚡', damage: 30, range: 8, accuracy: 0, ap: 2, ignoresArmor: 0.4 },
+        plasma_rifle: { name: 'Plasma Rifle', emoji: '🔥', damage: 40, range: 6, accuracy: -1, ap: 3, ignoresArmor: 0.5 },
+        ice_rifle: { name: 'Ice Rifle', emoji: '❄️', damage: 25, range: 6, accuracy: 0, ap: 2, ignoresArmor: 0.3 },
+        emp_gun: { name: 'EMP Gun', emoji: '📡', damage: 15, range: 5, accuracy: 1, ap: 2, empDamageBonus: 30 },
+        fists: { name: 'Fists', emoji: '👊', damage: 8, range: 1, accuracy: 0, ap: 1, strBonus: true, drPen: 0 },
+        super_punch: { name: 'Super Punch', emoji: '💥', damage: 25, range: 1, accuracy: 1, ap: 2, strBonus: true, drPen: 10 },
+        sword: { name: 'Sword', emoji: '⚔️', damage: 22, range: 1, accuracy: 1, ap: 2, drPen: 3 }
+    };
+
+    const ARMORS = {
+        none: { name: 'None', emoji: '👕', dr: 0, energyDR: 0 },
+        kevlar: { name: 'Kevlar', emoji: '🦺', dr: 6, energyDR: 3 },
+        tactical: { name: 'Tactical', emoji: '🎽', dr: 8, energyDR: 4 },
+        combat: { name: 'Combat', emoji: '⚙️', dr: 12, energyDR: 6 },
+        power: { name: 'Power', emoji: '🦾', dr: 18, energyDR: 12 },
+        mystic_ward: { name: 'Mystic Ward', emoji: '✨', dr: 5, energyDR: 15 },
+        alien_hide: { name: 'Alien Hide', emoji: '🛸', dr: 14, energyDR: 14 }
+    };
+
+    // ============ SIMULATION ENGINE ============
+    const GRID_SIZE = 15;
+
+    function createUnit(def) {
+        const origin = ORIGINS[def.origin] || ORIGINS.skilled_human;
+        const personality = PERSONALITIES[def.personality] || PERSONALITIES.tactical;
+        return {
+            id: def.id,
+            name: def.name,
+            team: def.team,
+            origin: origin,
+            personality: personality,
+            x: def.x,
+            y: def.y,
+            hp: def.hp || 100,
+            maxHp: def.hp || 100,
+            ap: def.ap || 6,
+            maxAp: def.ap || 6,
+            str: def.str || 30,
+            agl: def.agl || 30,
+            weaponId: def.weapon,
+            armorId: def.armor,
+            acted: false
+        };
+    }
+
+    function createGrid() {
+        const grid = [];
+        for (let y = 0; y < GRID_SIZE; y++) {
+            grid[y] = [];
+            for (let x = 0; x < GRID_SIZE; x++) {
+                grid[y][x] = { x, y, walkable: true, unit: null, cover: 0 };
+            }
+        }
+        // Add some cover
+        [[5, 5], [5, 9], [9, 5], [9, 9], [7, 7]].forEach(([x, y]) => {
+            if (grid[y] && grid[y][x]) grid[y][x].cover = 1;
+        });
+        // Add walls
+        [[7, 3], [7, 11]].forEach(([x, y]) => {
+            if (grid[y] && grid[y][x]) grid[y][x].walkable = false;
+        });
+        return grid;
+    }
+
+    function findPath(grid, sx, sy, ex, ey) {
+        const openSet = [{ x: sx, y: sy, f: 0, g: 0 }];
+        const closedSet = new Set();
+        const cameFrom = {};
+        const gScore = { [`${sx},${sy}`]: 0 };
+
+        while (openSet.length > 0) {
+            openSet.sort((a, b) => a.f - b.f);
+            const current = openSet.shift();
+            const key = `${current.x},${current.y}`;
+
+            if (current.x === ex && current.y === ey) {
+                const path = [{ x: ex, y: ey }];
+                let k = key;
+                while (cameFrom[k]) { path.unshift(cameFrom[k]); k = `${cameFrom[k].x},${cameFrom[k].y}`; }
+                return path;
+            }
+
+            closedSet.add(key);
+
+            for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
+                const nx = current.x + dx, ny = current.y + dy;
+                if (nx < 0 || nx >= GRID_SIZE || ny < 0 || ny >= GRID_SIZE) continue;
+                const cell = grid[ny][nx];
+                if (!cell.walkable || (cell.unit && !(nx === ex && ny === ey))) continue;
+
+                const nKey = `${nx},${ny}`;
+                if (closedSet.has(nKey)) continue;
+
+                const tentG = gScore[key] + 1;
+                if (!gScore[nKey] || tentG < gScore[nKey]) {
+                    cameFrom[nKey] = { x: current.x, y: current.y };
+                    gScore[nKey] = tentG;
+                    const h = Math.abs(nx - ex) + Math.abs(ny - ey);
+                    if (!openSet.some(n => n.x === nx && n.y === ny)) {
+                        openSet.push({ x: nx, y: ny, f: tentG + h, g: tentG });
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    function resolveAttack(attacker, defender, grid) {
+        const weapon = WEAPONS[attacker.weaponId];
+        const armor = ARMORS[defender.armorId];
+        const dist = Math.sqrt(Math.pow(defender.x - attacker.x, 2) + Math.pow(defender.y - attacker.y, 2));
+
+        let bonus = Math.floor((attacker.agl - 30) / 10) * 5 + (weapon.accuracy || 0) * 5;
+        if (weapon.closeBonus && dist <= 2) bonus += weapon.closeBonus * 5;
+
+        const defCell = grid[defender.y][defender.x];
+        const coverPen = defCell.cover === 2 ? 15 : (defCell.cover === 1 ? 8 : 0);
+
+        const roll = Math.floor(Math.random() * 100) + 1;
+        const finalRoll = roll + bonus - coverPen;
+
+        let result, mult;
+        if (finalRoll < 40) { result = 'MISS'; mult = 0; }
+        else if (finalRoll < 70) { result = 'GRAZE'; mult = 0.5; }
+        else if (finalRoll < 95) { result = 'HIT'; mult = 1.0; }
+        else { result = 'CRIT'; mult = 1.5; }
+
+        if (mult === 0) return { hit: false, result, coverSaved: roll + bonus >= 40 && coverPen > 0 };
+
+        let dmg = weapon.damage;
+        if (weapon.strBonus) dmg += Math.floor(attacker.str / 10);
+        dmg = Math.floor(dmg * mult);
+
+        let empBonus = 0;
+        if (weapon.empDamageBonus && defender.origin.empVulnerable) {
+            empBonus = weapon.empDamageBonus;
+            dmg += empBonus;
+        }
+
+        let dr = armor.dr;
+        if (weapon.ignoresArmor) {
+            dr = armor.energyDR || Math.floor(armor.dr * 0.5);
+            dr = Math.floor(dr * (1 - weapon.ignoresArmor));
+        } else {
+            dr = Math.max(0, dr - (weapon.drPen || 0));
+        }
+
+        return { hit: true, damage: Math.max(1, dmg - dr), rawDamage: dmg, dr, result, empBonus };
+    }
+
+    function selectTarget(unit, targets, freeForAll = false) {
+        if (targets.length === 0) return null;
+
+        const personality = unit.personality;
+        const targetPref = personality.targetPref;
+
+        const scoredTargets = targets.map(t => {
+            const weapon = WEAPONS[t.weaponId];
+            const threatScore = weapon.damage * (1 + (t.str / 100)) * (t.hp / 50);
+            return { target: t, hp: t.hp, threatScore, dist: Math.sqrt((t.x - unit.x)**2 + (t.y - unit.y)**2) };
+        });
+
+        let selected;
+        switch (targetPref) {
+            case 1: scoredTargets.sort((a, b) => b.hp - a.hp); break;
+            case 2: scoredTargets.sort((a, b) => a.hp - b.hp); break;
+            case 3: scoredTargets.sort((a, b) => b.threatScore - a.threatScore); break;
+            case 4: scoredTargets.sort((a, b) => a.threatScore - b.threatScore); break;
+            case 5: return scoredTargets[Math.floor(Math.random() * scoredTargets.length)].target;
+        }
+
+        // In FFA, prefer closest enemy
+        if (freeForAll) {
+            scoredTargets.sort((a, b) => a.dist - b.dist);
+        }
+
+        return scoredTargets[0].target;
+    }
+
+    function runAITurn(unit, allUnits, grid, freeForAll = false) {
+        const targets = freeForAll
+            ? allUnits.filter(u => u.id !== unit.id && u.hp > 0)
+            : allUnits.filter(u => u.team !== unit.team && u.hp > 0);
+
+        if (targets.length === 0) return { actions: [], damage: 0, kills: 0 };
+
+        const weapon = WEAPONS[unit.weaponId];
+        const actions = [];
+        let totalDamage = 0;
+        let kills = 0;
+
+        while (unit.ap > 0 && targets.some(t => t.hp > 0)) {
+            const target = selectTarget(unit, targets.filter(t => t.hp > 0), freeForAll);
+            if (!target) break;
+
+            const dist = Math.sqrt((target.x - unit.x)**2 + (target.y - unit.y)**2);
+
+            // In range? Attack
+            if (dist <= weapon.range && unit.ap >= weapon.ap) {
+                unit.ap -= weapon.ap;
+                const result = resolveAttack(unit, target, grid);
+                if (result.hit) {
+                    target.hp -= result.damage;
+                    totalDamage += result.damage;
+                    actions.push({ type: 'attack', target: target.name, result: result.result, damage: result.damage });
+                    if (target.hp <= 0) {
+                        kills++;
+                        grid[target.y][target.x].unit = null;
+                    }
+                } else {
+                    actions.push({ type: 'miss', target: target.name, coverSaved: result.coverSaved });
+                }
+                continue;
+            }
+
+            // Need to move
+            const moveRange = Math.floor(unit.ap * 2);
+            let bestMove = null;
+            let bestScore = Infinity;
+
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    const cell = grid[y][x];
+                    if (!cell.walkable || cell.unit) continue;
+
+                    const path = findPath(grid, unit.x, unit.y, x, y);
+                    if (!path || path.length - 1 > moveRange) continue;
+
+                    const distAfter = Math.sqrt((x - target.x)**2 + (y - target.y)**2);
+                    if (distAfter <= weapon.range && distAfter < bestScore) {
+                        bestScore = distAfter;
+                        bestMove = { x, y, path, cost: Math.ceil((path.length - 1) / 2) };
+                    }
+                }
+            }
+
+            if (bestMove && unit.ap >= bestMove.cost) {
+                grid[unit.y][unit.x].unit = null;
+                unit.x = bestMove.x;
+                unit.y = bestMove.y;
+                grid[unit.y][unit.x].unit = unit;
+                unit.ap -= bestMove.cost;
+                actions.push({ type: 'move', cost: bestMove.cost });
+            } else {
+                break; // Can't do anything useful
+            }
+        }
+
+        return { actions, damage: totalDamage, kills };
+    }
+
+    function runBattle(teamA, teamB, options = {}) {
+        const freeForAll = options.freeForAll || false;
+        const maxTurns = options.maxTurns || 20;
+
+        const grid = createGrid();
+        const units = [];
+
+        // Place team A on left side
+        teamA.forEach((def, i) => {
+            def.x = 1 + (i % 2);
+            def.y = 3 + i * 2;
+            def.team = 'a';
+            const unit = createUnit(def);
+            units.push(unit);
+            grid[unit.y][unit.x].unit = unit;
+        });
+
+        // Place team B on right side (or scattered for FFA)
+        teamB.forEach((def, i) => {
+            if (freeForAll) {
+                def.x = 5 + (i % 5) * 2;
+                def.y = 3 + Math.floor(i / 5) * 3;
+            } else {
+                def.x = GRID_SIZE - 2 - (i % 2);
+                def.y = 3 + i * 2;
+            }
+            def.team = freeForAll ? String.fromCharCode(98 + i) : 'b'; // Each unit is own team in FFA
+            const unit = createUnit(def);
+            units.push(unit);
+            if (grid[unit.y] && grid[unit.y][unit.x]) {
+                grid[unit.y][unit.x].unit = unit;
+            }
+        });
+
+        const stats = {
+            turns: 0,
+            winner: null,
+            damageDealt: {},
+            kills: {},
+            survivingUnits: [],
+            events: []
+        };
+
+        units.forEach(u => {
+            stats.damageDealt[u.name] = 0;
+            stats.kills[u.name] = 0;
+        });
+
+        let turn = 0;
+        while (turn < maxTurns) {
+            turn++;
+            stats.turns = turn;
+
+            // Reset AP
+            units.forEach(u => { if (u.hp > 0) u.ap = u.maxAp; });
+
+            // Each unit takes a turn
+            const turnOrder = [...units].filter(u => u.hp > 0).sort(() => Math.random() - 0.5);
+
+            for (const unit of turnOrder) {
+                if (unit.hp <= 0) continue;
+
+                const result = runAITurn(unit, units, grid, freeForAll);
+                stats.damageDealt[unit.name] += result.damage;
+                stats.kills[unit.name] += result.kills;
+            }
+
+            // Check victory
+            if (freeForAll) {
+                const alive = units.filter(u => u.hp > 0);
+                if (alive.length <= 1) {
+                    stats.winner = alive.length === 1 ? alive[0].name : 'DRAW';
+                    stats.survivingUnits = alive.map(u => u.name);
+                    break;
+                }
+            } else {
+                const aAlive = units.filter(u => u.team === 'a' && u.hp > 0);
+                const bAlive = units.filter(u => u.team === 'b' && u.hp > 0);
+                if (aAlive.length === 0 || bAlive.length === 0) {
+                    stats.winner = bAlive.length === 0 ? 'a' : 'b';
+                    stats.survivingUnits = [...aAlive, ...bAlive].map(u => u.name);
+                    break;
+                }
+            }
+        }
+
+        if (!stats.winner) stats.winner = 'TIMEOUT';
+        return stats;
+    }
+
+    // ============ EXPERIMENT DEFINITIONS ============
+    const EXPERIMENTS = {
+        '1v1_origins': {
+            name: '1v1 Origin Matchups',
+            description: 'Test each origin type against each other',
+            run: async (iterations, updateProgress) => {
+                const originIds = Object.keys(ORIGINS);
+                const results = [];
+                const winMatrix = {};
+
+                originIds.forEach(o => { winMatrix[o] = {}; originIds.forEach(o2 => winMatrix[o][o2] = 0); });
+
+                let total = originIds.length * originIds.length * iterations;
+                let done = 0;
+
+                for (const origin1 of originIds) {
+                    for (const origin2 of originIds) {
+                        for (let i = 0; i < iterations; i++) {
+                            const teamA = [{ id: 0, name: `${ORIGINS[origin1].emoji} Fighter A`, origin: origin1, personality: 'tactical', weapon: 'rifle', armor: 'tactical', hp: 100, str: 30, agl: 30 }];
+                            const teamB = [{ id: 1, name: `${ORIGINS[origin2].emoji} Fighter B`, origin: origin2, personality: 'tactical', weapon: 'rifle', armor: 'tactical', hp: 100, str: 30, agl: 30 }];
+
+                            const result = runBattle(teamA, teamB);
+                            if (result.winner === 'a') winMatrix[origin1][origin2]++;
+
+                            done++;
+                            updateProgress(done / total * 100);
+                        }
+                    }
+                }
+
+                return { winMatrix, originIds };
+            },
+            render: (data) => {
+                let html = '<h3>Origin Win Matrix (row vs column)</h3><table><tr><th></th>';
+                data.originIds.forEach(o => html += `<th>${ORIGINS[o].emoji}</th>`);
+                html += '<th>Total</th></tr>';
+
+                data.originIds.forEach(o1 => {
+                    html += `<tr><td>${ORIGINS[o1].emoji} ${ORIGINS[o1].name}</td>`;
+                    let total = 0;
+                    data.originIds.forEach(o2 => {
+                        const wins = data.winMatrix[o1][o2];
+                        total += wins;
+                        const pct = Math.round(wins / 20 * 100);
+                        const color = pct > 60 ? '#2ecc71' : (pct < 40 ? '#e74c3c' : '#f1c40f');
+                        html += `<td style="color: ${color}">${pct}%</td>`;
+                    });
+                    html += `<td class="stat-value">${total}</td></tr>`;
+                });
+                html += '</table>';
+
+                // Find best/worst origins
+                const totals = {};
+                data.originIds.forEach(o1 => {
+                    totals[o1] = 0;
+                    data.originIds.forEach(o2 => totals[o1] += data.winMatrix[o1][o2]);
+                });
+                const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+
+                html += '<h3>Origin Rankings</h3>';
+                sorted.forEach(([o, wins], i) => {
+                    html += `<div class="stat-row"><span>${i+1}. ${ORIGINS[o].emoji} ${ORIGINS[o].name}</span><span class="stat-value">${wins} wins</span></div>`;
+                });
+
+                return html;
+            }
+        },
+
+        'weapons': {
+            name: 'Weapon Effectiveness Test',
+            description: 'Test each weapon type in combat',
+            run: async (iterations, updateProgress) => {
+                const weaponIds = Object.keys(WEAPONS);
+                const results = {};
+
+                let total = weaponIds.length * iterations;
+                let done = 0;
+
+                for (const weaponId of weaponIds) {
+                    results[weaponId] = { wins: 0, totalDamage: 0, avgTurns: 0 };
+
+                    for (let i = 0; i < iterations; i++) {
+                        const teamA = [{ id: 0, name: `${WEAPONS[weaponId].emoji} Tester`, origin: 'skilled_human', personality: 'tactical', weapon: weaponId, armor: 'tactical', hp: 100, str: 40, agl: 35 }];
+                        const teamB = [{ id: 1, name: '🎯 Target', origin: 'skilled_human', personality: 'tactical', weapon: 'rifle', armor: 'tactical', hp: 100, str: 30, agl: 30 }];
+
+                        const result = runBattle(teamA, teamB);
+                        if (result.winner === 'a') results[weaponId].wins++;
+                        results[weaponId].totalDamage += result.damageDealt[teamA[0].name] || 0;
+                        results[weaponId].avgTurns += result.turns;
+
+                        done++;
+                        updateProgress(done / total * 100);
+                    }
+
+                    results[weaponId].avgDamage = Math.round(results[weaponId].totalDamage / iterations);
+                    results[weaponId].avgTurns = (results[weaponId].avgTurns / iterations).toFixed(1);
+                }
+
+                return results;
+            },
+            render: (data) => {
+                let html = '<h3>Weapon Performance</h3><table><tr><th>Weapon</th><th>Win Rate</th><th>Avg Damage</th><th>Avg Turns</th></tr>';
+
+                const sorted = Object.entries(data).sort((a, b) => b[1].wins - a[1].wins);
+                sorted.forEach(([weaponId, stats]) => {
+                    const weapon = WEAPONS[weaponId];
+                    const winPct = stats.wins * 5;
+                    const color = winPct > 60 ? '#2ecc71' : (winPct < 40 ? '#e74c3c' : '#f1c40f');
+                    html += `<tr><td>${weapon.emoji} ${weapon.name}</td><td style="color: ${color}">${winPct}%</td><td>${stats.avgDamage}</td><td>${stats.avgTurns}</td></tr>`;
+                });
+
+                html += '</table>';
+                return html;
+            }
+        },
+
+        'robot_vs_humans': {
+            name: 'Robot vs Humans',
+            description: 'Test Construct vs multiple Skilled Humans',
+            run: async (iterations, updateProgress) => {
+                const scenarios = [
+                    { name: '1 Robot vs 1 Human', robotCount: 1, humanCount: 1 },
+                    { name: '1 Robot vs 2 Humans', robotCount: 1, humanCount: 2 },
+                    { name: '1 Robot vs 3 Humans', robotCount: 1, humanCount: 3 },
+                    { name: '2 Robots vs 3 Humans', robotCount: 2, humanCount: 3 },
+                    { name: '2 Robots vs 4 Humans', robotCount: 2, humanCount: 4 },
+                ];
+
+                const results = {};
+                let total = scenarios.length * iterations;
+                let done = 0;
+
+                for (const scenario of scenarios) {
+                    results[scenario.name] = { robotWins: 0, humanWins: 0, draws: 0, avgTurns: 0 };
+
+                    for (let i = 0; i < iterations; i++) {
+                        const robots = [];
+                        for (let r = 0; r < scenario.robotCount; r++) {
+                            robots.push({ id: r, name: `🤖 UNIT-${r+1}`, origin: 'construct', personality: 'cold', weapon: 'beam', armor: 'combat', hp: 150, str: 50, agl: 30 });
+                        }
+
+                        const humans = [];
+                        for (let h = 0; h < scenario.humanCount; h++) {
+                            humans.push({ id: 100 + h, name: `🧑 Soldier ${h+1}`, origin: 'skilled_human', personality: 'tactical', weapon: 'rifle', armor: 'tactical', hp: 100, str: 30, agl: 35 });
+                        }
+
+                        const result = runBattle(robots, humans);
+                        if (result.winner === 'a') results[scenario.name].robotWins++;
+                        else if (result.winner === 'b') results[scenario.name].humanWins++;
+                        else results[scenario.name].draws++;
+                        results[scenario.name].avgTurns += result.turns;
+
+                        done++;
+                        updateProgress(done / total * 100);
+                    }
+
+                    results[scenario.name].avgTurns = (results[scenario.name].avgTurns / iterations).toFixed(1);
+                }
+
+                return results;
+            },
+            render: (data) => {
+                let html = '<h3>Robot vs Human Results</h3><table><tr><th>Scenario</th><th>🤖 Robot Wins</th><th>🧑 Human Wins</th><th>Avg Turns</th></tr>';
+
+                Object.entries(data).forEach(([name, stats]) => {
+                    const robotPct = stats.robotWins * 5;
+                    const humanPct = stats.humanWins * 5;
+                    html += `<tr><td>${name}</td><td style="color: #e74c3c">${robotPct}%</td><td style="color: #3498db">${humanPct}%</td><td>${stats.avgTurns}</td></tr>`;
+                });
+
+                html += '</table>';
+                return html;
+            }
+        },
+
+        'team_battle': {
+            name: 'Team Composition Battle',
+            description: '4v4 with different team compositions',
+            run: async (iterations, updateProgress) => {
+                const teams = {
+                    'Balanced Squad': [
+                        { name: 'Leader', origin: 'skilled_human', personality: 'tactical', weapon: 'rifle', armor: 'tactical', hp: 100, str: 35, agl: 35 },
+                        { name: 'Sniper', origin: 'skilled_human', personality: 'sniper', weapon: 'sniper', armor: 'kevlar', hp: 80, str: 25, agl: 40 },
+                        { name: 'Heavy', origin: 'altered_human', personality: 'aggressive', weapon: 'shotgun', armor: 'combat', hp: 120, str: 45, agl: 25 },
+                        { name: 'Support', origin: 'tech_enhanced', personality: 'cautious', weapon: 'smg', armor: 'tactical', hp: 100, str: 30, agl: 35 }
+                    ],
+                    'Robot Squad': [
+                        { name: 'UNIT-1', origin: 'construct', personality: 'cold', weapon: 'beam', armor: 'combat', hp: 150, str: 50, agl: 30 },
+                        { name: 'UNIT-2', origin: 'construct', personality: 'cold', weapon: 'beam', armor: 'combat', hp: 150, str: 50, agl: 30 },
+                        { name: 'UNIT-3', origin: 'construct', personality: 'calculating', weapon: 'rifle', armor: 'combat', hp: 140, str: 45, agl: 30 },
+                        { name: 'UNIT-4', origin: 'construct', personality: 'tactical', weapon: 'rifle', armor: 'tactical', hp: 130, str: 40, agl: 35 }
+                    ],
+                    'Super Team': [
+                        { name: 'Blaster', origin: 'mutant', personality: 'aggressive', weapon: 'plasma_rifle', armor: 'tactical', hp: 100, str: 35, agl: 40 },
+                        { name: 'Tank', origin: 'altered_human', personality: 'berserker', weapon: 'super_punch', armor: 'power', hp: 140, str: 60, agl: 25 },
+                        { name: 'Mystic', origin: 'mystic', personality: 'calculating', weapon: 'beam', armor: 'mystic_ward', hp: 90, str: 30, agl: 35 },
+                        { name: 'Alien', origin: 'alien', personality: 'opportunist', weapon: 'ice_rifle', armor: 'alien_hide', hp: 110, str: 40, agl: 35 }
+                    ],
+                    'Melee Squad': [
+                        { name: 'Brawler 1', origin: 'altered_human', personality: 'berserker', weapon: 'super_punch', armor: 'combat', hp: 130, str: 55, agl: 30 },
+                        { name: 'Brawler 2', origin: 'altered_human', personality: 'aggressive', weapon: 'super_punch', armor: 'combat', hp: 130, str: 55, agl: 30 },
+                        { name: 'Swordsman', origin: 'skilled_human', personality: 'tactical', weapon: 'sword', armor: 'tactical', hp: 100, str: 40, agl: 45 },
+                        { name: 'Fist Fighter', origin: 'mutant', personality: 'bloodthirsty', weapon: 'fists', armor: 'kevlar', hp: 110, str: 60, agl: 40 }
+                    ]
+                };
+
+                const teamNames = Object.keys(teams);
+                const results = {};
+                teamNames.forEach(t => { results[t] = { wins: 0, losses: 0, avgDamage: 0 }; });
+
+                let total = (teamNames.length * (teamNames.length - 1) / 2) * iterations;
+                let done = 0;
+
+                for (let i = 0; i < teamNames.length; i++) {
+                    for (let j = i + 1; j < teamNames.length; j++) {
+                        const teamAName = teamNames[i];
+                        const teamBName = teamNames[j];
+
+                        for (let k = 0; k < iterations; k++) {
+                            const teamA = teams[teamAName].map((u, idx) => ({ ...u, id: idx }));
+                            const teamB = teams[teamBName].map((u, idx) => ({ ...u, id: 100 + idx }));
+
+                            const result = runBattle(teamA, teamB);
+                            if (result.winner === 'a') {
+                                results[teamAName].wins++;
+                                results[teamBName].losses++;
+                            } else if (result.winner === 'b') {
+                                results[teamBName].wins++;
+                                results[teamAName].losses++;
+                            }
+
+                            done++;
+                            updateProgress(done / total * 100);
+                        }
+                    }
+                }
+
+                return { results, teamNames };
+            },
+            render: (data) => {
+                let html = '<h3>Team Rankings</h3><table><tr><th>Team</th><th>Wins</th><th>Losses</th><th>Win Rate</th></tr>';
+
+                const sorted = Object.entries(data.results).sort((a, b) => b[1].wins - a[1].wins);
+                sorted.forEach(([name, stats]) => {
+                    const total = stats.wins + stats.losses;
+                    const winPct = total > 0 ? Math.round(stats.wins / total * 100) : 0;
+                    const color = winPct > 60 ? '#2ecc71' : (winPct < 40 ? '#e74c3c' : '#f1c40f');
+                    html += `<tr><td>${name}</td><td>${stats.wins}</td><td>${stats.losses}</td><td style="color: ${color}">${winPct}%</td></tr>`;
+                });
+
+                html += '</table>';
+                return html;
+            }
+        },
+
+        'ffa': {
+            name: 'Free-For-All',
+            description: '8-way battle royale',
+            run: async (iterations, updateProgress) => {
+                const combatants = [
+                    { name: '🧑 Soldier', origin: 'skilled_human', personality: 'tactical', weapon: 'rifle', armor: 'tactical', hp: 100, str: 30, agl: 35 },
+                    { name: '🤖 Robot', origin: 'construct', personality: 'cold', weapon: 'beam', armor: 'combat', hp: 150, str: 50, agl: 30 },
+                    { name: '🧪 Mutant', origin: 'mutant', personality: 'aggressive', weapon: 'plasma_rifle', armor: 'tactical', hp: 100, str: 40, agl: 40 },
+                    { name: '👽 Alien', origin: 'alien', personality: 'opportunist', weapon: 'ice_rifle', armor: 'alien_hide', hp: 120, str: 45, agl: 35 },
+                    { name: '🔮 Mystic', origin: 'mystic', personality: 'calculating', weapon: 'beam', armor: 'mystic_ward', hp: 90, str: 30, agl: 40 },
+                    { name: '🦾 Cyborg', origin: 'tech_enhanced', personality: 'tactical', weapon: 'rifle', armor: 'combat', hp: 110, str: 40, agl: 35 },
+                    { name: '💥 Berserker', origin: 'altered_human', personality: 'berserker', weapon: 'super_punch', armor: 'combat', hp: 130, str: 55, agl: 30 },
+                    { name: '🎯 Sniper', origin: 'skilled_human', personality: 'sniper', weapon: 'sniper', armor: 'kevlar', hp: 80, str: 25, agl: 45 }
+                ];
+
+                const wins = {};
+                combatants.forEach(c => wins[c.name] = 0);
+
+                let done = 0;
+
+                for (let i = 0; i < iterations; i++) {
+                    const fighters = combatants.map((c, idx) => ({ ...c, id: idx }));
+                    const result = runBattle([], fighters, { freeForAll: true, maxTurns: 30 });
+
+                    if (result.winner && result.winner !== 'TIMEOUT' && result.winner !== 'DRAW') {
+                        wins[result.winner]++;
+                    }
+
+                    done++;
+                    updateProgress(done / iterations * 100);
+                }
+
+                return { wins, combatants };
+            },
+            render: (data) => {
+                let html = '<h3>Free-For-All Winners</h3><table><tr><th>Combatant</th><th>Wins</th><th>Win Rate</th></tr>';
+
+                const sorted = Object.entries(data.wins).sort((a, b) => b[1] - a[1]);
+                const total = sorted.reduce((sum, [_, wins]) => sum + wins, 0);
+
+                sorted.forEach(([name, wins]) => {
+                    const winPct = total > 0 ? Math.round(wins / total * 100) : 0;
+                    const color = winPct > 20 ? '#2ecc71' : (winPct < 10 ? '#e74c3c' : '#f1c40f');
+                    html += `<tr><td>${name}</td><td>${wins}</td><td style="color: ${color}">${winPct}%</td></tr>`;
+                });
+
+                html += '</table>';
+                return html;
+            }
+        },
+
+        'personality_test': {
+            name: 'Personality Effectiveness',
+            description: 'Test how different AI personalities perform',
+            run: async (iterations, updateProgress) => {
+                const personalityIds = Object.keys(PERSONALITIES);
+                const results = {};
+
+                let total = personalityIds.length * iterations;
+                let done = 0;
+
+                for (const personalityId of personalityIds) {
+                    results[personalityId] = { wins: 0, avgDamage: 0, avgKills: 0 };
+
+                    for (let i = 0; i < iterations; i++) {
+                        const teamA = [{ id: 0, name: `${PERSONALITIES[personalityId].emoji} Tester`, origin: 'skilled_human', personality: personalityId, weapon: 'rifle', armor: 'tactical', hp: 100, str: 30, agl: 35 }];
+                        const teamB = [{ id: 1, name: '🎯 Opponent', origin: 'skilled_human', personality: 'tactical', weapon: 'rifle', armor: 'tactical', hp: 100, str: 30, agl: 35 }];
+
+                        const result = runBattle(teamA, teamB);
+                        if (result.winner === 'a') results[personalityId].wins++;
+                        results[personalityId].avgDamage += result.damageDealt[teamA[0].name] || 0;
+                        results[personalityId].avgKills += result.kills[teamA[0].name] || 0;
+
+                        done++;
+                        updateProgress(done / total * 100);
+                    }
+
+                    results[personalityId].avgDamage = Math.round(results[personalityId].avgDamage / iterations);
+                    results[personalityId].avgKills = (results[personalityId].avgKills / iterations).toFixed(2);
+                }
+
+                return results;
+            },
+            render: (data) => {
+                let html = '<h3>Personality Performance</h3><table><tr><th>Personality</th><th>Win Rate</th><th>Avg Damage</th></tr>';
+
+                const sorted = Object.entries(data).sort((a, b) => b[1].wins - a[1].wins);
+                sorted.forEach(([personalityId, stats]) => {
+                    const p = PERSONALITIES[personalityId];
+                    const winPct = stats.wins * 5;
+                    const color = winPct > 55 ? '#2ecc71' : (winPct < 45 ? '#e74c3c' : '#f1c40f');
+                    html += `<tr><td>${p.emoji} ${p.name}</td><td style="color: ${color}">${winPct}%</td><td>${stats.avgDamage}</td></tr>`;
+                });
+
+                html += '</table>';
+                return html;
+            }
+        },
+
+        'full_suite': {
+            name: 'Full Test Suite',
+            description: 'Run all experiments',
+            run: async (iterations, updateProgress) => {
+                const allResults = {};
+                const experiments = ['1v1_origins', 'weapons', 'robot_vs_humans', 'team_battle', 'ffa', 'personality_test'];
+
+                for (let i = 0; i < experiments.length; i++) {
+                    const expId = experiments[i];
+                    const exp = EXPERIMENTS[expId];
+                    updateProgress((i / experiments.length) * 100);
+
+                    allResults[expId] = await exp.run(Math.ceil(iterations / 2), (p) => {
+                        updateProgress((i / experiments.length + p / 100 / experiments.length) * 100);
+                    });
+                }
+
+                return allResults;
+            },
+            render: (data) => {
+                let html = '';
+                Object.entries(data).forEach(([expId, result]) => {
+                    const exp = EXPERIMENTS[expId];
+                    html += `<div class="result-box"><h3>${exp.name}</h3>${exp.render(result)}</div>`;
+                });
+                return html;
+            }
+        }
+    };
+
+    // ============ UI FUNCTIONS ============
+    let isRunning = false;
+
+    async function runExperiment(expId) {
+        if (isRunning) return;
+        isRunning = true;
+
+        const exp = EXPERIMENTS[expId];
+        const iterations = parseInt(document.getElementById('iterations').value) || 20;
+
+        document.getElementById('progress-container').style.display = 'block';
+        document.getElementById('results').innerHTML = `<p>Running ${exp.name}...</p>`;
+        document.getElementById('findings').style.display = 'none';
+
+        const updateProgress = (pct) => {
+            document.getElementById('progress-fill').style.width = pct + '%';
+            document.getElementById('progress-fill').textContent = Math.round(pct) + '%';
+        };
+
+        try {
+            const result = await exp.run(iterations, updateProgress);
+            const html = exp.render(result);
+
+            document.getElementById('results').innerHTML = `
+                <div class="result-box">
+                    <h2>${exp.name}</h2>
+                    <p style="color: #888;">${exp.description}</p>
+                    <p>Iterations: ${iterations}</p>
+                    ${html}
+                </div>
+            `;
+
+            // Generate findings
+            generateFindings(expId, result);
+
+        } catch (err) {
+            document.getElementById('results').innerHTML = `<p class="log-entry error">Error: ${err.message}</p>`;
+        }
+
+        document.getElementById('progress-container').style.display = 'none';
+        isRunning = false;
+    }
+
+    function generateFindings(expId, data) {
+        const findings = document.getElementById('findings');
+        const content = document.getElementById('findings-content');
+        let html = '';
+
+        if (expId === '1v1_origins') {
+            // Find strongest/weakest origins
+            const totals = {};
+            Object.keys(ORIGINS).forEach(o1 => {
+                totals[o1] = 0;
+                Object.keys(ORIGINS).forEach(o2 => totals[o1] += data.winMatrix[o1][o2]);
+            });
+            const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+            const best = sorted[0];
+            const worst = sorted[sorted.length - 1];
+
+            html += `<div class="suggestion"><strong>🏆 Strongest Origin:</strong> ${ORIGINS[best[0]].emoji} ${ORIGINS[best[0]].name} - Immunities to status effects give significant advantage</div>`;
+            html += `<div class="warning"><strong>⚠️ Weakest Origin:</strong> ${ORIGINS[worst[0]].emoji} ${ORIGINS[worst[0]].name} - Consider buffing with unique abilities</div>`;
+
+            // Check if Constructs are OP
+            if (totals['construct'] > totals['skilled_human'] * 1.3) {
+                html += `<div class="warning"><strong>⚠️ Balance Issue:</strong> Constructs may be too strong due to bleed/burn immunity. Consider adding EMP weapons to counter.</div>`;
+            }
+        }
+
+        if (expId === 'weapons') {
+            const sorted = Object.entries(data).sort((a, b) => b[1].wins - a[1].wins);
+            const best = sorted[0];
+            const worst = sorted[sorted.length - 1];
+
+            html += `<div class="suggestion"><strong>🔫 Best Weapon:</strong> ${WEAPONS[best[0]].emoji} ${WEAPONS[best[0]].name} (${best[1].wins * 5}% win rate)</div>`;
+            html += `<div class="warning"><strong>⚠️ Weakest Weapon:</strong> ${WEAPONS[worst[0]].emoji} ${WEAPONS[worst[0]].name} (${worst[1].wins * 5}% win rate) - May need damage/range buff</div>`;
+
+            // Check melee viability
+            const meleeWeapons = ['fists', 'super_punch', 'sword'];
+            const meleeAvg = meleeWeapons.reduce((sum, w) => sum + (data[w]?.wins || 0), 0) / meleeWeapons.length;
+            if (meleeAvg < 8) {
+                html += `<div class="suggestion"><strong>💡 Suggestion:</strong> Melee weapons underperform. Consider: faster movement, higher damage, or charge abilities.</div>`;
+            }
+        }
+
+        if (expId === 'robot_vs_humans') {
+            const oneVsTwo = data['1 Robot vs 2 Humans'];
+            if (oneVsTwo && oneVsTwo.robotWins > oneVsTwo.humanWins) {
+                html += `<div class="warning"><strong>⚠️ Balance Issue:</strong> Single robots defeating 2 humans suggests they may be OP. Consider: Lower HP (150→120), or give humans EMP weapons.</div>`;
+            } else {
+                html += `<div class="suggestion"><strong>✅ Balance OK:</strong> Robot vs Human balance seems reasonable. Numbers advantage works.</div>`;
+            }
+        }
+
+        if (expId === 'team_battle') {
+            const sorted = Object.entries(data.results).sort((a, b) => b[1].wins - a[1].wins);
+            html += `<div class="suggestion"><strong>🏆 Best Team Comp:</strong> ${sorted[0][0]} - Team synergy matters!</div>`;
+
+            if (sorted[0][0] === 'Robot Squad') {
+                html += `<div class="warning"><strong>⚠️ Robot dominance detected.</strong> Add more EMP weapons or anti-robot tactics.</div>`;
+            }
+            if (sorted[sorted.length - 1][0] === 'Melee Squad') {
+                html += `<div class="suggestion"><strong>💡 Melee teams struggle.</strong> They need: cover to close distance, smoke grenades, or charge abilities.</div>`;
+            }
+        }
+
+        if (expId === 'ffa') {
+            const sorted = Object.entries(data.wins).sort((a, b) => b[1] - a[1]);
+            html += `<div class="suggestion"><strong>👑 FFA Champion:</strong> ${sorted[0][0]} dominates free-for-all battles!</div>`;
+            html += `<div class="suggestion"><strong>💡 FFA Insight:</strong> Durability (HP + armor) matters more than raw damage in chaotic battles.</div>`;
+        }
+
+        // General suggestions
+        html += '<h3>General Suggestions</h3>';
+        html += `<div class="suggestion"><strong>🚀 Add Flight:</strong> Would add vertical tactics, but needs anti-air weapons</div>`;
+        html += `<div class="suggestion"><strong>🎒 Add Weapon Pickup:</strong> Dropped weapons on death could create risk/reward gameplay</div>`;
+        html += `<div class="suggestion"><strong>🏃 Add Overwatch:</strong> Reaction fire would help defensive play and melee countering</div>`;
+        html += `<div class="suggestion"><strong>💨 Add Smoke/Flash:</strong> Would help melee fighters close distance</div>`;
+
+        content.innerHTML = html;
+        findings.style.display = 'block';
+    }
+    </script>
+</body>
+</html>

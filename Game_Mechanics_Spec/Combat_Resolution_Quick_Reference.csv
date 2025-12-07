@@ -1,0 +1,57 @@
+Step,Action,Stat_Used,How_To_Resolve,Example
+1,Determine Initiative,AGL+INS,(AGL + INS) / 2 then find rank column,AGL 25 + INS 20 = 45 / 2 = 22 (Excellent column)
+2,Declare Action,N/A,Attacker states target and attack type,Granite punches Villain with Super Strength
+3,Calculate Attack Column,MEL (melee) or AGL (ranged),Find rank column for attack stat,MEL 35 = Remarkable column
+4,Apply Column Shifts,Skills/Powers/Situation,Add bonuses subtract penalties,Martial Arts +2CS; Target dodging -3CS = Net -1CS
+5,Determine Final Column,Attack Column + Net CS,Shift left for penalties right for bonuses,Remarkable -1CS = Excellent column
+6,Roll d100,N/A,Roll percentile dice,Rolls 34
+7,Find Result on Universal Table,Cross-reference roll vs column,Look up roll in Final Column,34 on Excellent = Major Success
+8,Calculate Base Damage,Weapon + STR modifier,Weapon damage + STR bonus,Fists (0) + STR 65 = 65 base damage
+9,Apply Power Damage,Power damage bonus,Add power damage to base,Super Strength High +50 = 115 damage
+10,Apply Result Multiplier,Based on success level,Failed=0x Minor=0.5x Success=1x Major=1.5x,Major Success 1.5x = 172 damage
+11,Target Dodge Attempt,AGL+INS (melee) or AGL (ranged),Target rolls on their dodge column,Villain AGL+INS 60 = -3CS defense
+12,Apply Armor Reduction,Armor DR,Subtract armor from damage,Villain armor -20 = 152 final damage
+13,Apply Damage to Health,Final damage to target,Reduce target health,Villain Health 100 - 152 = -52 (KO)
+14,Check Knockback,STR rank vs result,Major Success = knockback distance by STR,STR 65 (Amazing) = 8 squares knockback
+15,Apply Status Effects,Based on damage type and result,Check crit table for extra effects,Major Success + head hit = Stunned 1d4 rounds
+
+---ATTACK TYPE REFERENCE---
+Attack_Type,Hit_Stat,Damage_Stat,Range,Notes
+Punch/Kick,MEL,STR,Touch,Basic unarmed attack
+Melee Weapon,MEL,STR + Weapon,Touch,Add weapon damage to STR
+Thrown Weapon,AGL,STR + Weapon,STR/5 squares,Range based on strength
+Ranged Weapon,AGL,Weapon only,Weapon range,No STR bonus unless bow
+Super Strength Attack,MEL,STR + Power,Touch,Power adds damage bonus
+Energy Blast,CON or AGL,Power only,Power range,Uses power rank for damage
+Psychic Attack,CON,Power only,Power range,Bypasses physical armor
+Grapple,MEL,STR vs STR,Touch,Contested roll; see Wrestling System
+
+---COLUMN SHIFT QUICK REFERENCE---
+Source,Shift,Condition
+Skill Bonus,+1 to +4CS,Per skill description in Complete_Skills_Talents.csv
+Power Bonus,+1 to +5CS,Per power description in LSW_Power_Combat_Mechanics.csv
+Weapon Accuracy,Variable,Per weapon in Weapons table
+Target Dodging,-1 to -14CS,Based on target AGL+INS (see Dodge Chart)
+Cover,-1 to -3CS,Partial/Half/Full cover
+Prone Target,+1CS,Target on ground
+Flanking,+1CS,Attacking from side/behind
+Wounded,-1CS per 25%,Health loss penalty
+Stunned,-2CS,Stunned status effect
+Blinded,-4CS,Blinded status effect
+Multiple Targets,-1CS per extra,Attacking multiple enemies
+
+---SUCCESS RESULT EFFECTS---
+Result,Damage,Knockback,Crit_Roll,Status_Effect
+Failed,0%,None,No,None
+Minor,50%,None,No,Power-specific only
+Success,100%,If STR 40+,Yes if 01-05,Standard effects apply
+Major,150%,Always,Yes,Enhanced effects + bonus
+
+---DAMAGE TYPE INTERACTIONS---
+Damage_Type,Armor_Interaction,Status_Possibility,Environmental_Effect
+Smashing,Physical armor reduces,Knockback/Stun/Broken bones,Wall destruction
+Piercing,Physical armor reduces,Bleeding/Organ damage,Penetrates materials
+Slashing,Physical armor reduces,Bleeding/Severing,Cuts materials
+Energy,Energy armor reduces,Burning/Disintegration,Fire/explosion spread
+Psychic,All physical armor bypassed,Mind control/Unconscious,None
+Sonic,Reduced by sonic resistance,Deafened/Stunned,Glass shattering

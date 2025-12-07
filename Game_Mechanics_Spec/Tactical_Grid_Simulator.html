@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHT Tactical Grid Simulator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #eee; padding: 10px; }
+        h1 { color: #e94560; margin-bottom: 10px; font-size: 24px; }
+        .container { display: flex; gap: 20px; }
+        .grid-container { flex-shrink: 0; }
+        .sidebar { flex: 1; max-width: 400px; }
+
+        #tacticalGrid {
+            display: grid;
+            gap: 1px;
+            background: #333;
+            border: 2px solid #e94560;
+            width: fit-content;
+        }
+        .cell {
+            width: 28px; height: 28px;
+            background: #16213e;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; cursor: pointer;
+            position: relative;
+            transition: background 0.1s;
+        }
+        .cell:hover { background: #2a3f5f; }
+        .cell.clear { background: #1a3a1a; }
+        .cell.rough { background: #3a3a1a; }
+        .cell.wall { background: #444; }
+        .cell.water { background: #1a1a4a; }
+        .cell.cover-light { background: #2a4a2a; }
+        .cell.cover-medium { background: #3a5a3a; }
+        .cell.cover-heavy { background: #4a6a4a; }
+
+        .cell.in-range { box-shadow: inset 0 0 0 2px #00ff00; }
+        .cell.in-los { box-shadow: inset 0 0 0 2px #ffff00; }
+        .cell.blocked { box-shadow: inset 0 0 0 2px #ff0000; }
+        .cell.move-range { background: rgba(0, 255, 255, 0.3); }
+        .cell.attack-range { background: rgba(255, 100, 100, 0.3); }
+
+        .unit {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 11px;
+            border: 2px solid #fff;
+            z-index: 10;
+        }
+        .unit.player { background: #00aa00; color: #fff; }
+        .unit.enemy { background: #aa0000; color: #fff; }
+        .unit.selected { border-color: #ffff00; box-shadow: 0 0 10px #ffff00; }
+        .unit.flying { border-style: dashed; }
+
+        .altitude-indicator {
+            position: absolute; top: 0; right: 0;
+            background: #00fff5; color: #000;
+            font-size: 8px; padding: 1px 3px;
+            border-radius: 0 0 0 3px;
+        }
+
+        .panel { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 10px; margin-bottom: 10px; }
+        .panel h3 { color: #e94560; margin-bottom: 8px; font-size: 14px; }
+
+        button {
+            background: #e94560; color: white; border: none;
+            padding: 6px 12px; border-radius: 4px; cursor: pointer;
+            font-size: 12px; margin: 2px;
+        }
+        button:hover { background: #ff6b6b; }
+        button.active { background: #00aa00; }
+        button:disabled { background: #555; cursor: not-allowed; }
+
+        select, input {
+            background: #0f3460; color: #fff; border: 1px solid #e94560;
+            padding: 5px; border-radius: 4px; font-size: 12px;
+        }
+
+        .stat-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 12px; }
+        .stat-label { color: #00fff5; }
+        .stat-value { color: #fff; }
+
+        .log { background: #0a0a1a; border-radius: 5px; padding: 8px; max-height: 200px; overflow-y: auto; font-size: 11px; }
+        .log-entry { padding: 3px 0; border-bottom: 1px solid #222; }
+        .log-entry.hit { color: #00ff00; }
+        .log-entry.miss { color: #ff6666; }
+        .log-entry.move { color: #00fff5; }
+        .log-entry.info { color: #888; }
+
+        .legend { display: flex; flex-wrap: wrap; gap: 5px; font-size: 10px; }
+        .legend-item { display: flex; align-items: center; gap: 3px; }
+        .legend-color { width: 14px; height: 14px; border: 1px solid #fff; }
+
+        .range-info { font-size: 14px; color: #ffff00; margin: 5px 0; }
+        .cover-info { font-size: 12px; color: #00fff5; }
+
+        #coordinates { position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 5px 10px; border-radius: 4px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>SHT Tactical Grid Simulator</h1>
+
+    <div class="container">
+        <div class="grid-container">
+            <div id="tacticalGrid"></div>
+            <div id="coordinates">Hover over grid</div>
+        </div>
+
+        <div class="sidebar">
+            <!-- Controls -->
+            <div class="panel">
+                <h3>Mode</h3>
+                <button id="btnMove" class="active" onclick="setMode('move')">Move</button>
+                <button id="btnAttack" onclick="setMode('attack')">Attack</button>
+                <button id="btnPlace" onclick="setMode('place')">Place Unit</button>
+                <button id="btnTerrain" onclick="setMode('terrain')">Edit Terrain</button>
+                <br><br>
+                <button onclick="resetGrid()">Reset Grid</button>
+                <button onclick="generateCity()">Generate City</button>
+                <button onclick="nextTurn()">Next Turn</button>
+            </div>
+
+            <!-- Terrain Palette -->
+            <div class="panel" id="terrainPanel" style="display:none;">
+                <h3>Terrain Type</h3>
+                <button onclick="setTerrainType('clear')">Clear</button>
+                <button onclick="setTerrainType('rough')">Rough</button>
+                <button onclick="setTerrainType('wall')">Wall</button>
+                <button onclick="setTerrainType('water')">Water</button>
+                <button onclick="setTerrainType('cover-light')">Light Cover</button>
+                <button onclick="setTerrainType('cover-medium')">Medium Cover</button>
+                <button onclick="setTerrainType('cover-heavy')">Heavy Cover</button>
+            </div>
+
+            <!-- Selected Unit -->
+            <div class="panel" id="unitPanel">
+                <h3>Selected Unit: <span id="selectedUnitName">None</span></h3>
+                <div class="stat-row"><span class="stat-label">AGL</span><span class="stat-value" id="unitAGL">-</span></div>
+                <div class="stat-row"><span class="stat-label">Movement</span><span class="stat-value" id="unitMove">-</span></div>
+                <div class="stat-row"><span class="stat-label">AP Remaining</span><span class="stat-value" id="unitAP">-</span></div>
+                <div class="stat-row"><span class="stat-label">Position</span><span class="stat-value" id="unitPos">-</span></div>
+                <div class="stat-row"><span class="stat-label">Altitude (Z)</span><span class="stat-value" id="unitAlt">-</span></div>
+                <br>
+                <button onclick="changeAltitude(1)" id="btnAltUp">Altitude +1 (2 AP)</button>
+                <button onclick="changeAltitude(-1)" id="btnAltDown">Altitude -1 (2 AP)</button>
+            </div>
+
+            <!-- Range/LOS Info -->
+            <div class="panel">
+                <h3>Range & LOS</h3>
+                <div class="range-info" id="rangeInfo">Select unit and hover target</div>
+                <div class="cover-info" id="coverInfo"></div>
+                <div class="cover-info" id="losInfo"></div>
+            </div>
+
+            <!-- Attack Panel -->
+            <div class="panel" id="attackPanel" style="display:none;">
+                <h3>Attack Options</h3>
+                <select id="attackType">
+                    <option value="melee">Melee [MEL+STR] (0-1 sq)</option>
+                    <option value="pistol">Pistol [AGL] (25 sq, 20 dmg)</option>
+                    <option value="rifle">Rifle [AGL] (60 sq, 30 dmg)</option>
+                    <option value="sniper">Sniper [AGL] (100 sq, 45 dmg)</option>
+                    <option value="fire_low">Fire Gen Low [AGL] (8 sq, 30 dmg)</option>
+                    <option value="fire_high">Fire Gen High [AGL] (20 sq, 75 dmg, 5x5)</option>
+                    <option value="psychic">Psychic Blast [CON] (15 sq, 25 dmg, bypass armor)</option>
+                    <option value="thrown">Throw Object [MEL] (STR/5 sq)</option>
+                </select>
+                <br><br>
+                <div id="attackCalc"></div>
+                <div id="tableInfo" style="margin-top:10px;font-size:10px;color:#888;"></div>
+            </div>
+
+            <!-- Combat Log -->
+            <div class="panel">
+                <h3>Combat Log</h3>
+                <div class="log" id="combatLog"></div>
+            </div>
+
+            <!-- Legend -->
+            <div class="panel">
+                <h3>Legend</h3>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-color" style="background:#1a3a1a;"></div>Clear</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#3a3a1a;"></div>Rough</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#444;"></div>Wall</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#1a1a4a;"></div>Water</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#2a4a2a;"></div>Light Cover</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#3a5a3a;"></div>Med Cover</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#4a6a4a;"></div>Heavy Cover</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // TACTICAL GRID SYSTEM
+        // ============================================
+
+        const GRID_SIZE = 25;
+        const CELL_SIZE = 28;
+
+        let grid = [];
+        let units = [];
+        let selectedUnit = null;
+        let currentMode = 'move';
+        let terrainType = 'clear';
+
+        const TERRAIN = {
+            clear: { moveCost: 1, cover: 0, blocks: false },
+            rough: { moveCost: 2, cover: 0, blocks: false },
+            wall: { moveCost: 999, cover: 4, blocks: true },
+            water: { moveCost: 3, cover: 0, blocks: false },
+            'cover-light': { moveCost: 1, cover: 1, blocks: false },
+            'cover-medium': { moveCost: 1, cover: 2, blocks: false },
+            'cover-heavy': { moveCost: 1, cover: 3, blocks: false }
+        };
+
+        const WEAPONS = {
+            melee: { range: 1, accuracy: 0, name: 'Melee', damage: 0, useStat: 'MEL' },
+            pistol: { range: 25, accuracy: -2, name: 'Pistol', damage: 20, useStat: 'AGL' },
+            rifle: { range: 60, accuracy: -1, name: 'Rifle', damage: 30, useStat: 'AGL' },
+            sniper: { range: 100, accuracy: -1, name: 'Sniper Rifle', damage: 45, useStat: 'AGL' },
+            fire_low: { range: 8, accuracy: 1, name: 'Fire Gen (Low)', damage: 30, useStat: 'AGL', area: '1' },
+            fire_high: { range: 20, accuracy: 3, name: 'Fire Gen (High)', damage: 75, useStat: 'AGL', area: '5x5' },
+            psychic: { range: 15, accuracy: 1, name: 'Psychic Blast', damage: 25, useStat: 'CON', bypass: true },
+            thrown: { range: 0, accuracy: 0, name: 'Thrown Object', damage: 0, useStat: 'MEL' }
+        };
+
+        // ============================================
+        // ADVANCED UNIVERSAL TABLE (Proper FASERIP Thresholds)
+        // ============================================
+        const UNIVERSAL_TABLE = {
+            // Rank: [FailMax, MinorMin, MinorMax, SuccessMin, SuccessMax, MajorMin]
+            'Shift_0':    [65, 66, 94, 95, 99, 100],
+            'Feeble':     [60, 61, 90, 91, 99, 100],
+            'Poor':       [55, 56, 85, 86, 99, 100],
+            'Typical':    [50, 51, 80, 81, 97, 98],
+            'Good':       [45, 46, 75, 76, 97, 98],
+            'Excellent':  [40, 41, 70, 71, 94, 95],
+            'Remarkable': [35, 36, 65, 66, 94, 95],
+            'Incredible': [30, 31, 60, 61, 90, 91],
+            'Amazing':    [25, 26, 55, 56, 90, 91],
+            'Monstrous':  [20, 21, 50, 51, 85, 86],
+            'Unearthly':  [15, 16, 45, 46, 85, 86],
+            'Shift_X':    [10, 11, 40, 41, 80, 81],
+            'Shift_Y':    [6,  7,  40, 41, 80, 81],
+            'Shift_Z':    [3,  4,  35, 36, 75, 76],
+            'Class_1000': [2,  3,  30, 31, 70, 71],
+            'Class_3000': [1,  2,  25, 26, 65, 66],
+            'Beyond':     [1,  2,  15, 16, 55, 56]
+        };
+
+        const RANK_ORDER = ['Shift_0', 'Feeble', 'Poor', 'Typical', 'Good', 'Excellent',
+                           'Remarkable', 'Incredible', 'Amazing', 'Monstrous', 'Unearthly',
+                           'Shift_X', 'Shift_Y', 'Shift_Z', 'Class_1000', 'Class_3000', 'Beyond'];
+
+        function statToRank(statValue) {
+            if (statValue <= 0) return 'Shift_0';
+            if (statValue <= 2) return 'Feeble';
+            if (statValue <= 5) return 'Poor';
+            if (statValue <= 10) return 'Typical';
+            if (statValue <= 20) return 'Good';
+            if (statValue <= 30) return 'Excellent';
+            if (statValue <= 40) return 'Remarkable';
+            if (statValue <= 50) return 'Incredible';
+            if (statValue <= 75) return 'Amazing';
+            if (statValue <= 100) return 'Monstrous';
+            if (statValue <= 150) return 'Unearthly';
+            if (statValue <= 250) return 'Shift_X';
+            if (statValue <= 500) return 'Shift_Y';
+            if (statValue <= 1000) return 'Shift_Z';
+            if (statValue <= 2500) return 'Class_1000';
+            if (statValue <= 5000) return 'Class_3000';
+            return 'Beyond';
+        }
+
+        function applyColumnShift(rank, cs) {
+            let idx = RANK_ORDER.indexOf(rank);
+            idx = Math.max(0, Math.min(RANK_ORDER.length - 1, idx + cs));
+            return RANK_ORDER[idx];
+        }
+
+        function rollOnTable(rank, roll) {
+            // Special rules: 99 always fails, 00 (100) always Major
+            if (roll === 99) return 'Failed';
+            if (roll === 0 || roll === 100) return 'Major';
+
+            const thresholds = UNIVERSAL_TABLE[rank];
+            if (!thresholds) return 'Failed';
+
+            const [failMax, minorMin, minorMax, successMin, successMax, majorMin] = thresholds;
+
+            if (roll >= majorMin) return 'Major';
+            if (roll >= successMin && roll <= successMax) return 'Success';
+            if (roll >= minorMin && roll <= minorMax) return 'Minor';
+            return 'Failed';
+        }
+
+        // ============================================
+        // LIFTING & THROWING SYSTEM
+        // ============================================
+        const LIFT_CAPACITY = {
+            // STR: [max_kg, throw_range_squares]
+            5:   [50, 1],
+            10:  [100, 1],
+            20:  [200, 2],
+            30:  [400, 3],
+            40:  [1000, 4],
+            50:  [2500, 5],
+            75:  [10000, 7],
+            100: [50000, 10],
+            150: [200000, 15]
+        };
+
+        function getLiftCapacity(str) {
+            const keys = Object.keys(LIFT_CAPACITY).map(Number).sort((a, b) => a - b);
+            for (let i = keys.length - 1; i >= 0; i--) {
+                if (str >= keys[i]) return LIFT_CAPACITY[keys[i]];
+            }
+            return [25, 1];
+        }
+
+        function getThrowDamage(objectWeight) {
+            if (objectWeight <= 10) return 5;
+            if (objectWeight <= 50) return 15;
+            if (objectWeight <= 200) return 30;
+            if (objectWeight <= 1000) return 50;
+            return 100;
+        }
+
+        // Initialize grid
+        function initGrid() {
+            const gridEl = document.getElementById('tacticalGrid');
+            gridEl.style.gridTemplateColumns = `repeat(${GRID_SIZE}, ${CELL_SIZE}px)`;
+            gridEl.innerHTML = '';
+            grid = [];
+
+            for (let y = 0; y < GRID_SIZE; y++) {
+                grid[y] = [];
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell clear';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+                    cell.onclick = () => handleCellClick(x, y);
+                    cell.onmouseover = () => handleCellHover(x, y);
+                    gridEl.appendChild(cell);
+
+                    grid[y][x] = { terrain: 'clear', unit: null };
+                }
+            }
+
+            // Place initial units
+            placeUnit(2, 12, { name: 'P1', type: 'player', AGL: 45, STR: 30, MEL: 35, CON: 60, ap: 6, z: 0, canFly: true });
+            placeUnit(22, 12, { name: 'E1', type: 'enemy', AGL: 30, STR: 50, MEL: 55, CON: 20, ap: 6, z: 0, canFly: false });
+
+            log('Grid initialized. Click a unit to select, then move or attack.', 'info');
+        }
+
+        function placeUnit(x, y, unitData) {
+            const unit = { ...unitData, x, y, maxAP: 6 };
+            units.push(unit);
+            grid[y][x].unit = unit;
+            renderUnits();
+        }
+
+        function renderUnits() {
+            // Clear existing unit elements
+            document.querySelectorAll('.unit').forEach(el => el.remove());
+
+            units.forEach(unit => {
+                const cell = document.querySelector(`.cell[data-x="${unit.x}"][data-y="${unit.y}"]`);
+                if (cell) {
+                    const unitEl = document.createElement('div');
+                    unitEl.className = `unit ${unit.type}`;
+                    if (unit === selectedUnit) unitEl.classList.add('selected');
+                    if (unit.z > 0) unitEl.classList.add('flying');
+                    unitEl.textContent = unit.name;
+                    unitEl.onclick = (e) => { e.stopPropagation(); selectUnit(unit); };
+
+                    if (unit.z > 0) {
+                        const altInd = document.createElement('div');
+                        altInd.className = 'altitude-indicator';
+                        altInd.textContent = `Z${unit.z}`;
+                        cell.appendChild(altInd);
+                    }
+
+                    cell.appendChild(unitEl);
+                }
+            });
+        }
+
+        function selectUnit(unit) {
+            selectedUnit = unit;
+            renderUnits();
+            updateUnitPanel();
+            showMoveRange();
+        }
+
+        function updateUnitPanel() {
+            if (selectedUnit) {
+                document.getElementById('selectedUnitName').textContent = selectedUnit.name;
+                document.getElementById('unitAGL').textContent = selectedUnit.AGL;
+                document.getElementById('unitMove').textContent = Math.floor(selectedUnit.AGL / 5) + ' squares';
+                document.getElementById('unitAP').textContent = selectedUnit.ap;
+                document.getElementById('unitPos').textContent = `(${selectedUnit.x}, ${selectedUnit.y})`;
+                document.getElementById('unitAlt').textContent = selectedUnit.z;
+
+                document.getElementById('btnAltUp').disabled = !selectedUnit.canFly || selectedUnit.ap < 2;
+                document.getElementById('btnAltDown').disabled = selectedUnit.z <= 0 || selectedUnit.ap < 2;
+            } else {
+                document.getElementById('selectedUnitName').textContent = 'None';
+                ['unitAGL', 'unitMove', 'unitAP', 'unitPos', 'unitAlt'].forEach(id =>
+                    document.getElementById(id).textContent = '-');
+            }
+        }
+
+        // ============================================
+        // RANGE & LOS CALCULATIONS
+        // ============================================
+
+        function calculateRange(x1, y1, x2, y2, z1 = 0, z2 = 0) {
+            const dx = Math.abs(x2 - x1);
+            const dy = Math.abs(y2 - y1);
+            const dz = Math.abs(z2 - z1) * 2; // Vertical distance counts double
+
+            // Chebyshev distance with diagonal adjustment
+            const horizontal = Math.max(dx, dy) + Math.floor(Math.min(dx, dy) / 2);
+            return Math.sqrt(horizontal * horizontal + dz * dz);
+        }
+
+        function checkLOS(x1, y1, x2, y2) {
+            // Bresenham's line algorithm
+            const dx = Math.abs(x2 - x1);
+            const dy = Math.abs(y2 - y1);
+            const sx = x1 < x2 ? 1 : -1;
+            const sy = y1 < y2 ? 1 : -1;
+            let err = dx - dy;
+
+            let x = x1, y = y1;
+            const blockers = [];
+
+            while (x !== x2 || y !== y2) {
+                const e2 = 2 * err;
+                if (e2 > -dy) { err -= dy; x += sx; }
+                if (e2 < dx) { err += dx; y += sy; }
+
+                if (x === x2 && y === y2) break;
+
+                if (grid[y] && grid[y][x]) {
+                    const terrain = TERRAIN[grid[y][x].terrain];
+                    if (terrain.blocks) {
+                        blockers.push({ x, y });
+                    }
+                }
+            }
+
+            return { clear: blockers.length === 0, blockers };
+        }
+
+        function getCoverBonus(targetX, targetY) {
+            const terrain = grid[targetY][targetX].terrain;
+            return TERRAIN[terrain].cover;
+        }
+
+        function getRangeModifier(range) {
+            if (range <= 1) return 2;      // Point blank: +2CS
+            if (range <= 5) return 0;      // Short: no mod
+            if (range <= 15) return 0;     // Medium: no mod
+            if (range <= 30) return -1;    // Long: -1CS
+            if (range <= 50) return -2;    // Extreme: -2CS
+            return -3;                      // Maximum: -3CS
+        }
+
+        // ============================================
+        // MOVEMENT SYSTEM
+        // ============================================
+
+        function showMoveRange() {
+            clearHighlights();
+            if (!selectedUnit || currentMode !== 'move') return;
+
+            const maxMove = Math.floor(selectedUnit.AGL / 5);
+            const moveCost = Math.floor(selectedUnit.ap / 1); // 1 AP per square
+            const range = Math.min(maxMove, moveCost);
+
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    const dist = calculateRange(selectedUnit.x, selectedUnit.y, x, y);
+                    const terrain = TERRAIN[grid[y][x].terrain];
+
+                    if (dist <= range && !terrain.blocks && !grid[y][x].unit) {
+                        const cell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
+                        cell.classList.add('move-range');
+                    }
+                }
+            }
+        }
+
+        function moveUnit(unit, toX, toY) {
+            const dist = Math.ceil(calculateRange(unit.x, unit.y, toX, toY));
+            const apCost = dist; // 1 AP per square
+
+            if (unit.ap < apCost) {
+                log(`Not enough AP! Need ${apCost}, have ${unit.ap}`, 'miss');
+                return false;
+            }
+
+            const terrain = TERRAIN[grid[toY][toX].terrain];
+            if (terrain.blocks) {
+                log('Cannot move through walls!', 'miss');
+                return false;
+            }
+
+            if (grid[toY][toX].unit) {
+                log('Square occupied!', 'miss');
+                return false;
+            }
+
+            // Move unit
+            grid[unit.y][unit.x].unit = null;
+            unit.x = toX;
+            unit.y = toY;
+            unit.ap -= apCost;
+            grid[toY][toX].unit = unit;
+
+            log(`${unit.name} moved to (${toX}, ${toY}). Cost: ${apCost} AP. Remaining: ${unit.ap} AP`, 'move');
+            renderUnits();
+            updateUnitPanel();
+            showMoveRange();
+            return true;
+        }
+
+        function changeAltitude(delta) {
+            if (!selectedUnit || selectedUnit.ap < 2) return;
+            if (delta > 0 && !selectedUnit.canFly) return;
+            if (delta < 0 && selectedUnit.z <= 0) return;
+
+            selectedUnit.z = Math.max(0, selectedUnit.z + delta);
+            selectedUnit.ap -= 2;
+
+            log(`${selectedUnit.name} changed altitude to Z=${selectedUnit.z}. Cost: 2 AP`, 'move');
+            renderUnits();
+            updateUnitPanel();
+        }
+
+        // ============================================
+        // ATTACK SYSTEM
+        // ============================================
+
+        function calculateAttack(attacker, targetX, targetY) {
+            const weaponType = document.getElementById('attackType').value;
+            const weapon = WEAPONS[weaponType];
+            const range = calculateRange(attacker.x, attacker.y, targetX, targetY, attacker.z, 0);
+            const los = checkLOS(attacker.x, attacker.y, targetX, targetY);
+            const cover = getCoverBonus(targetX, targetY);
+
+            // Calculate effective range (thrown objects use STR/5)
+            let effectiveRange = weapon.range;
+            if (weaponType === 'thrown') {
+                effectiveRange = Math.floor(attacker.STR / 5);
+            }
+
+            // Check range
+            if (range > effectiveRange) {
+                return { valid: false, reason: `Out of range (${Math.ceil(range)} > ${effectiveRange})` };
+            }
+
+            // Check LOS
+            if (!los.clear && attacker.z === 0) {
+                return { valid: false, reason: 'No line of sight' };
+            }
+
+            // Calculate column shifts
+            const rangeMod = getRangeModifier(range);
+            const weaponMod = weapon.accuracy;
+            const coverMod = -cover;
+            const altitudeMod = attacker.z > 0 ? 2 : 0; // +2CS for shooting from above
+
+            const totalCS = rangeMod + weaponMod + coverMod + altitudeMod;
+
+            return {
+                valid: true,
+                range: Math.ceil(range),
+                weapon: weapon.name,
+                rangeMod,
+                weaponMod,
+                coverMod,
+                altitudeMod,
+                totalCS,
+                losBlocked: !los.clear
+            };
+        }
+
+        function executeAttack(attacker, targetX, targetY) {
+            const calc = calculateAttack(attacker, targetX, targetY);
+
+            if (!calc.valid) {
+                log(`Attack failed: ${calc.reason}`, 'miss');
+                return;
+            }
+
+            const target = grid[targetY][targetX].unit;
+            if (!target) {
+                log('No target at that location!', 'miss');
+                return;
+            }
+
+            if (attacker.ap < 3) {
+                log('Not enough AP for attack! Need 3 AP', 'miss');
+                return;
+            }
+
+            attacker.ap -= 3;
+
+            // Get attacker's stat for this weapon
+            const weapon = WEAPONS[document.getElementById('attackType').value];
+            const attackStat = attacker[weapon.useStat] || attacker.AGL;
+
+            // Determine base rank from stat
+            const baseRank = statToRank(attackStat);
+
+            // Apply column shifts
+            const finalRank = applyColumnShift(baseRank, calc.totalCS);
+
+            // Roll d100 (1-100, where we treat 0 as 100)
+            let roll = Math.floor(Math.random() * 100) + 1;
+            if (roll === 100) roll = 0; // Treat 100 as 00 for critical success
+
+            // Use proper Universal Table lookup
+            const result = rollOnTable(finalRank, roll);
+
+            // Calculate damage
+            let baseDamage = weapon.damage;
+            const weaponType = document.getElementById('attackType').value;
+
+            if (weapon.useStat === 'MEL') {
+                baseDamage += attacker.STR; // Melee adds STR
+            }
+
+            // Thrown objects: damage based on STR
+            if (weaponType === 'thrown') {
+                baseDamage = 15 + Math.floor(attacker.STR / 10); // Medium object + STR bonus
+            }
+
+            // Apply result multiplier
+            const multipliers = { 'Failed': 0, 'Minor': 0.5, 'Success': 1.0, 'Major': 1.5 };
+            const finalDamage = Math.floor(baseDamage * multipliers[result]);
+
+            // Knockback check (Major + STR 40+ for physical)
+            let knockback = 0;
+            if (result === 'Major' && attacker.STR >= 40 && weapon.useStat === 'MEL') {
+                if (attacker.STR >= 100) knockback = 10;
+                else if (attacker.STR >= 75) knockback = 8;
+                else if (attacker.STR >= 50) knockback = 6;
+                else knockback = 4;
+            }
+
+            const logClass = result === 'Failed' ? 'miss' : 'hit';
+            log(`${attacker.name} attacks ${target.name} with ${calc.weapon}!`, 'info');
+            log(`Stat: ${weapon.useStat} ${attackStat} (${baseRank}) | CS: ${calc.totalCS >= 0 ? '+' : ''}${calc.totalCS} = ${finalRank}`, 'info');
+            log(`Roll: ${roll.toString().padStart(2, '0')} = ${result}`, logClass);
+
+            if (result !== 'Failed') {
+                log(`Damage: ${baseDamage} × ${multipliers[result]} = ${finalDamage}`, 'hit');
+                if (knockback > 0) {
+                    log(`KNOCKBACK: ${knockback} squares!`, 'hit');
+                }
+            }
+
+            updateUnitPanel();
+        }
+
+        // ============================================
+        // UI HANDLERS
+        // ============================================
+
+        function handleCellClick(x, y) {
+            if (currentMode === 'terrain') {
+                grid[y][x].terrain = terrainType;
+                const cell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
+                cell.className = `cell ${terrainType}`;
+                return;
+            }
+
+            if (currentMode === 'place') {
+                const name = prompt('Unit name (P# for player, E# for enemy):');
+                if (name) {
+                    const type = name.startsWith('P') ? 'player' : 'enemy';
+                    placeUnit(x, y, {
+                        name, type,
+                        AGL: 30 + Math.floor(Math.random() * 30),
+                        STR: 30 + Math.floor(Math.random() * 40),
+                        MEL: 30 + Math.floor(Math.random() * 30),
+                        CON: 30 + Math.floor(Math.random() * 30),
+                        ap: 6, z: 0, canFly: Math.random() > 0.5
+                    });
+                }
+                return;
+            }
+
+            if (!selectedUnit) return;
+
+            if (currentMode === 'move') {
+                moveUnit(selectedUnit, x, y);
+            } else if (currentMode === 'attack') {
+                executeAttack(selectedUnit, x, y);
+            }
+        }
+
+        function handleCellHover(x, y) {
+            document.getElementById('coordinates').textContent = `Grid: (${x}, ${y})`;
+
+            if (selectedUnit) {
+                const range = calculateRange(selectedUnit.x, selectedUnit.y, x, y, selectedUnit.z, 0);
+                const los = checkLOS(selectedUnit.x, selectedUnit.y, x, y);
+                const cover = getCoverBonus(x, y);
+
+                document.getElementById('rangeInfo').textContent = `Range: ${Math.ceil(range)} squares`;
+                document.getElementById('coverInfo').textContent = `Cover: ${cover > 0 ? '+' + cover + 'CS defense' : 'None'}`;
+                document.getElementById('losInfo').textContent = `LOS: ${los.clear ? 'Clear' : 'BLOCKED'}`;
+
+                if (currentMode === 'attack') {
+                    const calc = calculateAttack(selectedUnit, x, y);
+                    if (calc.valid) {
+                        document.getElementById('attackCalc').innerHTML = `
+                            <div>Weapon: ${calc.weapon}</div>
+                            <div>Range Mod: ${calc.rangeMod >= 0 ? '+' : ''}${calc.rangeMod}CS</div>
+                            <div>Weapon Acc: ${calc.weaponMod >= 0 ? '+' : ''}${calc.weaponMod}CS</div>
+                            <div>Cover Mod: ${calc.coverMod}CS</div>
+                            <div>Altitude: ${calc.altitudeMod >= 0 ? '+' : ''}${calc.altitudeMod}CS</div>
+                            <div style="border-top:1px solid #444;margin-top:5px;padding-top:5px;">
+                                <strong>Total: ${calc.totalCS >= 0 ? '+' : ''}${calc.totalCS}CS</strong>
+                            </div>
+                        `;
+                    } else {
+                        document.getElementById('attackCalc').innerHTML = `<div style="color:#ff6666;">${calc.reason}</div>`;
+                    }
+                }
+            }
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            ['move', 'attack', 'place', 'terrain'].forEach(m => {
+                document.getElementById('btn' + m.charAt(0).toUpperCase() + m.slice(1)).classList.remove('active');
+            });
+            document.getElementById('btn' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+
+            document.getElementById('terrainPanel').style.display = mode === 'terrain' ? 'block' : 'none';
+            document.getElementById('attackPanel').style.display = mode === 'attack' ? 'block' : 'none';
+
+            clearHighlights();
+            if (mode === 'move' && selectedUnit) showMoveRange();
+        }
+
+        function setTerrainType(type) {
+            terrainType = type;
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.classList.remove('in-range', 'in-los', 'blocked', 'move-range', 'attack-range');
+            });
+            document.querySelectorAll('.altitude-indicator').forEach(el => el.remove());
+        }
+
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('combatLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = message;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function resetGrid() {
+            units = [];
+            initGrid();
+        }
+
+        function generateCity() {
+            // Generate random city layout
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    let terrain = 'clear';
+
+                    // Roads every 5 squares
+                    if (x % 5 === 0 || y % 5 === 0) {
+                        terrain = 'clear';
+                    }
+                    // Buildings
+                    else if (Math.random() < 0.3) {
+                        terrain = 'wall';
+                    }
+                    // Cover elements
+                    else if (Math.random() < 0.15) {
+                        const coverTypes = ['cover-light', 'cover-medium', 'cover-heavy'];
+                        terrain = coverTypes[Math.floor(Math.random() * 3)];
+                    }
+                    else if (Math.random() < 0.05) {
+                        terrain = 'rough';
+                    }
+
+                    grid[y][x].terrain = terrain;
+                    const cell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
+                    cell.className = `cell ${terrain}`;
+                }
+            }
+            renderUnits();
+            log('City layout generated!', 'info');
+        }
+
+        function nextTurn() {
+            units.forEach(unit => {
+                unit.ap = unit.maxAP;
+            });
+            log('=== NEW TURN === All units restored to 6 AP', 'info');
+            updateUnitPanel();
+            showMoveRange();
+        }
+
+        // Initialize on load
+        initGrid();
+    </script>
+</body>
+</html>

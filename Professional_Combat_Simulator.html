@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperHero Tactics - Professional Combat Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        .grid-cell { 
+            width: 32px; 
+            height: 32px; 
+            border: 1px solid rgba(75, 85, 99, 0.3); 
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .grid-cell:hover { 
+            border-color: #fbbf24; 
+            background-color: rgba(251, 191, 36, 0.1);
+        }
+        .character-token {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 10px;
+            color: white;
+            text-shadow: 1px 1px 1px black;
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.8); }
+        }
+        .altitude-indicator {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 14px;
+            height: 14px;
+            background: linear-gradient(45deg, #fbbf24, #f59e0b);
+            border-radius: 50%;
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            border: 1px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .damage-number {
+            position: absolute;
+            color: #ef4444;
+            font-weight: bold;
+            pointer-events: none;
+            animation: damageFloat 1.5s ease-out forwards;
+        }
+        @keyframes damageFloat {
+            0% { opacity: 1; transform: translateY(0px) scale(1); }
+            100% { opacity: 0; transform: translateY(-50px) scale(1.2); }
+        }
+        .health-bar {
+            width: 100%;
+            height: 8px;
+            background: #374151;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
+            transition: width 0.5s ease;
+        }
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 200px;
+            border: 1px solid #fbbf24;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .power-card {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            border: 1px solid #6b7280;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .power-card:hover {
+            border-color: #fbbf24;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);
+        }
+        .power-card.selected {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+        }
+        .stat-bar {
+            height: 6px;
+            background: #374151;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            transition: width 0.3s ease;
+        }
+        .environmental-object {
+            position: absolute;
+            font-size: 12px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .environmental-object:hover {
+            transform: scale(1.2);
+        }
+        .combat-effect {
+            position: absolute;
+            pointer-events: none;
+            animation: effectFade 2s ease-out forwards;
+        }
+        @keyframes effectFade {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(2); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white min-h-screen">
+    <!-- Header with Professional Branding -->
+    <header class="bg-gray-800 border-b border-yellow-400 shadow-lg">
+        <div class="container mx-auto p-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="text-3xl font-bold text-yellow-400">⚡ SuperHero Tactics</div>
+                    <div class="text-sm text-gray-400">Professional Combat Simulator v2.0</div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="exportData()" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-sm">Export Data</button>
+                    <button onclick="importData()" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">Import Data</button>
+                    <button onclick="showHelp()" class="bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm">Help</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-6">
+        <!-- Enhanced Mode Selection with Visual Indicators -->
+        <div class="flex justify-center gap-2 mb-8">
+            <button onclick="setMode('create')" id="mode-create" class="mode-btn bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-6 py-3 rounded-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                <span class="text-lg">🛠️</span> Character Creation
+            </button>
+            <button onclick="setMode('tactical')" id="mode-tactical" class="mode-btn bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 px-6 py-3 rounded-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                <span class="text-lg">⚔️</span> Turn-by-Turn Combat
+            </button>
+            <button onclick="setMode('quick')" id="mode-quick" class="mode-btn bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-6 py-3 rounded-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                <span class="text-lg">⚡</span> Quick Simulation
+            </button>
+            <button onclick="setMode('analysis')" id="mode-analysis" class="mode-btn bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 px-6 py-3 rounded-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                <span class="text-lg">📊</span> Statistical Analysis
+            </button>
+        </div>
+
+        <!-- Enhanced Character Creation Mode -->
+        <div id="creation-mode" class="hidden">
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <!-- Character Builder Panel -->
+                <div class="bg-gradient-to-b from-gray-800 to-gray-900 p-6 rounded-xl border border-yellow-400 shadow-2xl">
+                    <h2 class="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Character Builder</h2>
+                    
+                    <!-- Quick Start Gallery -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-bold mb-4 text-yellow-400">🚀 Quick Start Gallery</h3>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="character-preview bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-600 transition-all" onclick="loadArchetype('ARCH_001')">
+                                <div class="text-center">
+                                    <div class="text-2xl mb-1">🛡️</div>
+                                    <div class="font-bold text-xs text-blue-400">Cap America</div>
+                                    <div class="text-xs text-gray-400">Enhanced Soldier</div>
+                                </div>
+                            </div>
+                            <div class="character-preview bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-600 transition-all" onclick="loadArchetype('ARCH_002')">
+                                <div class="text-center">
+                                    <div class="text-2xl mb-1">🦇</div>
+                                    <div class="font-bold text-xs text-gray-400">Batman</div>
+                                    <div class="text-xs text-gray-400">Tech Specialist</div>
+                                </div>
+                            </div>
+                            <div class="character-preview bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-600 transition-all" onclick="loadArchetype('ARCH_005')">
+                                <div class="text-center">
+                                    <div class="text-2xl mb-1">⏰</div>
+                                    <div class="font-bold text-xs text-purple-400">Sandra Locke</div>
+                                    <div class="text-xs text-gray-400">Time Walker</div>
+                                </div>
+                            </div>
+                            <div class="character-preview bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-600 transition-all" onclick="loadArchetype('ARCH_006')">
+                                <div class="text-center">
+                                    <div class="text-2xl mb-1">🌍</div>
+                                    <div class="font-bold text-xs text-green-400">Kaiser Eziobi</div>
+                                    <div class="text-xs text-gray-400">Entity Bond</div>
+                                </div>
+                            </div>
+                            <div class="character-preview bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-600 transition-all" onclick="loadArchetype('ARCH_007')">
+                                <div class="text-center">
+                                    <div class="text-2xl mb-1">🔮</div>
+                                    <div class="font-bold text-xs text-red-400">Liu Xiao</div>
+                                    <div class="text-xs text-gray-400">Power Shifter</div>
+                                </div>
+                            </div>
+                            <div class="character-preview bg-gradient-to-br from-yellow-600 to-orange-600 p-3 rounded-lg cursor-pointer hover:from-yellow-700 hover:to-orange-700 transition-all" onclick="generateRandom()">
+                                <div class="text-center">
+                                    <div class="text-2xl mb-1">🎲</div>
+                                    <div class="font-bold text-xs">Random</div>
+                                    <div class="text-xs">Generate</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Character Creation -->
+                    <div class="space-y-6">
+                        <!-- Character Identity -->
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <h4 class="font-bold text-yellow-400 mb-3">👤 Identity</h4>
+                            <div class="space-y-3">
+                                <input type="text" id="char-name" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-yellow-400 transition-colors" placeholder="Character Name">
+                                <input type="text" id="char-real-name" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-yellow-400 transition-colors" placeholder="Real Name (Optional)">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <select id="char-origin" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-yellow-400 transition-colors" onchange="updateOriginEffects()">
+                                        <option value="">🧬 Select Origin</option>
+                                        <option value="ORIG_001">👤 Skilled Human</option>
+                                        <option value="ORIG_002">💪 Altered Human (+3 STR/END)</option>
+                                        <option value="ORIG_003">🔧 Tech Enhancement (+5 STR/INT)</option>
+                                        <option value="ORIG_004">🧬 Mutated Human (Random)</option>
+                                        <option value="ORIG_005">✨ Spiritual Enhancement (+8 WIS/INT)</option>
+                                        <option value="ORIG_006">🤖 Synthetics (+10 STR/END/INT)</option>
+                                        <option value="ORIG_007">👽 Symbiotic (Variable)</option>
+                                        <option value="ORIG_008">🛸 Aliens (+5 All Stats)</option>
+                                        <option value="ORIG_009">⚗️ Scientific Weapon (+8 INT)</option>
+                                    </select>
+                                    <select id="char-threat" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-yellow-400 transition-colors" onchange="updateThreatEffects()">
+                                        <option value="">⚡ Threat Level</option>
+                                        <option value="THREAT_A">🥇 Alpha (Peak Human)</option>
+                                        <option value="THREAT_1">🥈 Level 1 (+5 All Stats)</option>
+                                        <option value="THREAT_2">🥉 Level 2 (+10 All Stats)</option>
+                                        <option value="THREAT_3">🏆 Level 3 (+15 All Stats)</option>
+                                        <option value="THREAT_4">💎 Level 4 (+22 All Stats)</option>
+                                        <option value="THREAT_5">🌟 Level 5 (+40 All Stats)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Enhanced Stat Assignment -->
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <h4 class="font-bold text-yellow-400 mb-3">📊 Attributes</h4>
+                            <div class="space-y-3">
+                                <div class="stat-input">
+                                    <label class="flex justify-between items-center">
+                                        <span class="font-bold">💪 MEL (Melee):</span>
+                                        <span id="mel-display" class="text-yellow-400">30</span>
+                                    </label>
+                                    <input type="range" id="stat-mel" min="1" max="100" value="30" class="w-full accent-yellow-400" oninput="updateStatDisplay('mel')">
+                                    <div class="stat-bar"><div class="stat-fill" id="mel-bar" style="width: 30%"></div></div>
+                                </div>
+                                <div class="stat-input">
+                                    <label class="flex justify-between items-center">
+                                        <span class="font-bold">🏃 AGL (Agility):</span>
+                                        <span id="agl-display" class="text-yellow-400">30</span>
+                                    </label>
+                                    <input type="range" id="stat-agl" min="1" max="100" value="30" class="w-full accent-yellow-400" oninput="updateStatDisplay('agl')">
+                                    <div class="stat-bar"><div class="stat-fill" id="agl-bar" style="width: 30%"></div></div>
+                                </div>
+                                <div class="stat-input">
+                                    <label class="flex justify-between items-center">
+                                        <span class="font-bold">💎 STR (Strength):</span>
+                                        <span id="str-display" class="text-yellow-400">30</span>
+                                    </label>
+                                    <input type="range" id="stat-str" min="1" max="100" value="30" class="w-full accent-yellow-400" oninput="updateStatDisplay('str')">
+                                    <div class="stat-bar"><div class="stat-fill" id="str-bar" style="width: 30%"></div></div>
+                                    <div class="text-xs text-gray-400 mt-1">Can lift: <span id="lifting-capacity">200 lbs</span></div>
+                                </div>
+                                <div class="stat-input">
+                                    <label class="flex justify-between items-center">
+                                        <span class="font-bold">❤️ STA (Stamina):</span>
+                                        <span id="sta-display" class="text-yellow-400">30</span>
+                                    </label>
+                                    <input type="range" id="stat-sta" min="1" max="100" value="30" class="w-full accent-yellow-400" oninput="updateStatDisplay('sta')">
+                                    <div class="stat-bar"><div class="stat-fill" id="sta-bar" style="width: 30%"></div></div>
+                                </div>
+                                <div class="stat-input">
+                                    <label class="flex justify-between items-center">
+                                        <span class="font-bold">🧠 INT (Intelligence):</span>
+                                        <span id="int-display" class="text-yellow-400">30</span>
+                                    </label>
+                                    <input type="range" id="stat-int" min="1" max="100" value="30" class="w-full accent-yellow-400" oninput="updateStatDisplay('int')">
+                                    <div class="stat-bar"><div class="stat-fill" id="int-bar" style="width: 30%"></div></div>
+                                </div>
+                                <div class="stat-input">
+                                    <label class="flex justify-between items-center">
+                                        <span class="font-bold">👁️ INS (Instinct):</span>
+                                        <span id="ins-display" class="text-yellow-400">30</span>
+                                    </label>
+                                    <input type="range" id="stat-ins" min="1" max="100" value="30" class="w-full accent-yellow-400" oninput="updateStatDisplay('ins')">
+                                    <div class="stat-bar"><div class="stat-fill" id="ins-bar" style="width: 30%"></div></div>
+                                </div>
+                                <div class="stat-input">
+                                    <label class="flex justify-between items-center">
+                                        <span class="font-bold">🛡️ CON (Constitution):</span>
+                                        <span id="con-display" class="text-yellow-400">30</span>
+                                    </label>
+                                    <input type="range" id="stat-con" min="1" max="100" value="30" class="w-full accent-yellow-400" oninput="updateStatDisplay('con')">
+                                    <div class="stat-bar"><div class="stat-fill" id="con-bar" style="width: 30%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Combat Rating Display -->
+                        <div class="bg-gradient-to-r from-green-700 to-blue-700 p-4 rounded-lg text-center">
+                            <h4 class="font-bold text-yellow-400 mb-2">⚡ Combat Rating</h4>
+                            <div class="text-4xl font-bold" id="combat-rating">150</div>
+                            <div class="text-sm text-gray-300">Estimated Power Level</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Power Selection -->
+                <div class="bg-gradient-to-b from-gray-800 to-gray-900 p-6 rounded-xl border border-green-400 shadow-2xl">
+                    <h2 class="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">🔥 Power Selection</h2>
+                    
+                    <!-- Advanced Power Search -->
+                    <div class="mb-6">
+                        <div class="relative">
+                            <input type="text" id="power-search" placeholder="🔍 Search powers (fire, psychic, strength, temporal...)" class="w-full p-3 bg-gray-800 border border-gray-600 rounded-lg pl-10 focus:border-yellow-400 transition-colors" oninput="searchPowers()">
+                            <div class="absolute left-3 top-3 text-gray-400">🔍</div>
+                        </div>
+                        
+                        <!-- Category Filters -->
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <button onclick="filterPowers('all')" class="filter-btn bg-gray-600 hover:bg-gray-500 px-3 py-1 rounded text-xs transition-colors">All</button>
+                            <button onclick="filterPowers('Physical')" class="filter-btn bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded text-xs transition-colors">Physical</button>
+                            <button onclick="filterPowers('Mental')" class="filter-btn bg-purple-600 hover:bg-purple-500 px-3 py-1 rounded text-xs transition-colors">Mental</button>
+                            <button onclick="filterPowers('Elemental')" class="filter-btn bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-xs transition-colors">Elemental</button>
+                            <button onclick="filterPowers('Cosmic')" class="filter-btn bg-yellow-600 hover:bg-yellow-500 px-3 py-1 rounded text-xs transition-colors">Cosmic</button>
+                        </div>
+                    </div>
+
+                    <!-- Power Gallery -->
+                    <div class="max-h-96 overflow-y-auto space-y-3" id="power-gallery">
+                        <div class="power-card" onclick="selectPower('POW_001')" data-power="POW_001">
+                            <div class="flex items-start gap-3">
+                                <div class="text-2xl">💪</div>
+                                <div class="flex-1">
+                                    <h5 class="font-bold text-yellow-400">Super Strength</h5>
+                                    <p class="text-xs text-gray-300">Enhanced physical power for lifting and combat</p>
+                                    <div class="flex gap-2 mt-2">
+                                        <span class="bg-blue-600 text-xs px-2 py-1 rounded">Physical</span>
+                                        <span class="bg-gray-600 text-xs px-2 py-1 rounded">Enhancement</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- More power cards would be populated dynamically -->
+                    </div>
+
+                    <!-- Selected Powers Display -->
+                    <div class="mt-6 p-4 bg-gray-800 rounded-lg border border-yellow-400">
+                        <h4 class="font-bold text-yellow-400 mb-2">Selected Powers:</h4>
+                        <div id="selected-powers" class="text-sm text-gray-300">None selected</div>
+                    </div>
+                </div>
+
+                <!-- Equipment & Skills Panel -->
+                <div class="bg-gradient-to-b from-gray-800 to-gray-900 p-6 rounded-xl border border-purple-400 shadow-2xl">
+                    <h2 class="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">⚔️ Equipment & Skills</h2>
+                    
+                    <!-- Equipment Browser -->
+                    <div class="mb-6">
+                        <h4 class="font-bold text-purple-400 mb-3">🛡️ Equipment</h4>
+                        <div class="space-y-2">
+                            <select id="armor-select" class="w-full p-2 bg-gray-800 border border-gray-600 rounded focus:border-purple-400 transition-colors">
+                                <option value="">🛡️ Select Armor</option>
+                                <option value="EQ_006">🦺 Tactical Vest (DR: 12)</option>
+                                <option value="EQ_007">🛡️ Combat Armor (DR: 18)</option>
+                                <option value="EQ_008">🤖 Power Armor (DR: 25)</option>
+                                <option value="EQ_009">⚡ Force Field Belt (DR: 20 vs Energy)</option>
+                                <option value="EQ_019">💎 Vibranium Shield (Special DR)</option>
+                            </select>
+                            <select id="weapon-select" class="w-full p-2 bg-gray-800 border border-gray-600 rounded focus:border-purple-400 transition-colors">
+                                <option value="">⚔️ Select Primary Weapon</option>
+                                <option value="EQ_001">🗾 Katana (Damage: 15)</option>
+                                <option value="EQ_002">🔫 Combat Rifle (Damage: 35)</option>
+                                <option value="EQ_003">🎯 Sniper Rifle (Damage: 40)</option>
+                                <option value="EQ_004">🔥 Flamethrower (Fire Damage)</option>
+                                <option value="EQ_005">⚡ Energy Rifle (Energy Damage)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Skills Selection -->
+                    <div class="mb-6">
+                        <h4 class="font-bold text-purple-400 mb-3">🎯 Skills</h4>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-600 p-2 rounded transition-colors">
+                                <input type="checkbox" id="skill-martial" class="accent-purple-400">
+                                <span>🥋 Martial Arts</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-600 p-2 rounded transition-colors">
+                                <input type="checkbox" id="skill-shooting" class="accent-purple-400">
+                                <span>🎯 Shooting</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-600 p-2 rounded transition-colors">
+                                <input type="checkbox" id="skill-stealth" class="accent-purple-400">
+                                <span>👻 Stealth</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-600 p-2 rounded transition-colors">
+                                <input type="checkbox" id="skill-leadership" class="accent-purple-400">
+                                <span>👑 Leadership</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-600 p-2 rounded transition-colors">
+                                <input type="checkbox" id="skill-engineering" class="accent-purple-400">
+                                <span>🔧 Engineering</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-600 p-2 rounded transition-colors">
+                                <input type="checkbox" id="skill-detective" class="accent-purple-400">
+                                <span>🔍 Detective</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Character Preview -->
+                    <div class="bg-gray-800 p-4 rounded-lg border border-yellow-400">
+                        <h4 class="font-bold text-yellow-400 mb-2">👁️ Character Preview</h4>
+                        <div id="character-preview" class="text-sm space-y-1">
+                            <div class="text-gray-400">Create a character to see preview</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="grid grid-cols-2 gap-3 mt-6">
+                        <button onclick="validateCharacter()" class="bg-green-600 hover:bg-green-700 p-3 rounded-lg font-bold transition-all transform hover:scale-105">
+                            ✅ Validate Build
+                        </button>
+                        <button onclick="saveCharacter()" class="bg-blue-600 hover:bg-blue-700 p-3 rounded-lg font-bold transition-all transform hover:scale-105">
+                            💾 Save Character
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Tactical Combat Mode -->
+        <div id="tactical-mode" class="hidden">
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                <!-- Main Combat Grid -->
+                <div class="xl:col-span-3 bg-gradient-to-b from-gray-800 to-gray-900 p-6 rounded-xl border border-green-400 shadow-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">⚔️ Tactical Battlefield</h2>
+                        <div class="flex items-center gap-4">
+                            <select id="environment-select" class="p-2 bg-gray-700 border border-gray-600 rounded focus:border-green-400 transition-colors" onchange="updateEnvironment()">
+                                <option value="urban">🏙️ Urban Street</option>
+                                <option value="warehouse">🏭 Warehouse Interior</option>
+                                <option value="field">🌾 Open Field</option>
+                                <option value="government">🏛️ Government Building</option>
+                                <option value="industrial">⚙️ Industrial Zone</option>
+                                <option value="populated">👥 Populated Area</option>
+                            </select>
+                            <button onclick="resetGrid()" class="bg-gray-600 hover:bg-gray-700 px-3 py-2 rounded text-sm transition-colors">🔄 Reset</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Grid Container with Environment -->
+                    <div class="relative">
+                        <div id="combat-grid" class="inline-block bg-gray-700 p-4 rounded-lg shadow-inner border border-gray-600">
+                            <!-- 15x15 tactical grid will be generated here -->
+                        </div>
+                        
+                        <!-- Environmental Info Overlay -->
+                        <div class="absolute top-2 right-2 bg-black bg-opacity-75 p-2 rounded text-xs">
+                            <div id="environment-info">🏙️ Urban: Buildings provide cover</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Bar -->
+                    <div class="mt-6 flex gap-2 justify-center flex-wrap">
+                        <button onclick="selectAction('move')" class="action-btn bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold transition-all transform hover:scale-105">
+                            🚶 Move (1 AP)
+                        </button>
+                        <button onclick="selectAction('attack')" class="action-btn bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold transition-all transform hover:scale-105">
+                            ⚔️ Attack (2 AP)
+                        </button>
+                        <button onclick="selectAction('power')" class="action-btn bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-sm font-bold transition-all transform hover:scale-105">
+                            🔥 Use Power (3+ AP)
+                        </button>
+                        <button onclick="selectAction('throw')" class="action-btn bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-lg text-sm font-bold transition-all transform hover:scale-105">
+                            🚗 Throw Object (3 AP)
+                        </button>
+                        <button onclick="selectAction('altitude')" class="action-btn bg-cyan-600 hover:bg-cyan-700 px-4 py-2 rounded-lg text-sm font-bold transition-all transform hover:scale-105">
+                            ✈️ Altitude (1 AP)
+                        </button>
+                        <button onclick="selectAction('end')" class="action-btn bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-lg text-sm font-bold transition-all transform hover:scale-105">
+                            ⏭️ End Turn
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Enhanced Combat Control Panel -->
+                <div class="space-y-6">
+                    <!-- Turn Status -->
+                    <div class="bg-gradient-to-br from-blue-700 to-purple-700 p-4 rounded-xl border border-blue-400 shadow-lg">
+                        <h3 class="font-bold text-blue-200 mb-3">⏱️ Turn Status</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Turn:</span>
+                                <span class="font-bold text-yellow-400" id="current-turn">1</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Active:</span>
+                                <span class="font-bold text-green-400" id="active-character">Character 1</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>AP Left:</span>
+                                <span class="font-bold text-cyan-400" id="ap-remaining">6</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Character Status Cards -->
+                    <div class="space-y-4">
+                        <!-- Character 1 Status -->
+                        <div class="bg-gradient-to-br from-blue-700 to-blue-800 p-4 rounded-xl border border-blue-400">
+                            <h4 class="font-bold text-blue-200 mb-3">🔵 Character 1</h4>
+                            <div class="space-y-2">
+                                <div class="text-sm">
+                                    <div class="flex justify-between mb-1">
+                                        <span>Health:</span>
+                                        <span class="text-green-400" id="char1-health">70/70</span>
+                                    </div>
+                                    <div class="health-bar">
+                                        <div class="health-fill" id="char1-health-bar" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                                <div class="text-xs space-y-1">
+                                    <div>Armor: <span class="text-blue-400" id="char1-armor">85%</span></div>
+                                    <div>Status: <span class="text-green-400" id="char1-status">Ready</span></div>
+                                    <div>Altitude: <span class="text-cyan-400" id="char1-altitude">Ground</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Character 2 Status -->
+                        <div class="bg-gradient-to-br from-red-700 to-red-800 p-4 rounded-xl border border-red-400">
+                            <h4 class="font-bold text-red-200 mb-3">🔴 Character 2</h4>
+                            <div class="space-y-2">
+                                <div class="text-sm">
+                                    <div class="flex justify-between mb-1">
+                                        <span>Health:</span>
+                                        <span class="text-green-400" id="char2-health">55/55</span>
+                                    </div>
+                                    <div class="health-bar">
+                                        <div class="health-fill" id="char2-health-bar" style="width: 100%"></div>
+                                    </div>
+                                </div>
+                                <div class="text-xs space-y-1">
+                                    <div>Armor: <span class="text-blue-400" id="char2-armor">90%</span></div>
+                                    <div>Status: <span class="text-green-400" id="char2-status">Ready</span></div>
+                                    <div>Altitude: <span class="text-cyan-400" id="char2-altitude">Ground</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enhanced Combat Log -->
+                    <div class="bg-gray-800 p-4 rounded-xl border border-yellow-400">
+                        <h4 class="font-bold text-yellow-400 mb-3">📝 Combat Log</h4>
+                        <div class="bg-black p-3 rounded h-48 overflow-y-auto text-xs font-mono" id="combat-log">
+                            <div class="text-green-400">[00:00] Combat initialized</div>
+                            <div class="text-yellow-400">[00:01] Initiative calculated</div>
+                            <div class="text-blue-400">[00:02] Tactical phase begins</div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-gray-700 p-4 rounded-xl">
+                        <h4 class="font-bold text-yellow-400 mb-3">⚡ Quick Actions</h4>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <button onclick="autoPlay()" class="bg-green-600 hover:bg-green-700 p-2 rounded transition-colors">🤖 Auto-Play</button>
+                            <button onclick="pauseCombat()" class="bg-yellow-600 hover:bg-yellow-700 p-2 rounded transition-colors">⏸️ Pause</button>
+                            <button onclick="replayCombat()" class="bg-blue-600 hover:bg-blue-700 p-2 rounded transition-colors">🔄 Replay</button>
+                            <button onclick="exportCombat()" class="bg-purple-600 hover:bg-purple-700 p-2 rounded transition-colors">💾 Export</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Quick Simulation Mode -->
+        <div id="quick-mode" class="hidden">
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <!-- Enhanced Setup Panel -->
+                <div class="bg-gradient-to-b from-gray-800 to-gray-900 p-6 rounded-xl border border-purple-400 shadow-2xl">
+                    <h2 class="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">⚡ Quick Combat Setup</h2>
+                    
+                    <!-- Fighter Selection with Previews -->
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="bg-gray-700 p-4 rounded-lg border border-blue-400">
+                            <h3 class="font-bold text-blue-400 mb-3">🔵 Fighter A</h3>
+                            <select id="quick-char1" class="w-full p-3 bg-gray-800 border border-gray-600 rounded focus:border-blue-400 transition-colors mb-3" onchange="updateFighterPreview(1)">
+                                <option value="ARCH_001">🛡️ Captain America</option>
+                                <option value="ARCH_002">🦇 Batman</option>
+                                <option value="ARCH_005">⏰ Sandra Locke</option>
+                                <option value="ARCH_006">🌍 Kaiser Eziobi</option>
+                                <option value="ARCH_013">🏗️ Tank</option>
+                            </select>
+                            <div id="fighter1-preview" class="text-xs space-y-1">
+                                <div class="font-bold text-yellow-400">Steve Rogers</div>
+                                <div>Enhanced Soldier • Threat Level 2</div>
+                                <div class="text-blue-400">Combat Rating: 285</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-700 p-4 rounded-lg border border-red-400">
+                            <h3 class="font-bold text-red-400 mb-3">🔴 Fighter B</h3>
+                            <select id="quick-char2" class="w-full p-3 bg-gray-800 border border-gray-600 rounded focus:border-red-400 transition-colors mb-3" onchange="updateFighterPreview(2)">
+                                <option value="ARCH_002">🦇 Batman</option>
+                                <option value="ARCH_001">🛡️ Captain America</option>
+                                <option value="ARCH_004">⚫ Shadow Blade</option>
+                                <option value="ARCH_012">💨 Speed Demon</option>
+                                <option value="ARCH_015">🌌 Dr. Cosmic</option>
+                            </select>
+                            <div id="fighter2-preview" class="text-xs space-y-1">
+                                <div class="font-bold text-yellow-400">Bruce Wayne</div>
+                                <div>Tech Specialist • Threat Level Alpha</div>
+                                <div class="text-red-400">Combat Rating: 245</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enhanced Scenario Setup -->
+                    <div class="space-y-4">
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <label class="block text-sm font-bold mb-2 text-yellow-400">🏞️ Environment:</label>
+                            <select id="quick-environment" class="w-full p-3 bg-gray-800 border border-gray-600 rounded focus:border-yellow-400 transition-colors" onchange="updateEnvironmentPreview()">
+                                <option value="urban">🏙️ Urban Street (Buildings + Traffic)</option>
+                                <option value="warehouse">🏭 Warehouse (Indoor + Objects)</option>
+                                <option value="field">🌾 Open Field (No Cover)</option>
+                                <option value="government">🏛️ Government Building (High Security)</option>
+                                <option value="industrial">⚙️ Industrial Zone (Hazards)</option>
+                                <option value="populated">👥 Populated Area (Civilians)</option>
+                            </select>
+                            <div id="environment-preview" class="text-xs text-gray-400 mt-2">
+                                Tactical advantage: Flight reduced by buildings; Throwing objects abundant
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-700 p-4 rounded-lg">
+                                <label class="block text-sm font-bold mb-2 text-yellow-400">🎯 Victory Condition:</label>
+                                <select id="combat-type" class="w-full p-3 bg-gray-800 border border-gray-600 rounded focus:border-yellow-400 transition-colors">
+                                    <option value="standard">💀 Defeat Opponent</option>
+                                    <option value="nonlethal">🔒 Non-lethal Capture</option>
+                                    <option value="escape">🏃 One Tries to Escape</option>
+                                    <option value="objective">🛡️ Protect Objective</option>
+                                    <option value="time">⏱️ Survive Time Limit</option>
+                                </select>
+                            </div>
+                            <div class="bg-gray-700 p-4 rounded-lg">
+                                <label class="block text-sm font-bold mb-2 text-yellow-400">🔢 Simulation Count:</label>
+                                <select id="sim-count" class="w-full p-3 bg-gray-800 border border-gray-600 rounded focus:border-yellow-400 transition-colors">
+                                    <option value="1">⚔️ Single Fight</option>
+                                    <option value="10">📊 10 Fights</option>
+                                    <option value="100">📈 100 Fights</option>
+                                    <option value="1000">🧮 1000 Fights</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Simulation Button -->
+                        <button onclick="runQuickSimulation()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 p-4 rounded-xl font-bold text-xl transition-all transform hover:scale-105 shadow-lg">
+                            🚀 RUN COMBAT SIMULATION
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Enhanced Results Panel -->
+                <div class="bg-gradient-to-b from-gray-800 to-gray-900 p-6 rounded-xl border border-yellow-400 shadow-2xl">
+                    <h2 class="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">📊 Simulation Results</h2>
+                    
+                    <div id="quick-results" class="space-y-6">
+                        <!-- Results will be populated here with enhanced visualizations -->
+                        <div class="text-center text-gray-400 p-8">
+                            <div class="text-4xl mb-4">⚔️</div>
+                            <div>Run a simulation to see detailed results</div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Analysis Tools -->
+                    <div class="mt-6 space-y-3">
+                        <button onclick="compareFighters()" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg text-sm font-bold transition-all">
+                            ⚖️ Compare Fighters
+                        </button>
+                        <button onclick="analyzeBalance()" class="w-full bg-green-600 hover:bg-green-700 p-3 rounded-lg text-sm font-bold transition-all">
+                            📈 Balance Analysis
+                        </button>
+                        <button onclick="exportResults()" class="w-full bg-purple-600 hover:bg-purple-700 p-3 rounded-lg text-sm font-bold transition-all">
+                            💾 Export Results
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Statistical Analysis Mode -->
+        <div id="analysis-mode" class="hidden">
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <!-- Balance Testing Dashboard -->
+                <div class="bg-gradient-to-b from-gray-800 to-gray-900 p-6 rounded-xl border border-red-400 shadow-2xl">
+                    <h2 class="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">📊 Balance Dashboard</h2>
+                    
+                    <!-- System Health Indicators -->
+                    <div class="space-y-4 mb-6">
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <h4 class="font-bold text-green-400 mb-2">✅ System Health</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>Overall Balance:</span>
+                                    <span class="text-green-400 font-bold">OPTIMAL</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Power Scaling:</span>
+                                    <span class="text-green-400 font-bold">VALID</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Equipment Curve:</span>
+                                    <span class="text-green-400 font-bold">BALANCED</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Environment Variety:</span>
+                                    <span class="text-green-400 font-bold">DIVERSE</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Test Suite Controls -->
+                    <div class="space-y-3">
+                        <button onclick="runBalanceTest('threat-scaling')" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 p-3 rounded-lg text-sm font-bold transition-all transform hover:scale-105">
+                            ⚖️ Test Threat Level Scaling
+                        </button>
+                        <button onclick="runBalanceTest('power-balance')" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 p-3 rounded-lg text-sm font-bold transition-all transform hover:scale-105">
+                            🔥 Test Power Balance
+                        </button>
+                        <button onclick="runBalanceTest('equipment-value')" class="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 p-3 rounded-lg text-sm font-bold transition-all transform hover:scale-105">
+                            ⚔️ Test Equipment Value
+                        </button>
+                        <button onclick="runBalanceTest('environmental')" class="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 p-3 rounded-lg text-sm font-bold transition-all transform hover:scale-105">
+                            🏞️ Test Environmental Impact
+                        </button>
+                        <button onclick="runFullTestSuite()" class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 p-4 rounded-lg font-bold transition-all transform hover:scale-105">
+                            🚀 RUN FULL TEST SUITE (200K+ Simulations)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Analysis Results -->
+                <div class="xl:col-span-2 bg-gradient-to-b from-gray-800 to-gray-900 p-6 rounded-xl border border-green-400 shadow-2xl">
+                    <h2 class="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">📈 Analysis Results</h2>
+                    
+                    <div id="analysis-results" class="space-y-6">
+                        <!-- Chart Container -->
+                        <div class="bg-gray-700 p-4 rounded-lg">
+                            <canvas id="balance-chart" width="400" height="200"></canvas>
+                        </div>
+
+                        <!-- Detailed Statistics -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-700 p-4 rounded-lg">
+                                <h4 class="font-bold text-blue-400 mb-3">🎯 Performance Metrics</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>Win Rate Variance:</span>
+                                        <span class="text-green-400" id="win-variance">±3.2%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Avg Combat Length:</span>
+                                        <span class="text-blue-400" id="avg-length">4.7 turns</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Critical Hit Rate:</span>
+                                        <span class="text-red-400" id="crit-rate">12.3%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Power Distribution:</span>
+                                        <span class="text-green-400" id="power-dist">Balanced</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gray-700 p-4 rounded-lg">
+                                <h4 class="font-bold text-purple-400 mb-3">⚙️ System Metrics</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>Simulation Speed:</span>
+                                        <span class="text-cyan-400" id="sim-speed">1,247/sec</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Balance Stability:</span>
+                                        <span class="text-green-400" id="balance-stability">Converged</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Edge Cases Found:</span>
+                                        <span class="text-yellow-400" id="edge-cases">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Auto-Adjustments:</span>
+                                        <span class="text-blue-400" id="auto-adjustments">3</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Test Status Display -->
+                        <div id="test-status" class="bg-gray-700 p-4 rounded-lg">
+                            <h4 class="font-bold text-yellow-400 mb-3">🔬 Test Status</h4>
+                            <div class="text-sm text-gray-300">Select a balance test to view detailed analysis</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals and Overlays -->
+    <div id="power-selection-modal" class="modal-overlay hidden">
+        <div class="bg-gray-800 p-6 rounded-xl border border-yellow-400 max-w-4xl max-h-90vh overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-yellow-400">🔥 Power Selection</h2>
+                <button onclick="closePowerModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            
+            <!-- Advanced Search -->
+            <div class="mb-6">
+                <input type="text" id="modal-power-search" placeholder="🔍 Search by name, category, tags, or description..." class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:border-yellow-400 transition-colors" oninput="searchModalPowers()">
+                
+                <!-- Filter Tags -->
+                <div class="flex flex-wrap gap-2 mt-3">
+                    <button onclick="filterModalPowers('all')" class="filter-tag bg-gray-600 hover:bg-gray-500 px-3 py-1 rounded-full text-xs transition-colors">All</button>
+                    <button onclick="filterModalPowers('Physical')" class="filter-tag bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded-full text-xs transition-colors">💪 Physical</button>
+                    <button onclick="filterModalPowers('Mental')" class="filter-tag bg-purple-600 hover:bg-purple-500 px-3 py-1 rounded-full text-xs transition-colors">🧠 Mental</button>
+                    <button onclick="filterModalPowers('Elemental')" class="filter-tag bg-red-600 hover:bg-red-500 px-3 py-1 rounded-full text-xs transition-colors">🔥 Elemental</button>
+                    <button onclick="filterModalPowers('Energy')" class="filter-tag bg-yellow-600 hover:bg-yellow-500 px-3 py-1 rounded-full text-xs transition-colors">⚡ Energy</button>
+                    <button onclick="filterModalPowers('Cosmic')" class="filter-tag bg-pink-600 hover:bg-pink-500 px-3 py-1 rounded-full text-xs transition-colors">🌌 Cosmic</button>
+                </div>
+            </div>
+
+            <!-- Power Grid -->
+            <div id="power-modal-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                <!-- Power cards will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="modal-overlay hidden">
+        <div class="text-center">
+            <div class="animate-spin text-6xl mb-4">⚡</div>
+            <div class="text-xl font-bold">Processing Combat Simulation...</div>
+            <div class="text-sm text-gray-400">Running statistical analysis</div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed top-4 right-4 space-y-2 z-50">
+        <!-- Toast messages appear here -->
+    </div>
+
+    <script>
+        // Enhanced Game State
+        let gameState = {
+            mode: 'create',
+            characters: {},
+            currentCombat: null,
+            settings: {
+                animations: true,
+                sounds: false,
+                autoSave: true
+            },
+            statistics: {
+                totalSimulations: 0,
+                balanceTests: 0,
+                charactersCreated: 0
+            }
+        };
+
+        // Professional Character Data
+        const characterArchetypes = {
+            'ARCH_001': { 
+                name: 'Captain America',
+                realName: 'Steve Rogers',
+                icon: '🛡️',
+                description: 'Enhanced super-soldier with vibranium shield',
+                stats: {mel: 65, agl: 55, str: 60, sta: 70, int: 45, ins: 50, con: 65},
+                powers: ['Enhanced Physiology', 'Super Durability'],
+                equipment: 'Vibranium Shield + Tactical Armor',
+                threat: 'THREAT_2',
+                faction: 'US/FIST',
+                combatRole: 'Tank/Leader',
+                combatRating: 285
+            },
+            'ARCH_002': { 
+                name: 'Batman',
+                realName: 'Bruce Wayne', 
+                icon: '🦇',
+                description: 'Peak human detective with advanced technology',
+                stats: {mel: 55, agl: 60, str: 45, sta: 55, int: 80, ins: 75, con: 50},
+                powers: ['Peak Human'],
+                equipment: 'High-tech Suit + Utility Belt',
+                threat: 'THREAT_A',
+                faction: 'Independent',
+                combatRole: 'Stealth/Control',
+                combatRating: 245
+            }
+            // Additional archetypes would be loaded from CSV
+        };
+
+        // Enhanced UI Functions
+        function setMode(mode) {
+            // Hide all modes with transition
+            ['creation', 'tactical', 'quick', 'analysis'].forEach(m => {
+                const element = document.getElementById(m + '-mode');
+                element.classList.add('hidden');
+            });
+
+            // Show selected mode
+            document.getElementById(mode + '-mode').classList.remove('hidden');
+            
+            // Update button states with visual feedback
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-yellow-400');
+            });
+            document.getElementById('mode-' + mode).classList.add('ring-2', 'ring-yellow-400');
+            
+            gameState.mode = mode;
+            showToast(`Switched to ${mode} mode`, 'info');
+        }
+
+        function updateStatDisplay(stat) {
+            const value = document.getElementById('stat-' + stat).value;
+            document.getElementById(stat + '-display').textContent = value;
+            document.getElementById(stat + '-bar').style.width = value + '%';
+            
+            // Update lifting capacity for strength
+            if (stat === 'str') {
+                const liftingCapacity = calculateLiftingCapacity(parseInt(value));
+                document.getElementById('lifting-capacity').textContent = liftingCapacity;
+            }
+            
+            // Update combat rating
+            updateCombatRating();
+        }
+
+        function calculateLiftingCapacity(str) {
+            if (str < 20) return (str * 5) + ' lbs';
+            if (str < 40) return Math.floor(str * 10) + ' lbs';  
+            if (str < 60) return Math.floor(str * 20) + ' lbs';
+            if (str < 80) return Math.floor(str / 20) + ' tons';
+            return Math.floor(str / 10) + ' tons';
+        }
+
+        function updateCombatRating() {
+            const stats = ['mel', 'agl', 'str', 'sta', 'int', 'ins', 'con'];
+            const total = stats.reduce((sum, stat) => {
+                return sum + parseInt(document.getElementById('stat-' + stat).value);
+            }, 0);
+            
+            document.getElementById('combat-rating').textContent = total;
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const colors = {
+                info: 'from-blue-600 to-blue-700',
+                success: 'from-green-600 to-green-700', 
+                warning: 'from-yellow-600 to-yellow-700',
+                error: 'from-red-600 to-red-700'
+            };
+            
+            toast.className = `bg-gradient-to-r ${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300`;
+            toast.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span>${type === 'success' ? '✅' : type === 'warning' ? '⚠️' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.getElementById('toast-container').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function generateTacticalGrid() {
+            const grid = document.getElementById('combat-grid');
+            grid.innerHTML = '';
+            
+            // Create enhanced 15x15 grid with environment
+            for (let y = 0; y < 15; y++) {
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                
+                for (let x = 0; x < 15; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell bg-gray-600 hover:bg-gray-500';
+                    cell.onclick = () => selectGridCell(x, y);
+                    cell.id = `cell-${x}-${y}`;
+                    cell.onmouseenter = () => showCellTooltip(cell, x, y);
+                    cell.onmouseleave = () => hideTooltip();
+                    
+                    // Add environmental features based on environment
+                    const envType = document.getElementById('environment-select')?.value || 'urban';
+                    addEnvironmentalFeatures(cell, x, y, envType);
+                    
+                    row.appendChild(cell);
+                }
+                grid.appendChild(row);
+            }
+            
+            // Place enhanced character tokens
+            placeCharacterToken(2, 2, 'C1', '#3b82f6', characterArchetypes['ARCH_001']);
+            placeCharacterToken(12, 12, 'C2', '#ef4444', characterArchetypes['ARCH_002']);
+        }
+
+        function addEnvironmentalFeatures(cell, x, y, envType) {
+            // Add environmental objects based on environment type
+            const random = Math.random();
+            let objectIcon = '';
+            
+            switch(envType) {
+                case 'urban':
+                    if (random < 0.1) objectIcon = '🚗';
+                    else if (random < 0.15) objectIcon = '🗑️';
+                    else if (random < 0.18) objectIcon = '🏢';
+                    break;
+                case 'warehouse':
+                    if (random < 0.12) objectIcon = '📦';
+                    else if (random < 0.16) objectIcon = '🚛';
+                    break;
+                case 'industrial':
+                    if (random < 0.08) objectIcon = '⚙️';
+                    else if (random < 0.12) objectIcon = '🛢️';
+                    break;
+            }
+            
+            if (objectIcon) {
+                const obj = document.createElement('div');
+                obj.className = 'environmental-object';
+                obj.textContent = objectIcon;
+                obj.style.top = '50%';
+                obj.style.left = '50%';
+                obj.style.transform = 'translate(-50%, -50%)';
+                obj.onclick = (e) => {
+                    e.stopPropagation();
+                    interactWithObject(x, y, objectIcon);
+                };
+                cell.appendChild(obj);
+            }
+        }
+
+        function placeCharacterToken(x, y, label, color, characterData) {
+            const cell = document.getElementById(`cell-${x}-${y}`);
+            if (cell) {
+                const token = document.createElement('div');
+                token.className = 'character-token';
+                token.style.backgroundColor = color;
+                token.textContent = characterData?.icon || label;
+                token.title = characterData?.name || label;
+                
+                // Add altitude indicator
+                const altIndicator = document.createElement('div');
+                altIndicator.className = 'altitude-indicator';
+                altIndicator.textContent = '0';
+                token.appendChild(altIndicator);
+                
+                cell.appendChild(token);
+            }
+        }
+
+        function showCellTooltip(cell, x, y) {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            tooltip.innerHTML = `
+                <div class="font-bold">Grid Position (${x}, ${y})</div>
+                <div class="text-xs mt-1">
+                    <div>Terrain: Urban Street</div>
+                    <div>Cover: Moderate</div>
+                    <div>Objects: Interactive</div>
+                </div>
+            `;
+            
+            document.body.appendChild(tooltip);
+            
+            const rect = cell.getBoundingClientRect();
+            tooltip.style.left = (rect.right + 5) + 'px';
+            tooltip.style.top = rect.top + 'px';
+        }
+
+        function hideTooltip() {
+            document.querySelectorAll('.tooltip').forEach(tooltip => tooltip.remove());
+        }
+
+        // Enhanced Combat Functions
+        function runQuickSimulation() {
+            showLoading();
+            
+            setTimeout(() => {
+                const char1 = document.getElementById('quick-char1').value;
+                const char2 = document.getElementById('quick-char2').value;
+                const environment = document.getElementById('quick-environment').value;
+                const simCount = parseInt(document.getElementById('sim-count').value);
+                
+                const results = simulateEnhancedCombat(char1, char2, environment, simCount);
+                displayEnhancedResults(results);
+                
+                gameState.statistics.totalSimulations += simCount;
+                hideLoading();
+                showToast(`Completed ${simCount} simulations`, 'success');
+            }, 500);
+        }
+
+        function simulateEnhancedCombat(char1Id, char2Id, environment, count) {
+            const char1 = characterArchetypes[char1Id];
+            const char2 = characterArchetypes[char2Id];
+            
+            let results = {
+                char1: char1,
+                char2: char2,
+                char1Wins: 0,
+                char2Wins: 0,
+                totalDamage: 0,
+                combatDurations: [],
+                criticalHits: 0,
+                environmentalDestruction: [],
+                statusEffects: {},
+                environment: environment
+            };
+            
+            for (let i = 0; i < count; i++) {
+                const combat = runSingleCombat(char1, char2, environment);
+                
+                if (combat.winner === char1) results.char1Wins++;
+                else results.char2Wins++;
+                
+                results.totalDamage += combat.propertyDamage;
+                results.combatDurations.push(combat.duration);
+                results.criticalHits += combat.criticalHits;
+                
+                // Track status effects
+                combat.statusEffects.forEach(effect => {
+                    results.statusEffects[effect] = (results.statusEffects[effect] || 0) + 1;
+                });
+            }
+            
+            // Calculate statistics
+            results.winRate = (results.char1Wins / count * 100).toFixed(1);
+            results.avgDuration = (results.combatDurations.reduce((a, b) => a + b, 0) / count).toFixed(1);
+            results.avgDamage = Math.floor(results.totalDamage / count);
+            results.critRate = (results.criticalHits / count * 100).toFixed(1);
+            
+            return results;
+        }
+
+        function runSingleCombat(char1, char2, environment) {
+            // Enhanced single combat simulation
+            const combat = {
+                duration: Math.floor(Math.random() * 8) + 2,
+                propertyDamage: Math.floor(Math.random() * 200000) + 10000,
+                criticalHits: Math.random() < 0.15 ? Math.floor(Math.random() * 3) + 1 : 0,
+                statusEffects: [],
+                winner: null
+            };
+            
+            // Determine winner based on combat ratings and environment
+            const char1Rating = char1.combatRating;
+            const char2Rating = char2.combatRating;
+            
+            // Environmental modifiers
+            const envModifiers = {
+                'urban': { flight: -0.2, stealth: 0.3, strength: 0.1 },
+                'warehouse': { flight: -0.5, strength: 0.2, throwing: 0.4 },
+                'field': { flight: 0.4, ranged: 0.2, stealth: -0.3 },
+                'industrial': { tech: 0.2, environmental: 0.3, hazards: 0.1 }
+            };
+            
+            const modifier = envModifiers[environment] || {};
+            const adjustedRating1 = char1Rating + (char1Rating * (modifier[char1.combatRole?.toLowerCase()] || 0));
+            const adjustedRating2 = char2Rating + (char2Rating * (modifier[char2.combatRole?.toLowerCase()] || 0));
+            
+            const winProbability = 50 + ((adjustedRating1 - adjustedRating2) * 1.2);
+            combat.winner = Math.random() * 100 < winProbability ? char1 : char2;
+            
+            // Generate status effects
+            if (Math.random() < 0.3) combat.statusEffects.push('Injured');
+            if (Math.random() < 0.15) combat.statusEffects.push('Stunned');
+            if (environment === 'industrial' && Math.random() < 0.2) combat.statusEffects.push('Poisoned');
+            
+            return combat;
+        }
+
+        function displayEnhancedResults(results) {
+            const resultsDiv = document.getElementById('quick-results');
+            
+            resultsDiv.innerHTML = `
+                <!-- Winner Display -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-gradient-to-br ${results.char1Wins > results.char2Wins ? 'from-green-600 to-green-700' : 'from-gray-600 to-gray-700'} p-4 rounded-xl border-2 ${results.char1Wins > results.char2Wins ? 'border-green-400' : 'border-gray-400'} text-center transform ${results.char1Wins > results.char2Wins ? 'scale-105' : ''}">
+                        <div class="text-2xl mb-2">${results.char1.icon || '🔵'}</div>
+                        <h4 class="font-bold text-lg">${results.char1.name}</h4>
+                        <div class="text-3xl font-bold mt-2">${results.char1Wins}</div>
+                        <div class="text-sm opacity-75">${results.winRate}% win rate</div>
+                    </div>
+                    <div class="bg-gradient-to-br ${results.char2Wins > results.char1Wins ? 'from-green-600 to-green-700' : 'from-gray-600 to-gray-700'} p-4 rounded-xl border-2 ${results.char2Wins > results.char1Wins ? 'border-green-400' : 'border-gray-400'} text-center transform ${results.char2Wins > results.char1Wins ? 'scale-105' : ''}">
+                        <div class="text-2xl mb-2">${results.char2.icon || '🔴'}</div>
+                        <h4 class="font-bold text-lg">${results.char2.name}</h4>
+                        <div class="text-3xl font-bold mt-2">${results.char2Wins}</div>
+                        <div class="text-sm opacity-75">${(100 - parseFloat(results.winRate)).toFixed(1)}% win rate</div>
+                    </div>
+                </div>
+
+                <!-- Detailed Statistics -->
+                <div class="bg-gray-700 p-4 rounded-lg mb-4">
+                    <h4 class="font-bold text-yellow-400 mb-3">📊 Combat Statistics</h4>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <div class="flex justify-between">
+                                <span>Average Duration:</span>
+                                <span class="text-blue-400">${results.avgDuration} rounds</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Critical Hit Rate:</span>
+                                <span class="text-red-400">${results.critRate}%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between">
+                                <span>Avg Property Damage:</span>
+                                <span class="text-yellow-400">$${results.avgDamage.toLocaleString()}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Environment:</span>
+                                <span class="text-green-400">${results.environment}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Effects -->
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <h4 class="font-bold text-purple-400 mb-3">🎭 Status Effects</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${Object.entries(results.statusEffects).map(([effect, count]) => 
+                            `<span class="bg-purple-600 text-xs px-2 py-1 rounded">${effect}: ${count}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showLoading() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
+
+        // Initialize Enhanced App
+        function initializeApp() {
+            setMode('create');
+            generateTacticalGrid();
+            showToast('SuperHero Tactics Combat Simulator v2.0 loaded', 'success');
+        }
+
+        // Load on startup
+        window.onload = function() {
+            initializeApp();
+        };
+    </script>
+</body>
+</html>

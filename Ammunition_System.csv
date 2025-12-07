@@ -1,0 +1,50 @@
+Ammo_Type,Weapon_Compatibility,Ammo_Count_Per_Load,Max_Carrying_Capacity,Cost_Per_Round,Availability,Special_Properties,Damage_Modifier,Legal_Restrictions,Weight_Per_Round
+Standard_Pistol_Rounds,Pistol,15,300 rounds,0.50,Common,Standard ball ammunition,Base damage,Civilian legal in most areas,0.02 lbs
+Hollow_Point_Pistol,Calls,12,240 rounds,0.75,Common,Increased damage vs unarmored,+25% damage vs no armor,Restricted in some jurisdictions,0.025 lbs
+Armor_Piercing_Pistol,Pistol,10,200 rounds,1.25,Military/Police,Reduced armor effectiveness,-2CS to armor protection,Military/Police only,0.03 lbs
+Incendiary_Pistol,Pistol,8,160 rounds,2.00,Restricted,Causes burning status effect,Base damage + burning status,Heavily restricted,0.035 lbs
+Standard_Rifle_Rounds,Rifle; Assault Rifle; Sniper Rifle,30,600 rounds,0.75,Common,Standard military ammunition,Base damage,Civilian legal in most areas,0.04 lbs
+High_Velocity_Rifle,Rifle; Sniper Rifle,25,500 rounds,1.50,Military,Increased range and penetration,+1CS accuracy; +2CS vs armor,Military/Police only,0.05 lbs
+Explosive_Rifle,Rifle; Assault Rifle,20,400 rounds,3.00,Military,Small explosive charge,+50% damage; small area effect,Military only,0.08 lbs
+Tracer_Rifle,Rifle; Machine Gun,25,500 rounds,1.25,Military,Visible projectile path,+1CS accuracy at night; -1CS stealth,Military only,0.045 lbs
+Shotgun_Buckshot,Shotgun,8,160 shells,1.00,Common,Spread pattern; close range effectiveness,+2CS accuracy <10 squares; -2CS accuracy >20 squares,Civilian legal,0.1 lbs
+Shotgun_Slug,Shotgun,5,100 shells,1.50,Common,Single projectile; armor piercing,-1CS vs armor,Civilian legal,0.15 lbs
+Shotgun_Dragon_Breath,Shotgun,4,80 shells,3.50,Restricted,Incendiary spread,Fire damage in cone; burning status,Heavily restricted,0.12 lbs
+Machine_Gun_Belt,Machine Gun; Minigun,200,2000 rounds,0.60,Military,Belt-fed sustained fire,Sustaining fire bonus; overheating risk,Military only,0.035 lbs
+Sniper_Match_Grade,Sniper Rifle,5,100 rounds,5.00,Specialized,Precision manufactured,+2CS accuracy; +1CS damage,Special license required,0.06 lbs
+Energy_Cell_Standard,Energy Weapons,50 shots,500 shots,2.00,High-Tech,No ballistic trajectory,Base energy damage,Technology restricted,0.5 lbs
+Energy_Cell_Overcharged,Energy Weapons,25 shots,250 shots,4.00,High-Tech,Increased power output,+50% damage; weapon overheat risk,Technology restricted,0.6 lbs
+Plasma_Cartridge,Plasma Weapons,10 shots,100 shots,8.00,Ultra-Tech,Superheated plasma,Base plasma damage; burning status,Ultra-tech restricted,0.8 lbs
+Laser_Power_Pack,Laser Weapons,100 shots,1000 shots,3.00,High-Tech,Coherent light beam,Base laser damage; no ballistic drop,Technology restricted,1.0 lbs
+Grenade_Fragmentation,Grenade (thrown),1,12 grenades,25.00,Military,Metal fragments,Base explosion + shrapnel area,Military/Police only,1.0 lbs
+Grenade_Concussion,Grenade (thrown),1,12 grenades,30.00,Military,Non-lethal stunning,Stun effect; minimal damage,Military/Police only,1.2 lbs
+Grenade_Incendiary,Grenade (thrown),1,8 grenades,35.00,Military,Fire spread,Fire damage + burning area,Military only,1.1 lbs
+Grenade_Smoke,Grenade (thrown),1,15 grenades,15.00,Military,Vision obstruction,No damage; vision penalty area,Military/Police,0.8 lbs
+Rocket_Standard,Rocket Launcher,1,6 rockets,150.00,Military,High explosive,Massive damage + large area,Military only,5.0 lbs
+Rocket_Armor_Piercing,Rocket Launcher,1,4 rockets,200.00,Military,Anti-vehicle shaped charge,Extreme armor penetration,Military only,6.0 lbs
+Rocket_Thermobaric,Rocket Launcher,1,3 rockets,300.00,Military,Pressure wave + heat,Area denial + structure damage,Military only,7.0 lbs
+Arrow_Standard,Bow; Crossbow,1,50 arrows,2.00,Common,Silent projectile,Base bow damage,Civilian legal,0.1 lbs
+Arrow_Broadhead,Bow; Crossbow,1,30 arrows,4.00,Common,Hunting arrowhead,+25% damage; bleeding status,Civilian legal,0.12 lbs
+Arrow_Bodkin,Bow; Crossbow,1,40 arrows,3.50,Specialized,Armor piercing point,-1CS vs armor,Specialized archery,0.11 lbs
+Arrow_Explosive,Bow; Crossbow,1,10 arrows,25.00,Military,Small explosive charge,Explosion damage + area effect,Military/Special Forces only,0.2 lbs
+Throwing_Knife,Throwing weapons,1,20 knives,15.00,Common,Balanced for throwing,+1CS accuracy; bleeding status,Civilian legal most areas,0.5 lbs
+Shuriken,Throwing weapons,1,30 shuriken,8.00,Specialized,Multiple projectiles,Can throw multiple in one action,Restricted in some areas,0.1 lbs
+Ammunition_Scarcity_Common,Availability Level,Readily available in most locations,Found in gun stores; military bases; police stations,Standard market price,No supply issues,Civilian and basic military ammunition,Normal cost and availability
+Ammunition_Scarcity_Military,Availability Level,Available only through military/police channels,Requires military authorization or black market,2-5× standard cost,Limited supply chains,Advanced military ammunition,Higher cost; restricted availability
+Ammunition_Scarcity_High_Tech,Availability Level,Available only through advanced technology sources,Requires high-tech faction connections or research,5-10× standard cost,Very limited availability,Energy and plasma ammunition,Expensive; requires technological infrastructure
+Ammunition_Scarcity_Ultra_Rare,Availability Level,Experimental or alien technology ammunition,Requires special research or alien contact,10-50× standard cost,Extremely limited,Exotic and experimental ammunition,Ultra-expensive; requires special circumstances
+Ammunition_Storage_Personal,Storage Type,Carried on character,Limited by character carrying capacity and equipment,Affects character movement and stealth,Personal ammunition management,Individual character ammunition tracking
+Ammunition_Storage_Vehicle,Storage Type,Stored in vehicles,Vehicles can carry larger ammunition supplies,Vehicle storage affects ammunition availability,Team ammunition management,Vehicle-based ammunition supplies
+Ammunition_Storage_Base,Storage Type,Stored at headquarters,Unlimited storage at faction base,Base storage affects mission preparation,Faction ammunition management,Headquarters ammunition stockpiles
+Ammunition_Resupply_Field,Resupply Method,Acquiring ammunition during missions,Finding ammunition in environment or from defeated enemies,Scavenged ammunition quality varies,Tactical ammunition management,Mission-based ammunition acquisition
+Ammunition_Resupply_Purchase,Resupply Method,Buying ammunition between missions,Standard commercial or military procurement,Cost affects faction budget,Economic ammunition management,Market-based ammunition acquisition
+Ammunition_Resupply_Manufacturing,Resupply Method,Creating ammunition through technology trees,Engineering careers can manufacture specialized ammunition,Manufacturing quality depends on technology level,Technology-based ammunition production,Research and development ammunition creation
+Combat_Integration_Reload_Actions,Combat Mechanic,Reloading weapons costs action points,Reloading interrupts combat flow,Reload times from weapon database affect tactical decisions,Action economy ammunition management,Weapon reload time integration
+Combat_Integration_Ammunition_Tracking,Combat Mechanic,Track ammunition expenditure during combat,Characters can run out of ammunition,Empty weapons require reload or weapon switching,Tactical resource management,Ammunition consumption tracking during combat
+Combat_Integration_Ammunition_Types,Combat Mechanic,Different ammunition provides different tactical options,Armor-piercing vs area effect vs incendiary,Ammunition choice affects combat strategy,Tactical ammunition selection,Ammunition effect integration
+Investigation_Integration_Ballistics,Investigation Mechanic,Ammunition forensics and ballistic analysis,Different ammunition leaves different evidence,Ballistic evidence affects investigation outcomes,Investigation forensics integration,Ammunition forensic analysis
+Investigation_Integration_Ammunition_Tracking,Investigation Mechanic,Ammunition purchases can be traced,Ammunition procurement creates paper trail,Ammunition purchases affect investigation vulnerability,Legal investigation integration,Ammunition purchase tracking and legal implications
+Legal_Integration_Ammunition_Possession,Legal Framework,Legal restrictions on ammunition types,Different jurisdictions restrict different ammunition,Ammunition possession affects legal status,Legal system ammunition regulation,Jurisdiction-based ammunition laws
+Legal_Integration_Ammunition_Use,Legal Framework,Legal consequences for ammunition use,Different ammunition creates different legal liability,Ammunition choice affects legal consequences,Legal consequence ammunition integration,Ammunition type affects legal liability
+Economic_Integration_Ammunition_Costs,Economic System,Ammunition costs affect faction budget,Ammunition expenses scale with team size and mission frequency,Ammunition costs create economic tactical decisions,Economic system ammunition integration,Ammunition economic impact on faction resources
+Supply_Chain_Integration,Logistical System,Ammunition supply affected by faction relationships,Allied nations provide ammunition; Enemy nations restrict supply,Political relationships affect ammunition availability,Political system ammunition integration,Geopolitical ammunition supply chain considerations

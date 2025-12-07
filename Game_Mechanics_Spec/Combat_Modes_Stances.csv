@@ -1,0 +1,73 @@
+Section,Description
+---COMBAT MODES AND STANCES SYSTEM---,Toggle modes and persistent stances affecting combat performance
+
+===TOGGLE MODES (Cost AP Each Turn to Maintain)===
+Mode_Name,AP_Cost_Per_Turn,Activation_Cost,Offense_Modifier,Defense_Modifier,Movement_Modifier,Perception_Modifier,Special_Effect,Duration,Cancellation
+Alert_Mode,2,0,+0CS,+2CS dodge,Half movement,+2CS perception,Can react to ambush; first turn interrupt possible,Until cancelled or unconscious,Free action
+Overwatch,4,0,+0CS,+0CS,Cannot move,+1CS perception,Interrupt enemy movement with ranged attack,Until triggered or cancelled,Automatic on trigger
+Aim_Mode,2,0,+1CS per turn (max +3CS),+0CS,Cannot move,+0CS,Stacking accuracy bonus; lost if interrupted,Until attack made,Attack or damage taken
+Suppressive_Fire,3,3 (burst),+0CS,+0CS,Cannot move,+0CS,Forces targets in cone to stay in cover or take fire,-1CS,End of turn,End of turn
+Guard_Ally,2,0,+0CS,+0CS,Must stay within 2 squares of ally,+0CS,Take hits for adjacent ally; redirect attacks to self,Until cancelled,Free action
+Ready_Action,2,0,+0CS,+0CS,Cannot move,+0CS,Declare trigger and action; interrupt when trigger occurs,Until triggered or end of round,Trigger or round end
+
+===PERSISTENT STANCES (Set Once Until Changed)===
+Stance_Name,Change_Cost_AP,Offense_Modifier,Defense_Modifier,Movement_Modifier,Grapple_Modifier,Special_Effect,Restrictions
+Neutral_Stance,0,+0CS,+0CS,Normal,+0CS,Default stance; no bonuses or penalties,None
+Defensive_Stance,1,−2CS attack,+2CS defense,Normal,+1CS counter-grapple,Prioritize defense over offense; can still attack,Cannot charge
+Aggressive_Stance,1,+2CS attack,−2CS defense,Normal,-1CS defense vs grapple,All-out attack priority; leave self open,Cannot use Overwatch
+Grappling_Stance,1,-1CS ranged,+1CS melee defense,Normal,+2CS counter-grapple,Ready to clinch or counter takedowns,Hands must be free
+Low_Stance,1,-1CS ranged,+2CS vs ranged,Half movement,+1CS vs takedowns,Crouched low; harder to hit with guns,Cannot sprint
+Mobile_Stance,1,+0CS,−1CS defense,+2 movement,−1CS vs grapple,Keep moving; harder to pin down,Cannot use Overwatch or Aim
+Power_Stance,1,+1CS melee damage,-1CS defense,Half movement,+1CS grapple initiate,Planted feet for stronger hits,Cannot dodge (only block/parry)
+Sniper_Stance,2,+2CS ranged at Long+,−2CS melee defense,Cannot move,−3CS vs grapple,Optimal long-range accuracy,Must be stationary; lose if move
+
+===STANCE COMBINATIONS (Cannot Stack Multiple)===
+Rule,Description
+One_Stance_Only,Character can only be in one stance at a time
+Mode_Plus_Stance,Toggle modes CAN be combined with stances (e.g. Alert + Defensive)
+Incompatible_Pairs,Some modes conflict: Overwatch requires stationary (conflicts with Mobile_Stance)
+Stance_Change,Changing stance costs 1 AP (free for returning to Neutral)
+
+===CHARACTER-SPECIFIC MODES (Based on Powers/Training)===
+Mode_Name,Requirement,AP_Cost,Effect,Duration,Special
+Berserk_Mode,Certain powers or triggers,0 (triggered),+3CS melee damage; +2CS STR; must attack nearest target,Until calmed or exhausted,Cannot distinguish friend from foe
+Focus_Mode,CON 40+ or Psychic powers,3,+2CS accuracy; immune to fear/charm; no defensive bonuses,3 turns,Cannot be distracted
+Stealth_Mode,Stealth skill or Invisibility,2/turn,+3CS stealth; half movement; attacks break stealth,Until attack or detected,Revealed by attacks or detection
+Flight_Combat_Mode,Flight power,0,+2CS vs ground; -1CS vs other flyers; ground melee cannot reach,While flying,Altitude requirements apply
+Super_Speed_Mode,Super Speed power,2/turn,Multiple actions possible; +4CS dodge,Power duration,May cause sonic boom damage
+
+===AP BUDGET EXAMPLES===
+Scenario,Mode_Cost,Action_Cost,Total_AP,Notes
+Alert + Move + Attack,2 (Alert),1 (move) + 3 (attack),6,Full turn with alert active
+Overwatch + Nothing,4 (Overwatch),0,4,Waiting to interrupt
+Defensive Stance + Move + Attack,0 (already set),1 + 3,4,2 AP remaining for extra action
+Aim + Aim + Attack,2 + 2,3,7,Exceeds budget - cannot do in one turn
+Change Stance + Attack,1 (change),3 (attack),4,Efficient stance switch
+
+===MODE INTERACTIONS WITH GRAPPLING===
+Mode_or_Stance,Grappling_Effect,Notes
+Alert_Mode,+2CS to avoid surprise grapple,Can react to grapple attempts
+Defensive_Stance,+1CS vs grapple initiation,Better counter-grapple position
+Aggressive_Stance,−1CS vs grapple,Left open to takedowns
+Grappling_Stance,+2CS counter-grapple; ready clinch,Best for anticipating grapples
+Low_Stance,+1CS vs takedowns,-1CS vs submission attempts
+Overwatch,Cannot react to melee/grapple,Only triggers on ranged/movement
+
+===MODE INTERACTIONS WITH MARTIAL ARTS===
+Martial_Art,Recommended_Stance,Bonus_When_Combined,Notes
+Wrestling,Grappling_Stance,+3CS total grapple initiate,Best for takedown fighters
+Judo,Defensive_Stance,+2CS throw defense; +3CS reversal,Counter-fighting style
+Boxing,Aggressive_Stance,+4CS punching attacks,All-out offense
+Aikido,Defensive_Stance,+5CS defense; +4CS reversal,Ultimate defensive combo
+Capoeira,Mobile_Stance,+3CS kicks; +3CS escape,Keep moving style
+Ninjitsu,Stealth_Mode,+5CS stealth attacks,Assassination approach
+Sniper (ranged),Sniper_Stance,+5CS at extreme range,Long-range specialists
+Krav Maga,Aggressive_Stance,+5CS unarmed; +4CS escapes,Brutal efficiency
+
+===STATUS EFFECTS AFFECTING MODES===
+Status_Effect,Mode_Restriction,Notes
+Stunned,All modes cancelled,Cannot maintain any mode while stunned
+Grappled,Most modes cancelled; Grappling actions only,Can maintain Berserk
+Frightened,Cannot use Aggressive/Overwatch,Fear restricts offensive modes
+Prone,Cannot use Sniper/Mobile stance,Must stand first
+Exhausted,AP costs doubled for modes,Harder to maintain focus

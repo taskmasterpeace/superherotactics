@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHT Tactical AI Simulation Engine</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Consolas', monospace; background: #0a0a15; color: #e0e0e0; padding: 10px; }
+        h1 { color: #ff4444; margin-bottom: 10px; font-size: 20px; }
+        h2 { color: #44aaff; margin: 10px 0 5px 0; font-size: 16px; }
+        .container { display: flex; gap: 15px; flex-wrap: wrap; }
+        .map-container { flex: 0 0 auto; }
+        .sidebar { flex: 1; min-width: 350px; max-width: 500px; }
+
+        #neighborhoodMap {
+            display: grid;
+            gap: 1px;
+            background: #222;
+            border: 2px solid #ff4444;
+            width: fit-content;
+        }
+        .cell {
+            width: 18px; height: 18px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 9px; cursor: pointer;
+            position: relative;
+        }
+        .cell.grass { background: #1a3a1a; }
+        .cell.street { background: #333; }
+        .cell.floor { background: #2a2a3a; }
+        .cell.wall { background: #555; }
+        .cell.door { background: #8B4513; cursor: pointer; }
+        .cell.door.open { background: #5a3a1a; }
+        .cell.window { background: #4a6a8a; }
+        .cell.stairs { background: #6a5a4a; }
+        .cell.furniture { background: #4a4a5a; }
+        .cell.basement { background: #1a1a2a; }
+
+        .unit {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 8px;
+            border: 1px solid #fff;
+            position: absolute;
+            z-index: 10;
+        }
+        .unit.defender { background: #0066cc; }
+        .unit.attacker { background: #cc0000; }
+        .unit.civilian { background: #00cc66; }
+        .unit.dead { opacity: 0.3; }
+
+        .sound-ring {
+            position: absolute;
+            border: 1px solid rgba(255,255,0,0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: soundPulse 1s ease-out forwards;
+        }
+        @keyframes soundPulse {
+            from { transform: scale(0.5); opacity: 1; }
+            to { transform: scale(2); opacity: 0; }
+        }
+
+        .detected { box-shadow: 0 0 8px #ff0; }
+        .alert { box-shadow: 0 0 8px #f00; }
+
+        .panel { background: #151525; border: 1px solid #333; border-radius: 5px; padding: 10px; margin-bottom: 10px; }
+        .panel h3 { color: #ff8844; margin-bottom: 8px; font-size: 13px; }
+
+        button {
+            background: #cc3333; color: white; border: none;
+            padding: 6px 12px; border-radius: 4px; cursor: pointer;
+            font-size: 11px; margin: 2px;
+        }
+        button:hover { background: #ee5555; }
+        button.blue { background: #3366cc; }
+        button.blue:hover { background: #5588ee; }
+        button.green { background: #33aa33; }
+        button.green:hover { background: #55cc55; }
+
+        select, input {
+            background: #1a1a2a; color: #fff; border: 1px solid #444;
+            padding: 4px; border-radius: 3px; font-size: 11px;
+        }
+
+        .log {
+            background: #0a0a15; border: 1px solid #333; border-radius: 3px;
+            padding: 8px; max-height: 300px; overflow-y: auto; font-size: 10px;
+            line-height: 1.4;
+        }
+        .log-entry { padding: 2px 0; border-bottom: 1px solid #1a1a2a; }
+        .log-entry.combat { color: #ff6666; }
+        .log-entry.move { color: #66ff66; }
+        .log-entry.sound { color: #ffff66; }
+        .log-entry.search { color: #66ffff; }
+        .log-entry.ai { color: #ff66ff; }
+        .log-entry.important { color: #ff8844; font-weight: bold; }
+
+        .stats { font-size: 11px; }
+        .stats-row { display: flex; justify-content: space-between; padding: 2px 0; }
+        .stats-label { color: #888; }
+
+        .house-indicator {
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            font-size: 8px; color: #888; white-space: nowrap;
+        }
+
+        #turnInfo {
+            background: #1a1a3a; padding: 8px; border-radius: 5px;
+            margin-bottom: 10px; font-size: 12px;
+        }
+        #turnInfo span { color: #ffaa44; }
+
+        .legend { display: flex; flex-wrap: wrap; gap: 8px; font-size: 10px; margin-top: 10px; }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .legend-color { width: 12px; height: 12px; border: 1px solid #666; }
+    </style>
+</head>
+<body>
+    <h1>SHT Tactical AI Simulation Engine v1.0</h1>
+
+    <div id="turnInfo">
+        Turn: <span id="turnNum">0</span> |
+        Phase: <span id="phase">Setup</span> |
+        Scenario: <span id="scenarioName">None</span>
+    </div>
+
+    <div class="container">
+        <div class="map-container">
+            <div id="neighborhoodMap"></div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background:#1a3a1a;"></div>Grass</div>
+                <div class="legend-item"><div class="legend-color" style="background:#333;"></div>Street</div>
+                <div class="legend-item"><div class="legend-color" style="background:#2a2a3a;"></div>Floor</div>
+                <div class="legend-item"><div class="legend-color" style="background:#555;"></div>Wall</div>
+                <div class="legend-item"><div class="legend-color" style="background:#8B4513;"></div>Door</div>
+                <div class="legend-item"><div class="legend-color" style="background:#4a4a5a;"></div>Furniture</div>
+                <div class="legend-item"><div class="legend-color unit defender" style="width:12px;height:12px;"></div>Defender</div>
+                <div class="legend-item"><div class="legend-color unit attacker" style="width:12px;height:12px;"></div>Attacker</div>
+                <div class="legend-item"><div class="legend-color unit civilian" style="width:12px;height:12px;"></div>VIP</div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="panel">
+                <h3>Scenario Selection</h3>
+                <button onclick="loadScenario('swat')">SWAT Raid</button>
+                <button onclick="loadScenario('superhero')" class="blue">Superhero Battle</button>
+                <button onclick="loadScenario('scientist')" class="green">Scientist Defense</button>
+                <br><br>
+                <button onclick="runTurn()">Run 1 Turn</button>
+                <button onclick="runSimulation(10)">Run 10 Turns</button>
+                <button onclick="runSimulation(50)">Run Full Sim</button>
+                <button onclick="resetSimulation()">Reset</button>
+            </div>
+
+            <div class="panel">
+                <h3>AI Settings</h3>
+                <div class="stats-row">
+                    <span class="stats-label">Attacker Aggression:</span>
+                    <input type="range" id="attackerAggro" min="1" max="10" value="5" style="width:80px;">
+                    <span id="attackerAggroVal">5</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Defender Caution:</span>
+                    <input type="range" id="defenderCaution" min="1" max="10" value="5" style="width:80px;">
+                    <span id="defenderCautionVal">5</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Power Detection Range:</span>
+                    <input type="number" id="powerDetectRange" value="15" style="width:50px;"> squares
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Simulation Status</h3>
+                <div class="stats" id="simStats">
+                    <div class="stats-row"><span class="stats-label">Defenders Alive:</span><span id="defAlive">-</span></div>
+                    <div class="stats-row"><span class="stats-label">Attackers Alive:</span><span id="atkAlive">-</span></div>
+                    <div class="stats-row"><span class="stats-label">VIP Status:</span><span id="vipStatus">-</span></div>
+                    <div class="stats-row"><span class="stats-label">Houses Searched:</span><span id="housesSearched">-</span></div>
+                    <div class="stats-row"><span class="stats-label">Sounds Heard:</span><span id="soundsHeard">-</span></div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Combat Log</h3>
+                <div class="log" id="combatLog"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ============================================
+// TACTICAL AI SIMULATION ENGINE
+// ============================================
+
+const MAP_WIDTH = 50;
+const MAP_HEIGHT = 40;
+const CELL_SIZE = 18;
+
+let map = [];
+let units = [];
+let houses = [];
+let doors = [];
+let turn = 0;
+let scenario = null;
+let simulationComplete = false;
+let soundEvents = [];
+let searchedHouses = new Set();
+
+// Sound system constants (from Sound_Detection_System.csv)
+const SOUNDS = {
+    walking: 30, running: 50, door_open: 40, door_slam: 70,
+    gunshot: 140, melee: 60, power_low: 70, power_high: 100,
+    talking: 50, scream: 80
+};
+
+const MATERIAL_DAMPENING = {
+    wall: 40, door_closed: 25, door_open: 0, window: 10
+};
+
+// ============================================
+// MAP GENERATION
+// ============================================
+
+function initMap() {
+    map = [];
+    for (let y = 0; y < MAP_HEIGHT; y++) {
+        map[y] = [];
+        for (let x = 0; x < MAP_WIDTH; x++) {
+            map[y][x] = { type: 'grass', door: null, furniture: null, searched: false };
+        }
+    }
+}
+
+function createNeighborhood() {
+    initMap();
+    houses = [];
+    doors = [];
+
+    // Create street in the middle (horizontal)
+    for (let x = 0; x < MAP_WIDTH; x++) {
+        for (let y = 18; y < 22; y++) {
+            map[y][x].type = 'street';
+        }
+    }
+
+    // Create 9 houses - 4 on top, 5 on bottom (different sizes)
+    const houseConfigs = [
+        // Top row (y: 2-16)
+        { x: 2, y: 2, w: 10, h: 12, hasBasement: true, name: 'H1' },
+        { x: 14, y: 4, w: 8, h: 10, hasBasement: false, name: 'H2' },
+        { x: 24, y: 2, w: 12, h: 14, hasBasement: true, name: 'H3' },
+        { x: 38, y: 3, w: 9, h: 11, hasBasement: false, name: 'H4' },
+        // Bottom row (y: 24-38)
+        { x: 2, y: 24, w: 9, h: 12, hasBasement: false, name: 'H5' },
+        { x: 13, y: 25, w: 11, h: 11, hasBasement: true, name: 'H6' },
+        { x: 26, y: 24, w: 8, h: 10, hasBasement: false, name: 'H7' },
+        { x: 36, y: 23, w: 12, h: 14, hasBasement: true, name: 'H8' },
+        { x: 18, y: 30, w: 6, h: 7, hasBasement: false, name: 'H9' } // Small house
+    ];
+
+    houseConfigs.forEach((config, idx) => {
+        createHouse(config);
+        houses.push({ ...config, id: idx, searched: false });
+    });
+}
+
+function createHouse(config) {
+    const { x, y, w, h, hasBasement, name } = config;
+
+    // Walls
+    for (let dy = 0; dy < h; dy++) {
+        for (let dx = 0; dx < w; dx++) {
+            const px = x + dx;
+            const py = y + dy;
+            if (py >= MAP_HEIGHT || px >= MAP_WIDTH) continue;
+
+            if (dy === 0 || dy === h-1 || dx === 0 || dx === w-1) {
+                map[py][px].type = 'wall';
+            } else {
+                map[py][px].type = 'floor';
+            }
+        }
+    }
+
+    // Interior walls (divide into rooms)
+    if (w > 6) {
+        const midX = x + Math.floor(w/2);
+        for (let dy = 1; dy < h-1; dy++) {
+            if (dy !== Math.floor(h/2)) { // Leave door gap
+                if (midX < MAP_WIDTH) map[y+dy][midX].type = 'wall';
+            }
+        }
+    }
+
+    // Front door (facing street)
+    const doorY = y < 20 ? y + h - 1 : y;
+    const doorX = x + Math.floor(w/2);
+    if (doorY < MAP_HEIGHT && doorX < MAP_WIDTH) {
+        map[doorY][doorX].type = 'door';
+        map[doorY][doorX].door = { open: false, locked: false };
+        doors.push({ x: doorX, y: doorY, house: name });
+    }
+
+    // Back door
+    const backDoorY = y < 20 ? y : y + h - 1;
+    const backDoorX = x + Math.floor(w/3);
+    if (backDoorY < MAP_HEIGHT && backDoorX < MAP_WIDTH && w > 6) {
+        map[backDoorY][backDoorX].type = 'door';
+        map[backDoorY][backDoorX].door = { open: false, locked: false };
+        doors.push({ x: backDoorX, y: backDoorY, house: name });
+    }
+
+    // Furniture (cover)
+    const furnitureCount = Math.floor(w * h / 20);
+    for (let i = 0; i < furnitureCount; i++) {
+        const fx = x + 2 + Math.floor(Math.random() * (w - 4));
+        const fy = y + 2 + Math.floor(Math.random() * (h - 4));
+        if (fy < MAP_HEIGHT && fx < MAP_WIDTH && map[fy][fx].type === 'floor') {
+            map[fy][fx].furniture = { type: 'cover', cover: 2 };
+        }
+    }
+
+    // Basement stairs
+    if (hasBasement) {
+        const stairX = x + 1;
+        const stairY = y + 1;
+        if (stairY < MAP_HEIGHT && stairX < MAP_WIDTH) {
+            map[stairY][stairX].type = 'stairs';
+            map[stairY][stairX].basement = true;
+        }
+    }
+}
+
+// ============================================
+// UNIT SYSTEM
+// ============================================
+
+function createUnit(config) {
+    return {
+        id: units.length,
+        name: config.name,
+        team: config.team, // 'defender', 'attacker', 'civilian'
+        x: config.x,
+        y: config.y,
+        hp: config.hp || 100,
+        maxHp: config.hp || 100,
+        ap: 6,
+        maxAp: 6,
+        stats: {
+            MEL: config.MEL || 30,
+            AGL: config.AGL || 30,
+            STR: config.STR || 30,
+            STA: config.STA || 30,
+            INS: config.INS || 30,
+            CON: config.CON || 30
+        },
+        weapon: config.weapon || 'pistol',
+        stance: 'neutral',
+        mode: null,
+        isSuper: config.isSuper || false,
+        powers: config.powers || [],
+        powerDetectable: config.powerDetectable || false,
+        alive: true,
+        hasActed: false,
+        knownEnemyPositions: [],
+        heardSounds: [],
+        currentHouse: null,
+        objective: config.objective || null,
+        aiState: 'idle',
+        searchedRooms: []
+    };
+}
+
+// ============================================
+// SOUND SYSTEM
+// ============================================
+
+function generateSound(x, y, decibels, source) {
+    soundEvents.push({ x, y, decibels, source, turn });
+
+    // Check which units can hear this
+    units.forEach(unit => {
+        if (!unit.alive) return;
+
+        const dist = getDistance(unit.x, unit.y, x, y);
+        const hearingRange = (unit.stats.INS / 5) * (decibels / 30);
+
+        // Check for walls between
+        let dampening = 0;
+        const wallsBlocking = countWallsBetween(unit.x, unit.y, x, y);
+        dampening = wallsBlocking * MATERIAL_DAMPENING.wall;
+
+        const effectiveRange = (unit.stats.INS / 5) * ((decibels - dampening) / 30);
+
+        if (dist <= effectiveRange) {
+            unit.heardSounds.push({
+                x, y, decibels, source, turn,
+                direction: getDirection(unit.x, unit.y, x, y),
+                certainty: dist <= effectiveRange/2 ? 'exact' : 'general'
+            });
+            log(`${unit.name} heard ${source} from ${unit.heardSounds[unit.heardSounds.length-1].direction}`, 'sound');
+        }
+    });
+}
+
+function countWallsBetween(x1, y1, x2, y2) {
+    let walls = 0;
+    const dx = Math.abs(x2 - x1);
+    const dy = Math.abs(y2 - y1);
+    const sx = x1 < x2 ? 1 : -1;
+    const sy = y1 < y2 ? 1 : -1;
+    let err = dx - dy;
+    let x = x1, y = y1;
+
+    while (x !== x2 || y !== y2) {
+        const e2 = 2 * err;
+        if (e2 > -dy) { err -= dy; x += sx; }
+        if (e2 < dx) { err += dx; y += sy; }
+        if (x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
+            if (map[y][x].type === 'wall') walls++;
+            if (map[y][x].type === 'door' && map[y][x].door && !map[y][x].door.open) walls += 0.5;
+        }
+    }
+    return walls;
+}
+
+// ============================================
+// AI LOGIC (IMPROVED v2)
+// ============================================
+
+// Tactical AI state machine
+const AI_STATES = {
+    IDLE: 'idle',
+    SEARCHING: 'searching',
+    INVESTIGATING: 'investigating',
+    COMBAT: 'combat',
+    BREACHING: 'breaching',
+    DEFENDING: 'defending',
+    AMBUSH: 'ambush',
+    RETREATING: 'retreating',
+    PROTECTING: 'protecting'
+};
+
+function runAI(unit) {
+    if (!unit.alive || unit.hasActed) return;
+
+    const aggression = parseInt(document.getElementById('attackerAggro').value);
+    const caution = parseInt(document.getElementById('defenderCaution').value);
+
+    // Update unit's current house
+    unit.currentHouse = getCurrentHouse(unit.x, unit.y);
+
+    if (unit.team === 'attacker') {
+        runAttackerAI(unit, aggression);
+    } else if (unit.team === 'defender') {
+        runDefenderAI(unit, caution);
+    }
+
+    unit.hasActed = true;
+}
+
+function getCurrentHouse(x, y) {
+    return houses.find(h => isInsideHouse(x, y, h)) || null;
+}
+
+function runAttackerAI(unit, aggression) {
+    const enemies = getVisibleEnemies(unit);
+    const powerDetectRange = parseInt(document.getElementById('powerDetectRange').value);
+    const teammates = units.filter(u => u.team === unit.team && u.alive && u.id !== unit.id);
+
+    // Power detection - check for detectable powers
+    const detectablePowers = units.filter(u =>
+        u.alive && u.team !== unit.team && u.powerDetectable &&
+        getDistance(unit.x, unit.y, u.x, u.y) <= powerDetectRange
+    );
+
+    if (detectablePowers.length > 0) {
+        const nearest = detectablePowers.sort((a,b) =>
+            getDistance(unit.x, unit.y, a.x, a.y) - getDistance(unit.x, unit.y, b.x, b.y)
+        )[0];
+
+        // Check if this is a new detection
+        const alreadyKnown = unit.knownEnemyPositions.some(p =>
+            Math.abs(p.x - nearest.x) < 3 && Math.abs(p.y - nearest.y) < 3
+        );
+
+        if (!alreadyKnown) {
+            log(`${unit.name} DETECTS power signature! Direction: ${getDirection(unit.x, unit.y, nearest.x, nearest.y)}`, 'ai');
+            unit.knownEnemyPositions.push({ x: nearest.x, y: nearest.y, turn, source: 'power_detect' });
+
+            // Share with nearby teammates
+            teammates.forEach(t => {
+                if (getDistance(unit.x, unit.y, t.x, t.y) <= 10) {
+                    t.knownEnemyPositions.push({ x: nearest.x, y: nearest.y, turn, source: 'shared' });
+                }
+            });
+        }
+    }
+
+    // Priority 1: Combat - engage visible enemies
+    if (enemies.length > 0) {
+        unit.aiState = AI_STATES.COMBAT;
+
+        // Tactical decision: engage or take cover?
+        const myHealth = unit.hp / unit.maxHp;
+        const enemyCount = enemies.length;
+
+        if (myHealth < 0.3 || (enemyCount > 2 && aggression < 7)) {
+            // Take cover and shoot
+            findCover(unit, enemies[0]);
+            if (unit.ap >= 3) {
+                attackTarget(unit, enemies[0]);
+            }
+        } else if (aggression >= 5) {
+            attackTarget(unit, enemies[0]);
+        }
+        return;
+    }
+
+    // Priority 2: Investigate recent sounds
+    const recentSounds = unit.heardSounds.filter(s => turn - s.turn <= 2);
+    if (recentSounds.length > 0 && unit.aiState !== AI_STATES.BREACHING) {
+        const loudestRecent = recentSounds.sort((a, b) => b.decibels - a.decibels)[0];
+        unit.aiState = AI_STATES.INVESTIGATING;
+
+        // Move quietly if possible
+        if (unit.ap >= 2) {
+            moveQuietly(unit, loudestRecent.x, loudestRecent.y);
+            log(`${unit.name} quietly investigating ${loudestRecent.source}`, 'ai');
+        } else {
+            moveTowardAStar(unit, loudestRecent.x, loudestRecent.y);
+        }
+        return;
+    }
+
+    // Priority 3: Follow power detection leads
+    if (unit.knownEnemyPositions.length > 0) {
+        const recentPositions = unit.knownEnemyPositions.filter(p => turn - p.turn <= 5);
+        if (recentPositions.length > 0) {
+            const target = recentPositions[recentPositions.length - 1];
+            unit.aiState = AI_STATES.INVESTIGATING;
+
+            // Check if we should breach
+            const targetHouse = getCurrentHouse(target.x, target.y);
+            if (targetHouse && !isInsideHouse(unit.x, unit.y, targetHouse)) {
+                breachHouse(unit, targetHouse, teammates);
+            } else {
+                moveTowardAStar(unit, target.x, target.y);
+            }
+            return;
+        }
+    }
+
+    // Priority 4: Systematic house search
+    unit.aiState = AI_STATES.SEARCHING;
+    searchForTargetTactical(unit, teammates);
+}
+
+function runDefenderAI(unit, caution) {
+    const vip = units.find(u => u.team === 'civilian' && u.alive);
+    const enemies = getVisibleEnemies(unit);
+    const teammates = units.filter(u => u.team === unit.team && u.alive && u.id !== unit.id);
+
+    // Check if enemies are detected nearby (through sounds)
+    const recentEnemySounds = unit.heardSounds.filter(s =>
+        turn - s.turn <= 3 && s.decibels >= 40
+    );
+
+    // Priority 1: Combat with visible enemies
+    if (enemies.length > 0) {
+        unit.aiState = AI_STATES.COMBAT;
+
+        const myHealth = unit.hp / unit.maxHp;
+
+        // Decide: engage, defend, or retreat
+        if (myHealth < 0.25 && caution >= 5) {
+            // Retreat toward VIP or cover
+            if (vip) {
+                moveTowardAStar(unit, vip.x, vip.y);
+                log(`${unit.name} retreating to protect VIP`, 'ai');
+            }
+        } else if (caution <= 4) {
+            // Aggressive engagement
+            if (unit.stance !== 'aggressive') {
+                unit.stance = 'aggressive';
+                log(`${unit.name} takes aggressive stance (+2CS attack, -2CS defense)`, 'ai');
+            }
+            attackTarget(unit, enemies[0]);
+        } else {
+            // Defensive engagement
+            if (unit.stance !== 'defensive') {
+                unit.stance = 'defensive';
+                unit.ap -= 1;
+                log(`${unit.name} takes defensive stance (+2CS defense)`, 'ai');
+            }
+            attackTarget(unit, enemies[0]);
+        }
+        return;
+    }
+
+    // Special behavior for Decoy unit
+    if (unit.name === 'Decoy') {
+        // Decoy should stay visible and draw attention
+        if (unit.mode !== 'alert') {
+            unit.mode = 'alert';
+            unit.ap -= 2;
+        }
+        // Occasionally make noise to attract attackers
+        if (turn % 3 === 0 && Math.random() < 0.5) {
+            generateSound(unit.x, unit.y, 50, 'movement');
+            log(`${unit.name} creates distraction noise`, 'ai');
+        }
+        return;
+    }
+
+    // Priority 2: Protect VIP
+    if (vip) {
+        const distToVip = getDistance(unit.x, unit.y, vip.x, vip.y);
+        const enemiesDetected = recentEnemySounds.length > 0 ||
+            units.some(u => u.team === 'attacker' && u.alive &&
+                teammates.some(t => t.knownEnemyPositions.length > 0));
+
+        if (unit.name === 'Guardian') {
+            // Guardian stays close to VIP
+            unit.aiState = AI_STATES.PROTECTING;
+            if (distToVip > 3) {
+                moveTowardAStar(unit, vip.x, vip.y);
+            } else {
+                // Set up defensive position
+                if (unit.stance !== 'defensive') {
+                    unit.stance = 'defensive';
+                    unit.ap -= 1;
+                    log(`${unit.name} takes defensive stance near VIP`, 'ai');
+                }
+                if (unit.mode !== 'alert' && unit.ap >= 2) {
+                    unit.mode = 'alert';
+                    unit.ap -= 2;
+                    log(`${unit.name} enters alert mode`, 'ai');
+                }
+            }
+            return;
+        }
+
+        if (unit.name === 'Watcher') {
+            // Watcher observes and warns
+            unit.aiState = AI_STATES.AMBUSH;
+
+            // Use enhanced senses - larger hearing range
+            if (recentEnemySounds.length > 0) {
+                // Warn teammates
+                log(`${unit.name} (enhanced senses) alerts team to enemy movement!`, 'ai');
+                teammates.forEach(t => {
+                    recentEnemySounds.forEach(s => {
+                        t.heardSounds.push({ ...s, source: 'Watcher intel' });
+                    });
+                });
+            }
+
+            // Stay in ambush position
+            if (unit.mode !== 'alert') {
+                unit.mode = 'alert';
+                unit.ap -= 2;
+            }
+            return;
+        }
+
+        // Generic defender behavior
+        if (caution >= 7) {
+            // Stay close to VIP
+            if (distToVip > 5) {
+                moveTowardAStar(unit, vip.x, vip.y);
+            }
+        } else if (caution <= 3 && recentEnemySounds.length > 0) {
+            // Hunt the enemy
+            const sound = recentEnemySounds[recentEnemySounds.length - 1];
+            unit.aiState = AI_STATES.INVESTIGATING;
+            moveTowardAStar(unit, sound.x, sound.y);
+            log(`${unit.name} hunting enemy`, 'ai');
+        } else {
+            // Set up ambush
+            unit.aiState = AI_STATES.AMBUSH;
+            setupAmbush(unit, vip);
+        }
+    }
+}
+
+// ============================================
+// TACTICAL HELPER FUNCTIONS
+// ============================================
+
+function findCover(unit, enemy) {
+    // Look for furniture or walls that block LOS from enemy
+    const coverPositions = [];
+
+    for (let dy = -3; dy <= 3; dy++) {
+        for (let dx = -3; dx <= 3; dx++) {
+            const nx = unit.x + dx;
+            const ny = unit.y + dy;
+            if (nx < 0 || nx >= MAP_WIDTH || ny < 0 || ny >= MAP_HEIGHT) continue;
+            if (!canMoveTo(nx, ny)) continue;
+
+            // Check if this position has cover from enemy
+            const wallsBetween = countWallsBetween(nx, ny, enemy.x, enemy.y);
+            if (wallsBetween > 0 || map[ny][nx].furniture) {
+                coverPositions.push({ x: nx, y: ny, cover: wallsBetween + (map[ny][nx].furniture ? 2 : 0) });
+            }
+        }
+    }
+
+    if (coverPositions.length > 0) {
+        // Pick best cover
+        const best = coverPositions.sort((a, b) => b.cover - a.cover)[0];
+        if (getDistance(unit.x, unit.y, best.x, best.y) > 0) {
+            moveTowardAStar(unit, best.x, best.y);
+            log(`${unit.name} takes cover`, 'ai');
+        }
+    }
+}
+
+function moveQuietly(unit, targetX, targetY) {
+    // Half speed, half noise (Stealth movement from Sound_Detection_System.csv)
+    const movementPoints = Math.floor(unit.stats.AGL / 10); // Half speed
+    let moved = 0;
+
+    while (unit.ap > 0 && moved < movementPoints) {
+        const path = getAStarPath(unit.x, unit.y, targetX, targetY);
+        if (!path || path.length < 2) break;
+
+        const next = path[1];
+        if (canMoveTo(next.x, next.y)) {
+            // Check for doors
+            const cell = map[next.y][next.x];
+            if (cell.type === 'door' && cell.door && !cell.door.open) {
+                // Quiet door open (2 AP, 20 dB from Door_Interaction_System.csv)
+                cell.door.open = true;
+                generateSound(next.x, next.y, 20, 'quiet door');
+                log(`${unit.name} quietly opens door`, 'move');
+                unit.ap -= 2;
+                renderMap();
+                continue;
+            }
+
+            unit.x = next.x;
+            unit.y = next.y;
+            unit.ap -= 1;
+            moved++;
+
+            // Quiet movement - 15 dB vs 30 dB
+            if (Math.random() < 0.2) {
+                generateSound(unit.x, unit.y, 15, 'careful footsteps');
+            }
+        } else {
+            break;
+        }
+    }
+    renderMap();
+}
+
+function moveTowardAStar(unit, targetX, targetY) {
+    const movementPoints = Math.floor(unit.stats.AGL / 5);
+    let moved = 0;
+
+    while (unit.ap > 0 && moved < movementPoints) {
+        const path = getAStarPath(unit.x, unit.y, targetX, targetY);
+        if (!path || path.length < 2) break;
+
+        const next = path[1];
+        const cell = map[next.y][next.x];
+
+        // Handle doors
+        if (cell.type === 'door' && cell.door && !cell.door.open) {
+            cell.door.open = true;
+            generateSound(next.x, next.y, SOUNDS.door_open, 'door opening');
+            log(`${unit.name} opens door`, 'move');
+            unit.ap -= 1;
+            renderMap();
+            continue;
+        }
+
+        if (canMoveTo(next.x, next.y)) {
+            unit.x = next.x;
+            unit.y = next.y;
+            unit.ap -= 1;
+            moved++;
+
+            if (Math.random() < 0.3) {
+                generateSound(unit.x, unit.y, SOUNDS.walking, 'footsteps');
+            }
+        } else {
+            break;
+        }
+    }
+    renderMap();
+}
+
+function getAStarPath(startX, startY, endX, endY) {
+    // Simple A* implementation
+    const openSet = [{ x: startX, y: startY, g: 0, h: 0, f: 0, parent: null }];
+    const closedSet = new Set();
+
+    const heuristic = (x1, y1, x2, y2) => Math.abs(x2 - x1) + Math.abs(y2 - y1);
+
+    while (openSet.length > 0) {
+        // Get node with lowest f score
+        openSet.sort((a, b) => a.f - b.f);
+        const current = openSet.shift();
+
+        if (current.x === endX && current.y === endY) {
+            // Reconstruct path
+            const path = [];
+            let node = current;
+            while (node) {
+                path.unshift({ x: node.x, y: node.y });
+                node = node.parent;
+            }
+            return path;
+        }
+
+        closedSet.add(`${current.x},${current.y}`);
+
+        // Check neighbors
+        const neighbors = [
+            { x: current.x + 1, y: current.y },
+            { x: current.x - 1, y: current.y },
+            { x: current.x, y: current.y + 1 },
+            { x: current.x, y: current.y - 1 }
+        ];
+
+        for (const neighbor of neighbors) {
+            if (neighbor.x < 0 || neighbor.x >= MAP_WIDTH ||
+                neighbor.y < 0 || neighbor.y >= MAP_HEIGHT) continue;
+
+            const key = `${neighbor.x},${neighbor.y}`;
+            if (closedSet.has(key)) continue;
+
+            const cell = map[neighbor.y][neighbor.x];
+            // Allow movement through doors (closed ones can be opened)
+            if (cell.type === 'wall') continue;
+
+            const g = current.g + 1;
+            const h = heuristic(neighbor.x, neighbor.y, endX, endY);
+            const f = g + h;
+
+            const existing = openSet.find(n => n.x === neighbor.x && n.y === neighbor.y);
+            if (existing) {
+                if (g < existing.g) {
+                    existing.g = g;
+                    existing.f = f;
+                    existing.parent = current;
+                }
+            } else {
+                openSet.push({ x: neighbor.x, y: neighbor.y, g, h, f, parent: current });
+            }
+        }
+
+        // Prevent infinite loops
+        if (closedSet.size > 500) return null;
+    }
+
+    return null;
+}
+
+function breachHouse(unit, house, teammates) {
+    // Find nearest door to this house
+    const houseDoors = doors.filter(d => d.house === house.name);
+    if (houseDoors.length === 0) return;
+
+    const nearestDoor = houseDoors.sort((a, b) =>
+        getDistance(unit.x, unit.y, a.x, a.y) - getDistance(unit.x, unit.y, b.x, b.y)
+    )[0];
+
+    const distToDoor = getDistance(unit.x, unit.y, nearestDoor.x, nearestDoor.y);
+
+    if (distToDoor <= 2) {
+        // At the door - breach!
+        unit.aiState = AI_STATES.BREACHING;
+
+        const cell = map[nearestDoor.y][nearestDoor.x];
+        if (cell.door && !cell.door.open) {
+            // Kick in door (loud breach)
+            cell.door.open = true;
+            generateSound(nearestDoor.x, nearestDoor.y, 85, 'door kicked in');
+            log(`${unit.name} BREACHES door at ${house.name}!`, 'important');
+            unit.ap -= 2;
+        }
+
+        // Enter the house
+        const entryX = nearestDoor.x + (nearestDoor.y === house.y ? 0 : 0);
+        const entryY = nearestDoor.y + (nearestDoor.y === house.y ? 1 : -1);
+
+        if (canMoveTo(entryX, entryY)) {
+            unit.x = entryX;
+            unit.y = entryY;
+            unit.ap -= 1;
+            generateSound(unit.x, unit.y, 50, 'entry movement');
+        }
+
+        renderMap();
+    } else {
+        // Move to door
+        moveTowardAStar(unit, nearestDoor.x, nearestDoor.y);
+    }
+}
+
+function searchForTargetTactical(unit, teammates) {
+    // Coordinated search - avoid searching same house as teammates
+    const unsearchedHouses = houses.filter(h => !searchedHouses.has(h.id));
+
+    if (unsearchedHouses.length === 0) {
+        log(`${unit.name}: All houses searched!`, 'ai');
+        return;
+    }
+
+    // Check which houses teammates are heading to
+    const teammateTargets = new Set();
+    teammates.forEach(t => {
+        const house = getCurrentHouse(t.x, t.y);
+        if (house) teammateTargets.add(house.id);
+    });
+
+    // Prioritize houses not being searched by teammates
+    const availableHouses = unsearchedHouses.filter(h => !teammateTargets.has(h.id));
+    const targetList = availableHouses.length > 0 ? availableHouses : unsearchedHouses;
+
+    // Pick based on distance and strategic value (larger houses more likely to hide VIP)
+    const target = targetList.sort((a, b) => {
+        const distA = getDistance(unit.x, unit.y, a.x + a.w/2, a.y + a.h/2);
+        const distB = getDistance(unit.x, unit.y, b.x + b.w/2, b.y + b.h/2);
+        const sizeA = a.w * a.h;
+        const sizeB = b.w * b.h;
+        // Balance distance vs size (larger houses are more attractive targets)
+        return (distA - sizeA * 0.1) - (distB - sizeB * 0.1);
+    })[0];
+
+    if (isInsideHouse(unit.x, unit.y, target)) {
+        // Search the house
+        log(`${unit.name} searches ${target.name}`, 'search');
+        searchedHouses.add(target.id);
+        generateSound(unit.x, unit.y, SOUNDS.walking, 'searching');
+
+        // Check if VIP is here
+        const vip = units.find(u => u.team === 'civilian' && u.alive);
+        if (vip && isInsideHouse(vip.x, vip.y, target)) {
+            log(`${unit.name} FOUND THE TARGET in ${target.name}!`, 'important');
+            unit.knownEnemyPositions.push({ x: vip.x, y: vip.y, turn });
+
+            // Alert all teammates
+            teammates.forEach(t => {
+                t.knownEnemyPositions.push({ x: vip.x, y: vip.y, turn, source: 'shared' });
+            });
+        }
+
+        // Also check for defenders
+        const defendersHere = units.filter(u =>
+            u.team === 'defender' && u.alive && isInsideHouse(u.x, u.y, target)
+        );
+        if (defendersHere.length > 0) {
+            log(`${unit.name} encounters defenders in ${target.name}!`, 'important');
+        }
+    } else {
+        // Move to house via breach
+        breachHouse(unit, target, teammates);
+    }
+}
+
+function setupAmbush(unit, vip) {
+    // Find good ambush position near VIP
+    if (!vip) return;
+
+    const vipHouse = getCurrentHouse(vip.x, vip.y);
+    if (!vipHouse) return;
+
+    // Find a position with good LOS to entrance
+    const houseDoors = doors.filter(d => d.house === vipHouse.name);
+    if (houseDoors.length === 0) return;
+
+    // Position near a door with cover
+    let bestPos = null;
+    let bestScore = -1;
+
+    for (let dy = -5; dy <= 5; dy++) {
+        for (let dx = -5; dx <= 5; dx++) {
+            const nx = vip.x + dx;
+            const ny = vip.y + dy;
+            if (nx < 0 || nx >= MAP_WIDTH || ny < 0 || ny >= MAP_HEIGHT) continue;
+            if (!canMoveTo(nx, ny)) continue;
+            if (!isInsideHouse(nx, ny, vipHouse)) continue;
+
+            // Score based on: distance to VIP, LOS to door, cover
+            const distToVip = getDistance(nx, ny, vip.x, vip.y);
+            let doorLOS = 0;
+            houseDoors.forEach(d => {
+                const walls = countWallsBetween(nx, ny, d.x, d.y);
+                if (walls === 0) doorLOS++;
+            });
+
+            const hasCover = map[ny][nx].furniture ? 2 : 0;
+
+            // Score: want moderate distance from VIP, good door LOS, cover
+            const score = (doorLOS * 3) + hasCover - Math.abs(distToVip - 3);
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestPos = { x: nx, y: ny };
+            }
+        }
+    }
+
+    if (bestPos && (unit.x !== bestPos.x || unit.y !== bestPos.y)) {
+        moveTowardAStar(unit, bestPos.x, bestPos.y);
+        log(`${unit.name} moves to ambush position`, 'ai');
+    }
+
+    // Set up defensive stance
+    if (unit.stance !== 'defensive') {
+        unit.stance = 'defensive';
+        unit.ap -= 1;
+        log(`${unit.name} takes defensive stance`, 'ai');
+    }
+}
+
+function searchForTarget(unit) {
+    // Legacy function - redirect to tactical version
+    searchForTargetTactical(unit, []);
+}
+
+function isInsideHouse(x, y, house) {
+    return x >= house.x && x < house.x + house.w &&
+           y >= house.y && y < house.y + house.h;
+}
+
+// ============================================
+// MOVEMENT
+// ============================================
+
+function moveToward(unit, targetX, targetY) {
+    const movementPoints = Math.floor(unit.stats.AGL / 5);
+    let moved = 0;
+
+    while (unit.ap > 0 && moved < movementPoints) {
+        const dx = Math.sign(targetX - unit.x);
+        const dy = Math.sign(targetY - unit.y);
+
+        if (dx === 0 && dy === 0) break;
+
+        let newX = unit.x + dx;
+        let newY = unit.y + dy;
+
+        // Check for doors
+        if (newX >= 0 && newX < MAP_WIDTH && newY >= 0 && newY < MAP_HEIGHT) {
+            const cell = map[newY][newX];
+
+            if (cell.type === 'wall') {
+                // Try to go around
+                if (dx !== 0 && canMoveTo(unit.x, unit.y + (dy || 1))) {
+                    newX = unit.x;
+                    newY = unit.y + (dy || 1);
+                } else if (dy !== 0 && canMoveTo(unit.x + (dx || 1), unit.y)) {
+                    newX = unit.x + (dx || 1);
+                    newY = unit.y;
+                } else {
+                    break;
+                }
+            }
+
+            if (cell.type === 'door' && cell.door && !cell.door.open) {
+                // Open door
+                cell.door.open = true;
+                generateSound(newX, newY, SOUNDS.door_open, 'door opening');
+                log(`${unit.name} opens door at (${newX}, ${newY})`, 'move');
+                unit.ap -= 1;
+                renderMap();
+            }
+
+            if (canMoveTo(newX, newY)) {
+                unit.x = newX;
+                unit.y = newY;
+                unit.ap -= 1;
+                moved++;
+
+                // Generate movement sound
+                if (Math.random() < 0.3) {
+                    generateSound(unit.x, unit.y, SOUNDS.walking, 'footsteps');
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
+    renderMap();
+}
+
+function canMoveTo(x, y) {
+    if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_HEIGHT) return false;
+    const cell = map[y][x];
+    if (cell.type === 'wall') return false;
+    if (cell.type === 'door' && cell.door && !cell.door.open) return false;
+    return true;
+}
+
+// ============================================
+// COMBAT
+// ============================================
+
+function attackTarget(unit, target) {
+    if (unit.ap < 3) {
+        log(`${unit.name} not enough AP to attack`, 'combat');
+        return;
+    }
+
+    const dist = getDistance(unit.x, unit.y, target.x, target.y);
+    const weapon = getWeapon(unit.weapon);
+
+    if (dist > weapon.range) {
+        log(`${unit.name} target out of range`, 'combat');
+        moveToward(unit, target.x, target.y);
+        return;
+    }
+
+    unit.ap -= 3;
+
+    // Roll attack (simplified d100)
+    const roll = Math.floor(Math.random() * 100) + 1;
+    const attackStat = weapon.stat === 'MEL' ? unit.stats.MEL : unit.stats.AGL;
+
+    // Determine result using Universal Table logic
+    let result;
+    if (roll === 99) result = 'Failed';
+    else if (roll === 100) result = 'Major';
+    else if (roll <= 100 - attackStat) result = 'Failed';
+    else if (roll <= 100 - attackStat/2) result = 'Minor';
+    else if (roll <= 95) result = 'Success';
+    else result = 'Major';
+
+    // Generate combat sound
+    generateSound(unit.x, unit.y, weapon.sound, weapon.name);
+
+    // Calculate damage
+    const multipliers = { Failed: 0, Minor: 0.5, Success: 1, Major: 1.5 };
+    let damage = Math.floor(weapon.damage * multipliers[result]);
+
+    if (result !== 'Failed') {
+        target.hp -= damage;
+        log(`${unit.name} ${result}: ${weapon.name} hits ${target.name} for ${damage} damage!`, 'combat');
+
+        if (target.hp <= 0) {
+            target.alive = false;
+            log(`${target.name} is DOWN!`, 'important');
+        }
+    } else {
+        log(`${unit.name} misses ${target.name} with ${weapon.name}`, 'combat');
+    }
+}
+
+function getWeapon(type) {
+    const weapons = {
+        pistol: { name: 'Pistol', damage: 20, range: 25, stat: 'AGL', sound: SOUNDS.gunshot },
+        rifle: { name: 'Rifle', damage: 30, range: 50, stat: 'AGL', sound: SOUNDS.gunshot },
+        melee: { name: 'Melee', damage: 15, range: 1, stat: 'MEL', sound: SOUNDS.melee },
+        power_blast: { name: 'Power Blast', damage: 40, range: 20, stat: 'CON', sound: SOUNDS.power_high }
+    };
+    return weapons[type] || weapons.pistol;
+}
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+function getDistance(x1, y1, x2, y2) {
+    return Math.sqrt((x2-x1)**2 + (y2-y1)**2);
+}
+
+function getDirection(fromX, fromY, toX, toY) {
+    const dx = toX - fromX;
+    const dy = toY - fromY;
+    if (Math.abs(dx) > Math.abs(dy)) {
+        return dx > 0 ? 'East' : 'West';
+    } else {
+        return dy > 0 ? 'South' : 'North';
+    }
+}
+
+function getVisibleEnemies(unit) {
+    return units.filter(u => {
+        if (!u.alive || u.team === unit.team) return false;
+        const dist = getDistance(unit.x, unit.y, u.x, u.y);
+        if (dist > 30) return false; // Vision range
+        // Check LOS
+        const walls = countWallsBetween(unit.x, unit.y, u.x, u.y);
+        return walls < 1;
+    });
+}
+
+// ============================================
+// SCENARIOS
+// ============================================
+
+function loadScenario(type) {
+    resetSimulation();
+    scenario = type;
+    document.getElementById('scenarioName').textContent = type.toUpperCase();
+
+    createNeighborhood();
+
+    if (type === 'swat') {
+        loadSWATScenario();
+    } else if (type === 'superhero') {
+        loadSuperheroScenario();
+    } else if (type === 'scientist') {
+        loadScientistDefenseScenario();
+    }
+
+    renderMap();
+    updateStats();
+    log(`Loaded ${type} scenario`, 'important');
+}
+
+function loadSWATScenario() {
+    // Criminals inside house H3 (largest), need to get to guns
+    const house = houses.find(h => h.name === 'H3');
+
+    // Criminals
+    units.push(createUnit({
+        name: 'Crim1', team: 'defender', x: house.x + 3, y: house.y + 3,
+        hp: 80, MEL: 35, AGL: 30, weapon: 'melee',
+        objective: 'get_guns'
+    }));
+    units.push(createUnit({
+        name: 'Crim2', team: 'defender', x: house.x + 5, y: house.y + 5,
+        hp: 80, MEL: 30, AGL: 35, weapon: 'melee',
+        objective: 'get_guns'
+    }));
+
+    // Guns in back room
+    map[house.y + 2][house.x + house.w - 3].furniture = { type: 'guns', cover: 0 };
+
+    // SWAT team coming from street
+    for (let i = 0; i < 4; i++) {
+        units.push(createUnit({
+            name: `SWAT${i+1}`, team: 'attacker',
+            x: house.x + Math.floor(house.w/2) + i - 2, y: 20,
+            hp: 100, MEL: 40, AGL: 45, weapon: 'rifle'
+        }));
+    }
+
+    log('SWAT RAID: Criminals must reach guns before SWAT breaches', 'important');
+}
+
+function loadSuperheroScenario() {
+    // Heroes in houses, villains attacking
+    units.push(createUnit({
+        name: 'Titan', team: 'defender', x: 5, y: 7, hp: 200,
+        MEL: 60, AGL: 40, STR: 80, isSuper: true,
+        powers: ['super_strength'], powerDetectable: true, weapon: 'melee'
+    }));
+    units.push(createUnit({
+        name: 'Blaze', team: 'defender', x: 38, y: 28, hp: 100,
+        MEL: 30, AGL: 50, CON: 60, isSuper: true,
+        powers: ['fire_gen'], powerDetectable: true, weapon: 'power_blast'
+    }));
+
+    // Villains
+    units.push(createUnit({
+        name: 'Crusher', team: 'attacker', x: 25, y: 2, hp: 180,
+        MEL: 55, STR: 70, isSuper: true, weapon: 'melee'
+    }));
+    units.push(createUnit({
+        name: 'Shadow', team: 'attacker', x: 25, y: 38, hp: 90,
+        MEL: 35, AGL: 60, isSuper: true,
+        powers: ['stealth'], powerDetectable: false, weapon: 'melee'
+    }));
+
+    log('SUPERHERO BATTLE: Heroes defend neighborhood from villains', 'important');
+}
+
+function loadScientistDefenseScenario() {
+    // Scientist in random house
+    const vipHouse = houses[Math.floor(Math.random() * houses.length)];
+
+    units.push(createUnit({
+        name: 'Dr.Vale', team: 'civilian',
+        x: vipHouse.x + Math.floor(vipHouse.w/2),
+        y: vipHouse.y + Math.floor(vipHouse.h/2),
+        hp: 50, weapon: 'none'
+    }));
+
+    log(`Scientist hidden in ${vipHouse.name} (DEFENDERS KNOW, ATTACKERS DON'T)`, 'important');
+
+    // Defenders - know where scientist is
+    const defenders = [
+        { name: 'Guardian', powers: ['shield'], powerDetectable: true },
+        { name: 'Watcher', powers: ['enhanced_senses'], powerDetectable: false },
+        { name: 'Decoy', powers: ['illusion'], powerDetectable: true } // Decoy has detectable power!
+    ];
+
+    // Place Guardian near scientist
+    units.push(createUnit({
+        name: 'Guardian', team: 'defender',
+        x: vipHouse.x + 2, y: vipHouse.y + 2,
+        hp: 150, MEL: 45, isSuper: true,
+        powers: ['shield'], powerDetectable: true, weapon: 'melee'
+    }));
+
+    // Place Watcher in different house to observe
+    const watchHouse = houses.find(h => h.id !== vipHouse.id);
+    units.push(createUnit({
+        name: 'Watcher', team: 'defender',
+        x: watchHouse.x + 2, y: watchHouse.y + 2,
+        hp: 80, INS: 70, isSuper: true,
+        powers: ['enhanced_senses'], powerDetectable: false, weapon: 'pistol'
+    }));
+
+    // Decoy in another house to mislead attackers
+    const decoyHouse = houses.find(h => h.id !== vipHouse.id && h.id !== watchHouse.id);
+    units.push(createUnit({
+        name: 'Decoy', team: 'defender',
+        x: decoyHouse.x + 2, y: decoyHouse.y + 2,
+        hp: 70, isSuper: true,
+        powers: ['illusion'], powerDetectable: true, weapon: 'pistol'
+    }));
+
+    // Attackers - must find scientist
+    const attackerSpawns = [
+        { x: 0, y: 20 }, { x: 49, y: 20 }, { x: 25, y: 0 }, { x: 25, y: 39 }
+    ];
+
+    for (let i = 0; i < 4; i++) {
+        units.push(createUnit({
+            name: `Hunter${i+1}`, team: 'attacker',
+            x: attackerSpawns[i].x, y: attackerSpawns[i].y,
+            hp: 100, MEL: 40, AGL: 40, INS: 35, weapon: 'pistol',
+            objective: 'find_scientist'
+        }));
+    }
+
+    log('SCIENTIST DEFENSE: Attackers must find scientist, defenders must protect', 'important');
+    log('Guardian and Decoy have DETECTABLE powers - attackers can sense them!', 'important');
+}
+
+// ============================================
+// SIMULATION LOOP
+// ============================================
+
+function runTurn() {
+    if (simulationComplete) return;
+
+    turn++;
+    document.getElementById('turnNum').textContent = turn;
+    document.getElementById('phase').textContent = 'Action';
+
+    // Reset unit AP and action flags
+    units.forEach(u => {
+        if (u.alive) {
+            u.ap = u.maxAp;
+            u.hasActed = false;
+            // Alert mode costs 2 AP
+            if (u.mode === 'alert') u.ap -= 2;
+        }
+    });
+
+    log(`--- TURN ${turn} ---`, 'important');
+
+    // Run AI for each unit
+    units.forEach(unit => {
+        if (unit.alive && unit.team !== 'civilian') {
+            runAI(unit);
+        }
+    });
+
+    // Check win conditions
+    checkWinConditions();
+
+    updateStats();
+    renderMap();
+}
+
+function runSimulation(turns) {
+    for (let i = 0; i < turns && !simulationComplete; i++) {
+        runTurn();
+    }
+}
+
+function checkWinConditions() {
+    const defenders = units.filter(u => u.team === 'defender' && u.alive);
+    const attackers = units.filter(u => u.team === 'attacker' && u.alive);
+    const vip = units.find(u => u.team === 'civilian');
+
+    if (attackers.length === 0) {
+        log('=== DEFENDERS WIN - All attackers eliminated ===', 'important');
+        simulationComplete = true;
+    } else if (defenders.length === 0) {
+        log('=== ATTACKERS WIN - All defenders eliminated ===', 'important');
+        simulationComplete = true;
+    } else if (vip && !vip.alive) {
+        log('=== ATTACKERS WIN - VIP eliminated ===', 'important');
+        simulationComplete = true;
+    } else if (turn >= 50) {
+        log('=== DEFENDERS WIN - Time limit reached ===', 'important');
+        simulationComplete = true;
+    }
+}
+
+function resetSimulation() {
+    turn = 0;
+    units = [];
+    houses = [];
+    doors = [];
+    soundEvents = [];
+    searchedHouses = new Set();
+    simulationComplete = false;
+    document.getElementById('turnNum').textContent = '0';
+    document.getElementById('phase').textContent = 'Setup';
+    document.getElementById('combatLog').innerHTML = '';
+    initMap();
+    renderMap();
+    updateStats();
+}
+
+// ============================================
+// RENDERING
+// ============================================
+
+function renderMap() {
+    const mapEl = document.getElementById('neighborhoodMap');
+    mapEl.style.gridTemplateColumns = `repeat(${MAP_WIDTH}, ${CELL_SIZE}px)`;
+    mapEl.innerHTML = '';
+
+    for (let y = 0; y < MAP_HEIGHT; y++) {
+        for (let x = 0; x < MAP_WIDTH; x++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+
+            const mapCell = map[y][x];
+            cell.classList.add(mapCell.type);
+
+            if (mapCell.type === 'door' && mapCell.door && mapCell.door.open) {
+                cell.classList.add('open');
+            }
+
+            if (mapCell.furniture) {
+                if (mapCell.furniture.type === 'cover') {
+                    cell.style.background = '#4a4a5a';
+                } else if (mapCell.furniture.type === 'guns') {
+                    cell.textContent = '🔫';
+                }
+            }
+
+            if (mapCell.basement) {
+                cell.textContent = '⬇';
+            }
+
+            // Units
+            const unitHere = units.find(u => u.x === x && u.y === y && u.alive);
+            if (unitHere) {
+                const unitEl = document.createElement('div');
+                unitEl.className = `unit ${unitHere.team}`;
+                unitEl.textContent = unitHere.name[0];
+                unitEl.title = `${unitHere.name} (HP: ${unitHere.hp})`;
+
+                if (unitHere.powerDetectable) {
+                    unitEl.classList.add('detected');
+                }
+
+                cell.appendChild(unitEl);
+            }
+
+            // Dead units
+            const deadHere = units.find(u => u.x === x && u.y === y && !u.alive);
+            if (deadHere && !unitHere) {
+                const deadEl = document.createElement('div');
+                deadEl.className = `unit ${deadHere.team} dead`;
+                deadEl.textContent = 'X';
+                cell.appendChild(deadEl);
+            }
+
+            mapEl.appendChild(cell);
+        }
+    }
+}
+
+function updateStats() {
+    document.getElementById('defAlive').textContent = units.filter(u => u.team === 'defender' && u.alive).length;
+    document.getElementById('atkAlive').textContent = units.filter(u => u.team === 'attacker' && u.alive).length;
+
+    const vip = units.find(u => u.team === 'civilian');
+    document.getElementById('vipStatus').textContent = vip ? (vip.alive ? `Alive (${vip.hp} HP)` : 'DEAD') : 'N/A';
+
+    document.getElementById('housesSearched').textContent = `${searchedHouses.size}/${houses.length}`;
+    document.getElementById('soundsHeard').textContent = soundEvents.length;
+
+    // Update slider displays
+    document.getElementById('attackerAggroVal').textContent = document.getElementById('attackerAggro').value;
+    document.getElementById('defenderCautionVal').textContent = document.getElementById('defenderCaution').value;
+}
+
+function log(message, type = 'info') {
+    const logEl = document.getElementById('combatLog');
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    entry.textContent = `[T${turn}] ${message}`;
+    logEl.appendChild(entry);
+    logEl.scrollTop = logEl.scrollHeight;
+}
+
+// ============================================
+// BATCH SIMULATION & STATISTICS
+// ============================================
+
+let batchResults = [];
+
+function runBatchSimulation(scenarioType, count) {
+    batchResults = [];
+    log(`Starting batch of ${count} simulations for ${scenarioType}...`, 'important');
+
+    for (let i = 0; i < count; i++) {
+        loadScenario(scenarioType);
+        runSimulation(50);
+
+        const result = collectSimulationStats();
+        result.runNumber = i + 1;
+        batchResults.push(result);
+
+        resetSimulation();
+    }
+
+    displayBatchResults(scenarioType);
+}
+
+function collectSimulationStats() {
+    const defenders = units.filter(u => u.team === 'defender');
+    const attackers = units.filter(u => u.team === 'attacker');
+    const vip = units.find(u => u.team === 'civilian');
+
+    return {
+        turns: turn,
+        defendersAlive: defenders.filter(u => u.alive).length,
+        defendersTotal: defenders.length,
+        attackersAlive: attackers.filter(u => u.alive).length,
+        attackersTotal: attackers.length,
+        vipAlive: vip ? vip.alive : null,
+        housesSearched: searchedHouses.size,
+        totalHouses: houses.length,
+        soundEvents: soundEvents.length,
+        winner: determineWinner()
+    };
+}
+
+function determineWinner() {
+    const vip = units.find(u => u.team === 'civilian');
+    const defenders = units.filter(u => u.team === 'defender' && u.alive);
+    const attackers = units.filter(u => u.team === 'attacker' && u.alive);
+
+    if (vip && !vip.alive) return 'attackers';
+    if (attackers.length === 0) return 'defenders';
+    if (defenders.length === 0) return 'attackers';
+    if (turn >= 50) return 'defenders'; // Time limit = defender win
+    return 'draw';
+}
+
+function displayBatchResults(scenarioType) {
+    const defenderWins = batchResults.filter(r => r.winner === 'defenders').length;
+    const attackerWins = batchResults.filter(r => r.winner === 'attackers').length;
+    const avgTurns = (batchResults.reduce((sum, r) => sum + r.turns, 0) / batchResults.length).toFixed(1);
+    const avgSounds = (batchResults.reduce((sum, r) => sum + r.soundEvents, 0) / batchResults.length).toFixed(1);
+    const avgHousesSearched = (batchResults.reduce((sum, r) => sum + r.housesSearched, 0) / batchResults.length).toFixed(1);
+
+    log('========================================', 'important');
+    log(`BATCH RESULTS: ${scenarioType.toUpperCase()}`, 'important');
+    log(`Total Simulations: ${batchResults.length}`, 'important');
+    log(`Defender Wins: ${defenderWins} (${(defenderWins/batchResults.length*100).toFixed(1)}%)`, 'important');
+    log(`Attacker Wins: ${attackerWins} (${(attackerWins/batchResults.length*100).toFixed(1)}%)`, 'important');
+    log(`Average Turns: ${avgTurns}`, 'important');
+    log(`Average Sound Events: ${avgSounds}`, 'important');
+    log(`Average Houses Searched: ${avgHousesSearched}`, 'important');
+    log('========================================', 'important');
+
+    // Detailed breakdown for VIP scenarios
+    if (scenarioType === 'scientist') {
+        const vipSurvived = batchResults.filter(r => r.vipAlive).length;
+        log(`VIP Survival Rate: ${(vipSurvived/batchResults.length*100).toFixed(1)}%`, 'important');
+
+        const foundBeforeSearchComplete = batchResults.filter(r =>
+            r.winner === 'attackers' && r.housesSearched < r.totalHouses
+        ).length;
+        log(`Found via Power Detection: ${foundBeforeSearchComplete}`, 'important');
+    }
+}
+
+// Add batch simulation buttons
+document.querySelector('.panel h3').insertAdjacentHTML('afterend', `
+    <br><button onclick="runBatchSimulation('swat', 10)" style="background:#666;">Batch SWAT x10</button>
+    <button onclick="runBatchSimulation('scientist', 10)" style="background:#666;">Batch Scientist x10</button>
+`);
+
+// Initialize
+resetSimulation();
+</script>
+</body>
+</html>

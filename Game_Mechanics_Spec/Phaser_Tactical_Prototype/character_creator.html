@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHT Character Creator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            color: #f39c12;
+        }
+
+        .header-buttons button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .btn-save { background: #27ae60; color: white; }
+        .btn-save:hover { background: #2ecc71; }
+        .btn-cancel { background: #7f8c8d; color: white; }
+        .btn-cancel:hover { background: #95a5a6; }
+        .btn-random { background: #9b59b6; color: white; }
+        .btn-random:hover { background: #a569bd; }
+        .btn-export { background: #3498db; color: white; }
+        .btn-export:hover { background: #5dade2; }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+        }
+
+        /* Preview Panel */
+        .preview-panel {
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            padding: 20px;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .preview-sprite {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            border: 3px solid #f39c12;
+        }
+
+        .preview-name {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #f39c12;
+        }
+
+        .preview-realname {
+            text-align: center;
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .preview-team {
+            text-align: center;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .team-heroes { background: #2980b9; }
+        .team-villains { background: #c0392b; }
+        .team-mercenary { background: #f39c12; color: #000; }
+        .team-civilian { background: #7f8c8d; }
+
+        .threat-display {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .threat-stars {
+            font-size: 24px;
+            color: #f39c12;
+        }
+
+        .threat-level {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .preview-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .preview-stat {
+            background: rgba(255,255,255,0.05);
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .preview-stat-label {
+            color: #888;
+            font-size: 11px;
+        }
+
+        .preview-stat-value {
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        /* Content Panel */
+        .content-panel {
+            background: rgba(0,0,0,0.4);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 2px solid #333;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+            font-size: 13px;
+        }
+
+        .tab:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .tab.active {
+            background: rgba(243, 156, 18, 0.1);
+            border-bottom-color: #f39c12;
+            color: #f39c12;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 25px;
+            min-height: 500px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #f39c12;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Stat Sliders */
+        .stat-row {
+            display: grid;
+            grid-template-columns: 100px 1fr 60px 120px;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-slider {
+            -webkit-appearance: none;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .stat-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #f39c12;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .stat-value {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .stat-effect {
+            font-size: 12px;
+            color: #27ae60;
+        }
+
+        .points-remaining {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .points-remaining.warning { color: #e74c3c; }
+        .points-remaining.ok { color: #27ae60; }
+
+        /* Origin Cards */
+        .origin-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .origin-card {
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #333;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .origin-card:hover {
+            border-color: #f39c12;
+            transform: translateY(-2px);
+        }
+
+        .origin-card.selected {
+            border-color: #f39c12;
+            background: rgba(243, 156, 18, 0.1);
+        }
+
+        .origin-emoji {
+            font-size: 36px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .origin-name {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .origin-hp {
+            text-align: center;
+            font-size: 12px;
+            color: #27ae60;
+            margin-bottom: 8px;
+        }
+
+        .origin-traits {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .origin-detail {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+        }
+
+        .immunity-list, .vulnerability-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .immunity-tag {
+            padding: 5px 12px;
+            background: rgba(39, 174, 96, 0.2);
+            border: 1px solid #27ae60;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .vulnerability-tag {
+            padding: 5px 12px;
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        /* Equipment Cards */
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .weapon-card, .armor-card {
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #333;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .weapon-card:hover, .armor-card:hover {
+            border-color: #3498db;
+        }
+
+        .weapon-card.selected, .armor-card.selected {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .weapon-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .weapon-emoji {
+            font-size: 24px;
+        }
+
+        .weapon-name {
+            font-weight: bold;
+        }
+
+        .weapon-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* Career System */
+        .career-section {
+            margin-bottom: 25px;
+        }
+
+        .career-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .career-card {
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #333;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .career-card:hover {
+            border-color: #9b59b6;
+        }
+
+        .career-card.selected {
+            border-color: #9b59b6;
+            background: rgba(155, 89, 182, 0.1);
+        }
+
+        .career-emoji {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .career-name {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .rank-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .rank-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .rank-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #333;
+            border: 2px solid #555;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .rank-dot.filled {
+            background: #9b59b6;
+            border-color: #9b59b6;
+        }
+
+        .rank-dot:hover {
+            border-color: #9b59b6;
+        }
+
+        .job-select {
+            margin-top: 15px;
+        }
+
+        .skill-bonuses {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .skill-bonus {
+            padding: 10px;
+            background: rgba(39, 174, 96, 0.1);
+            border: 1px solid #27ae60;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .skill-bonus-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .skill-bonus-name {
+            font-size: 11px;
+            color: #888;
+        }
+
+        /* Personality Cards */
+        .personality-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .personality-card {
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #333;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .personality-card:hover {
+            border-color: #e74c3c;
+        }
+
+        .personality-card.selected {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .personality-emoji {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .personality-name {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .personality-desc {
+            font-size: 10px;
+            color: #888;
+        }
+
+        /* Powers */
+        .power-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .power-card {
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #333;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .power-card:hover {
+            border-color: #8e44ad;
+        }
+
+        .power-card.selected {
+            border-color: #8e44ad;
+            background: rgba(142, 68, 173, 0.1);
+        }
+
+        .power-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .power-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .power-name {
+            font-weight: bold;
+        }
+
+        .power-type {
+            font-size: 11px;
+            color: #8e44ad;
+            padding: 2px 8px;
+            background: rgba(142, 68, 173, 0.2);
+            border-radius: 10px;
+        }
+
+        .power-desc {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .power-limit {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        /* Summary Bar */
+        .summary-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.95);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            border-top: 2px solid #333;
+        }
+
+        .summary-stat {
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .summary-label {
+            font-size: 11px;
+            color: #888;
+        }
+
+        /* Toggle Switch */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle {
+            width: 50px;
+            height: 26px;
+            background: #333;
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle.active {
+            background: #27ae60;
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s;
+        }
+
+        .toggle.active::after {
+            left: 26px;
+        }
+
+        /* Validation */
+        .validation-errors {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .validation-error {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+
+        .validation-error:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #1a1a2e;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #f39c12;
+        }
+
+        .modal pre {
+            background: #000;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        /* Section headers */
+        .section-header {
+            font-size: 18px;
+            color: #f39c12;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        /* Derived stats display */
+        .derived-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+        }
+
+        .derived-stat {
+            text-align: center;
+        }
+
+        .derived-stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .derived-stat-label {
+            font-size: 12px;
+            color: #888;
+        }
+
+        body {
+            padding-bottom: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚔️ CHARACTER CREATOR</h1>
+            <div class="header-buttons">
+                <button class="btn-random" onclick="randomizeCharacter()">🎲 Randomize</button>
+                <button class="btn-export" onclick="showExportModal()">📤 Export</button>
+                <button class="btn-cancel" onclick="window.close()">✖️ Cancel</button>
+                <button class="btn-save" onclick="saveCharacter()">💾 Save</button>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Preview Panel -->
+            <div class="preview-panel">
+                <div class="preview-sprite" id="preview-sprite">🧑</div>
+                <div class="preview-name" id="preview-codename">CODENAME</div>
+                <div class="preview-realname" id="preview-realname">Real Name</div>
+                <div class="preview-team team-heroes" id="preview-team">🔵 HEROES</div>
+
+                <div class="threat-display">
+                    <div class="threat-stars" id="threat-stars">⭐⭐⭐</div>
+                    <div class="threat-level" id="threat-level">Level 3 - Enhanced</div>
+                    <div style="font-size: 12px; color: #888; margin-top: 5px;">Score: <span id="threat-score">42</span></div>
+                </div>
+
+                <div class="preview-stats">
+                    <div class="preview-stat">
+                        <div class="preview-stat-label">Origin</div>
+                        <div class="preview-stat-value" id="preview-origin">Skilled Human</div>
+                    </div>
+                    <div class="preview-stat">
+                        <div class="preview-stat-label">Weapon</div>
+                        <div class="preview-stat-value" id="preview-weapon">Pistol</div>
+                    </div>
+                    <div class="preview-stat">
+                        <div class="preview-stat-label">Armor</div>
+                        <div class="preview-stat-value" id="preview-armor">None</div>
+                    </div>
+                    <div class="preview-stat">
+                        <div class="preview-stat-label">Career</div>
+                        <div class="preview-stat-value" id="preview-career">None</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #333;">
+                    <div class="preview-stats">
+                        <div class="preview-stat">
+                            <div class="preview-stat-label">❤️ HP</div>
+                            <div class="preview-stat-value" id="preview-hp">100</div>
+                        </div>
+                        <div class="preview-stat">
+                            <div class="preview-stat-label">⚡ AP</div>
+                            <div class="preview-stat-value" id="preview-ap">6</div>
+                        </div>
+                        <div class="preview-stat">
+                            <div class="preview-stat-label">🦶 Move</div>
+                            <div class="preview-stat-value" id="preview-move">6</div>
+                        </div>
+                        <div class="preview-stat">
+                            <div class="preview-stat-label">🛡️ DR</div>
+                            <div class="preview-stat-value" id="preview-dr">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Panel -->
+            <div class="content-panel">
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('identity')">👤 Identity</div>
+                    <div class="tab" onclick="switchTab('stats')">📊 Stats</div>
+                    <div class="tab" onclick="switchTab('origin')">🧬 Origin</div>
+                    <div class="tab" onclick="switchTab('equipment')">🔫 Equipment</div>
+                    <div class="tab" onclick="switchTab('career')">🎓 Career</div>
+                    <div class="tab" onclick="switchTab('personality')">🧠 Personality</div>
+                    <div class="tab" onclick="switchTab('powers')">✨ Powers</div>
+                </div>
+
+                <!-- Identity Tab -->
+                <div class="tab-content active" id="tab-identity">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Real Name</label>
+                            <input type="text" id="input-name" placeholder="Marcus Stone" oninput="updatePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Codename</label>
+                            <input type="text" id="input-codename" placeholder="Ironclad" oninput="updatePreview()">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Team</label>
+                            <select id="input-team" onchange="updatePreview()">
+                                <option value="heroes">🔵 Heroes</option>
+                                <option value="villains">🔴 Villains</option>
+                                <option value="mercenary">🟡 Mercenary</option>
+                                <option value="civilian">⚪ Civilian</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Secret Identity</label>
+                            <div class="toggle-container">
+                                <div class="toggle active" id="toggle-secret" onclick="toggleSecret()"></div>
+                                <span id="secret-label">Public knows real name: No</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Backstory</label>
+                        <textarea id="input-backstory" rows="4" placeholder="Former construction worker fused with experimental exoskeleton after workplace accident..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Stats Tab -->
+                <div class="tab-content" id="tab-stats">
+                    <div class="points-remaining ok" id="points-display">
+                        Points Remaining: <strong>0</strong> / 200
+                    </div>
+
+                    <div class="stat-row">
+                        <div class="stat-label">💪 STR</div>
+                        <input type="range" class="stat-slider" id="stat-str" min="10" max="80" value="30" oninput="updateStats()">
+                        <div class="stat-value" id="val-str">30</div>
+                        <div class="stat-effect" id="eff-str">Melee +3</div>
+                    </div>
+
+                    <div class="stat-row">
+                        <div class="stat-label">🏃 AGL</div>
+                        <input type="range" class="stat-slider" id="stat-agl" min="10" max="80" value="30" oninput="updateStats()">
+                        <div class="stat-value" id="val-agl">30</div>
+                        <div class="stat-effect" id="eff-agl">Dodge +1</div>
+                    </div>
+
+                    <div class="stat-row">
+                        <div class="stat-label">❤️ END</div>
+                        <input type="range" class="stat-slider" id="stat-end" min="10" max="80" value="30" oninput="updateStats()">
+                        <div class="stat-value" id="val-end">30</div>
+                        <div class="stat-effect" id="eff-end">HP +45</div>
+                    </div>
+
+                    <div class="stat-row">
+                        <div class="stat-label">🧠 RSN</div>
+                        <input type="range" class="stat-slider" id="stat-rsn" min="10" max="80" value="30" oninput="updateStats()">
+                        <div class="stat-value" id="val-rsn">30</div>
+                        <div class="stat-effect" id="eff-rsn">Tech +1</div>
+                    </div>
+
+                    <div class="stat-row">
+                        <div class="stat-label">👁️ INT</div>
+                        <input type="range" class="stat-slider" id="stat-int" min="10" max="80" value="30" oninput="updateStats()">
+                        <div class="stat-value" id="val-int">30</div>
+                        <div class="stat-effect" id="eff-int">Init +30</div>
+                    </div>
+
+                    <div class="stat-row">
+                        <div class="stat-label">🔮 PSY</div>
+                        <input type="range" class="stat-slider" id="stat-psy" min="10" max="80" value="30" oninput="updateStats()">
+                        <div class="stat-value" id="val-psy">30</div>
+                        <div class="stat-effect" id="eff-psy">Mental +1</div>
+                    </div>
+
+                    <div class="derived-stats">
+                        <div class="derived-stat">
+                            <div class="derived-stat-value" id="derived-hp">95</div>
+                            <div class="derived-stat-label">❤️ HP</div>
+                        </div>
+                        <div class="derived-stat">
+                            <div class="derived-stat-value" id="derived-ap">5</div>
+                            <div class="derived-stat-label">⚡ Max AP</div>
+                        </div>
+                        <div class="derived-stat">
+                            <div class="derived-stat-value" id="derived-move">5</div>
+                            <div class="derived-stat-label">🦶 Movement</div>
+                        </div>
+                        <div class="derived-stat">
+                            <div class="derived-stat-value" id="derived-init">30</div>
+                            <div class="derived-stat-label">⚡ Initiative</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Origin Tab -->
+                <div class="tab-content" id="tab-origin">
+                    <div class="origin-grid" id="origin-grid"></div>
+                    <div class="origin-detail" id="origin-detail" style="display: none;"></div>
+                </div>
+
+                <!-- Equipment Tab -->
+                <div class="tab-content" id="tab-equipment">
+                    <div class="section-header">🔫 Weapon Selection</div>
+                    <div class="equipment-grid" id="weapon-grid"></div>
+
+                    <div class="section-header" style="margin-top: 30px;">🛡️ Armor Selection</div>
+                    <div class="equipment-grid" id="armor-grid"></div>
+                </div>
+
+                <!-- Career Tab -->
+                <div class="tab-content" id="tab-career">
+                    <div class="section-header">📚 Primary Career</div>
+                    <div class="career-grid" id="career-grid"></div>
+
+                    <div class="rank-selector" id="rank-selector" style="display: none;">
+                        <span>Career Rank:</span>
+                        <div class="rank-dots" id="rank-dots"></div>
+                        <span id="rank-label">Rank 1</span>
+                    </div>
+
+                    <div class="job-select" id="job-select" style="display: none;">
+                        <label>Current Job:</label>
+                        <select id="job-dropdown" onchange="updatePreview()"></select>
+                    </div>
+
+                    <div class="skill-bonuses" id="skill-bonuses" style="display: none;"></div>
+                </div>
+
+                <!-- Personality Tab -->
+                <div class="tab-content" id="tab-personality">
+                    <div class="personality-grid" id="personality-grid"></div>
+
+                    <div class="origin-detail" id="personality-detail" style="display: none; margin-top: 20px;"></div>
+                </div>
+
+                <!-- Powers Tab -->
+                <div class="tab-content" id="tab-powers">
+                    <div class="power-limit" id="power-limit">
+                        Powers Selected: <strong>0</strong> / <strong id="max-powers">0</strong>
+                        <div style="font-size: 12px; color: #888; margin-top: 5px;">
+                            (Based on Origin: <span id="power-origin-name">Skilled Human</span>)
+                        </div>
+                    </div>
+                    <div class="power-grid" id="power-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Bar -->
+    <div class="summary-bar">
+        <div class="summary-stat">
+            <div class="summary-value" id="sum-hp">100</div>
+            <div class="summary-label">❤️ HP</div>
+        </div>
+        <div class="summary-stat">
+            <div class="summary-value" id="sum-ap">6</div>
+            <div class="summary-label">⚡ AP</div>
+        </div>
+        <div class="summary-stat">
+            <div class="summary-value" id="sum-move">6</div>
+            <div class="summary-label">🦶 Move</div>
+        </div>
+        <div class="summary-stat">
+            <div class="summary-value" id="sum-dr">0</div>
+            <div class="summary-label">🛡️ DR</div>
+        </div>
+        <div class="summary-stat">
+            <div class="summary-value" id="sum-dmg">20</div>
+            <div class="summary-label">💥 Damage</div>
+        </div>
+        <div class="summary-stat">
+            <div class="summary-value" id="sum-range">5</div>
+            <div class="summary-label">🎯 Range</div>
+        </div>
+        <div class="summary-stat">
+            <div class="summary-value">⭐⭐⭐</div>
+            <div class="summary-label" id="sum-threat">Level 3</div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal-overlay" id="export-modal">
+        <div class="modal">
+            <h2>📤 Export Character</h2>
+            <pre id="export-json"></pre>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal()">Close</button>
+                <button class="btn-save" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ============ DATA DEFINITIONS ============
+
+    const ORIGINS = {
+        skilled_human: { id: 'skilled_human', name: 'Skilled Human', emoji: '🧑', hpMod: 0,
+            description: 'Peak human training, no powers',
+            immunities: [], vulnerabilities: [],
+            powers: 0, traits: ['+10% Accuracy', '+5% Evasion'] },
+        altered_human: { id: 'altered_human', name: 'Altered Human', emoji: '🧬', hpMod: 10,
+            description: 'Enhanced through science or accident',
+            immunities: [], vulnerabilities: [],
+            powers: 1, traits: ['One enhanced stat (+10)'] },
+        mutant: { id: 'mutant', name: 'Mutant', emoji: '🧪', hpMod: 5,
+            description: 'Born with genetic mutations',
+            immunities: [], vulnerabilities: [],
+            powers: 2, traits: ['Random minor power'] },
+        tech_enhanced: { id: 'tech_enhanced', name: 'Tech Enhanced', emoji: '🦾', hpMod: 20,
+            description: 'Cybernetic or powered armor',
+            immunities: [], vulnerabilities: ['EMP (+30 damage)'],
+            powers: 1, traits: ['Tech-based abilities', '+DR from tech'] },
+        mystic: { id: 'mystic', name: 'Mystic', emoji: '🔮', hpMod: -10,
+            description: 'Magic or supernatural powers',
+            immunities: [], vulnerabilities: [],
+            powers: 2, traits: ['Energy damage +20%', 'Magic access'] },
+        alien: { id: 'alien', name: 'Alien', emoji: '👽', hpMod: 15,
+            description: 'Extraterrestrial biology',
+            immunities: ['Variable'], vulnerabilities: ['Variable'],
+            powers: 2, traits: ['Unusual resistances', 'Alien abilities'] },
+        construct: { id: 'construct', name: 'Construct', emoji: '🤖', hpMod: 50,
+            description: 'Robot, golem, or artificial being',
+            immunities: ['Bleeding', 'Poison', 'Stun', 'Burning'],
+            vulnerabilities: ['EMP (+30 damage)'],
+            powers: 1, traits: ['No biological needs'] },
+        divine: { id: 'divine', name: 'Divine', emoji: '👼', hpMod: 10,
+            description: 'Blessed or godly power source',
+            immunities: ['Burning', 'Freezing', 'Poison'],
+            vulnerabilities: ['Bleeds ichor'],
+            powers: 2, traits: ['Holy abilities'] },
+        cosmic: { id: 'cosmic', name: 'Cosmic', emoji: '✨', hpMod: 0,
+            description: 'Universal or reality-based powers',
+            immunities: ['All physical', 'All energy'],
+            vulnerabilities: ['EMP'],
+            powers: 3, traits: ['Reality manipulation'] }
+    };
+
+    const WEAPONS = {
+        pistol: { name: 'Pistol', emoji: '🔫', damage: 20, range: 5, ap: 2 },
+        rifle: { name: 'Assault Rifle', emoji: '🔫', damage: 25, range: 8, ap: 2 },
+        smg: { name: 'SMG', emoji: '🔫', damage: 15, range: 4, ap: 1 },
+        shotgun: { name: 'Shotgun', emoji: '💥', damage: 35, range: 3, ap: 2, knockback: 2 },
+        sniper: { name: 'Sniper Rifle', emoji: '🎯', damage: 45, range: 12, ap: 3 },
+        beam: { name: 'Energy Beam', emoji: '⚡', damage: 30, range: 8, ap: 2 },
+        plasma_rifle: { name: 'Plasma Rifle', emoji: '🔥', damage: 40, range: 6, ap: 3, knockback: 2 },
+        ice_rifle: { name: 'Ice Rifle', emoji: '❄️', damage: 25, range: 6, ap: 2 },
+        fists: { name: 'Fists', emoji: '👊', damage: 8, range: 1, ap: 1 },
+        super_punch: { name: 'Super Punch', emoji: '💥', damage: 25, range: 1, ap: 2, knockback: 3 },
+        sword: { name: 'Sword', emoji: '⚔️', damage: 22, range: 1, ap: 2 }
+    };
+
+    const ARMORS = {
+        none: { name: 'None', emoji: '👕', dr: 0, energyDR: 0 },
+        kevlar: { name: 'Kevlar', emoji: '🦺', dr: 6, energyDR: 3 },
+        tactical: { name: 'Tactical', emoji: '🎽', dr: 8, energyDR: 4 },
+        combat: { name: 'Combat', emoji: '⚙️', dr: 12, energyDR: 6 },
+        power: { name: 'Power Armor', emoji: '🦾', dr: 18, energyDR: 12 },
+        mystic_ward: { name: 'Mystic Ward', emoji: '✨', dr: 5, energyDR: 15 },
+        alien_hide: { name: 'Alien Hide', emoji: '🛸', dr: 14, energyDR: 14 }
+    };
+
+    const CAREERS = {
+        1: { name: 'Medical', emoji: '🏥', skills: ['Healing', 'Forensics', 'Chemistry'],
+             jobs: { 1: ['Physician', 'Vet', 'Pharmacist'], 2: ['Surgeon', 'Radiologist'],
+                     3: ['Neurosurgeon', 'Pharma Researcher'], 4: ['Biotech Researcher'], 5: ['Mutagenics Researcher'] }},
+        2: { name: 'Arts', emoji: '🎭', skills: ['Bluff', 'Disguise', 'Media'],
+             jobs: { 1: ['Model', 'Dancer', 'Musician'], 2: ['Actor', 'Musician'],
+                     3: ['Script Writer'], 4: ['Film Director'], 5: ['Media Mogul'] }},
+        3: { name: 'Liberal Arts', emoji: '📚', skills: ['Research', 'Politics', 'Communication'],
+             jobs: { 1: ['Teacher', 'Journalist'], 2: ['Politician', 'Designer'],
+                     3: ['Professor'], 4: ['Senator'], 5: ['President'] }},
+        4: { name: 'Engineering', emoji: '⚙️', skills: ['Tech', 'Hacking', 'Weapons'],
+             jobs: { 1: ['IT Tech', 'Mechanic'], 2: ['Developer', 'Architect'],
+                     3: ['Cyber-Security', 'Weapon Designer'], 4: ['AI Researcher', 'Robotics Engineer'], 5: ['Rocket Scientist'] }},
+        5: { name: 'Business', emoji: '💼', skills: ['Finance', 'Negotiation', 'Resources'],
+             jobs: { 1: ['Accountant', 'Manager'], 2: ['HR Manager', 'Economist'],
+                     3: ['Marketing Director'], 4: ['CEO'], 5: ['Megacorp Owner'] }},
+        6: { name: 'Psychology', emoji: '🧠', skills: ['Interrogation', 'Profiling', 'Manipulation'],
+             jobs: { 1: ['Counselor', 'Priest'], 2: ['Psychiatrist'],
+                     3: ['Criminal Psychologist'], 4: ['Psionics Researcher'], 5: ['Wizard'] }},
+        7: { name: 'Physical', emoji: '💪', skills: ['Combat', 'Athletics', 'Surveillance'],
+             jobs: { 1: ['Police Officer', 'Pro Athlete'], 2: ['PMC Soldier', 'MMA Fighter'],
+                     3: ['Special Forces'], 4: ['Elite Operative'], 5: ['Super Soldier'] }}
+    };
+
+    const PERSONALITIES = {
+        aggressive: { name: 'Aggressive', emoji: '😠', desc: 'Attacks nearest, charges in' },
+        calculating: { name: 'Calculating', emoji: '🧠', desc: 'Optimal target selection' },
+        protective: { name: 'Protective', emoji: '🛡️', desc: 'Defends allies, draws fire' },
+        sadistic: { name: 'Sadistic', emoji: '😈', desc: 'Targets wounded, overkill' },
+        tactical: { name: 'Tactical', emoji: '🎯', desc: 'Threat prioritization' },
+        sniper: { name: 'Sniper', emoji: '🔭', desc: 'Picks off wounded from range' },
+        bloodthirsty: { name: 'Bloodthirsty', emoji: '🩸', desc: 'Finishes kills' },
+        cautious: { name: 'Cautious', emoji: '😰', desc: 'Stays in cover, retreats' },
+        berserker: { name: 'Berserker', emoji: '🔥', desc: 'All-out attack' },
+        cold: { name: 'Cold', emoji: '🧊', desc: 'Emotionless efficiency' },
+        opportunist: { name: 'Opportunist', emoji: '🦊', desc: 'Adapts to situation' },
+        honorable: { name: 'Honorable', emoji: '⚔️', desc: 'Fair fights' },
+        cunning: { name: 'Cunning', emoji: '🐍', desc: 'Flanking, ambushes' },
+        reckless: { name: 'Reckless', emoji: '💀', desc: 'High risk plays' },
+        methodical: { name: 'Methodical', emoji: '📋', desc: 'Systematic elimination' },
+        vengeful: { name: 'Vengeful', emoji: '💢', desc: 'Targets who hurt them' },
+        heroic: { name: 'Heroic', emoji: '🦸', desc: 'Protects others' },
+        predatory: { name: 'Predatory', emoji: '🐺', desc: 'Hunts weak targets' },
+        professional: { name: 'Professional', emoji: '💼', desc: 'Efficient, no emotion' },
+        cowardly: { name: 'Cowardly', emoji: '🐔', desc: 'Runs when losing' }
+    };
+
+    const POWERS = {
+        super_strength: { name: 'Super Strength', emoji: '💪', type: 'Physical', desc: '+30 melee damage, throw objects' },
+        super_speed: { name: 'Super Speed', emoji: '⚡', type: 'Physical', desc: 'Double movement, +2 dodge' },
+        flight: { name: 'Flight', emoji: '🦅', type: 'Travel', desc: 'Ignore terrain, +2 vs ground' },
+        force_field: { name: 'Force Field', emoji: '🛡️', type: 'Defensive', desc: 'Block 50 damage, 3x3 area' },
+        invisibility: { name: 'Invisibility', emoji: '👻', type: 'Alteration', desc: 'Cannot be targeted' },
+        regeneration: { name: 'Regeneration', emoji: '💚', type: 'Defensive', desc: 'Heal 10 HP per turn' },
+        energy_bolt: { name: 'Energy Bolt', emoji: '⚡', type: 'Energy', desc: '35 damage ranged attack' },
+        fire_control: { name: 'Fire Control', emoji: '🔥', type: 'Energy', desc: 'Burning DOT, fire immunity' },
+        ice_control: { name: 'Ice Control', emoji: '❄️', type: 'Energy', desc: 'Freeze chance, slow enemies' },
+        telepathy: { name: 'Telepathy', emoji: '🧠', type: 'Mental', desc: 'Detect all enemies' },
+        telekinesis: { name: 'Telekinesis', emoji: '🖐️', type: 'Mental', desc: 'Move objects/units 5 tiles' },
+        teleport: { name: 'Teleport', emoji: '✨', type: 'Travel', desc: 'Blink 5 tiles, ignore walls' },
+        phasing: { name: 'Phasing', emoji: '💨', type: 'Alteration', desc: 'Walk through walls' },
+        super_durability: { name: 'Super Durability', emoji: '🪨', type: 'Defensive', desc: '+50 HP, DR +10' },
+        psychic_blast: { name: 'Psychic Blast', emoji: '💜', type: 'Mental', desc: 'PSY damage, ignores armor' }
+    };
+
+    // ============ STATE ============
+
+    let character = {
+        name: '',
+        codename: '',
+        team: 'heroes',
+        secretIdentity: true,
+        backstory: '',
+        str: 30, agl: 30, end: 30, rsn: 30, int: 30, psy: 30,
+        origin: 'skilled_human',
+        weapon: 'pistol',
+        armor: 'none',
+        career: { category: null, rank: 1, job: null },
+        personality: 'tactical',
+        powers: []
+    };
+
+    const TOTAL_POINTS = 200;
+
+    // ============ INITIALIZATION ============
+
+    document.addEventListener('DOMContentLoaded', () => {
+        renderOrigins();
+        renderWeapons();
+        renderArmors();
+        renderCareers();
+        renderPersonalities();
+        renderPowers();
+        updateStats();
+        updatePreview();
+    });
+
+    // ============ TAB SWITCHING ============
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelector(`.tab-content#tab-${tabId}`).classList.add('active');
+        document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+    }
+
+    // ============ STATS ============
+
+    function updateStats() {
+        const stats = ['str', 'agl', 'end', 'rsn', 'int', 'psy'];
+        let total = 0;
+
+        stats.forEach(stat => {
+            const val = parseInt(document.getElementById(`stat-${stat}`).value);
+            character[stat] = val;
+            document.getElementById(`val-${stat}`).textContent = val;
+            total += val;
+        });
+
+        // Update effects
+        document.getElementById('eff-str').textContent = `Melee +${Math.floor(character.str / 10)}`;
+        document.getElementById('eff-agl').textContent = `Dodge +${Math.floor(character.agl / 20)}`;
+        document.getElementById('eff-end').textContent = `HP +${Math.floor(character.end * 1.5)}`;
+        document.getElementById('eff-rsn').textContent = `Tech +${Math.floor(character.rsn / 20)}`;
+        document.getElementById('eff-int').textContent = `Init +${character.int}`;
+        document.getElementById('eff-psy').textContent = `Mental +${Math.floor(character.psy / 20)}`;
+
+        // Points remaining
+        const remaining = TOTAL_POINTS - total;
+        const display = document.getElementById('points-display');
+        display.innerHTML = `Points Remaining: <strong>${remaining}</strong> / ${TOTAL_POINTS}`;
+        display.className = remaining < 0 ? 'points-remaining warning' : 'points-remaining ok';
+
+        // Derived stats
+        const origin = ORIGINS[character.origin];
+        const hp = 50 + Math.floor(character.end * 1.5) + origin.hpMod;
+        const ap = 4 + Math.floor(character.agl / 20);
+        const move = 4 + Math.floor(character.agl / 20);
+        const init = Math.floor((character.agl + character.int) / 2);
+
+        document.getElementById('derived-hp').textContent = hp;
+        document.getElementById('derived-ap').textContent = ap;
+        document.getElementById('derived-move').textContent = move;
+        document.getElementById('derived-init').textContent = init;
+
+        updatePreview();
+    }
+
+    // ============ ORIGINS ============
+
+    function renderOrigins() {
+        const grid = document.getElementById('origin-grid');
+        grid.innerHTML = '';
+
+        Object.values(ORIGINS).forEach(origin => {
+            const card = document.createElement('div');
+            card.className = `origin-card ${character.origin === origin.id ? 'selected' : ''}`;
+            card.onclick = () => selectOrigin(origin.id);
+            card.innerHTML = `
+                <div class="origin-emoji">${origin.emoji}</div>
+                <div class="origin-name">${origin.name}</div>
+                <div class="origin-hp">${origin.hpMod >= 0 ? '+' : ''}${origin.hpMod} HP</div>
+                <div class="origin-traits">${origin.traits.join(', ')}</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function selectOrigin(originId) {
+        character.origin = originId;
+        renderOrigins();
+        showOriginDetail(originId);
+        renderPowers();
+        updateStats();
+    }
+
+    function showOriginDetail(originId) {
+        const origin = ORIGINS[originId];
+        const detail = document.getElementById('origin-detail');
+        detail.style.display = 'block';
+
+        let html = `<h3>${origin.emoji} ${origin.name}</h3>
+            <p style="color: #888; margin: 10px 0;">${origin.description}</p>`;
+
+        if (origin.immunities.length > 0) {
+            html += `<div style="margin-top: 15px;"><strong style="color: #27ae60;">✅ Immune To:</strong>
+                <div class="immunity-list">${origin.immunities.map(i => `<span class="immunity-tag">${i}</span>`).join('')}</div></div>`;
+        }
+
+        if (origin.vulnerabilities.length > 0) {
+            html += `<div style="margin-top: 15px;"><strong style="color: #e74c3c;">❌ Vulnerable To:</strong>
+                <div class="vulnerability-list">${origin.vulnerabilities.map(v => `<span class="vulnerability-tag">${v}</span>`).join('')}</div></div>`;
+        }
+
+        html += `<div style="margin-top: 15px;"><strong style="color: #3498db;">✨ Powers Available:</strong> ${origin.powers}</div>`;
+
+        detail.innerHTML = html;
+    }
+
+    // ============ EQUIPMENT ============
+
+    function renderWeapons() {
+        const grid = document.getElementById('weapon-grid');
+        grid.innerHTML = '';
+
+        Object.entries(WEAPONS).forEach(([id, weapon]) => {
+            const card = document.createElement('div');
+            card.className = `weapon-card ${character.weapon === id ? 'selected' : ''}`;
+            card.onclick = () => selectWeapon(id);
+            card.innerHTML = `
+                <div class="weapon-header">
+                    <span class="weapon-emoji">${weapon.emoji}</span>
+                    <span class="weapon-name">${weapon.name}</span>
+                </div>
+                <div class="weapon-stats">
+                    <span>Damage: ${weapon.damage}</span>
+                    <span>Range: ${weapon.range}</span>
+                    <span>AP: ${weapon.ap}</span>
+                    ${weapon.knockback ? `<span>KB: ${weapon.knockback}</span>` : '<span></span>'}
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function selectWeapon(weaponId) {
+        character.weapon = weaponId;
+        renderWeapons();
+        updatePreview();
+    }
+
+    function renderArmors() {
+        const grid = document.getElementById('armor-grid');
+        grid.innerHTML = '';
+
+        Object.entries(ARMORS).forEach(([id, armor]) => {
+            const card = document.createElement('div');
+            card.className = `armor-card ${character.armor === id ? 'selected' : ''}`;
+            card.onclick = () => selectArmor(id);
+            card.innerHTML = `
+                <div class="weapon-header">
+                    <span class="weapon-emoji">${armor.emoji}</span>
+                    <span class="weapon-name">${armor.name}</span>
+                </div>
+                <div class="weapon-stats">
+                    <span>Physical DR: ${armor.dr}</span>
+                    <span>Energy DR: ${armor.energyDR}</span>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function selectArmor(armorId) {
+        character.armor = armorId;
+        renderArmors();
+        updatePreview();
+    }
+
+    // ============ CAREERS ============
+
+    function renderCareers() {
+        const grid = document.getElementById('career-grid');
+        grid.innerHTML = '';
+
+        Object.entries(CAREERS).forEach(([id, career]) => {
+            const card = document.createElement('div');
+            card.className = `career-card ${character.career.category == id ? 'selected' : ''}`;
+            card.onclick = () => selectCareer(parseInt(id));
+            card.innerHTML = `
+                <div class="career-emoji">${career.emoji}</div>
+                <div class="career-name">${career.name}</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function selectCareer(categoryId) {
+        character.career.category = categoryId;
+        character.career.rank = 1;
+        renderCareers();
+        showCareerDetails(categoryId);
+        updatePreview();
+    }
+
+    function showCareerDetails(categoryId) {
+        const career = CAREERS[categoryId];
+
+        // Show rank selector
+        const rankSelector = document.getElementById('rank-selector');
+        rankSelector.style.display = 'flex';
+
+        const rankDots = document.getElementById('rank-dots');
+        rankDots.innerHTML = '';
+        for (let i = 1; i <= 5; i++) {
+            const dot = document.createElement('div');
+            dot.className = `rank-dot ${i <= character.career.rank ? 'filled' : ''}`;
+            dot.onclick = () => setCareerRank(i);
+            rankDots.appendChild(dot);
+        }
+        document.getElementById('rank-label').textContent = `Rank ${character.career.rank}`;
+
+        // Show job dropdown
+        const jobSelect = document.getElementById('job-select');
+        jobSelect.style.display = 'block';
+        const dropdown = document.getElementById('job-dropdown');
+        dropdown.innerHTML = '';
+        const jobs = career.jobs[character.career.rank] || [];
+        jobs.forEach(job => {
+            const opt = document.createElement('option');
+            opt.value = job;
+            opt.textContent = job;
+            dropdown.appendChild(opt);
+        });
+        character.career.job = jobs[0] || null;
+
+        // Show skill bonuses
+        const bonusDiv = document.getElementById('skill-bonuses');
+        bonusDiv.style.display = 'grid';
+        bonusDiv.innerHTML = career.skills.map((skill, i) => `
+            <div class="skill-bonus">
+                <div class="skill-bonus-value">+${5 * character.career.rank}%</div>
+                <div class="skill-bonus-name">${skill}</div>
+            </div>
+        `).join('');
+    }
+
+    function setCareerRank(rank) {
+        character.career.rank = rank;
+        if (character.career.category) {
+            showCareerDetails(character.career.category);
+        }
+        updatePreview();
+    }
+
+    // ============ PERSONALITIES ============
+
+    function renderPersonalities() {
+        const grid = document.getElementById('personality-grid');
+        grid.innerHTML = '';
+
+        Object.entries(PERSONALITIES).forEach(([id, p]) => {
+            const card = document.createElement('div');
+            card.className = `personality-card ${character.personality === id ? 'selected' : ''}`;
+            card.onclick = () => selectPersonality(id);
+            card.innerHTML = `
+                <div class="personality-emoji">${p.emoji}</div>
+                <div class="personality-name">${p.name}</div>
+                <div class="personality-desc">${p.desc}</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function selectPersonality(personalityId) {
+        character.personality = personalityId;
+        renderPersonalities();
+        updatePreview();
+    }
+
+    // ============ POWERS ============
+
+    function renderPowers() {
+        const grid = document.getElementById('power-grid');
+        const origin = ORIGINS[character.origin];
+        const maxPowers = origin.powers;
+
+        document.getElementById('max-powers').textContent = maxPowers;
+        document.getElementById('power-origin-name').textContent = origin.name;
+
+        grid.innerHTML = '';
+
+        if (maxPowers === 0) {
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 40px;">This origin cannot have powers. Choose equipment carefully!</div>';
+            return;
+        }
+
+        Object.entries(POWERS).forEach(([id, power]) => {
+            const isSelected = character.powers.includes(id);
+            const isDisabled = !isSelected && character.powers.length >= maxPowers;
+
+            const card = document.createElement('div');
+            card.className = `power-card ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`;
+            card.onclick = () => !isDisabled && togglePower(id);
+            card.innerHTML = `
+                <div class="power-header">
+                    <span style="font-size: 24px;">${power.emoji}</span>
+                    <span class="power-name">${power.name}</span>
+                    <span class="power-type">${power.type}</span>
+                </div>
+                <div class="power-desc">${power.desc}</div>
+            `;
+            grid.appendChild(card);
+        });
+
+        document.querySelector('#power-limit strong').textContent = character.powers.length;
+    }
+
+    function togglePower(powerId) {
+        const idx = character.powers.indexOf(powerId);
+        if (idx >= 0) {
+            character.powers.splice(idx, 1);
+        } else {
+            character.powers.push(powerId);
+        }
+        renderPowers();
+        updatePreview();
+    }
+
+    // ============ PREVIEW & CALCULATIONS ============
+
+    function updatePreview() {
+        const origin = ORIGINS[character.origin];
+        const weapon = WEAPONS[character.weapon];
+        const armor = ARMORS[character.armor];
+
+        // Identity
+        document.getElementById('preview-codename').textContent = character.codename || 'CODENAME';
+        document.getElementById('preview-realname').textContent = character.name || 'Real Name';
+        document.getElementById('preview-sprite').textContent = origin.emoji;
+
+        // Team
+        const teamDiv = document.getElementById('preview-team');
+        teamDiv.className = `preview-team team-${character.team}`;
+        const teamNames = { heroes: '🔵 HEROES', villains: '🔴 VILLAINS', mercenary: '🟡 MERCENARY', civilian: '⚪ CIVILIAN' };
+        teamDiv.textContent = teamNames[character.team];
+
+        // Stats
+        const hp = 50 + Math.floor(character.end * 1.5) + origin.hpMod;
+        const ap = 4 + Math.floor(character.agl / 20);
+        const move = 4 + Math.floor(character.agl / 20);
+
+        document.getElementById('preview-hp').textContent = hp;
+        document.getElementById('preview-ap').textContent = ap;
+        document.getElementById('preview-move').textContent = move;
+        document.getElementById('preview-dr').textContent = armor.dr;
+
+        document.getElementById('preview-origin').textContent = origin.name;
+        document.getElementById('preview-weapon').textContent = weapon.name;
+        document.getElementById('preview-armor').textContent = armor.name;
+        document.getElementById('preview-career').textContent = character.career.category ? CAREERS[character.career.category].name : 'None';
+
+        // Summary bar
+        document.getElementById('sum-hp').textContent = hp;
+        document.getElementById('sum-ap').textContent = ap;
+        document.getElementById('sum-move').textContent = move;
+        document.getElementById('sum-dr').textContent = armor.dr;
+        document.getElementById('sum-dmg').textContent = weapon.damage;
+        document.getElementById('sum-range').textContent = weapon.range;
+
+        // Threat calculation
+        calculateThreat();
+    }
+
+    function calculateThreat() {
+        const origin = ORIGINS[character.origin];
+        const weapon = WEAPONS[character.weapon];
+        const armor = ARMORS[character.armor];
+
+        const avgStats = (character.str + character.agl + character.end + character.rsn + character.int + character.psy) / 6;
+        const hp = 50 + Math.floor(character.end * 1.5) + origin.hpMod;
+
+        const originBonus = { skilled_human: 0, altered_human: 2, mutant: 3, tech_enhanced: 4, mystic: 4, alien: 5, construct: 6, divine: 6, cosmic: 8 };
+
+        let score = Math.floor(avgStats / 10) + Math.floor(hp / 25) + Math.floor(weapon.damage / 10) + Math.floor(armor.dr / 5) + (character.powers.length * 5) + (originBonus[character.origin] || 0);
+
+        let level, stars;
+        if (score <= 10) { level = 'Alpha'; stars = '-'; }
+        else if (score <= 20) { level = 'Level 1'; stars = '⭐'; }
+        else if (score <= 35) { level = 'Level 2'; stars = '⭐⭐'; }
+        else if (score <= 50) { level = 'Level 3'; stars = '⭐⭐⭐'; }
+        else if (score <= 70) { level = 'Level 4'; stars = '⭐⭐⭐⭐'; }
+        else { level = 'Level 5'; stars = '⭐⭐⭐⭐⭐'; }
+
+        document.getElementById('threat-stars').textContent = stars;
+        document.getElementById('threat-level').textContent = level;
+        document.getElementById('threat-score').textContent = score;
+        document.getElementById('sum-threat').textContent = level;
+    }
+
+    // ============ UTILITY FUNCTIONS ============
+
+    function toggleSecret() {
+        character.secretIdentity = !character.secretIdentity;
+        const toggle = document.getElementById('toggle-secret');
+        toggle.classList.toggle('active', character.secretIdentity);
+        document.getElementById('secret-label').textContent = `Public knows real name: ${character.secretIdentity ? 'No' : 'Yes'}`;
+    }
+
+    function getCharacterJSON() {
+        const origin = ORIGINS[character.origin];
+        const hp = 50 + Math.floor(character.end * 1.5) + origin.hpMod;
+
+        return {
+            id: `custom-${Date.now()}`,
+            name: document.getElementById('input-name').value || 'Unknown',
+            codename: document.getElementById('input-codename').value || 'Unnamed',
+            team: character.team,
+            origin: character.origin,
+            personality: character.personality,
+            threatLevel: document.getElementById('threat-level').textContent.toLowerCase().replace(' ', ''),
+            secretIdentity: character.secretIdentity,
+            hp: hp,
+            str: character.str,
+            agl: character.agl,
+            end: character.end,
+            rsn: character.rsn,
+            int: character.int,
+            psy: character.psy,
+            weapon: character.weapon,
+            armor: character.armor,
+            powers: character.powers,
+            career: character.career.category ? {
+                category: character.career.category,
+                categoryName: CAREERS[character.career.category].name,
+                rank: character.career.rank,
+                job: character.career.job
+            } : null,
+            backstory: document.getElementById('input-backstory').value || ''
+        };
+    }
+
+    function showExportModal() {
+        const json = getCharacterJSON();
+        document.getElementById('export-json').textContent = JSON.stringify(json, null, 2);
+        document.getElementById('export-modal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('export-modal').classList.remove('active');
+    }
+
+    function copyToClipboard() {
+        const json = JSON.stringify(getCharacterJSON(), null, 2);
+        navigator.clipboard.writeText(json).then(() => {
+            alert('Copied to clipboard!');
+        });
+    }
+
+    function saveCharacter() {
+        const json = getCharacterJSON();
+
+        // Save to localStorage
+        let savedChars = JSON.parse(localStorage.getItem('sht_custom_characters') || '[]');
+        savedChars.push(json);
+        localStorage.setItem('sht_custom_characters', JSON.stringify(savedChars));
+
+        alert(`Character "${json.codename}" saved! (${savedChars.length} total)`);
+    }
+
+    function randomizeCharacter() {
+        const origins = Object.keys(ORIGINS);
+        const weapons = Object.keys(WEAPONS);
+        const armors = Object.keys(ARMORS);
+        const personalities = Object.keys(PERSONALITIES);
+
+        character.origin = origins[Math.floor(Math.random() * origins.length)];
+        character.weapon = weapons[Math.floor(Math.random() * weapons.length)];
+        character.armor = armors[Math.floor(Math.random() * armors.length)];
+        character.personality = personalities[Math.floor(Math.random() * personalities.length)];
+
+        // Random stats
+        ['str', 'agl', 'end', 'rsn', 'int', 'psy'].forEach(stat => {
+            const val = 20 + Math.floor(Math.random() * 40);
+            character[stat] = val;
+            document.getElementById(`stat-${stat}`).value = val;
+        });
+
+        // Random career
+        character.career.category = 1 + Math.floor(Math.random() * 7);
+        character.career.rank = 1 + Math.floor(Math.random() * 5);
+
+        // Random powers
+        const origin = ORIGINS[character.origin];
+        character.powers = [];
+        if (origin.powers > 0) {
+            const powerList = Object.keys(POWERS);
+            for (let i = 0; i < origin.powers && powerList.length > 0; i++) {
+                const idx = Math.floor(Math.random() * powerList.length);
+                character.powers.push(powerList.splice(idx, 1)[0]);
+            }
+        }
+
+        // Re-render everything
+        renderOrigins();
+        showOriginDetail(character.origin);
+        renderWeapons();
+        renderArmors();
+        renderCareers();
+        if (character.career.category) showCareerDetails(character.career.category);
+        renderPersonalities();
+        renderPowers();
+        updateStats();
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+Power_Name,Investigation_Type,Bonus_Modifier,Special_Ability,Limitations,Description
+Invisibility,Covert Operations,+3,Undetectable surveillance,Limited duration,Can observe targets without being seen
+Psychic Persuasion,Information Gathering,+4,Extract information from unwilling subjects,Ethical concerns,Can convince people to reveal secrets
+Psychic Blast,Interrogation,+2,Force compliance through intimidation,Causes trauma,Can break mental resistance
+Super Speed,Time-Sensitive Investigations,+2,Cover large areas quickly,High energy cost,Can investigate multiple locations rapidly
+Flight,Surveillance,+2,Aerial reconnaissance,Weather dependent,Can observe from unreachable vantage points
+Super Durability,Dangerous Investigations,+1,Survive hostile environments,No stealth benefit,Can investigate hazardous locations safely
+Time Travel,Historical Investigation,+5,Access past events directly,Temporal paradox risk,Can witness events firsthand
+Sound Absorption,Covert Operations,+2,Move silently,Limited range,Can approach targets undetected
+Metal Manipulation,Evidence Analysis,+2,Examine metallic evidence,Metal-only limitation,Can detect metal tampering or weapons
+Gravitational Field Manipulation,Physical Investigation,+1,Access hard-to-reach areas,Energy intensive,Can reach elevated or secured locations
+Memory Vessel,Information Storage,+3,Perfect recall of investigation details,Emotional trauma risk,Can store vast amounts of evidence
+Entity Bonding,Communication,+2,Communicate through bonded entities,Limited to bonded entities,Can gather information through allies
+Dimensional Storage,Evidence Concealment,+1,Hide investigation materials,Living things die in storage,Can smuggle evidence or equipment
+Omnifabrication,Equipment Creation,+2,Create specialized investigation tools,Requires materials,Can fabricate needed equipment on-site
+Enhanced Inventing,Technology Investigation,+3,Understand and reverse-engineer tech,Material limitations,Can analyze advanced technology
+Perfect Recollection,Information Analysis,+4,Remember all investigation details,Cannot forget trauma,Can recall precise details of evidence
+Atmokinesis,Environmental Control,+1,Control weather for investigation,Conspicuous use,Can create distractions or access conditions
+Self-Sustenance,Extended Operations,+2,Investigate without breaks,Physical weakness if malnourished,Can maintain long surveillance
+Technopathy,Digital Investigation,+4,Control and analyze technology,Technology dependence,Can hack systems and analyze digital evidence
+Reactive Adaptation,Hostile Environment Investigation,+2,Adapt to investigation hazards,Unpredictable changes,Can survive dangerous investigation sites
+Scientific Weaponry,Technology Analysis,+3,Analyze alien and advanced weapons,Requires training,Can understand exotic technology
+Fire Generation,Covert Destruction,+1,Destroy evidence or create diversions,Highly visible,Can eliminate traces or create chaos
+Fire Manipulation,Evidence Destruction,+2,Precisely destroy specific evidence,Collateral damage risk,Can selectively eliminate materials
+Fire Invulnerability,Fire-Related Investigations,+3,Investigate fire scenes safely,Limited application,Can examine arson or explosions safely
+Telekinesis,Remote Investigation,+2,Manipulate objects from distance,Concentration required,Can search areas without physical presence
+Gravitational Influence,Access Control,+2,Manipulate security through gravity,Mentally taxing,Can disable alarms or open sealed areas
+Harmonic Resonance,Technology Disruption,+2,Disable electronic surveillance,Can damage friendly tech,Can neutralize security systems
+Adaptive Camouflage,Surveillance,+3,Blend perfectly with environment,Movement limitations,Can observe targets undetected
+Bio-Energy Projection,Interrogation,+1,Intimidate through energy display,Energy depletion,Can create fear for compliance
+Quantum Entanglement,Communication,+3,Instant untraceable communication,Distance limitations,Can coordinate with team instantly
+Energy Siphoning,Surveillance,+2,Power investigation equipment,Can drain friendly sources,Can extend electronic surveillance
+Multidimensional Awareness,Information Gathering,+4,Perceive across multiple realities,Information overload risk,Can see hidden dimensions of problems
+Chrono-Spatial Manipulation,Investigation Access,+3,Bypass temporal and spatial barriers,Reality distortion risk,Can investigate impossible locations
+Emotion Negation,Interrogation,+2,Remove emotional barriers to truth,Can affect allies,Can make subjects emotionally compliant
+Thought Induction,Information Gathering,+3,Plant investigative thoughts,Can backfire,Can make targets investigate for you
+Mutation Inducement,Emergency Powers,+1,Grant temporary abilities to team,Unpredictable results,Can enhance team capabilities temporarily
+Enhanced Parkour,Urban Investigation,+2,Navigate city environments easily,Property damage risk,Can access urban locations quickly
+Tactile Telekinesis,Physical Investigation,+2,Examine objects through enhanced touch,Requires physical contact,Can detect hidden details in objects
+Animal Empathy,Rural Investigation,+3,Use animals as surveillance network,Limited to animal intelligence,Can gather information through wildlife
+Enhanced Reflexes,Dangerous Investigations,+1,React quickly to threats,May react too quickly,Can avoid investigation hazards
+Tactical Genius,Investigation Planning,+4,Plan optimal investigation strategies,Requires accurate information,Can coordinate complex operations
+Advanced Engineering,Technology Investigation,+3,Understand complex systems,Resource dependent,Can analyze infrastructure and machinery
+Quantum Computing Mastery,Digital Investigation,+4,Break encryption and analyze data,Requires quantum computers,Can access any digital information
+Medical Savant,Biological Investigation,+3,Analyze biological evidence,Equipment dependent,Can investigate medical mysteries
+Linguistic Polymath,International Investigation,+4,Communicate in any language,Cultural barriers remain,Can operate in any country
+Energy Science Expert,Power Investigation,+3,Analyze LSW abilities and energy,Resource dependent,Can understand power sources
+Artificial Intelligence Specialist,AI Investigation,+3,Investigate AI-related incidents,Requires computing resources,Can analyze AI behavior
+Cryptography Master,Information Security,+4,Break codes and secure communications,Information dependent,Can access encrypted intelligence
+Environmental Science Virtuoso,Environmental Investigation,+4,Analyze environmental phenomena,Global scale limitations,Can investigate ecological mysteries
+Historical Insight,Background Investigation,+3,Understand historical context,Limited by available records,Can provide context for current events
+Absolute Mathematics,Pattern Analysis,+3,Find mathematical patterns in evidence,Context dependent,Can analyze statistical patterns
+Comprehensive Chemistry,Chemical Investigation,+4,Analyze chemical evidence,Equipment dependent,Can investigate chemical crimes
+Physics Mastery,Scientific Investigation,+4,Understand physical phenomena,Equipment dependent,Can investigate physics-based incidents
+Biological Expertise,Life Science Investigation,+4,Analyze biological systems,Equipment dependent,Can investigate biological mysteries
+Sociological Insight,Social Investigation,+3,Understand group behavior,Individual variation,Can predict social movements
+Complete Philosophy,Ethical Investigation,+2,Understand motivations and ethics,Abstract application,Can understand complex motivations
+Political Science Expertise,Political Investigation,+4,Analyze political systems,Human unpredictability,Can predict political outcomes
+Master of Fine Arts,Cultural Investigation,+2,Understand cultural contexts,Subjective interpretation,Can analyze cultural significance

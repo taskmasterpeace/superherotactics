@@ -1,0 +1,26 @@
+TerrainCode,TerrainSector
+1,Ocean
+2,Coastal
+3,Islands
+4,Desert
+5,Paved Roads
+6,Plains
+7,Unpaved Roads
+8,Grasslands
+9,Rocky Desert
+10,Hills
+11,Swamp
+12,Snow
+13,Rain Forest/Jungle
+14,Mountains
+15,Light Forest
+16,Heavy Forest
+17,Jungle Mountains
+18,Forested Mountains
+19,High Altitude Mountains
+20,Lake
+21,River
+22,Ice
+23,Farmland
+24,Wasteland
+25,Exclusion Zone

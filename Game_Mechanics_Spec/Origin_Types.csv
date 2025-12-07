@@ -1,0 +1,22 @@
+Origin_ID,Origin_Name,Description,Common_Powers,Stat_Tendencies,Weakness_Tendency,Example_Characters
+1,Skilled Human,Non-powered humans with exceptional training and equipment,None (equipment-based abilities),High MEL/AGL/INT balanced,Equipment dependency; normal human vulnerabilities,Batman; Black Widow; Punisher
+2,Altered Human,Humans transformed by accident experiment or external force,Physical enhancement; energy manipulation,High STR/STA; variable others,Often tied to transformation source,Hulk; Spider-Man; Captain America
+3,Mutant,Born with genetic X-gene or similar mutation,Highly variable - any power type,Varies widely by individual,Often emotional or psychological triggers,X-Men; Magneto; Professor X
+4,Tech Enhancement,Humans augmented with technology,Enhanced stats; built-in weapons; flight,High INT; enhanced physical stats,EMP vulnerability; maintenance needs,Iron Man; Cyborg; War Machine
+5,Mystic,Powers derived from magic or supernatural sources,Reality manipulation; summoning; enchantment,High CON/INT; variable others,Magic has rules and costs; specific counters,Doctor Strange; Scarlet Witch
+6,Alien,Non-human species with inherent abilities,Species-specific powers; often physical,Varies by species,Environmental (atmosphere kryptonite etc.),Superman; Martian Manhunter
+7,Cosmic,Powers granted by cosmic entities or forces,Near-unlimited power types; energy manipulation,Extremely high across board,Often tied to power source,Silver Surfer; Captain Marvel; Green Lantern
+8,Divine,Gods demigods or those with divine power,Immortality; domain-specific powers,High across board; extreme STA,Divine rules; other deities; specific artifacts,Thor; Wonder Woman; Hercules
+9,Construct,Artificial beings robots or animated objects,Programmed abilities; durability,High STA/STR; may lack CON,Programming limits; specific shutdown methods,Vision; Ultron; Sentinels
+
+---ORIGIN THREAT MODIFIERS---
+Origin_ID,Base_Threat_Modifier,Investigation_Modifier,Public_Perception_Modifier,Notes
+1,0,+2CS investigation,+20 public trust,Relatable to normal humans
+2,-1 threat (sympathy),0,Variable by story,Often seen as victims
+3,+1 threat (fear),0,-20 public trust,Mutant prejudice in many settings
+4,0,+1CS tech investigation,-10 public trust,Technology can be replicated/stolen
+5,+1 threat (unknown),-1CS investigation,Variable by culture,Magic is unpredictable
+6,+2 threat (xenophobia),-2CS (unfamiliar),-30 initial trust,Alien invasion fears
+7,+3 threat (power level),0,Awe/Fear mixed,Too powerful to relate to
+8,+2 threat (divine),+1CS historical,-10 (religious concerns),Challenges religious beliefs
+9,+1 threat (artificial),+2CS tech investigation,-20 (uncanny valley),Questions of consciousness

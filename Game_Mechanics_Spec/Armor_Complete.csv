@@ -1,0 +1,205 @@
+Section,Description
+---ARMOR COMPLETE DATABASE---,Master armor database including pre-made armor; components; materials; and custom building system
+
+===ARMOR CATEGORIES===
+Category,Description,Examples
+Light,Concealable protection for covert ops,Leather Jacket; Kevlar Vest; Undercover Vest
+Medium,Tactical protection with mobility,Tactical Vest; Riot Gear; Combat Armor
+Heavy,Maximum protection; reduced mobility,Military Plate; Bomb Suit; Juggernaut Armor
+Power,Tech-enhanced suits with abilities,Power Armor Mk1; Flight Suit; Stealth Suit
+Shield,Handheld/mounted protection,Riot Shield; Ballistic Shield; Energy Shield
+Natural,Innate super-powered protection,Super Durability; Stone Skin; Force Aura
+
+===PRE-MADE ARMOR - LIGHT===
+Armor_ID,Armor_Name,Category,DR_Physical,DR_Energy,DR_Mental,Coverage,Condition_Max,Weight_Lbs,STR_Required,Movement_Penalty,Stealth_Penalty,Cost_Level,Availability,Special_Properties,Notes
+ARM_LGT_001,Leather_Jacket,Light,3,0,0,Torso,20,3,0,0,0,Low,Common,Concealable; +1CS social situations,Basic street protection
+ARM_LGT_002,Kevlar_Vest,Light,8,0,0,Torso,40,4,0,0,0,Medium,Common,Concealable; Stops pistol rounds,Standard body armor
+ARM_LGT_003,Stab_Vest,Light,5,0,0,Torso,30,3,0,0,0,Low,Common,Concealable; +3DR vs edged,Anti-knife protection
+ARM_LGT_004,Undercover_Vest,Light,6,0,0,Torso,35,2,0,0,0,Medium,Law_Enforcement,Concealable under dress shirt,Thin profile armor
+ARM_LGT_005,Motorcycle_Armor,Light,5,0,0,Full,25,8,0,0,-1CS,Medium,Common,+2DR vs road rash; includes helmet,Rider protection
+ARM_LGT_006,Sports_Padding,Light,2,0,0,Limbs,15,4,0,0,0,Low,Common,Covers arms and legs only,Athletic protection
+ARM_LGT_007,Ballistic_Glasses,Light,0,0,0,Head_Partial,10,0.5,0,0,0,Low,Common,+2DR eyes only; shrapnel protection,Eye protection
+ARM_LGT_008,Tactical_Gloves,Light,1,0,0,Hands,10,0.5,0,0,0,Low,Common,+1CS grip; knuckle protection,Hand protection
+
+===PRE-MADE ARMOR - MEDIUM===
+Armor_ID,Armor_Name,Category,DR_Physical,DR_Energy,DR_Mental,Coverage,Condition_Max,Weight_Lbs,STR_Required,Movement_Penalty,Stealth_Penalty,Cost_Level,Availability,Special_Properties,Notes
+ARM_MED_001,Tactical_Vest,Medium,12,2,0,Torso,60,8,10,0,-1CS,Medium,Military,+4 gear slots; MOLLE compatible,Standard military vest
+ARM_MED_002,Riot_Gear,Medium,15,5,0,Full,80,15,15,-1 square,-2CS,High,Law_Enforcement,+2CS vs melee; includes helmet,Crowd control armor
+ARM_MED_003,Combat_Armor,Medium,18,5,0,Full,100,20,20,-1 square,-2CS,High,Military,Modular; accepts plates,Infantry armor
+ARM_MED_004,SWAT_Armor,Medium,20,8,0,Full,90,18,15,-1 square,-2CS,Very_High,Law_Enforcement,+2CS breaching; radio integrated,Tactical entry armor
+ARM_MED_005,Hazmat_Suit,Medium,5,10,0,Full,50,12,10,-2 squares,-3CS,High,Specialized,Immune to gas/chemical/radiation,Environmental protection
+ARM_MED_006,Fire_Suit,Medium,5,25,0,Full,60,15,15,-2 squares,-3CS,High,Specialized,Immune to fire damage,Firefighter protection
+ARM_MED_007,Dive_Suit_Armored,Medium,10,5,0,Full,70,25,20,-2 squares,-2CS,High,Military,Underwater capable; 200m depth,Combat diver armor
+ARM_MED_008,Security_Armor,Medium,10,3,0,Torso,50,10,10,0,-1CS,Medium,Common,Professional appearance,Corporate security
+
+===PRE-MADE ARMOR - HEAVY===
+Armor_ID,Armor_Name,Category,DR_Physical,DR_Energy,DR_Mental,Coverage,Condition_Max,Weight_Lbs,STR_Required,Movement_Penalty,Stealth_Penalty,Cost_Level,Availability,Special_Properties,Notes
+ARM_HVY_001,Military_Plate,Heavy,25,10,0,Full,150,30,25,-2 squares,-3CS,Very_High,Military,Ceramic/steel plates; rifle rated,Full military protection
+ARM_HVY_002,Bomb_Suit,Heavy,40,15,0,Full,200,80,35,-4 squares,-4CS,Ultra_High,Military,Blast resistant; +20DR vs explosion,EOD protection
+ARM_HVY_003,Juggernaut_Armor,Heavy,35,15,0,Full,180,50,30,-3 squares,-4CS,Ultra_High,Military_Only,Intimidation +2CS; cannot be knocked back,Heavy assault armor
+ARM_HVY_004,Exo_Frame,Heavy,20,10,0,Full,120,60,15,-1 square,-3CS,Ultra_High,High_Tech,STR +20 while worn; powered,Strength-enhancing frame
+ARM_HVY_005,Medieval_Plate,Heavy,20,0,0,Full,100,45,30,-3 squares,-4CS,High,Specialized,Historical; +2CS vs edged,Knight armor
+ARM_HVY_006,Riot_Heavy,Heavy,30,10,0,Full,160,40,25,-2 squares,-3CS,Very_High,Law_Enforcement,Full coverage; integrated comms,Maximum riot protection
+
+===PRE-MADE ARMOR - POWER ARMOR===
+Armor_ID,Armor_Name,Category,DR_Physical,DR_Energy,DR_Mental,Coverage,Condition_Max,Weight_Lbs,STR_Required,Movement_Penalty,Stealth_Penalty,Cost_Level,Availability,Special_Properties,Notes
+ARM_PWR_001,Power_Armor_Mk1,Power,30,30,0,Full,200,150,0,0,-4CS,Ultra_High,High_Tech,STR +30; Flight; HUD; 4hr battery,Basic power armor
+ARM_PWR_002,Power_Armor_Mk2,Power,40,40,5,Full,250,120,0,+1 square,-3CS,Ultra_High,High_Tech,STR +40; Flight; HUD; 8hr battery; AI assist,Advanced power armor
+ARM_PWR_003,Stealth_Suit,Power,15,15,0,Full,100,30,0,+2 squares,+3CS,Ultra_High,High_Tech,Active camo; sound dampening; thermal masking,Infiltration power armor
+ARM_PWR_004,Flight_Suit,Power,20,25,0,Full,120,40,0,Flight 50mph,-2CS,Ultra_High,High_Tech,Flight primary; aerial combat optimized,Air superiority suit
+ARM_PWR_005,Aqua_Suit,Power,25,20,0,Full,150,60,0,Swim 30mph,-2CS,Ultra_High,High_Tech,Underwater 500m; torpedo launcher mount,Naval power armor
+ARM_PWR_006,Heavy_Assault_Suit,Power,50,35,0,Full,300,200,0,-1 square,-5CS,Ultra_High,Military_Only,STR +50; weapon mounts; mini-missile rack,Walking tank
+ARM_PWR_007,Medical_Suit,Power,20,20,0,Full,100,50,0,0,-2CS,Ultra_High,Medical,Auto-stabilize wearer; +3CS medicine checks,Combat medic armor
+ARM_PWR_008,Engineering_Suit,Power,25,25,0,Full,150,80,0,0,-3CS,Ultra_High,High_Tech,Built-in tools; welding; cutting; repair drones,Construction/repair armor
+
+===PRE-MADE ARMOR - SHIELDS===
+Armor_ID,Armor_Name,Category,DR_Physical,DR_Energy,DR_Mental,Coverage,Condition_Max,Weight_Lbs,STR_Required,Movement_Penalty,Stealth_Penalty,Cost_Level,Availability,Special_Properties,Notes
+ARM_SHD_001,Riot_Shield,Shield,20,5,0,Directional,80,8,15,0,-1CS,Medium,Law_Enforcement,Block action; +2CS vs melee from front,Standard riot shield
+ARM_SHD_002,Ballistic_Shield,Shield,30,10,0,Directional,120,15,20,-1 square,-2CS,High,Law_Enforcement,Block action; stops rifle rounds from front,Entry team shield
+ARM_SHD_003,Tower_Shield,Shield,25,5,0,Directional,100,25,25,-2 squares,-3CS,High,Specialized,Full body coverage from front,Maximum physical shield
+ARM_SHD_004,Energy_Shield,Shield,15,40,10,Directional,60,5,0,0,-1CS,Ultra_High,High_Tech,Block action; excellent vs energy; 2hr battery,Tech energy barrier
+ARM_SHD_005,Buckler,Shield,10,0,0,Directional,40,3,10,0,0,Low,Common,Parry action; +1CS melee defense,Small shield
+ARM_SHD_006,Force_Shield_Generator,Shield,25,50,15,Bubble,100,10,0,0,-2CS,Ultra_High,High_Tech,3x3 area bubble; 1hr battery; stationary,Projected force field
+
+===NATURAL ARMOR (SUPER POWERS)===
+Armor_ID,Armor_Name,Category,DR_Physical,DR_Energy,DR_Mental,Coverage,Condition_Max,Weight_Lbs,STR_Required,Movement_Penalty,Stealth_Penalty,Cost_Level,Availability,Special_Properties,Notes
+ARM_NAT_001,Super_Durability_Low,Natural,15,10,0,Full,Infinite,0,0,0,0,N/A,Power,Regenerates; no condition loss,Low-level durability power
+ARM_NAT_002,Super_Durability_High,Natural,30,20,0,Full,Infinite,0,0,0,0,N/A,Power,Regenerates; no condition loss,High-level durability power
+ARM_NAT_003,Stone_Skin,Natural,25,5,0,Full,Infinite,0,0,-1 square,-2CS,N/A,Power,+5DR vs blunt; -5DR vs sonic,Rocky transformation
+ARM_NAT_004,Metal_Skin,Natural,35,15,0,Full,Infinite,0,0,-1 square,-2CS,N/A,Power,+10DR vs edged; vulnerable to magnetic,Metallic transformation
+ARM_NAT_005,Force_Aura,Natural,20,30,10,Full,Infinite,0,0,0,0,N/A,Power,Visible glow; can project shield,Psychic force field
+ARM_NAT_006,Adaptive_Armor,Natural,20,20,0,Full,Infinite,0,0,0,0,N/A,Power,After hit: +10DR vs that damage type for 1hr,Reactive adaptation
+ARM_NAT_007,Regeneration_Armor,Natural,10,10,0,Full,Infinite,0,0,0,0,N/A,Power,Heals 5 condition per turn; never breaks,Self-repairing biology
+ARM_NAT_008,Elastic_Body,Natural,5,5,0,Full,Infinite,0,0,0,0,N/A,Power,Blunt damage halved; immune to knockback,Stretchy form
+
+===ARMOR COMPONENTS (Add to base armor)===
+Component_ID,Component_Name,Slot,DR_Physical_Bonus,DR_Energy_Bonus,DR_Mental_Bonus,Weight_Add,Cost_Level,Availability,Effect,Compatible_With,Research_Required,Notes
+CMP_001,Ceramic_Plate_Insert,Torso,+8,+2,0,+4,Medium,Military,Stops rifle rounds; breaks after 3 hits,Light/Medium,None,Replaceable plates
+CMP_002,Steel_Plate_Insert,Torso,+10,+0,0,+6,Medium,Common,Heavy but durable; no break limit,Light/Medium,None,Old school protection
+CMP_003,Titanium_Plate_Insert,Torso,+12,+3,0,+3,High,Military,Lightweight rifle protection,Light/Medium,Metallurgy_1,Advanced material
+CMP_004,Graphene_Weave,Any,+5,+5,0,+0.5,Ultra_High,High_Tech,Flexible; no weight penalty,Any,Materials_3,Cutting edge material
+CMP_005,Trauma_Pad,Torso,+0,+0,0,+1,Low,Common,Reduces blunt trauma; -5 knockback damage,Light/Medium,None,Behind plate padding
+CMP_006,Neck_Guard,Neck,+5,+2,0,+2,Medium,Military,Protects throat/neck,-1CS head turn,Medium/Heavy,None,Vulnerable area protection
+CMP_007,Groin_Guard,Groin,+8,+3,0,+2,Medium,Military,Protects groin area,Medium/Heavy,None,Critical area protection
+CMP_008,Shoulder_Pauldrons,Shoulders,+5,+2,0,+4,Medium,Military,Shoulder protection; weapon mount option,Medium/Heavy,None,Modular shoulders
+CMP_009,Thigh_Guards,Legs,+4,+2,0,+3,Medium,Military,Upper leg protection,Medium/Heavy,None,Leg protection
+CMP_010,Shin_Guards,Legs,+3,+1,0,+2,Low,Common,Lower leg protection,Any,None,Basic leg armor
+CMP_011,Forearm_Guards,Arms,+3,+1,0,+2,Low,Common,Forearm protection; parry bonus +1CS,Any,None,Defensive arm armor
+CMP_012,Helmet_Ballistic,Head,+10,+3,0,+3,High,Military,Full head protection; -1CS perception,Medium/Heavy,None,Combat helmet
+CMP_013,Helmet_Tactical,Head,+6,+2,0,+2,Medium,Military,Partial head; no perception penalty,Light/Medium,None,Open face helmet
+CMP_014,Visor_Ballistic,Face,+5,+2,0,+1,Medium,Military,Face protection; -1CS perception,Helmet required,None,Face shield
+CMP_015,Visor_HUD,Face,+2,+2,0,+0.5,Very_High,High_Tech,Heads-up display; targeting +1CS,Helmet required,Electronics_2,Smart visor
+CMP_016,Night_Vision_Module,Head,+0,+0,0,+1,High,Military,See in darkness; blinded by bright light,Helmet required,Electronics_1,Low light vision
+CMP_017,Thermal_Module,Head,+0,+0,0,+1,Very_High,Military,See heat signatures; through thin walls,Helmet required,Electronics_2,Heat vision
+CMP_018,Comms_Module,Head,+0,+0,0,+0.5,Medium,Military,Encrypted radio; team communication,Helmet required,None,Tactical comms
+CMP_019,Air_Filter,Face,+0,+0,0,+1,Medium,Military,Immune to gas/airborne toxins,Helmet required,None,NBC protection
+CMP_020,Exo_Assist_Legs,Legs,+0,+0,0,+10,Ultra_High,High_Tech,+2 movement squares; STR +10 for carrying,Heavy/Power,Robotics_2,Powered leg assist
+CMP_021,Exo_Assist_Arms,Arms,+0,+0,0,+8,Ultra_High,High_Tech,STR +15 for lifting/melee,Heavy/Power,Robotics_2,Powered arm assist
+CMP_022,Mag_Boots,Feet,+0,+0,0,+3,High,High_Tech,Walk on metal surfaces any angle; -1 movement,Power,Electronics_1,Magnetic footwear
+CMP_023,Jump_Jets,Back,+0,+0,0,+15,Ultra_High,High_Tech,Jump 10 squares; hover 1 turn; 5 uses,Power,Propulsion_2,Jet-assisted jumps
+CMP_024,Flight_Pack,Back,+0,+0,0,+20,Ultra_High,High_Tech,Flight 30mph; 2hr battery,Power,Propulsion_3,Full flight capability
+CMP_025,Stealth_Coating,Surface,+0,+0,0,+2,Ultra_High,High_Tech,+2CS stealth; -50% thermal signature,Power,Stealth_2,Active camouflage lite
+
+===ARMOR MATERIALS (Affects base stats)===
+Material_ID,Material_Name,DR_Physical_Mult,DR_Energy_Mult,Weight_Mult,Condition_Mult,Cost_Mult,Research_Required,Special_Properties,Notes
+MAT_001,Standard,1.0x,1.0x,1.0x,1.0x,1.0x,None,None,Baseline material
+MAT_002,Hardened_Steel,1.3x,0.9x,1.4x,1.5x,1.5x,Metallurgy_1,Heavy but durable,Traditional armor material
+MAT_003,Titanium,1.2x,1.1x,0.7x,1.3x,3.0x,Metallurgy_2,Lightweight strength,Advanced alloy
+MAT_004,Ceramic_Composite,1.4x,1.0x,0.8x,0.6x,2.0x,Materials_1,Breaks easier but great protection,Modern body armor
+MAT_005,Carbon_Fiber,1.1x,1.0x,0.5x,1.0x,2.5x,Materials_2,Ultra lightweight,Racing/sport applications
+MAT_006,Kevlar_Weave,1.2x,0.8x,0.6x,0.8x,1.5x,None,Flexible; degrades faster,Fabric armor base
+MAT_007,Graphene_Layer,1.5x,1.3x,0.3x,1.2x,10.0x,Materials_3,Best weight-to-protection ratio,Cutting edge
+MAT_008,Vibranium_Alloy,2.0x,1.5x,0.6x,2.0x,50.0x,Alien_Tech,Absorbs kinetic energy; nearly indestructible,Rare alien metal
+MAT_009,Adamantium,2.5x,1.0x,1.5x,Infinite,100.0x,Alien_Tech,Virtually indestructible,Rarest metal
+MAT_010,Energy_Hardened,1.0x,2.0x,1.0x,1.0x,5.0x,Energy_Tech_2,Excellent energy resistance,Energy weapon defense
+MAT_011,Psi_Shielded,1.0x,1.0x,1.1x,1.0x,8.0x,Psi_Tech_2,+15 DR Mental,Psychic protection
+MAT_012,Reactive,1.3x,1.3x,1.2x,0.7x,4.0x,Explosives_2,Explodes outward on major hit; one use,Explosive reactive armor
+MAT_013,Bio_Organic,1.2x,1.2x,0.8x,Self_Repair,15.0x,Bio_Tech_3,Regenerates 5 condition/hour,Living armor
+MAT_014,Nano_Weave,1.4x,1.4x,0.6x,Self_Repair,20.0x,Nano_Tech_3,Regenerates 10 condition/hour; can reshape,Nanomachine armor
+
+===CUSTOM ARMOR BUILDING===
+Section,Description
+Overview,Players can build custom armor by combining: Base Frame + Material + Components
+Base_Frame,Starting template that determines coverage and base stats
+Material,What the armor is made of - affects all stats via multiplier
+Components,Add-on modules that provide specific bonuses
+
+===BASE FRAMES (Starting point for custom armor)===
+Frame_ID,Frame_Name,Category,Base_DR_Phys,Base_DR_Energy,Coverage,Base_Weight,Base_Condition,Slots_Available,Cost_Level,Research_Required,Notes
+FRM_001,Vest_Frame,Light,5,0,Torso,3,30,2,Low,None,Basic torso protection
+FRM_002,Jacket_Frame,Light,3,0,Torso_Arms,4,25,3,Low,None,Casual appearance
+FRM_003,Full_Light_Frame,Light,4,0,Full,8,35,4,Medium,Armor_1,Full body light coverage
+FRM_004,Tactical_Frame,Medium,8,2,Torso,6,50,4,Medium,Armor_1,Military vest base
+FRM_005,Combat_Frame,Medium,10,3,Full,15,80,6,High,Armor_2,Full infantry armor base
+FRM_006,Heavy_Frame,Heavy,15,5,Full,25,120,8,Very_High,Armor_3,Maximum protection base
+FRM_007,Exo_Frame,Power,10,10,Full,40,150,10,Ultra_High,Robotics_2,Powered armor base
+FRM_008,Stealth_Frame,Power,5,5,Full,15,80,6,Ultra_High,Stealth_2,Infiltration armor base
+FRM_009,Flight_Frame,Power,8,12,Full,30,100,8,Ultra_High,Propulsion_2,Aerial armor base
+FRM_010,Aquatic_Frame,Power,10,8,Full,35,120,8,Ultra_High,Aquatic_1,Underwater armor base
+
+===CUSTOM BUILD FORMULA===
+Stat,Formula
+Final_DR_Physical,(Base_DR_Phys × Material_Phys_Mult) + Component_Bonuses
+Final_DR_Energy,(Base_DR_Energy × Material_Energy_Mult) + Component_Bonuses
+Final_DR_Mental,Component_Bonuses + Material_Mental_Bonus
+Final_Weight,(Base_Weight × Material_Weight_Mult) + Component_Weights
+Final_Condition,Base_Condition × Material_Condition_Mult
+Total_Cost,Frame_Cost + (Material_Cost_Mult × Base) + Component_Costs
+
+===BUILD EXAMPLE===
+Example,Custom Stealth Infiltrator Suit
+Frame,Stealth_Frame (DR 5/5; 15 lbs; 80 condition; 6 slots)
+Material,Carbon_Fiber (1.1x phys; 1.0x energy; 0.5x weight)
+Components,Stealth_Coating; Visor_HUD; Air_Filter; Comms_Module (4 slots used)
+Final_DR_Physical,5 × 1.1 = 5.5 (round to 6) + 0 from components = 6
+Final_DR_Energy,5 × 1.0 = 5 + 0 from components = 5
+Final_Weight,15 × 0.5 = 7.5 + (2+0.5+1+0.5) = 11.5 lbs
+Special,+2CS stealth; HUD targeting +1CS; gas immunity; encrypted comms
+
+===RESEARCH REQUIREMENTS===
+Research_ID,Research_Name,Category,Prerequisites,Unlocks,Research_Time_Days,Required_Materials,Notes
+RES_ARM_001,Basic_Armor_Design,Armor,None,Armor_1 (Full_Light_Frame; Tactical_Frame),5,Kevlar samples; Steel samples,Entry level armor research
+RES_ARM_002,Combat_Armor_Design,Armor,Armor_1,Armor_2 (Combat_Frame),10,Ceramic plates; Titanium samples,Military grade armor
+RES_ARM_003,Heavy_Armor_Design,Armor,Armor_2,Armor_3 (Heavy_Frame),15,Ballistic steel; Trauma gel,Maximum protection armor
+RES_ARM_004,Basic_Metallurgy,Materials,None,Metallurgy_1 (Hardened_Steel),7,Iron ore; Carbon; Forge access,Metal working basics
+RES_ARM_005,Advanced_Metallurgy,Materials,Metallurgy_1,Metallurgy_2 (Titanium),14,Titanium ore; High-temp forge,Advanced alloys
+RES_ARM_006,Composite_Materials,Materials,None,Materials_1 (Ceramic_Composite),10,Clay; Silica; Kiln access,Ceramic armor materials
+RES_ARM_007,Advanced_Composites,Materials,Materials_1,Materials_2 (Carbon_Fiber),14,Carbon fiber raw; Epoxy resin,Lightweight materials
+RES_ARM_008,Nano_Materials,Materials,Materials_2 + Nano_Tech_1,Materials_3 (Graphene_Layer),21,Graphene samples; Nano lab,Cutting edge materials
+RES_ARM_009,Basic_Electronics,Tech,None,Electronics_1 (Night_Vision; Mag_Boots),7,Circuit boards; Sensors,Basic tech integration
+RES_ARM_010,Advanced_Electronics,Tech,Electronics_1,Electronics_2 (Thermal; Visor_HUD),14,Advanced processors; Displays,Smart armor tech
+RES_ARM_011,Robotics_Basics,Tech,Electronics_1,Robotics_1,10,Servo motors; Power cells,Mechanical assistance
+RES_ARM_012,Exo_Systems,Tech,Robotics_1,Robotics_2 (Exo_Frame; Exo_Assists),21,Hydraulics; Advanced servos,Powered armor systems
+RES_ARM_013,Propulsion_Basics,Tech,Electronics_1,Propulsion_1,10,Jet fuel; Thrusters,Basic propulsion
+RES_ARM_014,Flight_Systems,Tech,Propulsion_1,Propulsion_2 (Jump_Jets; Flight_Frame),21,Turbines; Stabilizers,Aerial mobility
+RES_ARM_015,Advanced_Flight,Tech,Propulsion_2,Propulsion_3 (Flight_Pack),30,Arc reactor; Anti-grav samples,Full flight capability
+RES_ARM_016,Stealth_Basics,Tech,Electronics_1,Stealth_1,14,Radar absorbent material; Sound dampeners,Basic stealth tech
+RES_ARM_017,Active_Camouflage,Tech,Stealth_1,Stealth_2 (Stealth_Frame; Stealth_Coating),28,Adaptive materials; Holographic projectors,Advanced stealth
+RES_ARM_018,Alien_Tech_Analysis,Exotic,Captured alien tech,Alien_Tech (Vibranium; exotic materials),Variable,Alien artifacts,Reverse engineering alien gear
+
+===ARMOR CONDITION AND REPAIR===
+Condition_State,Percentage,Effect,Repair_Requirement
+Perfect,100%,Full protection,None
+Good,75-99%,Full protection,Basic maintenance
+Worn,50-74%,-2 DR all types,Repair kit + 1 hour
+Damaged,25-49%,-5 DR all types; -1CS movement,Workshop + 4 hours
+Critical,1-24%,-10 DR all types; -2CS all actions,Workshop + materials + 8 hours
+Broken,0%,No protection; cannot be worn,Full rebuild or discard
+
+===REPAIR COSTS===
+Repair_Type,Time,Location,Material_Cost,Skill_Required
+Basic_Maintenance,30 min,Anywhere,None,None
+Field_Repair,1 hour,Anywhere,Repair kit,Engineering +0CS
+Workshop_Repair,4 hours,Workshop,Spare parts,Engineering +1CS
+Full_Rebuild,8 hours,Workshop,50% original materials,Engineering +2CS
+
+===DESIGNER NOTES===
+Topic,Note
+Custom_Building,Allow players to mix frame + material + components for unique armor
+Research_Gates,Powerful armor requires research investment; prevents early game OP
+Material_Tradeoffs,Each material has pros/cons; no perfect choice
+Component_Slots,Slot limits force meaningful choices
+Condition_System,Armor degrades; creates maintenance gameplay
+Power_Armor_Balance,Power armor is strong but expensive; requires research; limited battery
+Natural_Armor,Super powers give free armor; balances powered vs non-powered characters
+Shield_Mechanics,Shields require Block action; directional protection only

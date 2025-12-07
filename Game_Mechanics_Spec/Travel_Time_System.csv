@@ -1,0 +1,66 @@
+Travel_Type,Speed_Category,Game_Days_Per_Real_Hour,Range_Limit,Requirements,Notes
+
+---GROUND TRAVEL---,,,,,
+Walking,Very Slow,0.5 days/hour,City only,None,For local city movement only
+Vehicle_Standard,Slow,2 days/hour,Same country,Vehicle,Cars/trucks for land travel
+Vehicle_Fast,Medium,4 days/hour,Same continent,Fast vehicle + roads,Sports cars/motorcycles
+Train,Medium,3 days/hour,Rail network,Train access,Limited to countries with rail
+
+---AIR TRAVEL---,,,,,
+Commercial_Flight,Fast,12 days/hour,Global,Airport + tickets,Subject to schedules; 6hr minimum
+Private_Jet,Very Fast,18 days/hour,Global,Wealth + airport,On-demand; expensive
+Military_Transport,Very Fast,20 days/hour,Faction territory,Military authorization,Faction members only
+Supersonic,Extreme,30 days/hour,Global,Rare access,Very expensive; limited availability
+
+---SEA TRAVEL---,,,,,
+Boat_Small,Very Slow,1 day/hour,Coastal,Boat,For coastal/river only
+Ship_Standard,Slow,3 days/hour,Global,Port access,Cargo ships; ferries
+Ship_Fast,Medium,6 days/hour,Global,Naval vessel,Military or private yacht
+Submarine,Medium,5 days/hour,Global,Military/special,Covert travel; no detection
+
+---LSW TRAVEL---,,,,,
+Flight_Low,Fast,15 days/hour,500 miles,Flight power (Low),Personal flight ability
+Flight_High,Very Fast,25 days/hour,Global,Flight power (High),Supersonic flight
+Super_Speed_Low,Fast,10 days/hour,1000 miles,Super Speed (Low),Ground-based super speed
+Super_Speed_High,Extreme,40 days/hour,Global,Super Speed (High),Near-instant continental travel
+Teleportation,Instant,Instant,Line of sight or known location,Teleportation power,Instant but limited range
+Time_Travel,Special,Variable,Any time/place,Time Travel power,Can arrive before departure
+
+---TRAVEL TIME MATRIX (in Game Days)---,,,,,
+From_Region,Same_City,Same_Country,Same_Continent,Different_Continent,Global_Opposite
+Ground,0.5,2-5,N/A,N/A,N/A
+Commercial_Air,N/A,1,3-5,8-15,20-30
+Private_Air,N/A,0.5,2-3,5-10,12-18
+LSW_Flight_Low,0,0.5,1-2,N/A (range limit),N/A
+LSW_Flight_High,0,0,0.5,1-3,3-5
+Teleportation,0,0,0 (if known),0 (if known),0 (if known)
+
+---TRAVEL COMPLICATIONS---,,,,,
+Complication,Chance,Effect,Prevention
+Weather_Delay,15%,+50% travel time,Weather LSW; indoor route
+Political_Checkpoint,10% (hostile territory),+2 days + detection risk,Diplomatic credentials; covert entry
+Equipment_Failure,5%,Stranded; must find alternative,Backup vehicle; repair skill
+LSW_Encounter,Variable by region,Combat or social encounter,Stealth; speed; diplomacy
+Customs_Inspection,20% (international),Possible equipment confiscation,Diplomatic immunity; smuggling
+
+---REAL TIME TO GAME TIME REFERENCE---,,,,,
+Real_Time,Game_Time,Notes,,
+1 minute,0.02 days (30 min),"During active play",,
+1 hour,1.25 days,"Standard conversion",,
+1 day,30 days,"Base time flow",,
+1 week,210 days (7 months),"Significant time passage",,
+82.4 days,2472 days,"Full game countdown",,
+
+---TRAVEL COMMITMENT RULES---,,,,,
+Rule,Description,,,
+Commitment_Lock,Once travel begins cannot be interrupted without LSW power,,
+Emergency_Abort,Can abort travel at -50% progress with no refund on time,,
+Multi-Stop,Each additional stop adds 50% base time,,
+Rush_Travel,Pay 2x cost for -25% time (commercial only),,
+Covert_Travel,+50% time for untraceable route,,
+
+---SECTOR GRID REFERENCE---,,,,,
+Note,Sector codes on cities indicate grid position for calculating distances,,,
+Grid_Scale,Each grid square = approximately 500km,,,
+Adjacent_Sectors,1 day ground travel; 0.5 day air,,,
+Diagonal_Sectors,1.4x adjacent time,,,

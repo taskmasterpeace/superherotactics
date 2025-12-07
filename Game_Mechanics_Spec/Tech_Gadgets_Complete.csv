@@ -1,0 +1,332 @@
+Section,Description
+---TECH AND GADGETS COMPLETE DATABASE---,Comprehensive technology and gadget system including vehicles drones hacking sensors communications
+
+===TECH CATEGORIES===
+Category,Description,Examples
+Vehicles,Transportation with combat and travel capabilities,Motorcycle; Car; Helicopter; Jet
+Drones,Remote controlled or autonomous units,Recon Drone; Combat Drone; Medical Drone
+Hacking_Tools,Digital intrusion and cyber warfare equipment,Laptop; Decryption Kit; Signal Jammer
+Sensors,Detection and analysis equipment,Motion Sensor; Thermal Scanner; Radar
+Communications,Information sharing and coordination gear,Tactical Radio; Encrypted Phone; Satellite Uplink
+Weapon_Mods,Attachments that modify weapon performance,Scope; Silencer; Extended Magazine
+Field_Gear,Tactical equipment for operations,Breaching Charges; Zipline; Smoke Grenades
+Medical_Tech,Advanced medical equipment,Medkit; Defibrillator; Auto-Injector
+Surveillance,Covert observation equipment,Hidden Camera; Bug; Tracker
+Utility,General purpose tactical equipment,Flashlight; Multi-tool; Rope
+
+===VEHICLES - GROUND===
+Vehicle_ID,Vehicle_Name,Category,Speed_MPH,Speed_Squares_Turn,Passengers,Cargo_Lbs,Armor_HP,Armor_DR,Fuel_Type,Range_Miles,Cost_Level,Availability,Special_Properties,Notes
+VEH_001,Motorcycle_Sport,Ground,150,30,1,50,60,5,Gasoline,200,Medium,Common,Fast acceleration; easy to hide,Agile; exposed rider
+VEH_002,Motorcycle_Cruiser,Ground,100,20,2,100,70,8,Gasoline,300,Medium,Common,Stable; can carry passenger,Comfortable long distance
+VEH_003,Car_Compact,Ground,120,24,4,300,80,8,Gasoline,400,Medium,Common,Fuel efficient; easy parking,Basic transportation
+VEH_004,Car_Sedan,Ground,130,26,5,500,100,10,Gasoline,450,Medium,Common,Balanced capacity and speed,Standard vehicle
+VEH_005,Car_Sports,Ground,180,36,2,200,80,5,Gasoline,350,High,Common,High speed; handling,Performance focused
+VEH_006,Car_Muscle,Ground,160,32,4,400,90,8,Gasoline,300,High,Common,High acceleration; intimidating,American classic
+VEH_007,SUV,Ground,110,22,7,800,120,12,Gasoline,400,High,Common,Off-road capable; high capacity,Versatile
+VEH_008,Truck_Pickup,Ground,100,20,3,2000,130,10,Diesel,500,Medium,Common,Heavy cargo; towing,Work vehicle
+VEH_009,Van_Cargo,Ground,90,18,2,4000,100,8,Diesel,400,Medium,Common,Maximum cargo; mobile base,Surveillance/transport
+VEH_010,Van_Armored,Ground,80,16,8,1000,200,25,Diesel,300,Very_High,Law_Enforcement,Heavy armor; gun ports,SWAT transport
+VEH_011,APC,Ground,60,12,12,500,300,35,Diesel,350,Ultra_High,Military,Military armor; weapon mounts,Infantry carrier
+VEH_012,Tank_Light,Ground,45,9,3,200,400,50,Diesel,300,Ultra_High,Military_Only,Main gun; heavy armor,Light tank
+VEH_013,Limousine,Ground,100,20,8,400,150,15,Gasoline,400,Very_High,VIP,Luxury; extended armor option,Executive transport
+VEH_014,Bus,Ground,65,13,40,1000,200,10,Diesel,500,High,Commercial,Mass transport,Public/charter
+VEH_015,Semi_Truck,Ground,70,14,2,50000,250,8,Diesel,800,High,Commercial,Massive cargo,Long haul transport
+
+===VEHICLES - AIRCRAFT===
+Vehicle_ID,Vehicle_Name,Category,Speed_MPH,Altitude_Max_Ft,Passengers,Cargo_Lbs,Armor_HP,Armor_DR,Fuel_Type,Range_Miles,Cost_Level,Availability,Special_Properties,Notes
+VEH_020,Helicopter_Light,Aircraft,150,15000,4,500,100,8,Aviation_Fuel,400,Very_High,Licensed,VTOL; hover capable,News/tour helicopter
+VEH_021,Helicopter_Transport,Aircraft,180,20000,12,2000,150,12,Aviation_Fuel,500,Ultra_High,Military,VTOL; troop transport,Military transport
+VEH_022,Helicopter_Attack,Aircraft,200,20000,2,500,200,20,Aviation_Fuel,400,Ultra_High,Military_Only,Weapon systems; armor,Combat helicopter
+VEH_023,Jet_Private,Aircraft,500,45000,8,1000,80,5,Aviation_Fuel,3000,Ultra_High,Licensed,Fast long range,Executive travel
+VEH_024,Jet_Fighter,Aircraft,1500,60000,1,500,150,15,Aviation_Fuel,2000,Ultra_High,Military_Only,Combat systems; supersonic,Air superiority
+VEH_025,Cargo_Plane,Aircraft,400,35000,4,100000,200,10,Aviation_Fuel,5000,Ultra_High,Commercial,Massive cargo capacity,Freight transport
+VEH_026,VTOL_Craft,Aircraft,300,30000,6,1000,120,12,Aviation_Fuel,800,Ultra_High,High_Tech,VTOL + forward flight,Advanced military
+VEH_027,Drone_Aircraft,Aircraft,200,25000,0,200,50,5,Electric,100,Very_High,Military,Remote controlled; surveillance,Unmanned aerial
+VEH_028,Ultralight,Aircraft,80,10000,1,100,30,2,Gasoline,150,Medium,Licensed,Personal flight; slow,Recreational
+
+===VEHICLES - WATERCRAFT===
+Vehicle_ID,Vehicle_Name,Category,Speed_Knots,Passengers,Cargo_Lbs,Armor_HP,Armor_DR,Fuel_Type,Range_Miles,Cost_Level,Availability,Special_Properties,Notes
+VEH_030,Speedboat,Watercraft,50,4,500,60,5,Gasoline,200,High,Licensed,Fast; agile,Recreational/pursuit
+VEH_031,Yacht,Watercraft,25,12,2000,100,8,Diesel,500,Ultra_High,Licensed,Luxury; extended range,Executive
+VEH_032,Patrol_Boat,Watercraft,40,8,1000,150,15,Diesel,400,Very_High,Law_Enforcement,Weapon mounts; radar,Coast guard
+VEH_033,Submarine_Mini,Watercraft,15,2,200,200,20,Electric,50,Ultra_High,Military,Underwater; stealth,Covert insertion
+VEH_034,Fishing_Boat,Watercraft,20,6,3000,80,5,Diesel,300,Medium,Common,Work boat; storage,Commercial
+VEH_035,Jet_Ski,Watercraft,60,2,50,40,2,Gasoline,100,Medium,Common,Personal watercraft,Recreational
+
+===DRONES===
+Drone_ID,Drone_Name,Category,Speed_MPH,Range_Control_Ft,Flight_Time_Min,Payload_Lbs,Armor_HP,Sensors,Weapons,Cost_Level,Availability,Special_Properties,Notes
+DRN_001,Recon_Drone_Small,Aerial,30,5000,30,1,10,Camera_HD,None,Medium,Common,Quiet; small profile,Consumer grade
+DRN_002,Recon_Drone_Military,Aerial,60,20000,120,10,40,Camera_Thermal_IR,None,Very_High,Military,Extended range; encrypted,Military surveillance
+DRN_003,Combat_Drone_Light,Aerial,50,10000,60,5,60,Camera_HD,Light_Weapon_Mount,Ultra_High,Military,Armed; lethal,Armed surveillance
+DRN_004,Combat_Drone_Heavy,Aerial,80,50000,180,50,100,Full_Sensor_Suite,Heavy_Weapon_Mount,Ultra_High,Military_Only,Heavy weapons; armor,Combat UCAV
+DRN_005,Medical_Drone,Aerial,40,5000,45,10,30,Biometric_Sensors,None,High,Medical,Medical supplies delivery,Emergency response
+DRN_006,Cargo_Drone,Aerial,35,10000,60,50,50,GPS_Only,None,High,Commercial,Heavy lift capacity,Delivery drone
+DRN_007,Ground_Drone_Recon,Ground,15,3000,120,5,40,Camera_Thermal,None,High,Military,All terrain; quiet,Ground surveillance
+DRN_008,Ground_Drone_Combat,Ground,10,5000,180,20,100,Camera_Thermal,Weapon_Mount,Ultra_High,Military_Only,Armed ground unit,Combat robot
+DRN_009,Underwater_Drone,Aquatic,10,1000,60,5,60,Sonar_Camera,None,Very_High,Military,Underwater operation,Naval surveillance
+DRN_010,Swarm_Drone,Aerial,40,2000,15,0.5,5,Basic_Camera,Explosive_Payload,Ultra_High,Military_Only,Coordinated swarm AI,Swarm tactics
+
+===HACKING TOOLS===
+Tool_ID,Tool_Name,Category,Function,Skill_Required,Hack_Bonus,Range_Ft,Power_Duration_Hr,Cost_Level,Availability,Detection_Risk,Notes
+HCK_001,Laptop_Standard,Hacking,General purpose hacking,Computer,+0CS,N/A,4,Low,Common,High,Standard computer
+HCK_002,Laptop_Military,Hacking,Hardened hacking platform,Computer,+2CS,N/A,8,Very_High,Military,Low,Encrypted; hardened
+HCK_003,Decryption_Kit,Hacking,Breaks encryption,Cryptography,+3CS vs encryption,Contact,N/A,High,Specialized,Medium,Hardware decryption
+HCK_004,Signal_Jammer,Hacking,Blocks communications,Electronics,N/A,500,2,High,Restricted,Very_High,Illegal most places
+HCK_005,Keylogger_Hardware,Hacking,Records keystrokes,Computer,Auto-capture,Contact,Indefinite,Medium,Specialized,Low if hidden,Requires physical access
+HCK_006,RFID_Cloner,Hacking,Copies access cards,Electronics,Auto-copy,6,4,High,Specialized,Medium,Badge/card cloning
+HCK_007,USB_Exploit_Kit,Hacking,Auto-executes malware,Computer,+2CS,Contact,N/A,High,Hacker,Low,Drop attack tool
+HCK_008,WiFi_Pineapple,Hacking,Man-in-middle attacks,Computer,+2CS vs wireless,300,6,High,Hacker,Medium,Network interception
+HCK_009,Stingray_Device,Hacking,Cell phone interception,Electronics,Auto-intercept,1 mile,4,Ultra_High,Law_Enforcement,Medium,Phone tracking/intercept
+HCK_010,Quantum_Decryptor,Hacking,Breaks any encryption,Quantum_Physics,+5CS,Contact,1,Ultra_High,Alien_Tech,None,Future/alien tech
+
+===SENSORS===
+Sensor_ID,Sensor_Name,Category,Detection_Type,Range_Ft,Accuracy,Power_Duration_Hr,Cost_Level,Availability,Counters,Notes
+SEN_001,Motion_Sensor,Detection,Movement,50,High,168 (1 week),Low,Common,Slow movement; jamming,Basic security
+SEN_002,Thermal_Scanner,Detection,Heat signatures,200,High,8,High,Military,Thermal blanket; cold suit,Sees through walls (thin)
+SEN_003,Radar_Portable,Detection,Metal/movement,1000,Medium,4,Very_High,Military,Stealth tech; chaff,Vehicle/aircraft detection
+SEN_004,Sonar_Handheld,Detection,Underwater objects,500,High,6,High,Military,Silent running,Underwater detection
+SEN_005,Metal_Detector,Detection,Metal objects,10,Very_High,24,Low,Common,Non-metallic,Weapon screening
+SEN_006,Geiger_Counter,Detection,Radiation,100,Very_High,48,Medium,Specialized,Shielding,Radioactive detection
+SEN_007,Chemical_Sniffer,Detection,Chemical compounds,50,High,8,High,Law_Enforcement,Sealed containers,Drug/explosive detection
+SEN_008,Biometric_Scanner,Detection,Fingerprint/retina,Contact,Very_High,720 (1 month),High,Security,Spoofing; prosthetics,Identity verification
+SEN_009,Audio_Analyzer,Detection,Sound patterns,100,High,12,Medium,Specialized,Silence; masking,Voice recognition; bugs
+SEN_010,Life_Sign_Detector,Detection,Heartbeat/breathing,200,High,4,Very_High,Military,Dampening field,Through-wall life detection
+
+===COMMUNICATIONS===
+Comm_ID,Comm_Name,Category,Range,Encryption,Battery_Hr,Cost_Level,Availability,Intercept_Difficulty,Notes
+COM_001,Walkie_Talkie,Radio,2 miles,None,24,Low,Common,Easy,Consumer radio
+COM_002,Tactical_Radio,Radio,10 miles,Basic,48,Medium,Military,Medium,Squad communication
+COM_003,Encrypted_Radio,Radio,10 miles,Military_Grade,24,High,Military,Very_Hard,Secure military comms
+COM_004,Satellite_Phone,Satellite,Global,Basic,8,Very_High,Specialized,Medium,Global coverage
+COM_005,Satellite_Uplink,Satellite,Global,Military_Grade,4,Ultra_High,Military,Very_Hard,Data transmission
+COM_006,Encrypted_Phone,Cellular,Cell coverage,End-to-End,48,High,Specialized,Hard,Secure mobile
+COM_007,Burner_Phone,Cellular,Cell coverage,None,72,Low,Common,Easy but untraceable,Disposable; anonymous
+COM_008,Subvocal_Mic,Radio,1000 ft,Basic,12,High,Military,Medium,Silent communication
+COM_009,Neural_Link,Direct,500 ft,Thought_Encrypted,N/A,Ultra_High,High_Tech,Very_Hard,Brain-to-brain comm
+COM_010,Quantum_Comm,Quantum,Unlimited,Unbreakable,2,Ultra_High,Alien_Tech,Impossible,Instant; unhackable
+
+===WEAPON MODIFICATIONS===
+Mod_ID,Mod_Name,Category,Effect,Compatible_Weapons,Cost_Level,Availability,Drawbacks,Notes
+MOD_001,Scope_2x,Optic,+1CS accuracy at range,Rifles; Pistols,Low,Common,None,Basic magnification
+MOD_002,Scope_4x,Optic,+2CS accuracy at range,Rifles only,Medium,Common,-1CS close range,Medium magnification
+MOD_003,Scope_8x,Optic,+3CS accuracy at long range,Sniper rifles,High,Specialized,-2CS close range,Sniper scope
+MOD_004,Scope_Thermal,Optic,See heat signatures,Any firearm,Very_High,Military,Battery 4hr,Night/smoke capable
+MOD_005,Scope_Night_Vision,Optic,See in darkness,Any firearm,High,Military,Battery 8hr; blinded by bright light,Low light operation
+MOD_006,Silencer,Barrel,-30 dB sound; -10% range,Pistols; SMGs; Rifles,High,Restricted,Reduced velocity,Stealth operations
+MOD_007,Flash_Hider,Barrel,No muzzle flash,Any firearm,Low,Common,None,Night operations
+MOD_008,Compensator,Barrel,-1 recoil penalty,Any firearm,Medium,Common,+10 dB louder,Rapid fire accuracy
+MOD_009,Extended_Magazine,Magazine,+50% capacity,Compatible firearms,Medium,Common,+1 sec reload,More rounds
+MOD_010,Drum_Magazine,Magazine,+200% capacity,SMGs; Rifles,High,Restricted,+3 sec reload; jamming risk,High capacity
+MOD_011,Laser_Sight,Accessory,+1CS accuracy close range,Any firearm,Medium,Common,Visible beam reveals position,Point shooting
+MOD_012,Flashlight_Weapon,Accessory,Illumination; can blind,Any firearm,Low,Common,Reveals position,Tactical light
+MOD_013,Foregrip,Accessory,-1 recoil; +stability,Rifles; SMGs,Low,Common,None,Improved handling
+MOD_014,Bipod,Accessory,+2CS accuracy when deployed,Rifles; Machine guns,Low,Common,Requires setup; stationary,Prone shooting
+MOD_015,Bayonet,Accessory,+10 melee damage,Rifles,Low,Common,None,Emergency melee
+
+===FIELD GEAR===
+Gear_ID,Gear_Name,Category,Function,Uses,Weight_Lbs,Cost_Level,Availability,Notes
+FLD_001,Breaching_Charge,Explosive,Destroy door/wall,1,2,High,Military,Creates 3ft hole in standard wall
+FLD_002,C4_Block,Explosive,Demolition,1,1,Very_High,Military_Only,Shaped or bulk charge
+FLD_003,Flashbang,Tactical,Blind/deafen targets,1,0.5,High,Law_Enforcement,Non-lethal entry
+FLD_004,Smoke_Grenade,Tactical,Create concealment,1,1,Medium,Military,Blocks LOS 30 seconds
+FLD_005,Tear_Gas,Tactical,Incapacitate area,1,1,High,Law_Enforcement,Causes blindness/coughing
+FLD_006,Zipline_Kit,Mobility,Rapid descent/traverse,10,5,High,Military,100ft cable
+FLD_007,Grappling_Hook,Mobility,Vertical access,Reusable,3,Medium,Common,50ft rope included
+FLD_008,Rappelling_Gear,Mobility,Controlled descent,Reusable,5,Medium,Common,For zipline/rope descent
+FLD_009,Parachute,Mobility,Aerial insertion,1,20,High,Military,Altitudes 1000ft+
+FLD_010,Lockpick_Set,Infiltration,Open mechanical locks,Reusable,0.5,Medium,Specialized,Requires Lockpicking skill
+FLD_011,Electronic_Lockpick,Infiltration,Open electronic locks,Reusable,1,High,Specialized,Battery 4hr
+FLD_012,Glass_Cutter,Infiltration,Silent window entry,20,1,Medium,Specialized,Suction cup mount
+FLD_013,Tactical_Knife,Utility,Cutting; backup weapon,Reusable,0.5,Low,Common,Multi-purpose tool
+FLD_014,Multi_Tool,Utility,Various functions,Reusable,0.5,Low,Common,Pliers; screwdriver; etc
+FLD_015,Rope_100ft,Utility,Climbing; restraint,Reusable,5,Low,Common,550lb capacity
+FLD_016,Handcuffs,Restraint,Restrain targets,Reusable,0.5,Low,Law_Enforcement,Escape DC 20
+FLD_017,Zip_Ties,Restraint,Quick restraint,20,0.5,Low,Common,Escape DC 15; single use
+FLD_018,Body_Bag,Utility,Conceal/transport,5,2,Low,Common,Discrete transport
+FLD_019,Tactical_Vest,Loadout,Carry equipment,N/A,3,Medium,Common,+6 equipment slots
+FLD_020,Backpack_Tactical,Loadout,Large storage,N/A,4,Medium,Common,+10 equipment slots
+
+===MEDICAL TECH===
+Med_ID,Med_Name,Category,Effect,Uses,Skill_Required,Cost_Level,Availability,Notes
+MED_001,First_Aid_Kit,Treatment,+2CS Medicine checks; stabilize,10,First_Aid,Low,Common,Basic medical supplies
+MED_002,Trauma_Kit,Treatment,+3CS Medicine; treat critical,5,Medicine,Medium,Medical,Advanced supplies
+MED_003,Surgical_Kit,Treatment,Field surgery capable,20,Surgery,High,Medical,Professional tools
+MED_004,Defibrillator,Resuscitation,Restart heart,Reusable,First_Aid,High,Medical,DC 15 to revive
+MED_005,Auto_Injector_Stim,Chemical,+2CS all stats for 10 min,1,None,High,Military,Crash after (-2CS 1 hour)
+MED_006,Auto_Injector_Painkiller,Chemical,Ignore wound penalties 1 hr,1,None,Medium,Medical,Masks pain only
+MED_007,Auto_Injector_Antidote,Chemical,Cure poison/toxin,1,None,High,Medical,Universal antidote
+MED_008,Blood_Coagulant,Treatment,Stop bleeding instantly,3,First_Aid,Medium,Medical,Foam sealant
+MED_009,Splint_Kit,Treatment,Stabilize broken limb,5,First_Aid,Low,Common,Immobilize fracture
+MED_010,Stretcher_Portable,Transport,Move wounded,Reusable,None,Medium,Medical,Folding design
+
+===SURVEILLANCE EQUIPMENT===
+Surv_ID,Surv_Name,Category,Function,Range,Battery_Hr,Cost_Level,Availability,Detection_DC,Notes
+SRV_001,Hidden_Camera,Visual,Covert recording,N/A,168,Medium,Specialized,20,Pinhole; wireless
+SRV_002,Bug_Audio,Audio,Covert listening,500ft,72,Medium,Specialized,18,Small microphone
+SRV_003,GPS_Tracker,Location,Track movement,Global,720,Medium,Specialized,15,Magnetic mount
+SRV_004,Phone_Tap,Audio,Intercept calls,N/A,N/A,High,Law_Enforcement,22,Requires access
+SRV_005,Parabolic_Mic,Audio,Long range listening,500ft,8,High,Specialized,N/A,Obvious equipment
+SRV_006,Laser_Mic,Audio,Listen through glass,1000ft,4,Very_High,Military,N/A,Reads window vibrations
+SRV_007,Body_Wire,Audio,Personal recording,300ft,12,Medium,Law_Enforcement,15,Undercover use
+SRV_008,Counter_Surveillance,Detection,Find bugs/cameras,50ft,8,High,Specialized,N/A,RF/lens detection
+SRV_009,Facial_Recognition,Analysis,Identify faces,N/A,N/A,Very_High,Law_Enforcement,N/A,Database required
+SRV_010,License_Plate_Reader,Analysis,Track vehicles,N/A,N/A,High,Law_Enforcement,N/A,Automatic scanning
+
+===UTILITY EQUIPMENT===
+Util_ID,Util_Name,Category,Function,Battery_Hr,Cost_Level,Availability,Notes
+UTL_001,Flashlight_Standard,Illumination,Light source,24,Low,Common,100ft beam
+UTL_002,Flashlight_Tactical,Illumination,Bright; strobe mode,12,Medium,Common,Can disorient
+UTL_003,Night_Vision_Goggles,Vision,See in darkness,8,High,Military,Blinded by bright light
+UTL_004,Thermal_Goggles,Vision,See heat signatures,4,Very_High,Military,Sees through smoke
+UTL_005,Binoculars,Vision,Magnified sight,N/A,Low,Common,8x magnification
+UTL_006,Binoculars_Range,Vision,Magnified + laser range,24,High,Military,12x + rangefinder
+UTL_007,Gas_Mask,Protection,Filter air,N/A,Medium,Military,8hr filter life
+UTL_008,Hazmat_Suit,Protection,Full chemical protection,N/A,High,Specialized,Limits mobility
+UTL_009,Fire_Extinguisher,Safety,Put out fires,1 use,Low,Common,30 second discharge
+UTL_010,Crowbar,Tool,Pry/break,N/A,Low,Common,+2CS forced entry
+
+===POWER SOURCES===
+Power_ID,Power_Name,Type,Capacity_Wh,Recharge_Time,Weight_Lbs,Cost_Level,Notes
+PWR_001,Battery_AA,Chemical,3,N/A,0.1,Low,Common disposable
+PWR_002,Battery_Rechargeable,Chemical,50,4 hr,0.5,Low,USB rechargeable
+PWR_003,Power_Bank,Chemical,200,8 hr,1,Medium,Phone/device charging
+PWR_004,Solar_Panel_Portable,Renewable,100/day,Sunlight,3,Medium,Field charging
+PWR_005,Fuel_Cell,Chemical,500,Cartridge swap,5,High,Military grade
+PWR_006,Mini_Generator,Combustion,1000/hr,Fuel,20,High,Noisy; fuel required
+PWR_007,Arc_Reactor,Exotic,Unlimited,N/A,5,Ultra_High,Superhero tech
+PWR_008,Zero_Point,Exotic,Unlimited,N/A,1,Alien_Tech,Alien technology
+
+===TECH SKILL REQUIREMENTS===
+Skill,Equipment_Categories,Effect
+Computer,Hacking_Tools,Required for digital intrusion
+Electronics,Sensors; Some Hacking,Required for hardware manipulation
+Piloting_Ground,Ground_Vehicles,Required for vehicle operation
+Piloting_Air,Aircraft,Required for aircraft operation
+Piloting_Water,Watercraft,Required for boat operation
+Drone_Operation,All Drones,Required for drone control
+Medicine,Medical_Tech,Required for advanced medical equipment
+Lockpicking,Infiltration Gear,Required for lock bypass
+Demolitions,Explosive Field Gear,Required for safe explosive use
+Stealth,Surveillance Equipment,Improves placement and counter-surveillance
+
+===GADGET OPERATION SYSTEM===
+Operation_Type,UI_Control,Description,Examples
+passive,none,Always active when equipped; no user input needed,Armor; Tactical Vest; Backpack
+toggle,switch,On/Off control; user activates/deactivates,Night Vision Goggles; Thermal Goggles; Stealth Mode
+intensity,slider,Variable power/range; user adjusts 0-100%,Signal Jammer; Beam Width; Volume
+mode_select,dropdown,Multiple modes; user selects one,Kill/Stun; Wide/Narrow/Focused; Lethal/NonLethal
+deploy,place_button,Place on map; persists until destroyed/expires,Motion Sensor; C4; Tripwire
+consumable,use_button,Single use; removed after activation,Grenade; Medkit; Auto-Injector
+controlled,unit_control,Operates as separate unit; requires AP,Drone; Combat Robot
+
+===GADGET OPERATION MAPPING===
+Item_ID,Item_Name,Operation_Type,UI_Control,Modes,Intensity_Range,Deploy_Duration,Cooldown_Turns,AP_Cost,Combat_Effect
+---SENSORS---
+SEN_001,Motion_Sensor,deploy,place_button,-,-,Until_destroyed,0,2,Alerts when enemy enters 50ft radius
+SEN_002,Thermal_Scanner,toggle,switch,Standard;Enhanced,-,N/A,1,1,See heat signatures through thin walls
+SEN_003,Radar_Portable,toggle,switch,-,-,N/A,1,1,Detect metal/movement in 1000ft
+SEN_004,Sonar_Handheld,toggle,switch,-,-,N/A,1,1,Underwater detection
+SEN_005,Metal_Detector,passive,none,-,-,N/A,0,0,Always detects nearby metal
+SEN_006,Geiger_Counter,passive,none,-,-,N/A,0,0,Always detects radiation
+SEN_007,Chemical_Sniffer,toggle,switch,Explosives;Drugs;Both,-,N/A,1,1,Detect chemical compounds
+SEN_008,Biometric_Scanner,toggle,switch,Fingerprint;Retina;Both,-,N/A,0,2,Identity verification
+SEN_009,Audio_Analyzer,toggle,switch,Voice_ID;Bug_Detect,-,N/A,1,1,Sound pattern analysis
+SEN_010,Life_Sign_Detector,toggle,switch,-,-,N/A,1,1,Detect heartbeat through walls
+---COMMUNICATIONS---
+COM_001,Walkie_Talkie,passive,none,-,-,N/A,0,0,Always on when equipped
+COM_002,Tactical_Radio,passive,none,-,-,N/A,0,0,Squad comms always active
+COM_003,Encrypted_Radio,toggle,switch,Encrypted;Open,-,N/A,0,0,Toggle encryption
+COM_004,Satellite_Phone,passive,none,-,-,N/A,0,1,Global communication
+COM_005,Satellite_Uplink,toggle,switch,-,-,N/A,1,2,Data transmission mode
+COM_006,Encrypted_Phone,passive,none,-,-,N/A,0,0,Always encrypted
+COM_007,Burner_Phone,passive,none,-,-,N/A,0,0,Anonymous communication
+COM_008,Subvocal_Mic,toggle,switch,-,-,N/A,0,0,Silent communication toggle
+COM_009,Neural_Link,toggle,switch,-,-,N/A,0,0,Brain-to-brain comm
+COM_010,Quantum_Comm,passive,none,-,-,N/A,0,0,Instant unhackable comm
+---HACKING TOOLS---
+HCK_001,Laptop_Standard,toggle,switch,-,-,N/A,0,3,Activate hacking mode
+HCK_002,Laptop_Military,toggle,switch,-,-,N/A,0,3,Hardened hacking mode
+HCK_003,Decryption_Kit,consumable,use_button,-,-,N/A,3,2,Break one encryption
+HCK_004,Signal_Jammer,deploy,place_button,-,0-100,10,2,2,Block comms in radius (intensity = range)
+HCK_005,Keylogger_Hardware,deploy,place_button,-,-,Until_removed,0,2,Place on target device
+HCK_006,RFID_Cloner,toggle,switch,-,-,N/A,0,1,Scan and clone mode
+HCK_007,USB_Exploit_Kit,consumable,use_button,-,-,N/A,0,1,Single use malware deploy
+HCK_008,WiFi_Pineapple,deploy,place_button,-,-,Until_destroyed,3,2,Network interception zone
+HCK_009,Stingray_Device,toggle,switch,-,-,N/A,2,2,Phone interception active
+HCK_010,Quantum_Decryptor,toggle,switch,-,-,N/A,5,3,Break any encryption (limited uses)
+---FIELD GEAR---
+FLD_001,Breaching_Charge,consumable,use_button,-,-,N/A,0,2,Destroy door/wall
+FLD_002,C4_Block,deploy,place_button,-,-,Until_detonated,0,2,Remote detonation explosive
+FLD_003,Flashbang,consumable,use_button,-,-,N/A,0,2,Throw; blind/deafen area
+FLD_004,Smoke_Grenade,consumable,use_button,-,-,N/A,0,2,Throw; block LOS
+FLD_005,Tear_Gas,consumable,use_button,-,-,N/A,0,2,Throw; incapacitate area
+FLD_006,Zipline_Kit,consumable,use_button,-,-,N/A,0,2,Rapid traverse (10 uses)
+FLD_007,Grappling_Hook,consumable,use_button,-,-,N/A,0,2,Vertical access
+FLD_008,Rappelling_Gear,passive,none,-,-,N/A,0,0,Required for zipline/rope
+FLD_009,Parachute,consumable,use_button,-,-,N/A,0,0,Aerial insertion (1 use)
+FLD_010,Lockpick_Set,toggle,switch,-,-,N/A,0,2,Lock bypass mode
+FLD_011,Electronic_Lockpick,toggle,switch,-,-,N/A,0,2,Electronic lock mode
+FLD_012,Glass_Cutter,consumable,use_button,-,-,N/A,0,2,Silent window entry (20 uses)
+FLD_013,Tactical_Knife,passive,none,-,-,N/A,0,0,Always available as backup
+FLD_014,Multi_Tool,passive,none,-,-,N/A,0,0,Various functions
+FLD_015,Rope_100ft,passive,none,-,-,N/A,0,0,Climbing/restraint
+FLD_016,Handcuffs,consumable,use_button,-,-,N/A,0,1,Restrain target
+FLD_017,Zip_Ties,consumable,use_button,-,-,N/A,0,1,Quick restraint (20 uses)
+FLD_018,Body_Bag,passive,none,-,-,N/A,0,0,Concealment
+FLD_019,Tactical_Vest,passive,none,-,-,N/A,0,0,+6 equipment slots
+FLD_020,Backpack_Tactical,passive,none,-,-,N/A,0,0,+10 equipment slots
+---MEDICAL---
+MED_001,First_Aid_Kit,consumable,use_button,-,-,N/A,0,3,Heal 25 HP (10 uses)
+MED_002,Trauma_Kit,consumable,use_button,-,-,N/A,0,3,Heal 50 HP; treat critical (5 uses)
+MED_003,Surgical_Kit,consumable,use_button,-,-,N/A,0,5,Field surgery
+MED_004,Defibrillator,consumable,use_button,-,-,N/A,3,3,Revive downed ally
+MED_005,Auto_Injector_Stim,consumable,use_button,-,-,N/A,0,1,+2CS all stats 10 turns
+MED_006,Auto_Injector_Painkiller,consumable,use_button,-,-,N/A,0,1,Ignore wounds 10 turns
+MED_007,Auto_Injector_Antidote,consumable,use_button,-,-,N/A,0,1,Cure poison/toxin
+MED_008,Blood_Coagulant,consumable,use_button,-,-,N/A,0,1,Stop bleeding
+MED_009,Splint_Kit,consumable,use_button,-,-,N/A,0,2,Stabilize limb (5 uses)
+MED_010,Stretcher_Portable,passive,none,-,-,N/A,0,0,Required for transport
+---UTILITY---
+UTL_001,Flashlight_Standard,toggle,switch,-,-,N/A,0,0,Light on/off
+UTL_002,Flashlight_Tactical,toggle,switch,Normal;Strobe,-,N/A,0,0,Light with modes
+UTL_003,Night_Vision_Goggles,toggle,switch,-,-,N/A,0,1,See in darkness
+UTL_004,Thermal_Goggles,toggle,switch,Standard;X-Ray;Enhanced,-,N/A,1,1,See heat/through walls
+UTL_005,Binoculars,toggle,switch,-,-,N/A,0,0,Magnified sight
+UTL_006,Binoculars_Range,toggle,switch,-,-,N/A,0,0,Magnified + rangefinder
+UTL_007,Gas_Mask,passive,none,-,-,N/A,0,0,Filter air always
+UTL_008,Hazmat_Suit,passive,none,-,-,N/A,0,0,Full protection
+UTL_009,Fire_Extinguisher,consumable,use_button,-,-,N/A,0,1,Put out fires
+UTL_010,Crowbar,passive,none,-,-,N/A,0,0,+2CS forced entry
+---SURVEILLANCE---
+SRV_001,Hidden_Camera,deploy,place_button,-,-,Until_destroyed,0,2,Place for covert recording
+SRV_002,Bug_Audio,deploy,place_button,-,-,Until_destroyed,0,2,Place for covert listening
+SRV_003,GPS_Tracker,deploy,place_button,-,-,Until_removed,0,1,Attach to target
+SRV_004,Phone_Tap,deploy,place_button,-,-,Until_removed,0,3,Intercept calls
+SRV_005,Parabolic_Mic,toggle,switch,-,-,N/A,0,1,Long range listening mode
+SRV_006,Laser_Mic,toggle,switch,-,-,N/A,0,1,Listen through glass
+SRV_007,Body_Wire,toggle,switch,-,-,N/A,0,0,Personal recording
+SRV_008,Counter_Surveillance,toggle,switch,-,-,N/A,0,1,Bug/camera detection mode
+SRV_009,Facial_Recognition,toggle,switch,-,-,N/A,0,1,Face ID mode
+SRV_010,License_Plate_Reader,toggle,switch,-,-,N/A,0,0,Auto vehicle scan
+---DRONES---
+DRN_001,Recon_Drone_Small,controlled,unit_control,Scout;Return,-,N/A,2,3,Launch drone as unit
+DRN_002,Recon_Drone_Military,controlled,unit_control,Scout;Designate;Return,-,N/A,2,3,Military surveillance drone
+DRN_003,Combat_Drone_Light,controlled,unit_control,Attack;Scout;Return,-,N/A,2,3,Armed drone unit
+DRN_004,Combat_Drone_Heavy,controlled,unit_control,Attack;Designate;Scout,-,N/A,3,4,Heavy combat drone
+DRN_005,Medical_Drone,controlled,unit_control,Deliver;Return,-,N/A,2,3,Medical supply delivery
+DRN_006,Cargo_Drone,controlled,unit_control,Deliver;Return,-,N/A,2,3,Heavy cargo delivery
+DRN_007,Ground_Drone_Recon,controlled,unit_control,Scout;Return,-,N/A,2,3,Ground recon unit
+DRN_008,Ground_Drone_Combat,controlled,unit_control,Attack;Scout;Guard,-,N/A,3,4,Ground combat robot
+DRN_009,Underwater_Drone,controlled,unit_control,Scout;Return,-,N/A,2,3,Naval recon
+DRN_010,Swarm_Drone,controlled,unit_control,Attack;Distract,-,N/A,4,5,Coordinated swarm
+
+===DESIGNER NOTES===
+Topic,Note
+Vehicle_Balance,Vehicles provide mobility and protection; balanced by cost and availability
+Drone_Limitations,Drones limited by range/battery; require operator attention
+Hacking_Gameplay,Hacking tools enable non-combat problem solving; skill checks required
+Sensor_Counters,Every sensor has counters to prevent auto-detection
+Communication_Interception,Encryption levels create cat-and-mouse between teams
+Weapon_Mods,Mods provide customization without breaking balance; each has tradeoffs
+Field_Gear_Variety,Diverse options for different tactical approaches
+Medical_Economy,Medical supplies are consumable resource to manage

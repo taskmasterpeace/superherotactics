@@ -1,0 +1,1596 @@
+﻿Game Development Document (GDD)
+
+
+
+
+  
+
+________________
+Overview 
+Superhero Tactics is a tactical combat mercenary and superhero team management strategy game.  The player can manage a team and perform investigations, fight super criminals and mercenaries in a world filled with hundreds of unique real world cities. The player will select one from four factions, each with their own politics, values & challenges: US, India, China, Nigeria. 
+
+
+The player controls an organization that recruits mercenaries and super powered individuals to help defend their country from perceived super powered threats domestic, foreign or extraterrestrial in nature.
+Core Gameplay Mechanics Brief
+
+
+Superhero Tactics allow the player to recruit, manage and fight with a team of memorable superheroes & mercenaries.  
+
+With the convenience of a time walker on the team the player can 'walk back' time if you are unhappy with the outcome of a fight or the state of affairs in the world.  
+
+
+The player will broker alliances, conduct investigations, build customized battle suits, imprison super criminals and travel in time (to the future and past) in order to prepare for the coming global war.
+
+
+Targeted platforms
+
+
+PC & iOS
+Monetization model (Brief/Document)
+
+
+One-time purchase (Steam, EGS, etc.)
+
+
+
+Project Scope
+
+https://docs.google.com/spreadsheets/d/1_LK8d3aQA1bTvBVoOKhgC87_Daw_9C6PR3B8-PGpMko/edit?usp=sharing 
+
+This game is going to be created during 1-2 years and the stuff is going to include 10-20 specialists. 
+________________
+Influences (Brief)
+  
+
+
+
+Crusader Kings 2 
+Paradox Interactive’s grand strategy game is a data driven game on a grand scale. This game doesn't use decision trees.
+  
+
+Freedom Force vs. the 3rd Reich
+        A real-time tactical superhero role-playing game with environmental interaction in tactical combat.
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+X-Com 
+        Tactical combat in a 3d grid space with an international scope. 
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Jagged Alliance 2
+        Team management, character interaction, variety of actions, overall gameplay layers.
+
+The Elevator Pitch 
+
+
+Superheros dominate our movies and TV shows but only have a tiny presence in our PC and iOS games.  Superhero Tactics is a turn-based tactical game with a deep management component that lets the player use strategy to recruit and fight teams of mercenaries and superheroes.  And it has time travel to the future or to the past.
+
+The player will be able to time travel into the future or to the past and travel to one of the hundreds of unique real-world cities, manage your team, punch your enemies through a wall in turn-based combat.
+
+
+Project Description (Brief)
+
+
+Superhero Tactics game which is a turn-based superhero tactical role-playing strategy game that lets the player recruit, manage & fight with teams of superheroes all with their own unique lives, powers & personalities.
+Four unique factions: US, India, China, Nigeria start to develop new strategies and assign different tasks to the game characters to overcome this global issue.
+The player controls a government organization that recruits mercenaries and super-powered individuals to help defend his country from super-powered threats both foreign & domestic.  
+Project Description (Detailed)
+
+
+ 
+One night in 2019, Rusty Richards, one of the world’s most beloved musicians, vanished without a trace. Two years later he appears and organizes a press conference to deliver an unbelievable message to the world. He informs that the Earth is directly responsible for the genocide of an alien species and they are coming after human beings. Nobody believes him but soon more and more disappeared people come back telling the same story.  
+
+
+This is the brief description of the story of our game which is called Superhero Tactics.  This is a turn-based super hero tactical role playing strategy game that lets the player recruit, manage & fight with teams of superheroes all with their own unique lives, powers & personalities.
+
+
+Four unique factions: US, India, China, Nigeria start to develop new strategies and assign different tasks to the game characters to overcome this global issue.
+The player controls a government organization that recruits mercenaries and super powered individuals to help defend his country from super powered threats both foreign & domestic.  
+This game has more than 7 unique features. The main unique features are:
+* Players care about the  lives of characters because they are going to be created by professional writers.
+* Traveling into the future. 
+
+
+Unique features
+Time Travel to the past or to the future.
+
+Time travel to the past after a loss.
+The player just took a devastating loss on Day 25, and decides to time travel to the past.  Does the player go back to Day 2 or Day 24 of the game.  Each time a time travel event drives the time walker closer to madness and there are fewer destinations.
+The player can complete real tasks to realign the time path and regain her sanity.
+
+
+Time travel to the future before facing impossible odds.
+The player can achieve victory against impossible odds by sending the Time Walker to the future to change it.  The Time Walker goes to the future and your enemies are instantly vanquished, she has changed your future.  The cost of losing the Time Walker is temporarily losing the ability to time travel.
+When she suddenly returns after some time she has changed. She has a cyborg arm and she continuously emails you to not trust the man who throws the hammers. Or she returns with a cyborg future version of the man who throws the hammers.  Now you have two versions of the same character, great.  But can he be trusted?
+
+
+Email Replies are Dialogue Decisions
+
+You go to the castle. You walk up to the wizard, camera locks
+It pops up on your screen:
+"Sir Vincent! Thank you for coming to visit me. Will you kill the dragon over the hill?"
+1. Yes, sure.
+2. What Dragon?
+3. I don't do your bidding old man.
+That is how we get our missions
+
+
+We must go to the mission giver
+In Super Hero Tactics, the player will make traditional RPG dialogue decisions via email. When the player selects a ‘Subject’, the body of the email will show the player what email they can send. The player clicks the ‘SEND’ button when they decide on a specific reply.
+
+
+The player will never be forced to read or respond to emails but if the player does not respond to many events will occur without the player being aware.
+So the wizard would email the player and the player could ignore or reply, without typing a word. And they could read non priority emails.
+
+
+1. The email functionality is a unique feature which is not used in other games. To explain why this feature is unique let us remember other games. For example RPG where the player had to go to see the wizard. The player did some steps 
+* Going to the castle; 
+* Walking inside;
+* Clicking the wizard;
+* The wizard asks to kill the dragon for him? 
+* Dialogue box with answers yes/no opens; 
+* The player clicks yes; 
+* After killing the dragon the player comes back and has a conversation again with the wizard.
+This long story happens in every single game. The way we are  going to create this game is shortening the actions making them easier for the user. During the same scenario the player will receive an email from the wizard where he asks to kill the dragon. This kind of emails will be like priority emails for players as well as emails from the leaders of the countries for example.  For example simple reports won’t be priorities.
+2. SuperHero Tactics is going to be the  first turn based game that allows players to walk and fly like in action games. The player will be able to punch the opponent through a wall. In other games it can be seen that after punching the character only falls down. The difference of Fist will be that after punching the enemy flies through the wall breaking it, and falls flying some distance. 
+3. Turn based flight. In other games it is not possible to walk and fly at the same time.     
+Let us visually explain how it is going to work. If you pay attention to the screen below the numbers(3) tell the altitude of the unit. This unit will be 3 squares high. Normally in a tactic game the player clicks the unit himself in order to control the unit. For example if the flying unit  is 20 squares in the air the player doesn't have to zoom all the way in order to see it. Moreover, it is not needed to scroll up in order to find the unit.In our game this little red circle is going to be on the ground, these 3s are going to be animated. It is slowly going up, so without even looking up to the flying unit it can tell the player that the unit is 3 squares in the air at exactly the spot. 
+
+
+  
+
+* The player clicks the unit, 
+* Clicking the circle inside of a circle, it will give a visual indicator that it has been clicked. 
+* Then the player will drag it forward and that would happen for every unit even if it is a walking unit. 
+* If the player wants to fly down, he can drag his mouse down and it would allow him to control it.
+* If the player goes down and forward the altitude would lower as the player is moving and the player will see the altitude where his mouth is in setting the destination. 
+* When the mouse is drugged down the destination will not be changed. 
+* If the player has already clicked the destination, then he has to determine the altitude. This is basically a 3th dimension degree. 
+4. One of the Unique features will be the creation of personalities who are memorable and the player would like to manage them because of their human being. Players must care when the character dies and not just killing and being killed as a simple character with no face. 
+The creation of personality is not an easy task that is why we are going to have meetings with authors of books who have created really incredible characters. The author of Dragon lairs can be one of those talented people who can be helpful with advice. Our goal is to find out how they created mercenaries and dragon lairs so personal. We are going to hire a couple of writers to create those characters. 
+At the same time we are going to cooperate with specialists who can be the voice of different characters. Their voices must be new voices which can become famous voices in the future for sure by the help of our game. 
+Almost every movie that comes out nowadays  or every TV show the large portion of them has superheroes in them. I believe that superheros and media have a lot of staff but in gaming there is not enough superheros or they are not used accurately. It doesn’t mean that we are going to use Marvel characters in this game. We are going to create our new superheros. Somebody will say that the Marvel game is a failure. I shall answer that I don’t believe that it failed because of the superheroes, it failed because it is very shallow. People who play tactical games want to play a deeper game which can definitely make true.
+5. Some members of the team can communicate with dead characters and use their superskills.   
+
+
+
+
+
+
+Core Gameplay Mechanics (Detailed)
+
+Game Loop 
+  
+Factions 
+
+
+Establishment 24
+African Union
+FIST Mercenary
+FIST Hero
+The People's World Army
+Hero
+Vigilante
+Super Criminal
+Criminal
+Mercenary
+Terrorist
+Local Police Enforcement
+National Police Enforcement
+Military
+Jackal
+Living Super Weapon
+VIP Civilian
+
+
+
+
+
+
+________________
+Status
+The status of the unit tells the player what the unit is doing at that moment. 
+Ready - Characters who are idle
+Units who are idle and awaiting commands from the player, could be:  
+* becoming familiar with the city.
+* texting you their concerns.
+* aging by the day.
+* secretly hiding an addiction.
+
+
+Hospital - Go visit a physician
+Send a character to the hospital to receive treatment for:  
+* quicker health recovery.
+* injuries like concussions or broken limbs.
+* terminal diseases.
+* mental health concerns.
+
+Investigation - Be a Detective
+The Player can conduct investigations to:  
+* build tech suits with various specialties (ie flying, fighting or stealth)
+* research tech implants from defeated enemies.
+* repair your tech enhanced and robot based team mates.
+
+
+
+CovertOps - Secret missions in foreign countries
+Classified military operations that include:  
+* hostage rescues.
+* assassinations.
+* sabotage.
+* combat missions.
+________________
+Personal Life - Work & Family
+Characters with secret identities could have a personal life  
+   * create a tech implant.
+   * repair your tech enhanced and robot based team mates.
+   * reverse engineer dirty science tech.
+
+Training - Practice
+Skills and (most) statistics can be improved (or aquired) with training:  
+      * weight training improves strength statistic. 
+      * attend flight school and learn the piloting skill.
+      * martial arts (which can be skill or talent) erode without training.
+      * robots cannot train.
+Patrol - Watch over the city
+Roam the city:  
+      * Catch criminals as the crime is happening.
+      * Increase a hero's popularity.
+      * Keep your ear to the streets.
+
+Off the Grid - Go Missing
+A character attempts to make themselves tough to locate:  
+         * making obtaining their whereabouts very challenging.
+         * repair your tech enhanced and robot based team mates.
+         * which increases the travel time.
+Engineering - Build & Repair
+Characters who are engineers can:  
+         * build tech suits with various specialties (flying, fighting or stealth and more!)
+         * build or manufacture robots and androids.
+         * create tech implants.
+         * repair tech based teammates.
+
+Research - Unlock Secrets
+The player can send characters to the lab or university to:  
+            * unlock tech suits with various specialties (ie flying, fighting or stealth)
+            * discover new ways to use their powers in combination with other characters.
+            * research a way to cure or slow a terminal disease.
+            * learn what is needed to build that tech suit.
+            * analyze evidence in an investigation in hopes of a breakthrough.
+
+Travel - Unlock Secrets
+Some of the vehicles that can be used for combat or transit are:  
+            * lear jets
+            * helicopters
+            * fighter jets
+            * tanks
+            * modified tunnel boring machines
+
+
+Recruit - Unlock Secrets
+Attempt to add new members to your team like:  
+            * former military personnel.
+            * foreign nationals.
+            * famous (or infamous ) vigilantes.
+            * formerly (or currently) imprisoned Super Criminals 
+
+
+
+
+Story and Gameplay
+
+Story (Brief)[a]
+
+One night in 2019, Rusty Richards, one of the world’s most beloved musicians, vanished without a trace. Two years later when he suddenly reappears, every news outlet in the country wants to sit down with him for his first interview.  Instead, he gives a press conference and insists on an international audience to hear him deliver an unbelievable message to the world. He informs that the inhabitants of Earth are directly responsible for the genocide of an alien species, who are going to kill human beings because of that. Nobody believes him, but soon more and more disappeared people come back telling the same story. 
+
+
+
+
+As the player plays the game they learn 
+
+
+               * How nearly every person on Earth is responsible for the trillions of lives across the galaxy.
+               * The Greys have used a living alien algorithm to study and manipulate human behavior ( itsvoiceshow.com for details) in order to learn who they would "upgrade".
+               * The US Government was slow to build an army of super weapons because it was capturing and doing horrific experiments on poor superpowered US citizens as directed by our moronic ex President.
+What happened to Rusty Richards during his abduction by the greys.
+<The Summary or TL; DR version of below>
+Game Story (detailed)
+
+One night in 2019, Rusty Richards, one of the world’s most beloved musicians, vanished without a trace. Two years later when he suddenly reappears, every news outlet in the country wants to sit down with him for his first interview.  Instead, he gives a press conference and insists on an international audience to hear him deliver an unbelievable message to the world. 
+  
+
+According to Richards—apparently suffering from some kind of delusion—the inhabitants of Earth are directly responsible for the genocide of an alien species, several light years away. As a result, four intergalactic civilizations have formed an alliance, hell-bent on the invasion, occupation and atmospheric transformation of Earth.  This armada of highly militarized alien force will arrive in precisely 2472 days (just under 7 years from now). To a backdrop of near universal mockery, Rusty Richards adds that the alien race known as The Grays are aware of the destruction headed towards earth and have decided to help us defend ourselves using genetic manipulation to turn selected humans into living super-weapons.
+   
+Naturally, Rusty’s words are dismissed as the ravings of a madman, and within hours he has been reduced to an internet  meme. However, his words attract international attention just weeks later when the predictions begin to come true, as people all around the world who had been missing for weeks, started to reappear with new, and extraordinary abilities.  Before long, large and small countries alike begin to enlist these people for ‘defense’ purposes.  Though not all countries are able to control or employ their superpowered citizens.
+ 
+The potential for mass destruction is truly on display when the island nation of Cuba sends its own team of powerful living super-weapons to Andrews Airforce Base in Miami, Florida to settle an immigration dispute involving a particularly ‘gifted’ Cuban-born child. Following the infamous ‘Tragedy at Andrews’, the United States government finds that it is ill-prepared for the new age of superpowered soldiers that every country in the world now has at their disposal, and leverages its influence at the United Nations. The ‘Living Super Weapon Threshold Treaty’ is passed, and strictly prohibits any person with superhuman abilities from entering foreign territories, international waters, or any airspace.
+   
+In an attempt to avoid congressional oversight, the US government turns to Vaughn Galloway, private military contractor, to lead a private paramilitary organization codenamed FIST (First Infantry Strike Team ). Composed of mercenaries and superhumans, FIST’s stated objective is to recruit any US citizens with superpowers as in the US’ covert operations—and if they are a threat to the US or its citizens, FIST is under direct orders that anyone with these unnatural abilities should be contained…or eliminated.
+
+
+
+
+ As the player plays the game they learn 
+
+
+               *  How nearly every person on Earth is responsible for the trillions of lives across the galaxy.
+               * The Greys have used a living alien algorithm to study and manipulate human behavior ( itsvoiceshow.com for details) in order to learn who they would "upgrade".
+               * The US Government was slow to build an army of super weapons because it was capturing and doing horrific experiments on poor superpowered US citizens as directed by our moronic ex President.
+               * What happened to Rusty Richards during his abduction by the greys.
+               * 
+
+Gameplay (Brief)
+Time Travel
+
+
+Time Travel to the future is done by immediately changing a gameplay element and temporarily losing access to the time traveler (Sandra Locke-the character went to the future).  The time traveler returns in days or weeks.[b]
+
+
+
+
+
+
+
+
+
+
+
+
+Design Layers 
+
+
+Gameplay is divided into 3 main layers:
+               * Laptop Layer- There is where the player manages the team and gets information about the game world.
+               * World Layer - This is where the characters move from one place to another.  The game utilizes a map screen to show the map of the world and the player issues high-level orders to units.
+               * Tactical Layer - This is where the player engages in combat. 
+Gameplay (Detailed)
+There are different features which describe the game play
+
+Time Travel
+
+
+Time Travel to the future is done by immediately changing a gameplay element and temporarily losing access to the time traveler (Sandra Locke-the character went to the future).  The time traveler returns in days or weeks.[c]
+
+
+You can observe:
+
+
+               * Loading saved games  unlike how it is in the traditional sense.
+               * Use of saved games are considered time traveling to the past in the game. This will allow for the use of saved games to be a part of the story narrative and give the player the ability to selectively force the player to deal with the consequences of failure.  
+               * When the player sends the character Sandra Locke to the future she becomes unavailable for a random amount of time. Upon her return, one or more of the following things will happen.  
+               * She warns the player about a character who will betray the team.
+               * She has a lead on an investigation return with an additional power.  She could (correctly or incorrectly) advice the player about an upcoming decision.  She could have an eyepatch and a cyborg arm. 
+Superhero Tactics allows the player to recruit, manage and fight with a team of diverse superheroes & mercenaries.  With the convenience of a time traveler or reality warper the player's fingertips can almost always have access to a "do-over".  With a cost.  
+During the tactical portion of the game, the player takes control of individual mercenaries in turn-based combat. The more successful heroic acts will be rewarded with Fame, hurting civilians will cost Fame.  The player will not always have access to their favorite characters due to them having personal
+
+The game puts the player in control of an organization of mercenaries & super humans with special abilities that must recruit vigilantes, fight super criminals & go on covert operations in towns and territories from enemy forces. As the game advances, the player can hire new mercenaries and acquire better weapons and armor to combat opponents. The game utilizes a map screen to show the map of the world and issue high-level orders to the units. During tactical combat the player takes control of individual superheroes and mercenaries during real-time interactions and turn-based combat.
+Gameplay includes three secondary layers:
+               * Fork in the Road (FITR) - Choices that describes a situation and prompts the player to make a choice.  These could pop up at any time.
+               * Funeral - When a (full time) superhero dies the world will mourn. When the character dies the player can think that he is not going to hear that voice again  and this character is not going to make me laugh again. So the players mostly care about the death of character. I want the player to decide if they are going to let their team attend the funeral. 
+ 
+There are also choices that could pop up at any time that will have a significant effect on gameplay and personnel. 
+
+
+Characters do not level up in this game.  They all can gain one additional power from acquiring using the Time Chain (multiplayer solo character adventures) 
+
+
+________________
+Design Pillars
+Content Heavy/ Data Table
+Need to be able to add new content, rebalance & scale the game with little support from programmers.
+
+Give the player feedback
+Give the player feedback on the choices they make. Cellphone, Laptop
+
+Characters are aware of the world as it changes.
+“This tech implant Dr. Iguzo for me needs some repair.”
+Characters are aware of the world as it changes. Characters talk about the world as it changes.  They know who knows  what and when they did it.
+Metrics
+Many hooks in the game to send data back to us. We need to learn how the player likes to play to help us tweak and improve the game to see what resonates with the player base
+This will allow us to measure player behavior to understand why.
+Player choices
+"A game is a series of interesting choices." - Sid Mier
+Include potential for player decisions which meaningfully impact the flow and progress of events throughout the players's story or the character's story.
+Replayability
+This is a systems driven game with a challenging sandbox environment that provides unique game sessions with each play through. 
+You Eye (UI)
+"UI is gameplayer." - Brenda Romero
+Game mechanics should utilize the UI and vice versa.
+Storytelling Generator
+Things that happen to a player, let them have a cause and effect.  The effect of an event contains a focus on the cause and the potential fallout.
+Death most times permanent
+I want to have certain events that will allow the player to bring select characters back from the dead.  Just like in comics.  If ALL dead characters return to life
+
+
+  
+
+Design Layers
+
+
+Gameplay is divided into 3 main layers:
+               * Laptop Layer- There is where the player manages the team and gets information about the game world.
+               * World Layer - This is where the characters move from one place to another.  The game utilizes a map screen to show the map of the world and the player issues high-level orders to units.
+               * Tactical Layer - This is where the player engages in combat. 
+ 
+
+
+
+
+
+
+
+
+
+
+Mobile
+
+
+The mobile phone acts as a multifunctional device for the player.
+
+Dial  
+
+
+The player will be able to dial numbers to make in call in-game characters or organizations
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+So for when turning on the 'speaker' it will change the text bubble to display as if it is louder like in comic books.  I will also allow the player to make phone calls
+The player is able to dial the phone number to call characters, governments or organizations.  This will allow us to give the player a phone number to call lady from Saudi Arabia who can teleport or call the Robotics Lab in China to have order a robot or a weapon or call Pakistan to ask them to ally with you.  We as developers would be able to give these out in real life as the player plays the game, like cheat codes almost
+
+
+  
+  
+
+Laptop
+
+
+During the Laptop layer the player will manage the team to use an in-game Laptop that has four apps for the player to use. 
+When the player opens the laptop time is paused but the player can restart it while in the laptop.
+   
+E-MAIL
+
+The player will make traditional RPG dialogue decisions via email.  When the player selects a ‘Subject’, the body of the email will show the player the reply they can send back to the NPC.  The player clicks the ‘SEND’ button when they decide on a specific reply.  The player will never be forced to read or respond to emails but if they do not respond to emails gameplay will be impacted without the player influence. Why is that mushroom cloud is Iceland?  
+
+
+The player receives emails based on various events within the game, but some emails are more important than others.  The player can determine an email’s importance based on the PRIORITY flag.
+
+
+NEWS
+
+The NEWS application is how the player will learn about events around the game world.
+International news is presented on a website called, ‘Point of Interest’,  A close look at this information and the player will be able to see what each one of the AI factions are doing within the game.  Before China invades Taiwan, reports of troop buildups in the South China Sea will appear inside the News application.
+National news is presented on a website called ANN, America’s News Network.  This will reveal what Super Criminals in the United States are up to, who is running for President, national scandals, potential investigation clues (city of interest).
+BNN - national news program
+'Point of Interest' - international news program.
+
+
+
+
+PERSONNEL
+
+This application will provide the player with insight about:
+
+
+
+
+               * Current team members
+               * view unit detailed stats
+               * powers
+               * talents & skills
+               * unit relationships
+               * see who hates/loves who
+               * country relationships
+               * what countries are on the brink of all out war
+               * how countries have treated each other
+               * Potential recruits
+               * Locations of
+               * Super Criminals (LSWs in America)
+               * Living Super Weapons of interest.  (international LSWs)
+               * Prisoners - A database of incarcerated super criminals.
+               * Obituaries for fallen heroes
+
+
+your team's feelings about each other (like the screen above but using emojis).
+
+
+ Machine generated alternative text:
+GANGSTERS FOR HIRE 
+DELLA JACKSON 
+PROFESSION 
+DOCTOR 
+UPFRONT 
+S30,ooo 
+TAKE 
+HIRED 
+S20 (26% of profit@YlO 
+45 i' as 
+WA 
+o Ov•e 
+e ove  
+
+ 
+               * Team Members :
+
+
+               * View stats, powers, skills, abilities & popularity.  
+               * The player can utilize the resources of a team member here.
+               * Vigilantes - A database of potential recruits that the government is aware of. The player can email the recruitment division and select from predetermined email subjects
+               * Super Criminals - A database of known enemies.
+
+
+The player can see potential superhuman 
+	threats to the team
+
+
+	
+
+
+
+ World Layer
+ 
+Throughout the game the characters different personalities are seen  and this is where we see characters move around and the scope of the World map largely depends on the status of the team.  There are 5 different scopes.
+
+
+For example, I have 20 different personality types these are the current city variable stats I have to make each city truly unique:
+*Country code*
+*Terrain code*
+*Crime Index  *to determine the amount of crime in a city
+*Population Index  *the size of the city
+*City Types *which are:*
+1. Temple
+2. Military
+3. Political
+4. Industrial
+5. Resort
+6. Seaport
+7. Mining
+8. Educational
+9. Company
+10. Village
+*City Image* - Could be a dynamic image based country and city type
+
+
+ 
+World Map 
+
+
+               * Starts with earth can eventually become alien worlds.Currently the player is playing on the map of Earth but we want to allow the player to leave the Earth and to go to another planet. Also, he can find a space and have space battles, because we are really close to having vehicle combat  or components for the Combat.  We can just switch the map to let the user travel to another place.  
+
+
+In X- com the player  had enemies that were coming at character.  They were training to rave the base and you can go out to the enemies  wherever enemies at specific places are found or enemies can come to your base. 
+
+
+In Dragon Liars  the enemy is all over the territory,  except one little piece that you own and you push them back every single part outside your home is for the enemy. In our game the player would have to go out  in order to find the enemy. If there is something going on in Georgia  the enemy would have to fly to Georgia in order to deal with that.
+
+
+We want to have the ability for players to go to an alien world changing the map and allowing the player to set up a base in an alien world and deal with Alien culture and things like it.
+
+
+We want to  have a robot invasion, zombie invasion. Then we can use the time travel to let them go back where they want to be. 
+
+
+               * Movement
+
+
+               * All squad members move at the same speed if in a vehicle.
+               * Vehicles are treated as movement types that the squads benefit from
+               * Characters using different movement types cannot be in the same squad.  
+               * Characters who can fly move faster thru the map depending on the scope.
+
+
+               * Blips
+               * During this layer time moves in real time. 
+               * You control one of more heroes that represent both the hero and the squad they are leading.  
+               * You are either going to a mission or you are on a special apocalypse map.
+               * Apocalypse Map - it will be the same game and the same map    
+               * Combat encounters or choices in almost all sectors.
+               * Vehicles are scarce or non-existent.
+               * These maps start off largely unexplored and under the fog of war
+UI
+               * The grid is only shown when selecting the destination of a squad.
+               * When a hero dies, his name must stay on the roster until their funeral service.
+ Machine generated alternative text:
+MEL AGL STR STA INT INS CON 
+81-16 
+81-16 81-16 
+STATUS 
+81-16 
+(2--v«-0iAL 
+TORAVKEæ--C--1EY 
+(14-15 
+(14-15 
+VB-OEM 
+81-16 
+cm-15„ 
+W15„  
+
+ 
+ 
+Tactical
+ 
+Combat takes place on a 2D grid and is based on the 4C System Advanced rules (4CS).  4CS is a public domain work inspired by a 1980's classic superhero roleplaying game 'Marvel Super 
+Heroes'.  
+
+
+The combat system is reliant on this chart to determine the success or failure of attacks.  It should be noted that this chart is used for many things outside of combat. 
+ Machine generated alternative text:
+RANK 
+VALUE 
+15-19 
+2500-4999 
+15-19 
+1500-2499 
+15-19 
+1000-1499 
+15-19 
+500-999 
+15-19 
+250-499 
+150-249 
+100-149 
+15-19 
+75-99 
+15-19 
+50-74 
+15-19 
+40-49 
+15-19 
+30-39 
+20-29 
+10-19 
+36 
+1-2 
+o 
+RANK 
+VALUE 
+SYSTEM * MR5TERTRBLE • 
+Roll 
+SUCCESS 
+MAJOR SUCCESS 
+oo 
+00 
+oo 
+00 
+00 
+00 
+00 
+oo 
+00 
+00 
+oo 
+00 
+00 
+01-02 
+01-02 
+01-02 
+01-02 
+01-02 
+01 n 
+01-02 
+01-02 
+01-02 
+01-02 
+010 
+010 
+010 
+01-02 
+03-05 
+03-05 
+03-05 
+03-05 
+03-05 
+om5 
+03U 
+03-05 
+03-05 
+03-05 
+03-05 
+03U 
+034)5 
+03-05 
+03-05 
+06-09 
+06-09 
+06-09 
+06-09 
+06-09 
+06-09 
+06-09 
+06-09 
+06-09 
+06-09 
+06-09 
+06-09 
+06-09 
+06-09 
+06-09 
+06-09 
+10-14 
+10-14 
+10-14 
+10-14 
+10-14 
+10-14 
+10-14 
+10-14 
+10-14 
+10-14 
+10-14 
+10-14 
+10-14 
+10-14 
+10-14 
+10-14 
+15-19 
+15-19 
+15-19 
+15-19 
+15-19 
+20-24 
+20-24 
+20-24 
+20-24 
+20-24 
+20-24 
+20-24 
+20-24 
+20-24 
+20-24 
+20-24 
+20-24 
+20-24 
+20-24 
+20-24 
+20-24 
+25-29 
+25-29 
+25-2 
+25-29 
+25-29 
+25-29 
+25-29 
+25-29 
+25-29 
+25-29 
+25-29 
+25-29 
+25-29 
+25-29 
+25-29 
+25-29 
+30-34 
+30-34 
+30-34 
+30-3 
+30-34 
+30-34 
+30-34 
+30-34 
+30-34 
+30_34 
+30-34 
+30-34 
+30-34 
+30-34 
+30-34 
+30-34 
+35-39 
+35-39 
+35-39 
+35-39 
+35-39 
+35-39 
+35-39 
+35-39 
+35-39 
+35-39 
+35-39 
+35-39 
+35-39 
+35-39 
+35-39 
+35-39 
+40—44 
+4044 
+40-44 
+4044 
+40-44 
+40-44 
+40-44 
+40-44 
+40-44 
+40-44 
+4044 
+40-44 
+40-44 
+4044 
+40-44 
+40—44 
+45-49 
+45-49 
+45-49 
+4549 
+45_49 
+45-49 
+45-4 
+45•49 
+45-49 
+45-49 
+45-49 
+4549 
+45-49 
+45-49 
+4549 
+45—49 
+Roll 
+50-54 
+50-54 
+50-54 
+50-54 
+50-54 
+50-54 
+50-54 
+50-5 
+50-54 
+50-54 
+50-54 
+50-54 
+50-54 
+50-54 
+50-54 
+50-54 
+55-591 
+55-59 
+55-59 
+55-59 
+55-59 
+55-59 
+55-59 
+55-59 
+55-59 
+55-59 
+55-59 
+55-59 
+55-59 
+55-59 
+55-59 
+55-59 
+60-64 
+6064 
+60-64 
+60-64 
+60-64 
+60-64 
+60-64 
+60-64 
+60-64 
+60-64 
+60-64 
+60-64 
+60-64 
+60-64 
+60-64 
+65-69 
+65-69 
+65-6 
+6569 
+65_69 
+65-69 
+65-69 
+6569 
+65-69 
+65-69 
+65-69 
+65-69 
+6569 
+65-69 
+65-69 
+70-74 
+70-74 
+70-74 
+70' 74 
+70-74 
+70-74 
+70-74 
+70-74 
+70-74 
+70—74 
+70-74 
+70-1 
+70-74 
+70-74 
+70-74 
+70-74 
+75-79 
+75-79 
+75-79 
+75-79 
+75_79 
+75-79 
+75-79 
+75-79 
+75-79 
+75-79 
+75-79 
+75-79 
+75-7 
+75-79 
+75-79 
+75-79 
+80-84 
+80-84 
+80-84 
+80-84 
+80-84 
+8öL84 
+80-84 
+80-84 
+80-84 
+80-84 
+80-84 
+80-84 
+80-84 
+80-84 
+80-84 
+80-84 
+85-89 
+85-89 
+85-89 
+85-89 
+85-89 
+85-89 
+85-89 
+850 
+85-89 
+8589 
+85-89 
+85-89 
+8589 
+85-89 
+85-89 
+85-89 
+90-93 
+90-93 
+90-93 
+90-93 
+90_93 
+90-93 
+90-93 
+90-93 
+90-93 
+90_9S 
+90-93 
+90-93 
+90-93 
+90-93 
+90-93 
+90-03 
+94-96 
+94-96 
+94-96 
+94-96 
+94_ 96 
+94-96 
+94-96 
+94-96 
+94-96 
+94_ 96 
+94-96 
+94-96 
+94-96 
+94-96 
+94-96 
+97-98 
+97-98 
+97-98 
+97-98 
+97_98 
+97-98 
+97-98 
+97-98 
+97-98 
+97_98 
+97-98 
+97-98 
+97-98 
+Si-9S' 
+97-9b 
+97-9' 
+FAILED ATTEMPT 
+99 
+99 
+99 
+99 
+99 
+99 
+99 
+99 
+99 
+99 
+99 
+99 
+99 
+99 
+99 
+99 
+MS  
+
+ 
+After the attempt the result is a 1 of 4 possibilities major success, success, minor success or failure.  In a gunfight a major success is a headshot, while a minor success is flesh wound. 
+
+
+Column Shifts (referred to as CS) is a result modifier.  All of those things are handled behind the scenes, the player 
+ 
+ rol 
+ajor Success  
+
+ 
+ 
+
+
+
+
+Combat features include:
+
+
+               * Flight
+               * Melee and ranged attacks can be used while flying.
+               * Knockback
+               * Characters can be knocked back into a wall that is destroyed when they fall through it..
+ 
+  
+
+ 
+ 
+ 
+                  * Characters that have enough strength can throw cars
+
+  
+
+ 
+ 
+Funeral Service
+
+
+When a hero dies, his name must stay on the roster until their funeral service.
+ 
+Forks in the Road (FITR)
+
+During any time in the game, the player can be presented with choices. 
+ , ㄅ 一 一 一 The Night  
+
+ 
+ 
+FITR Examples:
+                     * When The Burning Man's secret identity is discovered by an investigative reporter how will you respond when she bursts into your office? 
+                     * Will you have Jacobs Huges arrested when he steals drugs during the Cuatro Dedos super cartel takedown? 
+                     * When the super criminal Ragic claims to have created a cure for superheroes dying from a terminal illness,  will you trust him?
+
+
+
+
+3D assets
+
+Environmental assets
+
+General
+https://www.unrealengine.com/marketplace/en-US/product/trees-oak-forest-volume https://www.unrealengine.com/marketplace/en-US/product/nordic-viking-landscape-snowy-sunny 
+
+Apocalyptic
+https://www.unrealengine.com/marketplace/en-US/product/planet-x         https://www.unrealengine.com/marketplace/en-US/product/sandstone-cliffs-kit                 https://www.unrealengine.com/marketplace/en-US/product/construction-pit         https://www.unrealengine.com/marketplace/en-US/product/nature-pack-01         https://www.unrealengine.com/marketplace/en-US/product/arctic-aurora-landscape
+https://www.unrealengine.com/marketplace/en-US/product/post-apocalyptic-world-vol-i 
+https://www.unrealengine.com/marketplace/en-US/product/burned-dead-forest-biome         https://www.unrealengine.com/marketplace/en-US/product/forest-kit-one 
+Alien/Apocalyptic
+https://www.unrealengine.com/marketplace/en-US/product/alien-plants-vol 
+
+China                https://sketchfab.com/3d-models/pagoda-low-poly-4ba3b32d46b745dca15939897287c51e                 https://www.unrealengine.com/marketplace/en-US/product/chinese-modular-temple         https://www.unrealengine.com/marketplace/en-US/product/asian-temple         ttps://www.unrealengine.com/marketplace/en-US/product/hong-kong-alley
+
+US/Europe                https://www.unrealengine.com/marketplace/en-US/product/ruined-city         https://www.unrealengine.com/marketplace/en-US/product/street-new-york         https://www.unrealengine.com/marketplace/en-US/product/country-town-vol https://www.unrealengine.com/marketplace/en-US/product/spanish-courtyard                 https://www.unrealengine.com/marketplace/en-US/product/brushify-urban-buildings-pack 
+
+India                
+https://www.unrealengine.com/marketplace/en-US/product/secrets-temple 
+Character assets        https://www.unrealengine.com/marketplace/en-US/product/character-ji             https://www.unrealengine.com/marketplace/en-US/product/master-of-martial-arts-character         
+https://www.unrealengine.com/marketplace/en-US/product/esm-code         https://www.unrealengine.com/marketplace/en-US/product/sci-fi-warri or        https://www.unrealengine.com/marketplace/en-US/product/female-hero-survival        https://www.unrealengine.com/marketplace/en-US/product/mercenary https://www.unrealengine.com/marketplace/en-US/product/camo-sniper         https://www.unrealengine.com/marketplace/en-US/product/specops         https://www.unrealengine.com/marketplace/en-US/product/soldiers-pack         https://www.unrealengine.com/marketplace/en-US/product/modular-military-character         https://www.unrealengine.com/marketplace/en-US/product/customized-alien-soldier
+
+Robots                
+https://www.unrealengine.com/marketplace/en-US/product/robot-02         https://www.unrealengine.com/marketplace/en-US/product/worker-robot-01        https://www.unrealengine.com/marketplace/en-US/product/a-c-s-u-ocelot 
+
+Aliens                https://www.unrealengine.com/marketplace/en-US/product/alien-spider         https://www.unrealengine.com/marketplace/en-US/product/alien-infantry-trooper                 https://www.unrealengine.com/marketplace/en-US/product/alien-special-forces-psychic         https://www.unrealengine.com/marketplace/en-US/product/alien-race-brute         https://www.unrealengine.com/marketplace/en-US/product/alien-race-hybri        https://www.unrealengine.com/marketplace/en-US/product/realistic-alien-04 https://www.unrealengine.com/marketplace/en-US/product/customized-alien-soldier 
+
+
+
+Character List
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+Rusty Richards
+Miami, FL
+
+A famous musician who first introduced the world to the Age of Living Super Weapons.
+
+
+
+
+
+
+
+
+
+
+Kaiser Eziobi
+Lagos, Nigeria
+
+Uniting and empowering Africa are the most important things to him and the alien organism that he shares his telepathic connection with.   
+
+
+
+
+
+
+
+
+
+Andrea Parker
+Albany, Georgia
+
+With the company of an alien machine called 'Its Voice' she travels the world as a Jackal who hunts Living Super Weapons on behalf of various governments & corporations.
+
+
+
+  
+
+
+
+
+
+
+
+
+
+Liu Xaio
+Xaiping, China
+His team Xiūkè Gējù, (shock opera in english) has access to several muou spheres that he uses to constantly change his teams powerset depending on the threat.
+________________
+Character List (cont.)
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Clinton Norwood
+Maple Hill, NC
+
+Sporting a facetat that reads, ‘HE>ME’A 57 year old crime fighter who is surrounded by an invisible field that grants him constant good luck down to an atomic level.
+
+
+
+
+
+
+
+
+
+
+
+Colonel Raghavan Reddy
+Kedarnath , India
+
+Possessing the ability to transform into a depiction of Garuda the armored bird god, he is the leader of India’s Living Super Weapon team called Establishment 24.  
+
+
+
+
+
+
+
+
+
+Vaughn Galloway
+Washington DC, United States
+
+With the company of an alien machine called 'Its Voice' she travels the world as a Jackal who hunts Living Super Weapons on behalf of various governments & corporations.
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+Liu Xaio
+Xaiping, China
+His team Xiūkè Gējù, (shock opera in english) has access to several muou spheres that he uses to constantly change his teams powerset depending on the threat.
+Environment Art Lists
+
+
+References  
+  
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+America
+Playing as the US faction, turn based tactical combat will take place in geographic locations equivalent to the modern United States of America. The player will battle in downtown city streets, national parks and suburbs where explosions from a thrown car can endanger civilians. The player will also fight super criminals to the death in the Nevada desert where the more powerful characters can use their abilities without concern for collateral damage.  At this chapter's conclusion the player will have a battle on the surface of the moon during a territorial dispute with Chinese Living Super Weapons.
+  
+
+________________
+
+
+
+
+China
+
+
+
+
+  
+  
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+India
+
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Nigeria
+  
+
+
+
+  
+
+  
+
+  
+
+Sound
+Some sounds are going to be taken from the BBC and  some of them are going to be created from scratch for the following categories. 
+Laptop Layer
+The laptop layer sounds will be stock cellphone, laptop and UI interface sounds purchased from 
+World Layer
+Tactical Layer 
+USA Levels
+Ambient
+Nigeria Levels
+Ambient
+China Levels
+Ambient
+India Levels
+Ambient
+                     *                      *          
+                     * Character Movement Sound List 
+                     *                      * This part of GDD can be done only during realization of project 
+                     *                      * Character Hit / Collision Sound list
+                     * Character on Injured / Death sound list
+                     * 
+
+Animation 
+Environment Animations
+Trees which are going to move naturally, forests
+Rivers, Seas, Oceans naturally, waterfalls
+Animals like birds in the forests
+Season and weather animation: rain, snow, storm, wind
+Character Animations
+Movements(throw each other, punch each other)
+Aiming 
+interactions with  everything around for example opening and closing doors, First- aid kit  
+NPC (non playable character)
+Movement
+
+
+Game analytics
+We are going to receive game data in syslog format and digest them into Splunk.  From there we will analyze the data produced by using dashboards, alerting and reporting.  This will allow us to find patterns of player behavior and correlate data from various game sources.  We will be able to immediately see how develop changes effect gameplay
+We will also explore services like Epic Online Services and Steamworks.
+
+
+
+
+
+
+Schedule 
+Prototype
+
+Milestone 1 
+Creation of characters (writing)
+                     * Two characters from each faction
+
+Basic mechanics
+                     * Laptop/Dialog system
+                     * World Map mechanics
+                     * Include 10 cities of various size and type   
+                     * Include 2 AI types
+
+General interface/General UI
+                     * World Map UI
+                     * Laptop UI
+
+General interface/General UI
+2D assets implementation[d]
+
+
+Milestone 2
+Complete game mechanics
+                     * Laptop/Dialog system
+                     * Tactical Layer (in general)
+                     * World Map mechanics
+                     * Building, Researching, Investigations
+Final UI
+AI
+Further content: characters, levels, storyline narrative
+3D modeling
+Improvement of 3D assets 
+2D assets implementation
+SFX
+QA
+
+
+Milestone 3
+
+
+- Level design
+- 3D modeling
+- Improvement of 3D assets
+- 2D assets implementation
+- Characters
+- Story details
+- Optimization
+- Analytics integration
+- SFX/VFX
+- QA
+
+
+Milestone 4
+- Level design
+- 3D modeling
+- Improvement of 3D assets
+- 2D assets implementation
+- Characters
+- Story details
+- Optimization
+- SFX/VFX
+- QA
+
+
+Milestone 5
+-Game release 
+-Marketing (PR and SMM)
+
+Out of GDD
+Minimal Viable Product (MVP)
+
+
+Management
+                     * Laptop
+                     * Email
+                     * Hospital Research
+                     * Engineering
+Find Trouble
+                     * Investigation
+                     * Vehicles
+                     * Cities
+                     * Hotspots
+Combat
+                     * Fast Combat
+                     * AI Unit goals
+                     * Engineered Units
+Hospital
+                     * Origin Healing
+
+
+
+
+
+
+
+
+
+
+[a]Task we are looking for brief story, have you deleted it?
+[b]the same text?
+[c]the same text twice?
+[d]?

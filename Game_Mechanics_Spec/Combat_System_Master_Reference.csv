@@ -1,0 +1,115 @@
+Section,Topic,Rule,Formula_Or_Example,Source_File
+
+---COMBAT FLOW OVERVIEW---,,,,
+Step_1,Determine Initiative,Higher (AGL+INS)/2 goes first,"Initiative = (AGL + INS) / 2",Combat_Resolution_Engine.csv
+Step_2,Declare Action,Attacker chooses: Power attack OR Weapon attack OR Skill use,Choose from available powers/weapons/skills,Character sheet
+Step_3,Determine Hit Stat,Physical melee = MEL; Ranged/Energy = AGL; Mental/Psychic = CON,See Power_Attack_Stats.csv,Power_Attack_Stats.csv
+Step_4,Find Base Column,Look up stat value in Stat_Rank_Mapping,MEL 35 = Remarkable = Column 6,Stat_Rank_Mapping.csv
+Step_5,Apply Attacker CS,Add skill bonuses + power bonuses,Martial Arts +2CS; Super Strength High +4CS lifting,Complete_Skills_Talents.csv + LSW_Power_Combat_Mechanics.csv
+Step_6,Apply Defender CS,Subtract target's dodge (based on AGL+INS for melee or AGL for ranged),AGL 25 + INS 20 = 45 = -2CS,Dodge Chart CSV
+Step_7,Calculate Final Column,Base Column + Attacker CS - Defender CS (min 0 max 11),"Final = 6 + 2 - 2 = 6 (Remarkable)",N/A
+Step_8,Roll d100,Roll percentile dice (00-99),Roll: 34,N/A
+Step_9,Universal Table Lookup,Cross-reference roll with column to get result,34 on Column 6 = Success,Universal_Table.csv
+Step_10,Calculate Base Damage,Power damage OR Weapon damage + STR (if melee),Super Strength High: STR + 50 = 65 + 50 = 115,LSW_Power_Combat_Mechanics.csv
+Step_11,Apply Result Multiplier,Failed=0x Minor=0.5x Success=1x Major=1.5x,"115 × 1.0 = 115",N/A
+Step_12,Apply Armor/DR,Subtract Damage Reduction from damage,"115 - 15 (Durability) = 100",Character powers
+Step_13,Apply Special Skills,Roll With Blow halves blunt; etc.,"100 - 50 (Roll With Blow) = 50 final",Complete_Skills_Talents.csv
+Step_14,Apply Damage to Health,Subtract final damage from target health,"Target Health: 205 - 50 = 155",N/A
+Step_15,Check Knockback,Major Success + STR 40+ = knockback per chart,STR 65 = 8 squares knockback,Knockback CSV
+Step_16,Apply Status Effects,Based on power and result level,Major Success = Knockback + Stun,Status Effects CSV
+
+---HIT STAT RULES---,,,,
+Melee_Physical,Super Strength / Punch / Melee Weapons,Use MEL (Melee) for hit roll,MEL determines if attack connects,Power_Attack_Stats.csv
+Ranged_Physical,Thrown objects / Ranged weapons,Use AGL (Agility) for hit roll,AGL for aiming projectiles,Power_Attack_Stats.csv
+Energy_Projection,Fire Generation / Psychic Blast / Bio-Energy,Use AGL (ranged) or CON (mental) for hit roll,Depends on power type,Power_Attack_Stats.csv
+Mental_Powers,Psychic Persuasion / Memory Imprinting,Use CON (Concentration) for hit roll,Mental focus determines success,Power_Attack_Stats.csv
+Grappling,Wrestling / Holds,Use MEL; contested by target MEL or STR,Winner controls grapple,Wrestling System
+
+---DAMAGE STAT RULES---,,,,
+Melee_Damage,Punches / Super Strength / Melee Weapons,STR + Power bonus + Weapon damage,"STR 65 + SS bonus 50 = 115",Power formula
+Ranged_Weapon,Guns / Bows,Weapon damage only (no STR),"Assault Rifle = 30 damage",Weapons CSV
+Thrown_Weapon,Throwing Knife / Thrown objects,STR + Weapon damage; Range = STR/5,"STR 40 + Knife 10 = 50; Range = 8",Weapons CSV
+Energy_Powers,Fire Generation / Psychic Blast,Power rank determines damage,"Fire Gen High = 75 damage",LSW_Power_Combat_Mechanics.csv
+Mental_Powers,Psychic Blast,Power rank determines damage; bypasses physical armor,"Psychic Blast Low = 25 damage",LSW_Power_Combat_Mechanics.csv
+
+---COLUMN SHIFT SOURCES---,,,,
+Skills_Combat,+1CS to +4CS depending on skill,Martial Arts +2CS; Sniper +3CS to rifles at range,Skill-specific conditions,Complete_Skills_Talents.csv
+Powers_Accuracy,+1CS to +5CS depending on power level,"Fire Gen High = +3CS area",Power description,LSW_Power_Combat_Mechanics.csv
+Equipment,Variable per weapon,"Pistol -2CS; Assault Rifle -1CS",Weapon accuracy column,Weapons CSV
+Target_Dodging,-1CS to -14CS based on AGL (+INS for melee),"AGL+INS 100 = -5CS",Dodge Chart,Dodge Chart CSV
+Cover,-1CS to -3CS,"Partial -1CS; Half -2CS; Full -3CS",Environmental,N/A
+Conditions,Variable,Stunned -2CS; Blinded -4CS; Prone target +1CS,Status effects,Status Effects CSV
+Flanking,+1CS,Attacking from side or behind,Tactical position,N/A
+Wounded,-1CS per 25% health lost,At 50% health = -2CS,Health percentage,N/A
+
+---RESULT EFFECTS---,,,,
+Failed,Miss,0x damage; no effect,"Attack misses completely",Universal_Table.csv
+Minor,Glancing blow,0.5x damage; power-specific effects only possible,"Reduced impact",Universal_Table.csv
+Success,Solid hit,1x damage; standard status effects apply,"Full intended effect",Universal_Table.csv
+Major,Critical hit,1.5x damage; enhanced effects + knockback + bonus status,"Extra damage + special effects",Universal_Table.csv
+
+---KNOCKBACK RULES---,,,,
+Knockback_Trigger,Major Success with STR 40+ OR Super Strength power,Knockback distance based on STR rank,See Knockback Chart,Knockback CSV
+STR_1-9,0 squares,No knockback possible,Human level,Knockback CSV
+STR_10-19,1 square,Minimal knockback,Above average,Knockback CSV
+STR_20-29,2 squares,Light knockback,Exceptional human,Knockback CSV
+STR_30-39,3 squares,Moderate knockback,Max human / Alpha,Knockback CSV
+STR_40-49,4 squares,Strong knockback,Threat Level 1,Knockback CSV
+STR_50-59,6 squares,Powerful knockback,Threat Level 2,Knockback CSV
+STR_60-69,8 squares,Devastating knockback,Threat Level 3,Knockback CSV
+STR_70-79,10 squares,Extreme knockback,Threat Level 4,Knockback CSV
+STR_80-99,9 squares,High superhuman,Threat Level 5,Knockback CSV
+STR_100+,10-20 squares,Cosmic level knockback,Earthshaker+,Knockback CSV
+Wall_Punch_Through,STR 40+,Can punch through walls,Environmental destruction,Knockback CSV
+
+---STATUS EFFECT RULES---,,,,
+Bleeding_I/II/III,Damage over time,"1d4/1d6/1d8 damage per round",Severity based on attack,Status Effects CSV
+Stunned,Cannot act for 1-4 rounds,Lose turn; standing but unable to react,From head blows or Major Success,Status Effects CSV
+Burning,Increasing damage over time,Fire damage continues until extinguished,From Fire powers,Status Effects CSV
+Mind_Controlled,Enemy controls actions,Attacker controls target's actions,From Psychic powers,Status Effects CSV
+Frozen,Immobile unless STR exceeds freeze rank,Cannot move; requires breaking free,From Ice powers,Status Effects CSV
+Unconscious,Knocked out,Out of combat until revived,From Knockout attacks,Status Effects CSV
+Prone,On ground,-1 to -3 rounds to stand; easier to hit,From knockback/throw,Status Effects CSV
+Frightened,Flees uncontrollably,Character runs away from threat source,From Intimidation or fear powers,Status Effects CSV
+
+---ARMOR AND DAMAGE REDUCTION---,,,,
+Super_Durability_Low,+5 DR per threat level,Reduces incoming physical damage,Bypassed by armor-piercing,LSW_Power_Combat_Mechanics.csv
+Super_Durability_High,+15 DR per threat level,Tank-level resistance,Only exotic weapons work,LSW_Power_Combat_Mechanics.csv
+Physical_Armor,Variable by equipment type,Reduces physical damage types,Degrades with damage,Armor_Equipment.csv
+Energy_Armor,Variable by equipment type,Reduces energy damage types,Different from physical armor,Armor_Equipment.csv
+Bypass_Rules,Mental bypasses physical; Armor-piercing bypasses physical armor,Some attacks ignore DR,Power-specific,LSW_Power_Combat_Mechanics.csv
+
+---POWER TYPE INTERACTIONS---,,,,
+Physical_vs_Physical,Standard combat,Armor and DR apply normally,Knockback possible,N/A
+Physical_vs_Energy,Energy may bypass physical armor,Check power description for armor interaction,Variable,LSW_Power_Combat_Mechanics.csv
+Mental_vs_Physical,Mental bypasses ALL physical armor,Psychic attacks ignore physical DR,Only mental shields block,LSW_Power_Combat_Mechanics.csv
+Fire_vs_Ice,Opposing elements,Fire countered by water/ice; Ice countered by fire,Elemental interaction,LSW_Power_Combat_Mechanics.csv
+Super_Strength_vs_Durability,Power vs power,Damage still reduced by DR,May cause knockback through,Power interactions
+
+---SKILL INTEGRATION---,,,,
+Combat_Skills,Add to hit rolls,Martial Arts +2CS melee; Shooting +2CS ranged,Skill type must match attack type,Complete_Skills_Talents.csv
+Defense_Skills,Add to dodge or reduce damage,Dodge +2CS; Roll With Blow halves blunt,Active during defense,Complete_Skills_Talents.csv
+Special_Skills,Unique effects,Ninjitsu stealth attacks +damage; Boxing can stun,Conditional effects,Complete_Skills_Talents.csv
+
+---THREAT LEVEL SCALING---,,,,
+Threat_Alpha,Max human / Enhanced human,Base power level,No cosmic abilities,Origins document
+Threat_1,Low superhuman,+10 to power effects,Minor superhuman,Origins document
+Threat_2,Superhuman,+20 to power effects,Solid superhuman,Origins document
+Threat_3,High superhuman,+30 to power effects,Major league,Origins document
+Threat_4,Very high superhuman,+40 to power effects,Near cosmic,Origins document
+Threat_5,Peak superhuman,+50 to power effects,Pre-cosmic,Origins document
+Earthshaker+,Cosmic levels,Reality-affecting powers,Beyond normal scale,Origins document
+
+---COMPLETE EXAMPLE---,,,,
+Example_Setup,"Inferno (Fire Gen High) vs Granite (Super Strength High + Durability High)",,,
+Step_A,Inferno attacks with Fire Generation,"Hit Stat: AGL = 45 (Incredible column 7)",AGL for ranged energy,
+Step_B,Apply Column Shifts,"Energy Weapons +2CS; Fire Gen High +3CS = +5CS",Attacker bonuses,
+Step_C,Granite's Dodge,"AGL 25 + INS 20 = 45 = -2CS",Defender penalty,
+Step_D,Final Column,"7 + 5 - 2 = 10 (Unearthly)",Very favorable,
+Step_E,Roll d100,Rolls 42,Mid-range roll,
+Step_F,Table Lookup,"42 on Column 10 = Major Success",Excellent result,
+Step_G,Calculate Damage,"Fire Gen High = 75 base × 1.5 (Major) = 112",Before DR,
+Step_H,Apply DR,"Granite Durability High = -15 DR; 112 - 15 = 97 final",After DR,
+Step_I,Apply Damage,"Granite Health: 205 - 97 = 108",Remaining health,
+Step_J,Status Effect,"Major Success = Burning applied",Ongoing fire damage,
+Step_K,No Knockback,Fire doesn't cause knockback (not physical),Energy attack,

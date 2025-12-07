@@ -1,0 +1,1389 @@
+﻿Dr. McLeod Dewitt LeFevre, 45
+Nationality: French
+
+
+Appearance:
+
+
+Dr. Dewitt LeFevre is a tall, handsome man with dark skin and short black hair. He has a strong jawline and piercing brown eyes. He always looks impeccably well-dressed, even when he's just wearing his military uniform. He has an aura of authority and competence about him that commands respect.
+
+
+Backstory:
+
+
+Dr. Dewitt LeFevre was born in France to a family of Black immigrants from the Caribbean. He was always a bright child, and he excelled in his studies. He was accepted into the prestigious University of Paris, where he earned a Bachelor's degree in Biology. He then went on to earn a Master's degree in Military Science from the French War College. After graduation, he joined the French military and quickly rose through the ranks. He eventually attained the rank of colonel.
+
+
+During his time in the military, Dr. LeFevre became interested in the study of superhuman abilities. He worked with some of the world's leading scientists in this field and was at the forefront of this area of research. He was the one who first proposed the classification system for Living SuperWeapons that is now used by militaries and intelligence agencies all over the world.
+
+
+Motivations:
+
+
+1. To protect the people of France from Living SuperWeapons.
+2. To study and understand the superhuman abilities of Living SuperWeapons.
+3. To find a way to neutralize the threat posed by Living SuperWeapons.
+
+
+Archetype:
+
+
+1. The Hero: Dr. LeFevre is a brave and courageous military officer who has dedicated his life to protecting the people of France from Living SuperWeapons.
+2. The Scholar: Dr. LeFevre is a highly intelligent and knowledgeable scientist who has been at the forefront of the study of superhuman abilities for many years.
+3. The Leader: Dr. LeFevre is a respected and influential leader in the French military who is considered one of the world's leading experts on Living SuperWeapons.
+
+
+Specific Characteristics:
+
+
+1. Highly intelligent
+2. Well-educated
+3. Brave
+4. Courageous
+5. Dedicated
+6. Respected
+7. Influential
+________________
+Weakness, each with their own name, purpose, and complexity.
+
+
+The LeFevre Weakness Levels
+
+
+
+
+Balance Equation (Simple)
+   In this formula, we use the principle of balance. For every action, there's an equal and opposite reaction. In other words, for every strength a character has, there should be a counteracting weakness. This formula is simple and universal, applicable even to non-superpowered individuals like Batman. It can be quantified as **Strength(𝑆) = Weakness(𝑊)**. Strength and weakness are opposite sides of the same coin.
+
+
+Environmental Constraint Model (Moderate)
+   This formula focuses on how powers interact with the environment. For example, a character's power may be dependent on a certain condition, like Superman's powers being reliant on the yellow sun. By changing this condition, one could potentially weaken the character. This model can be presented as **Power(P) = Environmental Condition(E) + Power Source(S)**. Change the environmental condition, and you alter the power.
+
+
+Quantum Vulnerability Assessment (Complex)
+   This advanced formula uses principles of quantum physics to predict vulnerabilities. This formula posits that if a superpower can be explained via quantum physics, then it can also be negated or counteracted through quantum physics. It takes into account the quantum state of the superpower, and the theoretical quantum state that would counteract it. The formula can be visualized as **Vulnerability(V) = Quantum State of Superpower(QS) - Quantum Counter State(QCS)**. This formula would take into account complex variables like time, space, and energy levels.
+
+
+These formulas are Dr. LeFevre's tools for understanding the strengths and weaknesses of LSWs. They enable him to quantify and categorize these individuals, creating a comprehensive system for evaluating the threat posed by LSWs and the methods to counteract them.The Evolution of the Threat Assessment Formulas
+
+
+The journey of Dr. Dewitt LeFevre, an acclaimed scholar, revered military officer, and a formidable leader, unfolds against the backdrop of an extraordinary global occurrence - the emergence of Living SuperWeapons (LSWs). With their incredible abilities, these LSWs carry the potential for both salvation and devastation. Driven by the need to evaluate these individuals' threats, Dewitt takes it upon himself to devise a method to do so.
+
+
+**1. Power Capacity Factor (PCF):
+
+
+   Dewitt's earliest encounters with LSWs drive him to measure the threat level these individuals pose based on the range, control, and intensity of their abilities. This groundwork lays the foundation for all the subsequent threat assessment models.
+
+
+   **Story Beats:**
+
+
+   - Introduction of Dr. Dewitt LeFevre, showcasing his military prowess and scientific brilliance.
+   - Rusty Richards, a well-known LSW, foretells the appearance of more LSWs worldwide.
+   - Richards' prediction comes to fruition, causing chaos and raising concerns.
+   - Witnessing the catastrophe, Dewitt resolves to devise a system to assess the threat level of LSWs.
+   - The Power Capacity Factor is born.
+
+
+**2. Subjective Threat Assessment Model (STAM):**
+
+
+   Recognizing the limitations of the PCF, which overlooked the human elements in LSWs, Dewitt incorporates aspects of their personality and motivations into his calculations. This enhancement results in a more precise and human-centric model - the STAM.
+
+
+   **Story Beats:**
+
+
+   - The Cuban crisis occurs, where LSWs are used as living weapons against the US.
+   - Dewitt acknowledges the limitations of the PCF, which fails to predict this offensive.
+   - He decides to revise the formula, incorporating personal motivations and psychological profiles.
+   - The STAM is developed and tested, yielding promising results.
+   - Dewitt presents STAM to the United Nations, gaining global recognition.
+
+
+**3. Situational Power Assessment Matrix (SPAM):**
+
+
+   Dewitt's most sophisticated model yet, the SPAM, accounts for the influence of past actions and current circumstances on the threat levels of LSWs. This dynamic model is continuously adaptive, offering a real-time threat assessment.
+
+
+   
+
+
+
+
+________________
+The LeFevre Power Power Levels
+
+
+The McLeod LeFevre Origin Threat Scale is a system that rates the threat level of living superweapons. It is used to help measure how dangerous someone with powers could be. The scale goes from 1 to 5, with 5 being the most dangerous.
+
+
+
+
+Power Capacity Factor (PCF)
+
+
+This formula is straightforward, focusing purely on the power itself. It multiplies the power's intensity, control, and effect range together. It's best for a quick, simple evaluation of a power's raw potential without considering the character's personality or motivations. 
+
+
+- Intensity: Rated from 1-10, with 10 being the most intense or powerful.
+- Control: Rated from 1-10, with 10 being perfect control over the power.
+- Effect Range: Measured in meters, referring to the distance the power can effectively reach.
+
+
+Higher scores represent greater threat levels.
+
+FORMULA
+
+
+The Power Capacity Factor (PCF) model is an arithmetic formula that calculates threat level based on three aspects: power intensity (I), power control (C), and power effect range (E).
+
+
+PCF = (I x C x E) / 1000
+
+
+Where:
+
+
+I = Power Intensity (rated from 1 to 10, with 10 being the most intense)
+C = Power Control (rated from 1 to 10, with 10 being perfect control)
+E = Power Effect Range (distance in meters the power can affect)
+
+
+Power Capacity Factor (PCF): Goku's power intensity (I) is massive, easily a 10. His power control (C) is also quite high, let's say 9 (he has trained for many years, but in some situations, he can lose control). His power effect range (E) is extremely large, given his ability to destroy planets. Let's place it at 10,000 meters for calculation purposes. So, PCF = (10 * 9 * 10,000) / 1000 = 900.
+________________
+Subjective Threat Assessment Model (STAM)
+
+
+STAM goes beyond the power itself, considering the character's personality, motivations, and potential to cause harm. It assigns a weighted score to each of these factors. Use STAM when the character's psychology plays a crucial role in their threat level.
+
+
+- Personality: Rated from 1-10, with 10 being the most volatile or unstable.
+- Motivations: Rated from 1-10, with 10 being the most malicious or harmful.
+- Potential to Cause Harm: Rated from 1-10, with 10 being the most harmful.
+
+
+A higher score in STAM indicates a higher threat level.
+
+
+FORMULA:
+
+STAM = 0.3P + 0.4M + 0.3H
+
+
+Where:
+
+
+P = Personality (rated from 1 to 10, with 10 being the most volatile)
+M = Motivations (rated from 1 to 10, with 10 being the most malicious)
+H = Potential to Cause Harm (rated from 1 to 10, with 10 being the most harmful)
+
+
+Goku's personality (P) is generally good-natured, so we can assign a low rating of 2. His motivations (M) are typically to protect rather than to harm, so let's assign a 2 here as well. His potential to cause harm (H), however, is extremely high due to the sheer power he wields. This would be a 10. Therefore, STAM = 0.32 + 0.42 + 0.3*10 = 4.2.
+________________
+Situational Power Assessment Matrix (SPAM)
+
+
+The SPAM takes a holistic approach, considering a superpower's potential in various situations (S), the user's ability to use their power under pressure (P), their past actions (A), and how much harm their power could cause in the worst-case scenario (M).
+Use SPAM when the context of the power usage, including the character's history and potential for destruction, is important.
+
+
+- Situational Potential: Rated from 1-10, with 10 being the most useful in various situations.
+- Performance Under Pressure: Rated from 1-10, with 10 being the best performance under pressure.
+- Past Actions: Rated from 1-10, with 10 being the most violent or destructive past.
+- Maximum Harm Potential: Rated from 1-10, with 10 being the most destructive potential.
+
+
+Again, higher scores on SPAM indicate greater threat levels.
+
+FORMULA:
+
+The SPAM takes a holistic approach, considering a superpower's potential in various situations (S), the user's ability to use their power under pressure (P), their past actions (A), and how much harm their power could cause in the worst-case scenario (M).
+
+
+SPAM = 0.2S + 0.2P + 0.3A + 0.3M
+
+
+Where:
+
+
+S = Situational Potential (rated from 1 to 10, with 10 being the most useful in various situations)
+P = Performance Under Pressure (rated from 1 to 10, with 10 being the best performance under pressure)
+A = Past Actions (rated from 1 to 10, with 10 being the most violent or destructive past)
+M = Maximum Harm Potential (rated from 1 to 10, with 10 being the most destructive potential)
+
+Goku is highly versatile in many situations (S), so he gets a 10. His performance under pressure (P) is also stellar, deserving another 10. His past actions (A) have mostly been heroic, so we'll assign a 2 for low violence. His maximum harm potential (M), however, is extremely high, so he gets a 10. Therefore, SPAM = 0.210 + 0.210 + 0.32 + 0.310 = 8.6.
+
+
+
+________________
+NEW
+1. Low Threat
+* Characterized by limited or minimal abilities that pose little threat to individuals or society
+* May have abilities that are useful in everyday life, but do not pose a significant threat to others
+* Example: Someone with the ability to communicate with animals, or someone with enhanced senses such as heightened hearing or smell
+
+   2. Moderate Threat
+   * Characterized by abilities that pose a moderate level of threat to individuals or society
+   * May have abilities that can be used to defend themselves or others, but may also have the potential to cause harm if not used responsibly
+   * Example: Someone with the ability to control the weather, or someone with enhanced strength or speed
+
+      3. High Threat
+      * Characterized by abilities that pose a high level of threat to individuals or society
+      * May have abilities that can cause significant harm to others, or abilities that could be used to disrupt society or the natural order
+      * Example: Someone with the ability to shape shift into a powerful and dangerous creature, or someone with the ability to teleport or fly
+
+         4. Very High Threat
+         * Characterized by abilities that pose a very high level of threat to individuals or society
+         * May have abilities that are difficult to defend against, or abilities that could have catastrophic consequences if not used responsibly
+         * Example: Someone with the ability to control and manipulate time, or someone with the ability to control the minds of others
+         5. Extreme Threat
+         * Characterized by abilities that pose an extreme level of threat to individuals or society
+         * May have abilities that are nearly impossible to defend against, or abilities that could have global or universal consequences if not used responsibly
+         * Example: Someone with the ability to destroy entire planets, or someone with the ability to create or manipulate life itself
+________________
+LSW Origins
+Skilled humans
+
+Those who have had training or natural ability in using their abilities. This is the most common origin for people with superpowers. Many people with superpowers have at least some training in using their abilities.
+
+
+Altered humans
+Those who have abilities that are not completely natural, but have been enhanced in some way using unexplained Dark Science.  This can be anything from training to genetic modification. This is less common in the early years of the Countdown, but there are still many people who fall into this category in later years.
+
+
+Tech enhancement
+Those who use or are used by some kind of technology to grant them with enhance their abilities or super powers. This can be things like suits or devices that give them extra strength or speed. This is a relatively uncommon origin for people living superweapons.
+
+
+Mutated humans
+Those who have abilities that are the result of a genetic mutation acquired at conception. This is a very rare origin for people with living superweapons.  This has been observed in two instances: time travelers and children who are users of an age accelerating gell.
+
+
+Spiritual enhancement
+Those who have abilities that are the result of some sort of spiritual connection. This can be anything from being blessed by a deity to having a connection to the spirit world. This is a relatively rare origin for people with superpowers.
+
+
+Synthetics
+Those who have abilities that are the result of being created, not born. This can be anything from being built in a lab to being created by aliens. This is a relatively rare origin for people with superpowers and normal refers to androids, cyborgs, robots and clones.
+
+
+Symbiotic
+Those who have abilities that come from being bonded with another creature or entity. This can be anything from having a symbiotic creature living inside them to being possessed by a spirit. This is a relatively rare origin for people with superpowers.
+
+
+Aliens
+Those whose abilities come from being not of this world. This can be anything from being from another planet to being from another dimension. This is a relatively rare origin for people with superpowers.
+
+
+Scientific Weapon
+Those who themselves do not have superpowers, but have gained the ability to use weaponry that gives them the power to replicate the abilities of those with superpowers. This is a relatively rare origin for people with superpowers but is one of the more dangerous as is usually an item that is focused on being used as a weapon.
+
+
+
+
+________________
+
+
+LSW Powers
+Invisibility - Renders the character or object invisible. Invisibility does not mean that the person is silent, if they make noise people will be able to hear them.
+Possible Drawback: If the character makes any noise while invisible they will be revealed.
+At High Levels: The character can become invisible to all forms of detection, including X-Ray vision, heat sensing, and so on.
+At Low Levels: The character can only become invisible to the naked eye.
+Observed in: North America, Central America, South America and All of Africa
+
+
+Super Strength - Gives the character enhanced strength, allowing them to lift extremely heavy objects or perform other feats of strength.
+Possible Drawback: The character may not be able to control their strength, resulting in them accidentally harming people or destroying property.
+At High Levels: The character can lift objects weighing millions of tons.
+At Low Levels: The character can only lift objects weighing a few thousand pounds.
+Observed in: South America ,The Caribbean, South East Asia and All of Africa
+
+
+Psychic Persuasion - Allows the character to influence the thoughts and emotions of others.
+Possible Drawback: The character may not be able to control their power, resulting in them unintentionally manipulating people's emotions or thoughts.
+At High Levels: The character can influence the emotions and thoughts of entire groups of people.
+At Low Levels: The character can only influence the emotions and thoughts of individuals.
+Observed in: America, Central Asia, South Asia ,The Caribbean,and All of Africa
+
+
+Psychic Blast - Allows the character to project a blast of psionic energy that can damage or incapacitate enemies.
+Possible Drawback: The character may not be able to control their power, resulting in them accidentally harming or killing people.
+At High Levels: The character can generate a blast of psionic energy that can level a city.
+At Low Levels: The character can only generate a blast of psionic energy that can incapacitate a single person.
+Observed in: America, South Eastern Europe, Oceania, and All of Africa
+
+
+Super Speed - Gives the character enhanced speed, allowing them to move at extremely high speeds.
+Possible Drawback: The character may not be able to control their speed, resulting in them accidentally harming people or destroying property.
+At High Levels: The character can move at speeds exceeding the speed of sound.
+At Low Levels: The character can outrun most animals.
+Observed in: Worldwide
+
+
+Flight - Gives the character the ability to fly by means of either wings or some other form of propulsion.
+Possible Drawback: The character may not be able to control their power, resulting in them crashing into things or losing altitude.
+At High Levels: The character can fly at speeds exceeding the speed of sound.
+At Low Levels: The character can only fly at slower speeds of up to 30 mph.
+Observed in: Worldwide
+
+
+Super Durability - Gives the character enhanced durability, making them resistant to damage or injury.
+Possible Drawback: The character's increased durability may make them less agile, resulting in them being slower or more clumsy.
+At High Levels: The character can withstand attacks from tanks and artillery.
+At Low Levels: The character can only withstand attacks from small arms fire and hand-to-hand combat.
+Observed in: Worldwide
+
+
+Time Travel - Gives the character the ability to the past or to a possible future.
+Possible Drawback: The character may not be able to control their power, resulting in them going to a an unexpected time period.
+At High Levels: The character can travel to far into the past or future.
+At Low Levels: The character can only travel back and within a limited time period, 30mins to the past or future.
+Observed in: India, United States, China possibly Nigeria
+
+
+Invisibility - Gives the character the ability to turn invisible at will.
+Possible Drawback: The character may not be able to control their power, resulting in them accidentally revealing themselves.
+At High Levels: The character can remain invisible for extended periods of time or is undetectable by any electronic means.
+At Low Levels: The character can only turn invisible for short periods of time or is detectable by electronic means.
+Observed in: United States, China, Russia, and Africa
+
+
+Sound Absorption - The character has the ability to absorb the sound around them, making it appear as if they are in a vacuum.
+Possible Drawback: The character may not be able to control their power, resulting in them accidentally revealing themselves.
+At High Levels: The character can absorbed 140 decibels and can absorb sounds and then release them in a patterned direction.
+At Low Levels: The character can nullify sounds at up to 20 decibels but cannot disperse the sound.
+Observed in: South America, China, India, and Tanzania
+
+
+Metal Manipulation - The character has the ability to manipulate metal, shaping it into various forms or objects.
+Possible Drawback: The character may not be able to control their power, resulting in them accidentally harming people or destroying property.
+At High Levels: The character can manipulate large amounts of metal with great precision.
+At Low Levels: The character can only manipulate small amounts of metal or with limited precision.
+Observed in: North Korea
+
+
+Gravitational Field Manipulation - The ability to alter gravity is possessed by the character.
+Possible Drawback: The character may not be able to control their power, resulting in them accidentally harming people or destroying property.
+At High Levels: The character may create artificial gravity fields or alter/reduce the gravitational pull in a specific location. Lifting objects weighing hundreds of tons is no problem
+At Low Levels: The character can create small gravitational fields or increase/decrease the gravitational pull in a limited area, affecting things that weigh a hundred of pounds or less.
+Observed in: United States
+
+
+Memory Vessel - The character is a vessel for stored memories. 
+Possible Drawback: The hero may be overwhelmed with new experiences and information, taking an emotional toll on the character
+At High Levels: The character can store an infinite number of memories.
+At Low Levels: The character can only store a limited number of memories.
+Observed in: Nigeria
+
+
+Entity Bonding - The character may form a relationship with other beings, metaphysically knitting individuals together by various methods, whether telepathic, empathic, symbiotic,
+Possible Drawback: The character may not be able to control their power, resulting in them accidentally harming people or destroying property.
+At High Levels: The character can bond with multiple entities at the same time.
+At Low Levels: The character can only bond with one entity at a time.
+Observed in: China, Angola , Bangladesh, South America and Bolivia
+
+
+Dimensional Storage - The character has the ability to store objects in another dimension.
+Possible Drawback: Living things cannot survive in the second dimension, resulting in the death of anyone or anything that is stored.
+At High Levels: The character can store large objects or multiple objects. 
+At Low Levels: The character can only store small objects or a limited number of objects and sometimes retrieves unintentional items. 
+Observed in: United Kingdom, France, Italy, and Spain
+
+
+Omnifabrication - The character has the ability to design & create all aspects of any object they can think of.
+Possible Drawback: The character may not be able obtain the parts needed for more complex creations.
+At High Levels: The character can create anything they can think of without any materials.
+At Low Levels: The character can only create simple objects or needs specific materials to create more complex objects. 
+Observed in: Japan, South Korea, and Thailand.
+
+
+Enhanced Inventing - The character has a genius-level intellect when it comes to inventing.
+Possible Drawback: The character may be unable to find the materials needed to create their inventions.
+At High Levels: The character can create anything they can think of with the materials at hand.
+At Low Levels: The character can only create simple objects or needs specific materials to create more complex objects.
+Observed in: United States, Canada, and Mexico.
+
+
+Perfect Recollection - The character can perfectly remember anything they have seen or heard.
+Possible Drawback: The character may be unable to forget traumatic memories.
+At High Levels: The character can remember every detail of everything they have experienced.
+At Low Levels: The character can only remember specific details of things they have experienced or must make an effort to 'record' the event in memory.
+Observed in: Russia, Ukraine, and Belarus.
+
+
+Atmokinesis - The character has the ability to control the weather.
+Possible Drawback: The character may not be able to control their power, resulting in them accidentally harming people or destroying property.
+At High Levels: The character can control the weather in a large area.
+At Low Levels: The character can only control the weather in a limited area.
+Observed in: Australia, New Zealand, and Papua New Guinea.
+
+
+Self-Sustenance - The character does not need to eat or drink.
+Possible Drawback: The character may become physically weak if they do not consume enough nutrients.
+At High Levels: The character can go without food or drink for extended periods of time without any ill effects.
+At Low Levels: The character can only go without food or drink for a limited period of time.
+Observed in: Sweden, Norway, and Denmark, Middle East
+
+
+Technopathy - The character has the ability to control technology with their mind.
+Possible Drawback: The character may not be able to control their power, resulting in them accidentally harming people or destroying property.
+At High Levels: The character can control all forms of technology.
+At Low Levels: The character can only control a limited number of forms of technology or can only control technology in a limited way.
+Observed in: United Kingdom, Germany, Central Asia
+
+
+Reactive Adaptation - The character's physiology adapts to whatever situation they are in, whether it is changing to survive in a toxic environment or developing immunity to a disease.
+Possible Drawback: The character may be unable to control their adaptations, resulting in them becoming more monster than human.
+At High Levels: The character can adapt to any situation.
+At Low Levels: The character can only adapt to a limited number of situations or can only adapt in a limited way.
+Observed in: China, India, and Sri Lanka.
+
+
+Scientific Weaponry - The character has the ability to create and/or use scientific alien weapons.
+Possible Drawback: The person may not know how to utilize the scientific weapon effectively, resulting in injury or death to themselves or others, and they require instruction or training.
+At High Levels: The character can create and effectively use the scientific alien weapon or device.
+At Low Levels: The character can only create or use a limited number of scientific alien weapons or devices, and they require instruction or training.
+Observed in: Asia, Eastern Europe, North America, Central Africa
+
+
+Fire Generation - The character has the ability to create fire.
+Possible Drawback: The character may not be able to control their power, resulting in them accidentally harming people or destroying property.
+At High Levels: The character can create fire in a large area.
+At Low Levels: The character can create fire in a small area.
+Observed in: United States, Canada, Mexico, Central America, and South America.
+
+
+Fire Manipulation - The character has the ability to create and control fire.
+Possible Drawback: The character may not be able to control their power, resulting in them accidentally harming people or destroying property.
+At High Levels: The character can control fire simultaneously over a large area.
+At Low Levels: The character can only control fire over small areas at a time.
+Observed in: Europe, Kenya, North and South America
+
+
+Fire Invulnerability - The character is invulnerable to the effects of heat and fire.
+Possible Drawback: The lack of oxygen in large fires may cause the character to faint or suffocate.
+At High Levels: The character is completely invulnerable to the effects of heat and fire.
+At Low Levels: The character is only partially invulnerable to the effects of heat and fire.
+Observed in: Mexico, United States, Argentina, 
+
+
+Telekinesis - The character has the ability to move objects with their mind.
+Possible Drawback: On the other hand, if a person attempts to carry too much weight or apply too much force, they may become exhausted, faint, or be unable to move the object at all.
+At High Levels: The character can move large objects or many object with great force.
+At Low Levels: The character can one small object or apply only a small amount of force.
+Observed in: Brazil, Venezuela, Colombia, Ecuador, Peru, Bolivia, Chile
+
+
+
+
+Gravitational Influence - The character can manipulate the gravitational field of objects and individuals other than themselves, providing a tactical advantage in battles and enabling unique movement possibilities.
+
+
+Possible Drawback: Overuse of this power could lead to temporary loss of control over their ability, potentially causing unintentional injuries or damage. Additionally, controlling the gravity of multiple targets simultaneously might be mentally taxing.
+
+
+At High Levels: The character can manipulate the gravity of multiple targets at once, allowing them to "float" objects or individuals, alter their course, or even immobilize enemies by significantly increasing their gravitational pull.
+
+
+At Low Levels: The character can adjust the gravity of a single object or person at a time, providing brief periods of altered weightlessness or increased weight, but the control over the direction and magnitude of gravity alteration is limited.
+
+
+Observed in: Russia, Brazil, Canada, and Japan.
+
+
+
+
+
+
+
+
+
+
+Notes
+
+
+THREAT LEVELS
+
+
+
+
+
+
+Someone who has achieved maximum human performance is assigned the Threat Level designation Alpha. This classification is given to individuals who have slightly increased strength, stamina, agility, reflexes, speed, reason, instincts, wisdom, knowledge, intellect psionic abilities, or spirituality.
+
+
+
+
+
+
+Alpha's might also be more resilient to harm or have a quicker recovery time. They're a result of rigorous training, conditioning, psychological preparation, or a genetic abnormality. This label is often applied to people who have never been abducted by The Grays, and who do not possess any otherworldly genetic changes that would have occurred as a result of their abduction experience. Threat level "alpha" was given to highly trained martial artists with natural talents, as well as soilers who'd discovered their calling.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Threat Level 1 
+given to those who have had at least one encounter with The Grays. They will have had one or more genetic modifications with a seemingly minor superpower.
+
+
+Threat Level 2
+Those who have abilities, powers, or information that exceed normal human ability are assigned a threat level 2 or deemed excellent. Such as lifting up to 800lbs, running at speeds of up to 60mph, has an eidetic memory, perfectly guessing the future, or precognition without the use of time travel through time, intensive accuracy, very minor psionic abilities, occasional misfortune Inducement
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Threat Level 3
+The third level in the LSW Threat System, Remarkable, is for those who usually have during their encounter with The Grays have usually been given more than a single power, ability or area of hyper knowledge abilities that exceed human capability or a single ability that is considerably more powerful than a Level 2 ability.
+
+
+
+
+
+
+An example would be if they can now lift up to 2,000lbs, run at up to 80mph. They have been observed with the ability to cause trouble for local police forces with powers that national military organizations.
+
+
+
+
+
+
+
+
+
+
+
+
+Threat Level 4
+Level 4, Impossible, is when an individual has been granted abilities that completely break the laws of physics as they are currently understood.
+
+
+Could have an eidetic memory and can now use their precognition to time-travel up to 10 minutes into the future with almost 100% accuracy. They also have some very
+
+
+The fourth Threat Level designation was reserved for the volunteer LSWs who had a power that was deemed incredible. Such as being able to lift up to a to 10 tons until reaching their limit or running at speeds of up to 150mph. They also have an eidetic memory and can now use their precognition to time-travel up to 1 hour into the future with almost 100% accuracy. They also have some very
+
+
+
+
+Threat Level 5The fifth and final Threat Level is for those who have
+They may also have information on The Grays that could be useful to humans in the event of an encounter.
+
+
+
+
+Threat Level 4 is 
+Threat Level 3 is for those who have had multiple encounters with The Grays. They will have had two. 
+
+
+
+
+
+
+These people may have had multiple encounters with The Grays or been abducted but have not been abducted for a prolonged period. Usually no more than two several days.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Threat level beta is given to those who have shown to possess two or more of the abilities seen in alpha-level.
+
+
+
+
+
+
+Threat level beta is given to those who have been abducted by The Grays and have had their DNA  
+
+
+
+
+
+
+ A person who is a danger level to the planet or reality itself is known as an Omnipotent being or power that might alter or destroy the fabric
+
+
+
+
+
+
+While a somone is classified as a threat level Omnipotent entity or power that can alter or destroy the fabric of the eath or reality itself. 
+________________
+Powes
+
+
+Harmonic Resonance - The character has the ability to manipulate vibrational frequencies, creating powerful harmonic waves capable of disrupting enemy technology, communications, and even their physical structures.
+Possible Drawback: The character may accidentally disrupt friendly technology or harm allies if they are unable to control the frequencies they emit.
+Observed in: Canada, Australia, South Korea, and Argentina.
+
+
+Adaptive Camouflage - The character can blend seamlessly into their environment, essentially becoming invisible to both the naked eye and advanced detection systems.
+Possible Drawback: The character may accidentally reveal themselves if they move too quickly or if their emotions cause the camouflage to falter.
+Observed in: Russia, Brazil, Spain, and South Africa.
+
+
+Bio-Energy Projection - The character can convert their own biological energy into powerful energy blasts, capable of causing massive damage to enemy forces and structures.
+Possible Drawback: The character may become severely weakened or even fall unconscious if they expend too much of their own energy in an attack.
+Observed in: United States, China, France, and India.
+
+
+Quantum Entanglement - The character can create temporary connections between objects or beings, allowing for instant communication, transportation, or even weaponization of the entangled particles.
+Possible Drawback: Entangling too many objects or beings at once may cause the character to lose control of the connections, resulting in unintended consequences.
+Observed in: United Kingdom, Japan, Germany, and Italy.
+
+
+Energy Siphoning - The character can drain energy from various sources, including other beings, and convert it into a form they can use to power their own abilities.
+Possible Drawback: The character may unintentionally drain energy from friendly sources, potentially causing harm to allies or weakening their own defenses.
+Observed in: Mexico, Egypt, Sweden, and Indonesia.
+
+
+Multidimensional Awareness - The character possesses the ability to perceive events and information across multiple dimensions, providing them with an exceptional level of strategic insight and knowledge.
+Possible Drawback: The character may become overwhelmed by the sheer volume of information they receive, leading to confusion, disorientation, or even madness.
+Observed in: Greece, Israel, Chile, and Norway.
+
+
+Chrono-Spatial Manipulation - The character can manipulate both time and space in a localized area, allowing them to perform feats such as pausing time, teleporting objects, or even temporarily merging two separate locations.
+Possible Drawback: The character may become lost in time or space if they push their abilities beyond their limits or lose control of the manipulation.
+Observed in: Switzerland, Belgium, Austria, and Denmark.
+
+
+Emotion Negation - The character can suppress the emotions of others, potentially preventing enemies from experiencing fear, pain, or anger.
+Possible Drawback: The character may unintentionally suppress the emotions of allies, causing them to lose their motivation or become detached from their actions, leading to potentially disastrous consequences.
+Observed in: Colombia, Turkey, New Zealand, and Vietnam.
+
+
+Thought Induction - The character can plant thoughts or ideas into the minds of others, potentially causing enemies to second-guess their actions or even turn on each other.
+Possible Drawback: The character may accidentally implant thoughts in the minds of allies, leading to confusion, distrust, or even conflict within their own ranks.
+Observed in: Argentina, Portugal, Netherlands, and Poland.
+
+
+Mutation Inducement - The character can induce temporary mutations in others, potentially granting them temporary powers or enhancements.
+Possible Drawback: The character may accidentally induce harmful mutations in allies or lose control of the mutations, resulting in unpredictable and dangerous consequences.
+Observed in: India, South Africa, Brazil, and Kazakhstan.
+
+
+
+
+
+
+
+
+Taskophilus Tanner
+give more of these 10 more
+Entropic Field Generation - The character can create fields of entropy, causing enemy technology, weapons, and structures to rapidly decay and malfunction.
+Possible Drawback: The character may accidentally affect friendly technology or infrastructure, leading to unintended damage or loss of resources.
+Observed in: Iceland, Hungary, Ireland, and the Czech Republic.
+
+
+Polarity Manipulation - The character can control the polarity of objects and beings, allowing them to repel or attract enemy forces, weapons, and projectiles.
+Possible Drawback: The character may accidentally repel or attract friendly forces, causing unintended harm or disarray.
+Observed in: Slovakia, Lithuania, Finland, and Estonia.
+
+
+Neural Disruption - The character can interfere with the neural processes of others, causing confusion, disorientation, or even temporary paralysis.
+Possible Drawback: The character may unintentionally disrupt the neural processes of allies, potentially incapacitating them or causing friendly fire incidents.
+Observed in: Singapore, Latvia, Slovenia, and Croatia.
+
+
+Molecular Disintegration - The character can cause the molecular bonds of objects or beings to weaken and break apart, effectively disintegrating them.
+Possible Drawback: The character may accidentally disintegrate friendly targets or vital resources if they are unable to control their power effectively.
+Observed in: Saudi Arabia, United Arab Emirates, Jordan, and Lebanon.
+
+
+Bioluminescent Illusions - The character can generate lifelike bioluminescent illusions, deceiving enemy forces and creating tactical advantages.
+Possible Drawback: The character may accidentally create illusions that confuse or misdirect friendly forces, resulting in miscommunication or unintended harm.
+Observed in: Costa Rica, Panama, Ecuador, and Madagascar.
+
+
+Reality Warping - The character can manipulate the fabric of reality within a localized area, allowing them to bend or break the laws of physics to their advantage.
+Possible Drawback: The character may inadvertently warp reality in a way that negatively affects friendly forces or disrupts their plans.
+Observed in: Luxembourg, Liechtenstein, Cyprus, and Malta
+
+
+
+
+
+
+
+
+Taskophilus Tanner
+OK those are some really powerful powers Now let's get some street level powers
+Enhanced Parkour - The character possesses a heightened level of agility, balance, and spatial awareness, enabling them to navigate urban environments with ease and speed.
+Possible Drawback: The character may inadvertently cause property damage or accidents while using their abilities in crowded or congested areas.
+Observed in: France, Germany, the United States, and Brazil.
+
+
+Tactile Telekinesis - The character can manipulate objects they touch with telekinesis, making them exceptionally skilled in hand-to-hand combat or precision tasks.
+Possible Drawback: The character may accidentally harm people or damage objects if they lose control of their telekinesis while in physical contact with them.
+Observed in: Russia, India, China, and Australia.
+
+
+Animal Empathy - The character can communicate with and influence the behavior of animals, allowing them to gather information or receive assistance from them.
+Possible Drawback: The character may unintentionally cause harm to animals, people, or property if their animal allies become frightened or aggressive.
+Observed in: Canada, Kenya, South Africa, and Indonesia.
+
+
+Energy Siphoning - The character can absorb and store energy from various sources, such as electricity or kinetic energy, and use it to fuel their abilities.
+Possible Drawback: The character may inadvertently cause power outages or equipment malfunctions if they absorb too much energy from a source.
+Observed in: Japan, South Korea, the United Kingdom, and Italy.
+
+
+Enhanced Reflexes - The character possesses lightning-fast reflexes, enabling them to dodge attacks and react to situations quicker than an average person.
+Possible Drawback: The character's reflexes may cause them to react too quickly, potentially leading to accidents or miscommunications.
+Observed in: Mexico, Spain, the United States, and Argentina.
+
+
+Minor Matter Manipulation -
+
+
+
+
+
+
+
+
+Taskophilus Tanner
+I want you to list the next powers from weakest the strongest and I want the mall to be powers that are completely unique I have never been seen before the weakest power should barely be able to move a napkin the most the most powerful power should be able to almost crack the Earth at its highest intensity give me 20 of these powers each which one of them gradually increasing maximum damage. use scientific names don't use names like napkin flutter or Ice Cube creation and make sure that the powers get more rare the more powerful they are. use the same format as above and mention and mention the exact countries where it's been observed and the possible drawbacks. be sure to include if the character's power is direct meaning they don't have to touch it They just the note exists or if they have to see it or if it's a beam or if it's a ball bubble that they create a field around them a field that they create somewhere else So we should get a sense as to how this power manifests
+Micro-Aerokinesis: The character can manipulate air currents on a minuscule scale, allowing them to gently move lightweight objects, such as napkins.
+Direct/Range: Line of sight.
+Possible Drawback: Limited to extremely lightweight objects; gusts of wind may inadvertently affect surrounding items.
+Observed in: Uruguay, Paraguay, and Suriname.
+
+
+Cryohydratic Condensation: The character can generate small amounts of ice or frost by manipulating moisture in the air.
+Direct/Range: Line of sight.
+Possible Drawback: Ineffective in arid environments; may unintentionally freeze surfaces, creating slippery conditions.
+Observed in: Bolivia, Colombia, and Peru.
+
+
+Tectonic Vibration Manipulation: The character can cause small, localized vibrations in the ground, making objects tremble or shake.
+Direct/Range: Touch.
+Possible Drawback: Limited to objects in contact with the ground; may cause unintended damage or disruption to nearby structures.
+Observed in: Laos, Cambodia, and Myanmar.
+
+
+Bioelectrogenesis: The character can generate weak electrical currents within their body, allowing them to deliver mild shocks or power small electronic devices.
+Direct/Range: Touch.
+Possible Drawback: May inadvertently shock people or damage sensitive electronics.
+Observed in: Kazakhstan, Uzbekistan, and Turkmenistan.
+
+
+Gravitational Displacement Field: The character can create a small, localized field that slightly alters gravity within its boundaries, allowing them to lift or move moderately heavy objects.
+Direct/Range: Field creation within line of sight.
+Possible Drawback: May cause disorientation or motion sickness; limited field size.
+Observed in: Algeria, Tunisia, and Libya.
+
+
+Nanoscale Pyrokinesis: The character can generate and control tiny flames, allowing them to ignite flammable materials or create small heat sources.
+Direct/Range: Line of sight.
+Possible Drawback: Limited to small-scale fires; may accidentally cause larger fires or burns if not controlled properly.
+Observed in: Greece, Romania, and Bulgaria.
+
+
+Magnokinetic Repulsion: The character can create a magnetic field that repels metallic objects, allowing them to deflect projectiles or create barriers.
+Direct/Range: Field creation within line of sight.
+Possible Drawback: Limited to metallic objects; may inadvertently affect nearby electronics or infrastructure.
+Observed in: Israel, Egypt, and Iran.
+
+
+Cellular Regeneration Acceleration: The character can stimulate the healing process of living organisms, allowing them to recover from injuries more quickly.
+Direct/Range: Touch.
+Possible Drawback: May inadvertently heal enemy combatants or cause abnormal cell growth if not controlled properly.
+Observed in: Sweden, Norway, and Denmark.
+
+
+Kinetic Energy Amplification: The character can amplify the kinetic energy of moving objects, allowing them to increase the force and speed of their attacks or projectiles.
+Direct/Range: Line of sight.
+Possible Drawback: May inadvertently cause excessive damage or injuries if not controlled properly.
+Observed in: Belgium, the Netherlands, and Austria.
+
+
+Thermobaric Wave Generation: The character can generate a powerful wave of heat and pressure, causing significant damage to their surroundings.
+Direct/Range: Line of sight.
+Possible Drawback: May inadvertently harm allies or cause collateral damage if not controlled properly.
+Observed in: Ukraine, Poland, and Belarus.
+
+
+Seismic Force Projection: The character can create powerful seismic waves, causing earthquakes or fissures in the ground.
+Direct/Range: Field creation within line of sight.
+Possible Drawback: May inadvertently cause structural damage or harm to allies if not controlled properly.
+Observed in: India, Pakistan, and Bangladesh.
+
+
+Subatomic Disassembly: The character can break down matter at the subatomic
+
+
+
+
+
+
+
+
+Taskophilus Tanner
+Create abilities that cna be use to travel and in combat.
+Spatial Blink: The character can teleport short distances, allowing them to quickly reposition themselves in combat or travel through obstacles.
+Direct/Range: Line of sight.
+Possible Drawback: May inadvertently teleport into dangerous or unstable locations if not careful.
+Observed in: South Korea, Taiwan, and Hong Kong.
+
+
+Gravity Surfing: The character can manipulate gravity to create a personal gravitational field, allowing them to "surf" through the air or hover above the ground.
+Direct/Range: Self-generated field.
+Possible Drawback: May cause motion sickness or disorientation; limited altitude and speed.
+Observed in: Portugal, Spain, and Morocco.
+
+
+Quantum Tethering: The character can create temporary, invisible "tethers" to nearby objects, allowing them to pull themselves towards or swing from those objects.
+Direct/Range: Line of sight.
+Possible Drawback: May inadvertently tether to unstable or dangerous objects, causing accidents or injuries.
+Observed in: Thailand, Vietnam, and the Philippines.
+
+
+Chrono-Dilation: The character can temporarily slow down their perception of time, enabling them to react and move faster in combat or travel situations.
+Direct/Range: Personal perception.
+Possible Drawback: May cause disorientation or fatigue from prolonged use; limited duration.
+Observed in: Switzerland, Austria, and Germany.
+
+
+Intangible Phasing: The character can become intangible for short periods, allowing them to pass through solid objects or avoid physical attacks.
+Direct/Range: Self-generated field.
+Possible Drawback: May inadvertently phase into dangerous locations or lose control of the ability, causing them to become stuck.
+Observed in: Brazil, Argentina, and Chile.
+
+
+Temporal Leap: The character can momentarily jump forward in time, allowing them to evade attacks and reposition themselves in combat or travel situations.
+Direct/Range: Personal perception.
+Possible Drawback: May inadvertently leap into dangerous situations or miss important events.
+Observed in: New Zealand, Australia, and Fiji.
+
+
+Aerodynamic Manipulation: The character can control the air currents around their body, allowing them to glide, fly, or propel themselves at high speeds.
+Direct/Range: Self-generated field.
+Possible Drawback: May be affected by adverse weather conditions; limited altitude and speed.
+Observed in: France, Italy, and Monaco.
+
+
+Elasticity: The character can stretch and elongate their body, allowing them to reach distant objects, traverse gaps, or dodge attacks.
+Direct/Range: Self-generated field.
+Possible Drawback: May become tangled or trapped if not careful; limited range and elasticity.
+Observed in: Nigeria, Ghana, and Cameroon.
+
+
+Dimensional Shift: The character can temporarily shift themselves into an alternate dimension, allowing them to bypass obstacles or avoid attacks in combat.
+Direct/Range: Personal perception.
+Possible Drawback: May encounter dangerous entities or environments in the alternate dimension; limited duration.
+Observed in: Russia, Turkey, and Georgia.
+
+
+Bio-Engineered Propulsion: The character possesses specialized organs or appendages that enable them to propel themselves through the air or water at high speeds.
+Direct/Range: Self-generated field.
+Possible Drawback: May be affected by environmental conditions or become fatigued from prolonged use.
+Observed in: South Africa, Namibia, and Mozambique.
+
+
+
+
+
+
+
+
+Taskophilus Tanner
+add 10 body control powers
+Osteokinesis: The character can manipulate and reshape their bones, allowing them to create temporary weapons or armor, or even alter their appearance.
+Direct/Range: Self-generated field.
+Possible Drawback: May cause pain or injury if not careful; limited by the body's natural bone structure.
+Observed in: Estonia, Latvia, and Lithuania.
+
+
+Myokinesis: The character can manipulate and control their muscles, allowing them to enhance their strength, speed, or agility for short periods.
+Direct/Range: Self-generated field.
+Possible Drawback: May cause muscle strain or fatigue if not careful; limited duration.
+Observed in: Japan, South Korea, and Singapore.
+
+
+Dermakinesis: The character can manipulate the texture, color, and properties of their skin, allowing them to blend into their surroundings or create a natural armor.
+Direct/Range: Self-generated field.
+Possible Drawback: May cause discomfort or irritation if not careful; limited by the body's natural skin structure.
+Observed in: Greece, Cyprus, and Malta.
+
+
+Hemokinesis: The character can manipulate their blood, allowing them to control its flow, clotting, and even shape it into weapons or projectiles.
+Direct/Range: Self-generated field.
+Possible Drawback: May cause blood loss or anemia if not careful; limited by the body's natural blood supply.
+Observed in: India, Nepal, and Bangladesh.
+
+
+Neurokinesis: The character can manipulate their nervous system, allowing them to dull pain, enhance reflexes, or temporarily boost cognitive functions.
+Direct/Range: Self-generated field.
+Possible Drawback: May cause nerve damage or mental fatigue if not careful; limited duration.
+Observed in: Canada, the United States, and Mexico.
+
+
+Bioluminescence: The character can emit light from their body, allowing them to illuminate dark areas or create dazzling displays for offensive or defensive purposes.
+Direct/Range: Self-generated field.
+Possible Drawback: May attract unwanted attention or affect the character's vision if not careful.
+Observed in: Belize, Honduras, and Guatemala.
+
+
+Viscerokinesis: The character can manipulate their internal organs, allowing them to enhance bodily functions, heal injuries, or temporarily withstand toxins.
+Direct/Range: Self-generated field.
+Possible Drawback: May cause organ damage or internal injuries if not careful; limited by the body's natural organ structure.
+Observed in: Saudi Arabia, Kuwait, and Qatar.
+
+
+Lymphokinesis: The character can manipulate their lymphatic system, allowing them to enhance immune responses or temporarily resist infections and diseases.
+Direct/Range: Self-generated field.
+Possible Drawback: May cause autoimmune reactions or weaken the immune system if not careful; limited duration.
+Observed in: Indonesia, Malaysia, and the Philippines.
+
+
+Adipokinesis: The character can manipulate their body fat, allowing them to redistribute it for cushioning, insulation, or to alter their appearance.
+Direct/Range: Self-generated field.
+Possible Drawback: May cause health issues or discomfort if not careful; limited by the body's natural fat stores.
+Observed in: Colombia, Peru, and Ecuador.
+
+
+Respiratory Adaptation: The character can manipulate their respiratory system, allowing them to breathe in different environments, such as underwater or in high altitudes.
+Direct/Range: Self-generated field.
+Possible Drawback: May cause oxygen deprivation or respiratory issues if not careful; limited duration.
+Observed in: Norway, Sweden, and Finland.
+
+
+
+
+
+
+
+
+Taskophilus Tanner
+Make 5 new age, modernized powers that wouldnt exist in the 70's
+Technokinesis: The character can manipulate and control electronic devices and digital systems, allowing them to hack into computers, control drones, or disrupt communication networks.
+Direct/Range: Requires direct line of sight or close proximity to the device.
+Possible Drawback: May not work on outdated or heavily secured technology; susceptible to counter-hacking.
+Observed in: United States, South Korea, and Germany.
+
+
+Nanobot Control: The character can mentally command and control swarms of nanobots, allowing them to perform various tasks such as repairing machinery, disassembling objects, or constructing devices.
+Direct/Range: Requires direct line of sight or close proximity to the nanobots.
+Possible Drawback: Limited by the number and type of nanobots available; susceptible to external interference.
+Observed in: Japan, Singapore, and Switzerland.
+
+
+Augmented Reality Manipulation: The character can manipulate augmented reality interfaces, allowing them to create illusions, modify digital information, or access restricted areas within virtual environments.
+Direct/Range: Requires the presence of augmented reality devices or systems.
+Possible Drawback: Limited by the capabilities of the augmented reality technology; may not affect individuals without access to the same digital interfaces.
+Observed in: Canada, the Netherlands, and the United Kingdom.
+
+
+Electromagnetic Pulse Generation: The character can generate powerful electromagnetic pulses, allowing them to disable electronic devices or disrupt electrical systems within a specific radius.
+Direct/Range: Self-generated field or targeted pulse.
+Possible Drawback: May inadvertently affect friendly devices or systems; may not work on shielded or hardened technology.
+Observed in: Russia, China, and Israel.
+
+
+Bio-Cyber Interface: The character possesses a direct neural interface with electronic devices and digital systems, allowing them to access information, control technology, or communicate with machines at the speed of thought.
+Direct/Range: Requires physical connection to the device or system.
+Possible Drawback: Risk of neural feedback or damage if the interface is disrupted; potential vulnerability to hacking or cyber-attacks.
+Observed in: Australia, New Zealand, and South Africa.
+
+
+
+
+
+
+
+
+Taskophilus Tanner
+there is another type of power this power is knowledge so when the aliens gave humanity powers they they studied specific subjects and made and made certain people experts at certain subjects the world doesn't find out about these new type of powers until much later in the story But I want you to go ahead and list some of these new type of powers.
+Tactical Genius: The character possesses an innate understanding of military strategy and tactics, allowing them to effectively lead forces in combat or devise highly effective battle plans.
+Subject: Military Strategy
+Possible Drawback: May struggle to adapt to rapidly changing or unexpected situations; overconfidence could lead to poor decisions.
+Observed in: United States, Russia, and China.
+
+
+Advanced Engineering: The character is an expert in engineering and can quickly design, analyze, and improve various structures and machines, from bridges to spaceships.
+Subject: Engineering
+Possible Drawback: May require access to resources and materials to bring their ideas to fruition; highly specialized knowledge may limit applicability in some situations.
+Observed in: Germany, Japan, and South Korea.
+
+
+Quantum Computing Mastery: The character has an innate understanding of quantum computing and can harness its full potential to solve complex problems, break encryption, or model highly accurate simulations.
+Subject: Quantum Computing
+Possible Drawback: Requires access to advanced quantum computing technology; may struggle to apply knowledge to more traditional computing systems.
+Observed in: Canada, the United Kingdom, and Switzerland.
+
+
+Medical Savant: The character has an encyclopedic knowledge of medicine and biology, enabling them to diagnose and treat various illnesses and injuries with exceptional skill.
+Subject: Medicine and Biology
+Possible Drawback: May be limited by the availability of medical equipment and resources; ethical considerations may impact the use of their knowledge in certain situations.
+Observed in: India, France, and Italy.
+
+
+Linguistic Polymath: The character can effortlessly learn and understand any language, both spoken and written, providing them with unparalleled communication skills and the ability to decipher coded messages.
+Subject: Linguistics
+Possible Drawback: May struggle with non-verbal communication or cultural nuances; could be overwhelmed by the sheer number of languages encountered.
+Observed in: Brazil, Spain, and Nigeria.
+
+
+Energy Science Expert: The character has an extensive knowledge of energy science, allowing them to design, develop, and optimize various energy systems, from renewable energy sources to advanced power generation methods.
+Subject: Energy Science
+Possible Drawback: Requires access to resources and infrastructure to implement their knowledge; may face resistance or skepticism from established energy interests.
+Observed in: Sweden, Norway, and Denmark.
+
+
+Artificial Intelligence Specialist: The character is a leading expert in artificial intelligence, capable of designing, programming, and refining advanced AI systems for various applications.
+Subject: Artificial Intelligence
+Possible Drawback: May face ethical dilemmas or unintended consequences associated with the development and use of AI; requires access to computing resources and technology.
+Observed in: United States, China, and Israel.
+
+
+Cryptography Master: The character is an expert in cryptography, capable of creating or breaking even the most complex codes and encryption systems with ease.
+Subject: Cryptography
+Possible Drawback: May be limited by the availability of information or technology; could face legal or ethical concerns related to the use of their knowledge.
+Observed in: United Kingdom, Australia, and Canada.
+
+
+Environmental Science Virtuoso: The character has a deep understanding of environmental science, enabling them to predict, analyze, and mitigate the impacts of various environmental phenomena or human activities.
+Subject: Environmental Science
+Possible Drawback: May face resistance from political or economic interests; may struggle to implement solutions on a global scale.
+Observed in: Brazil, Indonesia, and South Africa.
+
+
+Historical Insight: The character possesses a profound knowledge of history, allowing them to understand the motivations, decisions, and consequences of past events, providing valuable context and guidance for current challenges.
+Subject: History
+Possible Drawback: Historical knowledge may not always be applicable to contemporary situations; may be limited by the availability of historical records or resources.
+Observed in
+
+
+
+
+
+
+
+
+Taskophilus Tanner
+if aliens got access to a community college curriculum they use that curriculum as the basis for distributing these knowledge powers which gives people absolute knowledge in a particular field. y write the powers out that they will use
+Absolute Mathematics: The character has complete mastery of mathematics, enabling them to solve complex problems and develop innovative mathematical models for various applications.
+Subject: Mathematics
+Possible Drawback: May struggle to apply mathematical knowledge to real-world situations without sufficient context or data.
+Observed in: Greece, India, and Hungary.
+
+
+Comprehensive Chemistry: The character has an unparalleled understanding of chemistry, allowing them to analyze and manipulate chemical reactions, synthesize new compounds, and understand the properties of various elements and molecules.
+Subject: Chemistry
+Possible Drawback: Requires access to chemicals, equipment, and resources; may face safety risks when working with hazardous materials.
+Observed in: United States, Germany, and China.
+
+
+Physics Mastery: The character possesses complete knowledge of physics, enabling them to understand and predict the behavior of matter and energy across various scales and domains.
+Subject: Physics
+Possible Drawback: Highly theoretical knowledge may not always have practical applications; may require specialized equipment or resources.
+Observed in: United Kingdom, Russia, and Japan.
+
+
+Biological Expertise: The character has absolute knowledge of biology, granting them the ability to study, analyze, and manipulate living organisms, as well as understand the complex interactions between species and ecosystems.
+Subject: Biology
+Possible Drawback: May face ethical concerns or unintended consequences when manipulating living organisms; may require access to specialized resources or equipment.
+Observed in: Australia, Brazil, and France.
+
+
+In-Depth Geology: The character has a comprehensive understanding of geology, allowing them to study and predict geological phenomena such as earthquakes, volcanic eruptions, and the formation of natural resources.
+Subject: Geology
+Possible Drawback: May be limited by the availability of geological data or the unpredictability of natural phenomena.
+Observed in: Italy, Iceland, and Chile.
+
+
+Unrivaled Astronomy: The character has complete mastery of astronomy, enabling them to study celestial objects, understand the universe's structure and evolution, and potentially navigate interstellar space.
+Subject: Astronomy
+Possible Drawback: May require access to advanced telescopes or other equipment; may struggle to apply astronomical knowledge to immediate or terrestrial concerns.
+Observed in: United States, Russia, and South Africa.
+
+
+Sociological Insight: The character has an unparalleled understanding of sociology, allowing them to analyze and predict social phenomena, as well as develop strategies to address societal challenges.
+Subject: Sociology
+Possible Drawback: May struggle to account for individual motivations or actions; may face resistance from established social institutions or norms.
+Observed in: United Kingdom, France, and Germany.
+
+
+Complete Philosophy: The character has absolute knowledge of philosophy, granting them the ability to critically examine complex ideas, ethical dilemmas, and the nature of existence.
+Subject: Philosophy
+Possible Drawback: May struggle to find practical applications for philosophical ideas; may face disagreements or debates with other philosophical perspectives.
+Observed in: Greece, Germany, and France.
+
+
+Political Science Expertise: The character has a comprehensive understanding of political science, allowing them to analyze political systems, predict political outcomes, and develop strategies for political success.
+Subject: Political Science
+Possible Drawback: May struggle with the unpredictability of human behavior; may face opposition from established political actors.
+Observed in: United States, United Kingdom, and China.
+
+
+Master of Fine Arts: The character possesses absolute knowledge and skill in various forms of art, including painting, sculpture, music, and dance, enabling them to create or appreciate masterpieces across different mediums and styles.
+Subject: Fine Arts
+Possible Drawback: May struggle to find practical applications for artistic skills in certain situations; may face criticism or disagreement from other artistic perspectives.
+Observed in: Italy, Spain, and France.
+
+
+
+
+
+
+
+
+Taskophilus Tanner
+there are other people with powers that come from other alien species who have who have merged with them partnered with them or that they use in order to manifest their power because this alien species let me tell you about two alien species There is one who is a mineral like species that has two liquids inside of it And when it lets these two liquids touch it turns into a gas a type of sentient gas the second one is a golden like substance that has a telekinetic bond with the person And this substance is it's fascinated with birds and it turns itself into wings that flap to give the person flight It also can mold into shield in order to provide protection and armor so with those alien species online I would like for you to go ahead and create other powers that are based on alien species you must also define if the alien can communicate with the human or how it communicates with the human
+Osmo-Fluid Symbiosis: The character is partnered with an alien species composed of two fluids that, when combined, form a sentient gas. This gas allows the character to manipulate its density and form, enabling them to phase through solid objects, create temporary constructs, or alter their appearance.
+Alien Species: Osmo-Fluid
+Communication: The alien communicates with the human through a telepathic bond, which allows for seamless coordination between them.
+Observed in: Canada, Argentina, and South Korea.
+
+
+Avian Golden Armor: The character is bonded with a golden alien substance that is fascinated with birds. This substance can morph into wings that grant the character flight, as well as mold into shields and armor for protection. The substance's telekinetic bond with the character ensures precise control and adaptation.
+Alien Species: Aurum Avian
+Communication: The alien communicates with the human through telekinetic feedback, allowing them to sense the alien's intentions and control the substance's transformations.
+Observed in: Egypt, Brazil, and Spain.
+
+
+Crystal Resonance: The character is merged with a crystalline alien species that can manipulate sound and vibrations. This allows the character to create powerful sonic blasts, generate protective sound barriers, or even levitate through vibrational control.
+Alien Species: Resono-Crystal
+Communication: The alien communicates with the human through resonating vibrations that the character can interpret as feelings or ideas.
+Observed in: Australia, Nepal, and Poland.
+
+
+Bioluminescent Symbiote: The character has formed a bond with an alien species that emits a bioluminescent glow. This species can control the intensity and color of its light, enabling the character to blend in with their surroundings, create dazzling displays to distract opponents, or emit intense flashes of light to temporarily blind others.
+Alien Species: Lumisquid
+Communication: The alien communicates with the human through a series of light patterns, which the character can understand as simple messages or signals.
+Observed in: United States, Thailand, and Norway.
+
+
+Living Shadow Partnership: The character is partnered with an alien species that exists as a living shadow. This species can change its shape and size, allowing the character to manipulate shadows for stealth, create shadow constructs, or even transport themselves through shadows.
+Alien Species: Umbracite
+Communication: The alien communicates with the human through a shared consciousness, enabling them to coordinate their actions and share sensory input.
+Observed in: United Kingdom, Japan, and South Africa.
+
+
+Energivore Companion: The character is merged with an alien species that can absorb and store various forms of energy. This allows the character to harness the stored energy for offensive or defensive purposes, such as creating energy blasts, generating force fields, or enhancing their physical abilities.
+Alien Species: Voltarax
+Communication: The alien communicates with the human through an empathic connection, which allows them to share emotions and basic desires.
+Observed in: Russia, Mexico, and France.
+
+
+
+
+
+
+
+
+Taskophilus Tanner
+Imagine 5 more, with interesting versitle powers but with vulnerabilities or weaknesses that make sense
+Flora-Mimic Hybrid: The character is merged with an alien plant species that enables them to manipulate plant life and even adopt plant-like attributes. They can grow vines for mobility, create thorny barriers for defense, or regenerate damaged tissue rapidly. However, their vulnerability lies in their susceptibility to extreme cold or fire, which can hinder their abilities and cause them pain.
+Alien Species: Floraphoria
+Communication: The alien communicates with the human through pheromones, which allows them to understand each other's needs and intentions.
+Observed in: Brazil, India, and Madagascar.
+
+
+Temporal Flux Manipulator: The character is partnered with an alien species that can manipulate localized time. They can slow down or speed up time within a small area, which allows them to evade attacks, surprise opponents, or repair minor damage quickly. However, this power is limited by the character's mental and physical stamina; overexertion can lead to fatigue, dizziness, or even unconsciousness.
+Alien Species: Chrono-Weaver
+Communication: The alien communicates with the human through a neural link, which allows them to share thoughts and memories.
+Observed in: Germany, China, and Canada.
+
+
+Elemental Conduit: The character has formed a bond with an alien species that grants them the ability to channel and manipulate the four classical elements: earth, water, air, and fire. While this provides versatile offensive and defensive options, the character's power is directly tied to their proximity to the respective element. The further they are from a source of that element, the weaker their control becomes.
+Alien Species: Quatrotian
+Communication: The alien communicates with the human through tactile sensations, which convey emotions and intentions.
+Observed in: Italy, Australia, and Indonesia.
+
+
+Empathic Healer: The character is partnered with an alien species that can heal physical wounds and emotional traumas by absorbing the pain and negative emotions of others. While this can be incredibly beneficial to their allies, the character also takes on the burden of the pain and emotions they absorb, which can overwhelm them and cause physical and emotional distress.
+Alien Species: Mendalor
+Communication: The alien communicates with the human through a shared emotional bond, allowing them to feel each other's emotions and intentions.
+Observed in: United States, South Africa, and Japan.
+
+
+Gravitational Rift Generator: The character is merged with an alien species that can manipulate gravity within a localized area. This allows them to create areas of intense gravity to immobilize opponents or generate areas of low gravity for increased mobility. However, the character's own body is not immune to these gravitational changes, and they must be careful not to inadvertently harm themselves or lose control.
+Alien Species: Gravitus
+Communication: The alien communicates with the human through auditory signals, which convey simple instructions and warnings.
+Observed in: Russia, Argentina, and the United Kingdom.
+
+
+
+
+
+
+
+
+Taskophilus Tanner
+Imagine 5 unusual ones now
+Reality Stitcher: The character is partnered with an alien species capable of manipulating the fabric of reality within a small radius. They can bend, twist, or rearrange objects and materials, creating unexpected and disorienting effects. However, prolonged use of this power can strain the character's perception of reality, leading to disorientation and hallucinations.
+Alien Species: Warpweaver
+Communication: The alien communicates with the human through complex geometric patterns visible only to the user, which convey ideas and intentions.
+Observed in: France, Egypt, and Nepal.
+
+
+Shadow Puppeteer: The character has bonded with an alien species that allows them to control and manipulate shadows. They can create shadowy constructs, hide in the darkness, or even use the shadows to teleport short distances. The power is limited by the availability of shadows, and bright light can significantly weaken their abilities.
+Alien Species: Umbrafiend
+Communication: The alien communicates with the human through whispers in the darkness, allowing them to share thoughts and warnings.
+Observed in: Mexico, Norway, and New Zealand.
+
+
+Soundwave Sculptor: The character is merged with an alien species that can manipulate sound waves, allowing them to create sonic barriers, deafening blasts, or even illusions through the manipulation of sound. Their power is limited by the character's ability to maintain focus, and loud or chaotic environments can make it difficult for them to use their abilities effectively.
+Alien Species: Audiolith
+Communication: The alien communicates with the human through vibrations, which convey emotions and intentions.
+Observed in: South Korea, Brazil, and the Netherlands.
+
+
+Hive Mind Conductor: The character is partnered with an alien species capable of connecting multiple minds into a shared consciousness. This allows them to coordinate actions, share knowledge, and experience collective empathy. However, maintaining a hive mind can be mentally exhausting, and the character may struggle to maintain their sense of self when connected to too many minds at once.
+Alien Species: Neuraxon
+Communication: The alien communicates with the human through a direct neural connection, allowing them to share thoughts and memories.
+Observed in: Israel, India, and Peru.
+
+
+Probability Shifter: The character is bonded with an alien species that can subtly influence probability, creating small but significant changes in outcomes. They can nudge events in their favor or create unlikely coincidences. However, this power is unpredictable and cannot be relied upon for specific outcomes. Overuse of the ability can also lead to a backlash of negative probability, causing a string of bad luck.
+Alien Species: Fortunekin
+Communication: The alien communicates with the human through a shared sense of intuition, providing a subtle guiding influence.
+Observed in: Ireland, Singapore, and Morocco.
+
+
+
+
+
+
+
+
+Taskophilus Tanner
+Now create normal level alien collaboration powers. They should not be too powerful but not too weak. THey should also have very interesting and intriguing weaknesses or vulnerabilities
+
+
+Bioluminescent Camouflage: The character is partnered with an alien species that can alter the color and pattern of their skin to blend in with their surroundings, much like a chameleon. The camouflage is limited by the complexity of the environment and can be disrupted by sudden changes in light or temperature.
+Alien Species: Chromaskin
+Communication: The alien communicates with the human through color-shifting patterns on their skin, which convey emotions and simple messages.
+Observed in: Australia, Portugal, and South Africa.
+
+
+Gravitational Tether: The character has bonded with an alien species that can manipulate gravity around them, allowing them to anchor objects or people to specific points in space. They can use this power to immobilize enemies or stabilize structures. However, the ability is limited by the mass of the object being tethered, and larger objects require greater focus and energy.
+Alien Species: Graviton Wisp
+Communication: The alien communicates with the human through subtle changes in gravitational force, providing a sense of direction and guidance.
+Observed in: Canada, Argentina, and Russia.
+
+
+Elemental Symbiosis: The character is merged with an alien species that can absorb and store small amounts of elemental energy, such as fire, water, or electricity. They can then release this energy in a controlled manner, creating bursts of elemental power. Their ability is limited by the amount of energy they can store, and they must recharge by absorbing more energy from an external source.
+Alien Species: Elemeld
+Communication: The alien communicates with the human through the shared sensation of elemental energy, allowing them to convey information and warnings.
+Observed in: Japan, Italy, and Kenya.
+
+
+Time Dilation Bubble: The character is partnered with an alien species capable of creating a localized bubble of slowed time around themselves or others. Within this bubble, time moves slower relative to the outside world, allowing the character to think or move more quickly. However, the bubble's effect is limited to a small area, and maintaining it for long periods can be physically and mentally exhausting.
+Alien Species: Chronostalker
+Communication: The alien communicates with the human through shared memories of past and potential future events.
+Observed in: United States, Germany, and Thailand.
+
+
+Emotional Resonance: The character has bonded with an alien species that can amplify and project their emotions onto others. This power can be used to calm tense situations, inspire allies, or disorient enemies. However, the ability is limited by the character's emotional control, and strong or chaotic emotions can make it difficult for them to use their power effectively.
+Alien Species: Empathix
+Communication: The alien communicates with the human through shared emotional experiences, allowing them to express feelings and intentions.
+Observed in: United Kingdom, Brazil, and Sweden.
+
+
+
+
+
+
+
+
+Taskophilus Tanner
+Do more but with no gravity, emotion, energy, camo, time or anything else youve already done.  Imagine new powers humans have never seen before but arnt too overpowered to be interesting
+Quantum Entanglement: The character is partnered with an alien species capable of linking pairs of objects or individuals through quantum entanglement. When linked, any action performed on one entity is mirrored by the other. This power can be used for communication, coordination, or even subterfuge. However, the connection is disrupted if the entangled entities move too far apart or are separated by dense materials.
+Alien Species: Entangylar
+Communication: The alien communicates with the human through quantum entanglement, allowing for instantaneous and untraceable communication.
+Observed in: Norway, Peru, and South Korea.
+
+
+Molecular Deconstruction: The character has bonded with an alien species that can selectively disassemble the molecular bonds of objects or substances. They can use this power to disintegrate barriers, break down pollutants, or sabotage equipment. However, the ability is limited by the character's knowledge of the target's molecular structure and requires direct contact with the target.
+Alien Species: Disassembloid
+Communication: The alien communicates with the human through a tactile telepathy, exchanging information through touch.
+Observed in: Mexico, Israel, and New Zealand.
+
+
+Sonic Sculpting: The character is merged with an alien species that can generate and manipulate sound waves with precision. They can use this power to create intricate sonic structures or illusions, such as invisible barriers, sound dampening fields, or localized echoes. However, the power is disrupted by loud noises or environments with poor acoustics.
+Alien Species: Echoform
+Communication: The alien communicates with the human through unique sound patterns, creating a language of tones and harmonics.
+Observed in: France, Malaysia, and South Africa.
+
+
+Probability Manipulation: The character is partnered with an alien species capable of subtly influencing the probability of events occurring in their immediate vicinity. This power can be used to increase the likelihood of success or failure for a particular action, causing surprising coincidences or accidents. However, the power cannot guarantee specific outcomes and becomes less effective as the desired event becomes more improbable.
+Alien Species: Luckspinner
+Communication: The alien communicates with the human through a series of intuitive nudges, guiding the human's decisions and actions.
+Observed in: Poland, India, and Egypt.
+
+
+Memory Imprinting: The character has bonded with an alien species that can create and implant specific memories into the minds of others. They can use this power to influence the behavior of individuals or groups by altering their perceptions of past events. However, the implanted memories are less effective if they directly contradict the target's existing memories, and the power requires direct eye contact to initiate the imprinting process.
+Alien Species: Memoriarch
+Communication: The alien communicates with the human through the shared experience of memories, allowing for a deep understanding of each other's thoughts and feelings.
+Observed in: Indonesia, Finland, and Spain.
+
+
+
+
+
+
+
+
+Taskophilus Tanner
+Create a list of power inspried by obscure comic book heroes but not exactly like them.  Make sure it includes other minor powers. The name should not be even close to the character it is inspired by.  Never ever mention the character it is inspired by
+Elasticity Master: The character has the ability to stretch and elongate any part of their body to great lengths. They can use this power for feats of agility, to reach distant objects, or to avoid harm. Minor power: Enhanced flexibility for evading attacks and navigating tight spaces.
+
+
+Spectrum Shifter: The character can absorb and redirect various forms of electromagnetic radiation. They can use this power to create light shows, manipulate electronic devices, or disrupt communication signals. Minor power: Enhanced night vision, allowing the character to see in near-total darkness.
+
+
+Density Controller: The character can alter the density of their body or objects they touch, making them incredibly light or heavy. They can use this power to lift heavy objects, float on air, or become as hard as stone. Minor power: Enhanced durability, providing resistance to physical damage.
+
+
+Insect Whisperer: The character can communicate with and control insects and other small arthropods. They can use this power to gather information, coordinate attacks, or create distractions. Minor power: Wall-crawling ability, allowing the character to cling to and climb vertical surfaces.
+
+
+Aqua Shaper: The character can manipulate and control water, shaping it into various forms or moving it through the air. They can use this power to create barriers, weapons, or even surf on water. Minor power: Enhanced swimming and the ability to breathe underwater.
+
+
+Plant Manipulator: The character can communicate with and control plants, causing them to grow or move at their command. They can use this power to create barriers, ensnare enemies, or heal damaged plants. Minor power: Enhanced knowledge of botany, providing the character with insight into the properties and uses of various plants.
+
+
+Vibration Conductor: The character can generate and control powerful vibrations, causing objects to shake, crumble, or explode. They can use this power to destroy barriers, create shockwaves, or detect hidden objects. Minor power: Enhanced balance, allowing the character to maintain their footing on unstable surfaces.
+
+
+Weather Architect: The character can manipulate and control the weather, summoning storms, heatwaves, or other meteorological phenomena. They can use this power to hinder enemies, aid allies, or create environmental hazards. Minor power: Enhanced knowledge of meteorology, providing the character with insight into weather patterns and forecasting.
+
+
+Energy Absorber: The character can absorb various forms of energy, such as heat, electricity, or kinetic energy, and store it for later use. They can use this power to heal themselves, power devices, or release the stored energy as an attack. Minor power: Enhanced resistance to energy-based attacks.
+
+
+Gravity Defier: The character can manipulate gravity around them, allowing them to fly, levitate objects, or increase or decrease the weight of objects. They can use this power for transportation, combat, or to perform feats of strength. Minor power: Enhanced agility, providing the character with impressive reflexes and acrobatics.

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperHero Tactics Combat Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="container mx-auto p-6">
+        <h1 class="text-4xl font-bold mb-8 text-center text-yellow-400">SuperHero Tactics Combat Simulator</h1>
+        
+        <!-- Character Creation Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Character 1 -->
+            <div class="bg-gray-800 p-6 rounded-lg border border-yellow-400">
+                <h2 class="text-2xl font-bold mb-4 text-blue-400">Character 1</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Character Name:</label>
+                        <input type="text" id="char1-name" class="w-full p-2 bg-gray-700 rounded" placeholder="Enter character name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Origin:</label>
+                        <select id="char1-origin" class="w-full p-2 bg-gray-700 rounded">
+                            <option value="ORIG_001">Skilled Human</option>
+                            <option value="ORIG_002">Altered Human</option>
+                            <option value="ORIG_003">Tech Enhancement</option>
+                            <option value="ORIG_004">Mutated Human</option>
+                            <option value="ORIG_005">Spiritual Enhancement</option>
+                            <option value="ORIG_006">Synthetics</option>
+                            <option value="ORIG_007">Symbiotic</option>
+                            <option value="ORIG_008">Aliens</option>
+                            <option value="ORIG_009">Scientific Weapon</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Threat Level:</label>
+                        <select id="char1-threat" class="w-full p-2 bg-gray-700 rounded">
+                            <option value="THREAT_A">Alpha (Peak Human)</option>
+                            <option value="THREAT_1">Level 1 (Low Superhuman)</option>
+                            <option value="THREAT_2">Level 2 (Superhuman)</option>
+                            <option value="THREAT_3">Level 3 (Advanced Superhuman)</option>
+                            <option value="THREAT_4">Level 4 (High Superhuman)</option>
+                            <option value="THREAT_5">Level 5 (Cosmic Level)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Primary Power:</label>
+                        <select id="char1-power" class="w-full p-2 bg-gray-700 rounded">
+                            <option value="POW_STR">Super Strength</option>
+                            <option value="POW_SPD">Super Speed</option>
+                            <option value="POW_FLY">Flight</option>
+                            <option value="POW_DUR">Super Durability</option>
+                            <option value="POW_INV">Invisibility</option>
+                            <option value="POW_PSY">Psychic Powers</option>
+                            <option value="POW_ENE">Energy Projection</option>
+                            <option value="POW_TIM">Time Manipulation</option>
+                            <option value="POW_REA">Reality Warping</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Equipment:</label>
+                        <select id="char1-equipment" class="w-full p-2 bg-gray-700 rounded">
+                            <option value="EQ_CIV">Civilian Clothing</option>
+                            <option value="EQ_TAC">Tactical Gear</option>
+                            <option value="EQ_COM">Combat Armor</option>
+                            <option value="EQ_POW">Power Armor</option>
+                            <option value="EQ_ENE">Force Field</option>
+                            <option value="EQ_MYS">Blessed Items</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Character 2 -->
+            <div class="bg-gray-800 p-6 rounded-lg border border-yellow-400">
+                <h2 class="text-2xl font-bold mb-4 text-red-400">Character 2</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Character Name:</label>
+                        <input type="text" id="char2-name" class="w-full p-2 bg-gray-700 rounded" placeholder="Enter character name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Origin:</label>
+                        <select id="char2-origin" class="w-full p-2 bg-gray-700 rounded">
+                            <option value="ORIG_001">Skilled Human</option>
+                            <option value="ORIG_002">Altered Human</option>
+                            <option value="ORIG_003">Tech Enhancement</option>
+                            <option value="ORIG_004">Mutated Human</option>
+                            <option value="ORIG_005">Spiritual Enhancement</option>
+                            <option value="ORIG_006">Synthetics</option>
+                            <option value="ORIG_007">Symbiotic</option>
+                            <option value="ORIG_008">Aliens</option>
+                            <option value="ORIG_009">Scientific Weapon</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Threat Level:</label>
+                        <select id="char2-threat" class="w-full p-2 bg-gray-700 rounded">
+                            <option value="THREAT_A">Alpha (Peak Human)</option>
+                            <option value="THREAT_1">Level 1 (Low Superhuman)</option>
+                            <option value="THREAT_2">Level 2 (Superhuman)</option>
+                            <option value="THREAT_3">Level 3 (Advanced Superhuman)</option>
+                            <option value="THREAT_4">Level 4 (High Superhuman)</option>
+                            <option value="THREAT_5">Level 5 (Cosmic Level)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Primary Power:</label>
+                        <select id="char2-power" class="w-full p-2 bg-gray-700 rounded">
+                            <option value="POW_STR">Super Strength</option>
+                            <option value="POW_SPD">Super Speed</option>
+                            <option value="POW_FLY">Flight</option>
+                            <option value="POW_DUR">Super Durability</option>
+                            <option value="POW_INV">Invisibility</option>
+                            <option value="POW_PSY">Psychic Powers</option>
+                            <option value="POW_ENE">Energy Projection</option>
+                            <option value="POW_TIM">Time Manipulation</option>
+                            <option value="POW_REA">Reality Warping</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Equipment:</label>
+                        <select id="char2-equipment" class="w-full p-2 bg-gray-700 rounded">
+                            <option value="EQ_CIV">Civilian Clothing</option>
+                            <option value="EQ_TAC">Tactical Gear</option>
+                            <option value="EQ_COM">Combat Armor</option>
+                            <option value="EQ_POW">Power Armor</option>
+                            <option value="EQ_ENE">Force Field</option>
+                            <option value="EQ_MYS">Blessed Items</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scenario Selection -->
+        <div class="bg-gray-800 p-6 rounded-lg border border-yellow-400 mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-green-400">Combat Scenario</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-bold mb-2">Environment:</label>
+                    <select id="environment" class="w-full p-2 bg-gray-700 rounded">
+                        <option value="urban">Urban Street</option>
+                        <option value="field">Open Field</option>
+                        <option value="industrial">Industrial Zone</option>
+                        <option value="warehouse">Warehouse District</option>
+                        <option value="laboratory">Laboratory</option>
+                        <option value="government">Government Building</option>
+                        <option value="populated">Populated Area</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-2">Victory Condition:</label>
+                    <select id="victory" class="w-full p-2 bg-gray-700 rounded">
+                        <option value="defeat">Defeat Opponent</option>
+                        <option value="capture">Capture Opponent</option>
+                        <option value="objective">Achieve Objective</option>
+                        <option value="survival">Survive Time Limit</option>
+                        <option value="escape">Escape Combat</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold mb-2">Special Rules:</label>
+                    <select id="special" class="w-full p-2 bg-gray-700 rounded">
+                        <option value="standard">Standard Rules</option>
+                        <option value="no-powers">No Powers Allowed</option>
+                        <option value="powers-only">Powers Only (No Equipment)</option>
+                        <option value="environmental">Environmental Hazards</option>
+                        <option value="civilian">Civilian Protection Required</option>
+                        <option value="time-limit">Time Pressure</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation Controls -->
+        <div class="text-center mb-8">
+            <button onclick="runCombatSimulation()" class="bg-yellow-500 hover:bg-yellow-600 text-black px-8 py-4 rounded-lg font-bold text-xl">
+                RUN COMBAT SIMULATION
+            </button>
+        </div>
+
+        <!-- Results Display -->
+        <div id="results" class="bg-gray-800 p-6 rounded-lg border border-green-400 hidden">
+            <h2 class="text-2xl font-bold mb-4 text-green-400">Combat Results</h2>
+            <div id="combat-stats" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <!-- Statistical results will be populated here -->
+            </div>
+            <div id="combat-narrative" class="bg-gray-700 p-4 rounded mb-4">
+                <!-- AI-generated narrative will be populated here -->
+            </div>
+            <div id="combat-consequences" class="bg-gray-700 p-4 rounded">
+                <!-- Legal/financial/reputation consequences will be populated here -->
+            </div>
+        </div>
+
+        <!-- Quick Test Buttons -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+            <button onclick="loadPreset('street-fight')" class="bg-blue-600 hover:bg-blue-700 p-3 rounded">Street Fight</button>
+            <button onclick="loadPreset('power-battle')" class="bg-purple-600 hover:bg-purple-700 p-3 rounded">Power Battle</button>
+            <button onclick="loadPreset('cosmic-encounter')" class="bg-red-600 hover:bg-red-700 p-3 rounded">Cosmic Battle</button>
+            <button onclick="loadPreset('balance-test')" class="bg-green-600 hover:bg-green-700 p-3 rounded">Balance Test</button>
+        </div>
+    </div>
+
+    <script>
+        // Combat simulation data (would normally load from CSV files)
+        const threatLevels = {
+            'THREAT_A': { name: 'Alpha', statBonus: 0, combatMod: 0 },
+            'THREAT_1': { name: 'Level 1', statBonus: 5, combatMod: 5 },
+            'THREAT_2': { name: 'Level 2', statBonus: 10, combatMod: 10 },
+            'THREAT_3': { name: 'Level 3', statBonus: 15, combatMod: 15 },
+            'THREAT_4': { name: 'Level 4', statBonus: 25, combatMod: 25 },
+            'THREAT_5': { name: 'Level 5', statBonus: 40, combatMod: 40 }
+        };
+
+        const powers = {
+            'POW_STR': { name: 'Super Strength', damageBonus: 20, specialEffect: 'Knockback' },
+            'POW_SPD': { name: 'Super Speed', initiativeBonus: 30, specialEffect: 'Multiple Actions' },
+            'POW_FLY': { name: 'Flight', mobilityBonus: 20, specialEffect: 'Altitude Advantage' },
+            'POW_DUR': { name: 'Super Durability', defenseBonus: 15, specialEffect: 'Damage Resistance' },
+            'POW_INV': { name: 'Invisibility', stealthBonus: 25, specialEffect: 'Surprise Attack' },
+            'POW_PSY': { name: 'Psychic Powers', mentalBonus: 20, specialEffect: 'Mind Control' },
+            'POW_ENE': { name: 'Energy Projection', rangedBonus: 25, specialEffect: 'Energy Blast' },
+            'POW_TIM': { name: 'Time Manipulation', initiativeBonus: 20, specialEffect: 'Time Dilation' },
+            'POW_REA': { name: 'Reality Warping', allBonus: 30, specialEffect: 'Reality Alteration' }
+        };
+
+        const equipment = {
+            'EQ_CIV': { name: 'Civilian Clothing', protection: 0, cost: 0 },
+            'EQ_TAC': { name: 'Tactical Gear', protection: 5, cost: 5 },
+            'EQ_COM': { name: 'Combat Armor', protection: 15, cost: 15 },
+            'EQ_POW': { name: 'Power Armor', protection: 25, cost: 25 },
+            'EQ_ENE': { name: 'Force Field', energyProtection: 20, cost: 20 },
+            'EQ_MYS': { name: 'Blessed Items', mysticalProtection: 18, cost: 18 }
+        };
+
+        function buildCharacter(charNum) {
+            const name = document.getElementById(`char${charNum}-name`).value || `Character ${charNum}`;
+            const origin = document.getElementById(`char${charNum}-origin`).value;
+            const threat = document.getElementById(`char${charNum}-threat`).value;
+            const power = document.getElementById(`char${charNum}-power`).value;
+            const eq = document.getElementById(`char${charNum}-equipment`).value;
+
+            return {
+                name: name,
+                origin: origin,
+                threatLevel: threat,
+                power: power,
+                equipment: eq,
+                stats: calculateStats(origin, threat),
+                combatRating: calculateCombatRating(threat, power, eq)
+            };
+        }
+
+        function calculateStats(origin, threat) {
+            const baseStats = { str: 30, agi: 30, end: 30, int: 30 };
+            const threatBonus = threatLevels[threat].statBonus;
+            
+            // Add threat level bonus to all stats
+            Object.keys(baseStats).forEach(stat => {
+                baseStats[stat] += threatBonus;
+            });
+
+            return baseStats;
+        }
+
+        function calculateCombatRating(threat, power, equipment) {
+            let rating = 50; // Base human
+            rating += threatLevels[threat].combatMod;
+            rating += powers[power].damageBonus || 10;
+            rating += equipment.includes('POW') ? 15 : equipment.includes('COM') ? 10 : 5;
+            return rating;
+        }
+
+        function runCombatSimulation() {
+            const char1 = buildCharacter(1);
+            const char2 = buildCharacter(2);
+            const environment = document.getElementById('environment').value;
+            const victory = document.getElementById('victory').value;
+            const special = document.getElementById('special').value;
+
+            // Simple combat resolution
+            const combatResult = resolveCombat(char1, char2, environment, victory, special);
+            
+            // Display results
+            displayResults(combatResult);
+        }
+
+        function resolveCombat(char1, char2, environment, victory, special) {
+            // Initiative calculation
+            const char1Initiative = char1.stats.agi + (powers[char1.power].initiativeBonus || 0);
+            const char2Initiative = char2.stats.agi + (powers[char2.power].initiativeBonus || 0);
+            
+            const firstActor = char1Initiative >= char2Initiative ? char1 : char2;
+            const secondActor = char1Initiative >= char2Initiative ? char2 : char1;
+
+            // Simple combat resolution based on combat ratings
+            const char1Rating = char1.combatRating;
+            const char2Rating = char2.combatRating;
+            
+            const ratingDifference = Math.abs(char1Rating - char2Rating);
+            const winProbability = 50 + (ratingDifference * 2); // Each point of rating difference = 2% win chance
+            
+            const roll = Math.random() * 100;
+            const winner = (char1Rating > char2Rating && roll < winProbability) || 
+                          (char2Rating > char1Rating && roll > (100 - winProbability)) ? 
+                          (char1Rating > char2Rating ? char1 : char2) : 
+                          (char1Rating > char2Rating ? char2 : char1);
+            
+            const loser = winner === char1 ? char2 : char1;
+
+            // Calculate consequences
+            const propertyDamage = calculatePropertyDamage(char1, char2, environment);
+            const civilianImpact = calculateCivilianImpact(environment, propertyDamage);
+            
+            return {
+                winner: winner,
+                loser: loser,
+                initiative: { first: firstActor, second: secondActor },
+                combatRatings: { char1: char1Rating, char2: char2Rating },
+                winProbability: char1Rating > char2Rating ? winProbability : 100 - winProbability,
+                actualRoll: roll,
+                propertyDamage: propertyDamage,
+                civilianImpact: civilianImpact,
+                environment: environment,
+                victory: victory,
+                special: special
+            };
+        }
+
+        function calculatePropertyDamage(char1, char2, environment) {
+            const powerLevels = [char1.threatLevel, char2.threatLevel].map(t => threatLevels[t].statBonus);
+            const maxPowerLevel = Math.max(...powerLevels);
+            
+            const baseDamage = maxPowerLevel * 10000; // Base damage in dollars
+            
+            const environmentMultiplier = {
+                'urban': 2.0,
+                'field': 0.1,
+                'industrial': 1.5,
+                'warehouse': 1.2,
+                'laboratory': 3.0,
+                'government': 5.0,
+                'populated': 2.5
+            };
+            
+            return Math.round(baseDamage * (environmentMultiplier[environment] || 1.0));
+        }
+
+        function calculateCivilianImpact(environment, propertyDamage) {
+            const civilianDensity = {
+                'urban': 0.8,
+                'field': 0.0,
+                'industrial': 0.3,
+                'warehouse': 0.1,
+                'laboratory': 0.4,
+                'government': 0.6,
+                'populated': 1.0
+            };
+            
+            const baseCasualties = Math.floor((propertyDamage / 100000) * (civilianDensity[environment] || 0));
+            return Math.max(0, baseCasualties);
+        }
+
+        function displayResults(result) {
+            document.getElementById('results').classList.remove('hidden');
+            
+            // Statistical results
+            document.getElementById('combat-stats').innerHTML = `
+                <div class="text-center">
+                    <h3 class="font-bold text-green-400">WINNER</h3>
+                    <p class="text-2xl">${result.winner.name}</p>
+                    <p class="text-sm">Combat Rating: ${result.combatRatings[result.winner === result.char1 ? 'char1' : 'char2']}</p>
+                </div>
+                <div class="text-center">
+                    <h3 class="font-bold text-red-400">CONSEQUENCES</h3>
+                    <p>Property: $${result.propertyDamage.toLocaleString()}</p>
+                    <p>Civilians: ${result.civilianImpact} affected</p>
+                </div>
+                <div class="text-center">
+                    <h3 class="font-bold text-blue-400">PROBABILITY</h3>
+                    <p>Win Chance: ${result.winProbability.toFixed(1)}%</p>
+                    <p>Actual Roll: ${result.actualRoll.toFixed(1)}</p>
+                </div>
+            `;
+
+            // Generate narrative
+            const narrative = generateNarrative(result);
+            document.getElementById('combat-narrative').innerHTML = `
+                <h3 class="font-bold text-yellow-400 mb-2">COMBAT REPORT</h3>
+                <p class="text-gray-300">${narrative}</p>
+            `;
+
+            // Generate consequences
+            const consequences = generateConsequences(result);
+            document.getElementById('combat-consequences').innerHTML = `
+                <h3 class="font-bold text-orange-400 mb-2">LEGAL & FINANCIAL IMPACT</h3>
+                <p class="text-gray-300">${consequences}</p>
+            `;
+        }
+
+        function generateNarrative(result) {
+            const templates = {
+                'urban': `Epic battle erupts in downtown as ${result.winner.name} faces off against ${result.loser.name}. The ${powers[result.winner.power].name} wielding hero demonstrates superior tactics, ultimately prevailing in a spectacular display of superhuman ability. Property damage estimated at $${result.propertyDamage.toLocaleString()}.`,
+                'field': `In a remote field location, ${result.winner.name} and ${result.loser.name} engage in superhuman combat away from civilian eyes. The ${powers[result.winner.power].name} proves decisive in this unrestricted battle, with minimal collateral damage reported.`,
+                'populated': `Civilian evacuation teams work frantically as ${result.winner.name} battles ${result.loser.name} in densely populated ${result.environment} area. Despite the challenging conditions with ${result.civilianImpact} civilians affected, ${result.winner.name}'s ${powers[result.winner.power].name} allows for victory while minimizing casualties.`
+            };
+            
+            return templates[result.environment] || `${result.winner.name} defeats ${result.loser.name} in combat using ${powers[result.winner.power].name}.`;
+        }
+
+        function generateConsequences(result) {
+            let consequences = [];
+            
+            if (result.propertyDamage > 100000) {
+                consequences.push(`Major property damage lawsuit: $${result.propertyDamage.toLocaleString()} in claims expected.`);
+            }
+            
+            if (result.civilianImpact > 0) {
+                consequences.push(`${result.civilianImpact} civilian injury lawsuits anticipated. Legal fees estimated at $${(result.civilianImpact * 50000).toLocaleString()}.`);
+            }
+            
+            if (result.environment === 'government') {
+                consequences.push(`Federal investigation launched into government property damage. National security implications under review.`);
+            }
+            
+            if (consequences.length === 0) {
+                consequences.push(`Clean victory with minimal legal exposure. Positive media coverage expected.`);
+            }
+            
+            return consequences.join(' ');
+        }
+
+        function loadPreset(presetName) {
+            const presets = {
+                'street-fight': {
+                    char1: { origin: 'ORIG_001', threat: 'THREAT_A', power: 'POW_STR', equipment: 'EQ_TAC' },
+                    char2: { origin: 'ORIG_001', threat: 'THREAT_A', power: 'POW_SPD', equipment: 'EQ_CIV' },
+                    environment: 'urban'
+                },
+                'power-battle': {
+                    char1: { origin: 'ORIG_002', threat: 'THREAT_2', power: 'POW_ENE', equipment: 'EQ_COM' },
+                    char2: { origin: 'ORIG_003', threat: 'THREAT_2', power: 'POW_PSY', equipment: 'EQ_ENE' },
+                    environment: 'warehouse'
+                },
+                'cosmic-encounter': {
+                    char1: { origin: 'ORIG_008', threat: 'THREAT_5', power: 'POW_REA', equipment: 'EQ_POW' },
+                    char2: { origin: 'ORIG_007', threat: 'THREAT_5', power: 'POW_TIM', equipment: 'EQ_MYS' },
+                    environment: 'field'
+                },
+                'balance-test': {
+                    char1: { origin: 'ORIG_001', threat: 'THREAT_2', power: 'POW_STR', equipment: 'EQ_COM' },
+                    char2: { origin: 'ORIG_001', threat: 'THREAT_1', power: 'POW_STR', equipment: 'EQ_COM' },
+                    environment: 'urban'
+                }
+            };
+            
+            const preset = presets[presetName];
+            if (preset) {
+                document.getElementById('char1-origin').value = preset.char1.origin;
+                document.getElementById('char1-threat').value = preset.char1.threat;
+                document.getElementById('char1-power').value = preset.char1.power;
+                document.getElementById('char1-equipment').value = preset.char1.equipment;
+                
+                document.getElementById('char2-origin').value = preset.char2.origin;
+                document.getElementById('char2-threat').value = preset.char2.threat;
+                document.getElementById('char2-power').value = preset.char2.power;
+                document.getElementById('char2-equipment').value = preset.char2.equipment;
+                
+                document.getElementById('environment').value = preset.environment;
+            }
+        }
+
+        // Initialize with default values
+        window.onload = function() {
+            document.getElementById('char1-name').value = 'Thunder Strike';
+            document.getElementById('char2-name').value = 'Shadow Blade';
+            loadPreset('street-fight');
+        };
+    </script>
+</body>
+</html>

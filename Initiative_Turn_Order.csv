@@ -1,0 +1,60 @@
+Initiative_Component,Base_Stat,Modifier_Type,Modifier_Value,Description,Threat_Level_Bonus,LSW_Power_Bonus,Equipment_Bonus,Situational_Modifier,Examples
+Base Initiative,Agility,Primary Stat,Full Stat Value,Primary determinant of action speed,Varies by threat level,Varies by power,Varies by equipment,Varies by situation,Agility 45 = 45 base initiative
+Instinct Modifier,Instinct,Secondary Stat,Half Stat Value,Awareness and reaction speed,None,Some powers enhance,None,Surprise situations,Instinct 30 = +15 initiative modifier  
+Reflex Skill,Reflex Skill,Skill Bonus,+10 per skill level,Training in quick reactions,None,None,None,Combat situations,Reflex Skill = +10 initiative
+Quick Draw Skill,Quick Draw,Skill Bonus,+5 with weapons,Weapon readiness speed,None,None,Weapon specific,Ranged combat only,Quick Draw + Pistol = +5 initiative
+Threat Level Alpha,Alpha Level,Threat Bonus,+0,Maximum human capability,No bonus,Power-based only,None,None,Highly trained human
+Threat Level 1,Level 1,Threat Bonus,+5,Low superhuman speed,+5 initiative,Power enhancement,None,None,Enhanced reflexes
+Threat Level 2,Level 2,Threat Bonus,+10,Superhuman reactions,+10 initiative,Significant enhancement,None,None,Clearly superhuman speed
+Threat Level 3,Level 3,Threat Bonus,+15,Advanced superhuman,+15 initiative,Major enhancement,None,None,Impressive superhuman capability
+Threat Level 4,Level 4,Threat Bonus,+20,High superhuman,+20 initiative,Extreme enhancement,None,None,Remarkable speed
+Threat Level 5,Level 5,Threat Bonus,+25,Peak superhuman,+25 initiative,Ultimate enhancement,None,None,Near-cosmic reaction speed
+Super Speed Power,Super Speed,Power Bonus,+30,Enhanced movement speed,Stacks with threat,Power-specific bonus,None,Speed-based,Super Speed = +30 initiative
+Enhanced Reflexes,Enhanced Reflexes,Power Bonus,+15,Faster reaction time,Stacks with threat,Reflex enhancement,None,Combat reactions,Enhanced Reflexes = +15 initiative
+Time Travel Power,Time Travel,Power Bonus,+20,Temporal awareness,Stacks with threat,Time-based advantage,None,Temporal situations,Precognitive advantage
+Precognition Power,Precognition,Power Bonus,+25,See attacks coming,Stacks with threat,Foresight bonus,None,Predictive advantage,Knowing future actions
+Flight Power,Flight,Power Bonus,+10,Aerial mobility advantage,Stacks with threat,Mobility enhancement,None,Aerial combat,Three-dimensional movement
+Invisibility Power,Invisibility,Power Bonus,+5,Stealth attack advantage,Stacks with threat,Surprise bonus,None,When invisible,Hidden position benefit
+Psychic Powers,Psychic Abilities,Power Bonus,+8,Mental speed enhancement,Stacks with threat,Mental acceleration,None,Mental actions,Thought-speed reactions
+Energy Powers,Energy Manipulation,Power Bonus,+5,Energy-based reaction speed,Stacks with threat,Energy enhancement,None,Energy combat,Lightning-fast energy
+Technology Enhancement,Tech Powers,Power Bonus,+12,Computer-assisted reactions,Stacks with threat,Processing speed,Equipment dependent,Tech-based,Cybernetic enhancement
+Martial Arts Training,Martial Arts,Power Bonus,+8,Combat-trained reflexes,None,Training enhancement,None,Melee combat,Disciplined reactions
+Combat Armor,Power Armor,Equipment Bonus,+5,Servo-assisted movement,None,None,Armor-specific,Powered systems,Mechanical assistance
+Tactical Gear,Tactical Equipment,Equipment Bonus,+3,Military-grade equipment,None,None,Gear-specific,Prepared situations,Professional readiness
+Cybernetic Implants,Cybernetics,Equipment Bonus,+10,Electronic reaction speed,None,None,Implant-specific,Tech situations,Computer-speed reflexes
+Stimulants,Combat Drugs,Equipment Bonus,+8,Chemical reaction enhancement,None,None,Temporary only,Drugged states,Artificial acceleration
+Light Armor,Light Armor,Equipment Penalty,-0,No movement hindrance,None,None,Armor-specific,None,No initiative penalty
+Medium Armor,Medium Armor,Equipment Penalty,-2,Slight movement restriction,None,None,Armor-specific,None,Minor speed reduction
+Heavy Armor,Heavy Armor,Equipment Penalty,-5,Significant bulk,None,None,Armor-specific,None,Noticeable slowdown
+Surprise Attack,Surprise,Situational,+15,Unexpected assault,None,Power-dependent,None,Ambush situations,First strike advantage
+Ambush Setup,Ambush,Situational,+10,Prepared attack position,None,Stealth powers help,Stealth gear helps,Hidden positions,Tactical advantage
+Caught Off-Guard,Surprised,Situational,-10,Unexpected attack,None,Detection powers help,Sensor gear helps,Surprised situations,Reaction penalty
+Wounded Condition,Wounded,Situational,-5,Injury affecting speed,None,Healing powers negate,Medical gear helps,Injured state,Pain distraction
+Exhausted Condition,Exhausted,Situational,-8,Fatigue affecting reactions,None,Stamina powers help,Energy gear helps,Tired state,Slowed responses
+Frightened Condition,Frightened,Situational,-5,Fear affecting performance,None,Courage powers help,None,Fear situations,Hesitation penalty
+Confused Condition,Confused,Situational,-10,Mental state affecting speed,None,Mental powers help,None,Disoriented state,Reaction confusion
+Stunned Condition,Stunned,Situational,-15,Physical shock,None,Recovery powers help,Medical gear helps,Shocked state,Delayed reactions  
+Environmental Hazards,Hazardous Terrain,Situational,-3,Difficult movement conditions,None,Movement powers help,Environmental gear,Rough terrain,Footing problems
+Darkness Conditions,Low Visibility,Situational,-5,Poor visual conditions,None,Enhanced senses help,Night vision gear,Dark environments,Visual impairment
+Underwater Combat,Underwater,Situational,-8,Aquatic environment penalty,None,Water powers negate,Diving gear helps,Submerged combat,Water resistance
+Zero Gravity,Zero-G,Situational,-10,Weightless environment,None,Flight powers help,Maneuvering gear,Space combat,Disorientation effects
+High Gravity,Heavy Gravity,Situational,-6,Increased gravitational pull,None,Gravity powers negate,None,Heavy-G environments,Movement difficulty
+Toxic Environment,Chemical Hazard,Situational,-4,Poisonous atmosphere effects,None,Immunity powers help,Protective gear,Contaminated areas,Physical distress
+Radiation Exposure,Radiation,Situational,-3,Radiation affecting performance,None,Radiation immunity,Rad protection gear,Radioactive zones,Cellular interference
+Extreme Cold,Cold Environment,Situational,-4,Freezing temperature effects,None,Cold immunity,Heating gear,Arctic conditions,Sluggish movement
+Extreme Heat,Hot Environment,Situational,-4,High temperature effects,None,Heat immunity,Cooling gear,Desert conditions,Heat exhaustion
+Electronic Interference,EMP Effects,Situational,-8,Electronic systems disrupted,None,Tech immunity,Shielded gear,EMP environment,System failures
+Psychic Interference,Mental Static,Situational,-6,Psychic noise affecting focus,None,Mental shielding,Psi-shields,Psychic storms,Mental disruption
+Temporal Distortion,Time Anomaly,Situational,-12,Time flow irregularities,None,Time powers help,Temporal gear,Time storms,Causality confusion
+Dimensional Instability,Reality Flux,Situational,-10,Reality fluctuations,None,Reality powers help,Anchor gear,Dimensional rifts,Existence uncertainty
+Team Leadership,Leadership Skill,Team Bonus,+3 to team,Coordinated team actions,None,Tactical powers,Communications gear,Team situations,Command coordination  
+Team Coordination,Tactical Training,Team Bonus,+2 to team,Military coordination,None,Team powers,Military gear,Organized teams,Synchronized actions
+Hive Mind,Collective Consciousness,Team Bonus,+5 to team,Shared awareness,None,Mental link powers,None,Connected minds,Perfect coordination
+Formation Fighting,Military Formation,Team Bonus,+4 to team,Disciplined positioning,None,None,Formation gear,Organized combat,Professional spacing
+First Strike,Combat Opening,Special,Separate phase,Opening combat actions,Power-dependent,Power-specific,Equipment-specific,Situation-specific,Pre-combat positioning
+Reaction Fire,Opportunity Attack,Special,Interrupt action,Responding to enemy actions,Skill-dependent,Power-dependent,Equipment-dependent,Trigger-dependent,Defensive responses
+Quick Action,Minor Action,Special,Reduced initiative cost,Simple actions during turn,None,Some powers,Some equipment,Simple tasks,Fast movements
+Full Action,Major Action,Special,Full initiative cost,Complex actions during turn,None,Most powers,Most equipment,Complex tasks,Full commitment
+Multiple Actions,Action Splitting,Special,Initiative penalty per extra action,Taking multiple actions per turn,High stats reduce penalty,Some powers allow,Some equipment helps,Split attention,Divided focus penalty
+Delay Action,Hold Action,Special,Initiative adjustment,Waiting for optimal timing,None,Precognitive powers help,None,Tactical waiting,Strategic patience
+Abort Action,Reaction Cancel,Special,Initiative forfeit,Stopping planned action,Skill-dependent,Mental powers help,None,Emergency stops,Last-second changes

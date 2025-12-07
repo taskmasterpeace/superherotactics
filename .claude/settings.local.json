@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(/C:\\Users/**)",
+      "Bash(powershell:*)",
+      "Bash(npm install:*)",
+      "Bash(pip install:*)",
+      "WebSearch",
+      "WebFetch(domain:classicmarvelforever.com)",
+      "Bash(npm run dev:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

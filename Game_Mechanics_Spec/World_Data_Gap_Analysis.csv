@@ -1,0 +1,55 @@
+Category,What_Exists,What_Is_Missing,Priority,Notes
+
+---COUNTRY DATA---,,,,
+Country_Attributes,35+ attributes per country (population healthcare education military intel etc.),NO MECHANICAL EFFECTS DEFINED - What does Healthcare:90 vs Healthcare:35 DO?,Critical,Need Country_Attribute_Effects.csv
+Country_Government,Government type + perception + corruption levels,No effect on LSW operations or investigation methods,High,Should affect legal methods and political consequences
+Country_LSW_Regulations,"LSWActivity, LSWRegulations (Banned/Regulated/Legal)",No mechanical effects on recruitment or operations,High,Should affect LSW availability and legal status
+Country_Vigilantism,"Vigilantism status (Banned/Regulated/Legal)",No effect on player actions or consequences,Medium,Should affect public operations legality
+Country_Cloning,Cloning capability ratings,No effect on resurrection or LSW creation,Medium,Core to LSW recovery mechanics
+Country_Science,Science ratings 20-90,No effect on research speed or technology access,High,Should affect tech tree progression
+Country_Faction_Territory,"Implied by 4 factions (US/India/China/Nigeria)",No formal territory ownership or faction bonuses,Critical,Need Faction_Territory_Bonuses.csv
+
+---CITY DATA---,,,,
+City_Types,"9 types defined: Temple, Military, Political, Industrial, Resort, Seaport, Mining, Educational, Company",NO MECHANICAL EFFECTS - What bonuses does each type provide?,Critical,Need City_Type_Effects.csv
+City_Type_Combinations,Cities can have up to 4 types,No rules for how multiple types interact or stack,High,Need combination bonus rules
+Culture_Codes,"14 culture regions defined (North Africa, Central Asia, etc.)",No mechanical effects on investigations or LSW powers,High,Need Culture_Region_Effects.csv
+Population_Rating,Ratings 2-7 based on population size,No mechanical effect defined,Medium,Should affect mission scale and resources
+Population_Type,"Village/Small Town/Town/City/Large City/Mega City",No mechanical differences defined,Medium,Should affect available activities
+Crime_Index,0-100 scale with ranges defined,Only filters investigation templates - no other effects,Medium,Should affect more systems
+Safety_Index,Inverse of Crime Index,No defined purpose beyond display,Low,Could affect civilian casualties
+HVT,High Value Targets per city,Defined but no system for using them,High,Need HVT mechanics
+Sector_Codes,Grid-based location system,No travel time calculations between sectors,High,Need Travel_Time_Matrix.csv
+
+---INVESTIGATION SYSTEM---,,,,
+Investigation_Templates,25 templates with city type mapping,Templates exist but no skill check mechanics,Medium,Need stat checks per template
+Investigation_Methods,25 methods with faction bonuses,Methods defined but no city type bonuses,Medium,City types should modify methods
+Investigation_Consequences,37 outcome types defined,No probability system for which outcomes occur,High,Need outcome probability tables
+Email_System,25 email templates with urgency,No system for when emails generate,High,Need Email_Generation_Rules.csv
+Investigation_to_City_Link,Templates mention city types,No bonus for matching city type to investigation,Medium,Should provide bonuses
+
+---FACTION SYSTEM---,,,,
+Faction_Definition,"4 factions mentioned (US, India, China, Nigeria)",No formal faction stats or capabilities,Critical,Need Faction_Specification.csv
+Faction_Methods,Method bonuses per faction defined,Bonuses exist but no explanation WHY each faction is good at specific methods,Low,Flavor text needed
+Faction_Starting_Territory,Not formally defined,Need starting countries and cities per faction,Critical,Core to faction selection
+Faction_Relationships,Polished_World_Data mentions relationships,No formal ally/enemy mechanics,High,Need Faction_Diplomacy.csv
+
+---TRAVEL SYSTEM---,,,,
+Movement_System,Grid sectors exist on cities,No travel time between cities or countries,Critical,Need Travel_Time_System.csv
+Flight_System,Flight_Altitude_System.csv exists,No integration with world map travel,High,Need World_Travel_Speeds.csv
+Vehicle_Speeds,Mentioned in GDD,No formal vehicle speed table,Medium,Need Vehicle_Speeds.csv
+
+---RECRUITMENT SYSTEM---,,,,
+LSW_Recruitment,Investigation rewards mention recruitment,No formal recruitment mechanics,High,Need LSW_Recruitment_System.csv
+Country_LSW_Pool,LSWActivity ratings exist,No system for available LSWs per country,High,Should drive recruitment options
+City_LSW_Presence,Not defined,No system for which LSWs are in which cities,Medium,Need for recruitment gameplay
+
+---ECONOMY SYSTEM---,,,,
+Resource_Costs,Investigation methods mention Low/Medium/High/Very High costs,No formal currency or resource system,Medium,Need Resource_Economy.csv
+Country_GDP,GDP per country defined,No effect on equipment costs or recruitment,Medium,Should affect pricing
+Equipment_Markets,Equipment database exists,No market availability per country/city,Low,Could add depth
+
+---SUMMARY---,,,,
+Critical_Gaps,4 items,City_Type_Effects + Country_Attribute_Effects + Faction_Specification + Travel_System,,These block core gameplay
+High_Priority_Gaps,11 items,Most investigation mechanics + faction territories + recruitment,,Needed for complete game loop
+Medium_Priority_Gaps,10 items,Economy + secondary effects,,Nice to have for depth
+Low_Priority_Gaps,3 items,Flavor and polish,,Can defer

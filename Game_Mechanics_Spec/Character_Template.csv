@@ -1,0 +1,145 @@
+Field,Value,Notes
+---IDENTITY---,,
+Character_Name,,Full name
+Alias,,Hero/villain name
+Nationality,,Country of origin
+Faction,,US/India/China/Nigeria/Independent
+Origin_Type,,1 of 9 LSW origins (see Origins table)
+Threat_Level,,Alpha/1/2/3/4/5/Cosmic scale
+
+---PRIMARY STATS---,,All stats use numeric values mapped to ranks
+MEL,,(1-150+) Melee combat ability
+AGL,,(1-150+) Agility and reflexes
+STR,,(1-150+) Physical strength
+STA,,(1-150+) Stamina and endurance
+INT,,(1-150+) Intelligence
+INS,,(1-150+) Instinct and intuition
+CON,,(1-150+) Concentration and willpower
+
+---DERIVED STATS---,,Calculated from primary stats
+Health,,(STA * 2) + STR
+Initiative,,(AGL + INS) / 2
+Karma,,(INT + INS + CON) / 3
+Dodge_CS_Melee,,Based on AGL+INS (see Dodge Chart)
+Dodge_CS_Ranged,,Based on AGL (see Dodge Chart)
+
+---THREAT ASSESSMENT---,,LeFevre formulas
+PCF,,(Intensity * Control * Range) / 1000
+STAM,,0.3*Personality + 0.4*Motivation + 0.3*Harm_Potential
+SPAM,,Situational assessment matrix value
+
+---POWERS---,,List all powers with ranks
+Power_1_Name,,
+Power_1_Level,,Low/High
+Power_1_Rank,,(stat value for power)
+Power_2_Name,,
+Power_2_Level,,
+Power_2_Rank,,
+Power_3_Name,,
+Power_3_Level,,
+Power_3_Rank,,
+
+---SKILLS---,,List all skills with column shifts
+Skill_1,,Skill name (+XCS)
+Skill_2,,
+Skill_3,,
+Skill_4,,
+Skill_5,,
+
+---TALENTS---,,Non-combat abilities
+Talent_1,,
+Talent_2,,
+Talent_3,,
+
+---EQUIPMENT---,,
+Weapon_1,,Name (damage range accuracy)
+Weapon_2,,
+Armor,,Type (damage reduction condition)
+Gear,,Other equipment
+
+---CONTACTS---,,
+Contact_1,,Name (relationship usefulness)
+Contact_2,,
+Contact_3,,
+
+---WEAKNESSES---,,Per LeFevre weakness system
+Weakness_1,,Description and mechanical effect
+Weakness_2,,
+
+---BACKGROUND---,,
+Appearance,,Physical description
+Backstory,,Brief origin story
+Motivations,,What drives this character
+Personality,,Key personality traits
+
+===EXAMPLE CHARACTER===,,
+---IDENTITY---,,
+Character_Name,Marcus Stone,
+Alias,Granite,
+Nationality,American,
+Faction,US,
+Origin_Type,Altered Human,Experiment subject
+Threat_Level,Threat 2,
+
+---PRIMARY STATS---,,
+MEL,35,Remarkable - trained fighter
+AGL,25,Excellent - athletic but heavy
+STR,65,Amazing - superhuman strength
+STA,70,Amazing - extremely durable
+INT,15,Good - street smart
+INS,20,Good - experienced
+CON,18,Good - focused
+
+---DERIVED STATS---,,
+Health,205,(70*2)+65
+Initiative,22,(25+20)/2
+Karma,18,(15+20+18)/3
+Dodge_CS_Melee,-3CS,AGL+INS=45
+Dodge_CS_Ranged,-3CS,AGL=25
+
+---THREAT ASSESSMENT---,,
+PCF,4.9,(7*7*100)/1000 - local threat
+STAM,4.2,0.3*3 + 0.4*2 + 0.3*8
+SPAM,Moderate,Controlled hero
+
+---POWERS---,,
+Power_1_Name,Super Strength,
+Power_1_Level,High,
+Power_1_Rank,65,+25 damage per hit
+Power_2_Name,Super Durability,
+Power_2_Level,High,
+Power_2_Rank,70,-15 damage reduction
+Power_3_Name,,,
+
+---SKILLS---,,
+Skill_1,Martial Arts (+2CS),
+Skill_2,Wrestling (+2CS),
+Skill_3,Intimidation (+2CS),
+Skill_4,Streetwise (+2CS),
+Skill_5,,
+
+---TALENTS---,,
+Talent_1,Roll With Blow,
+Talent_2,Block,
+Talent_3,,
+
+---EQUIPMENT---,,
+Weapon_1,Fists (STR+50 melee),
+Weapon_2,,
+Armor,Granite Skin (built-in),
+Gear,Communicator,
+
+---CONTACTS---,,
+Contact_1,Agent Morrison (FBI handler),
+Contact_2,Maria Stone (sister civilian),
+Contact_3,,
+
+---WEAKNESSES---,,
+Weakness_1,Sonic attacks bypass durability,Environmental Constraint
+Weakness_2,Protective of civilians - can be manipulated,Personality weakness
+
+---BACKGROUND---,,
+Appearance,7ft tall gray-skinned man with rocky texture,
+Backstory,Construction worker exposed to experimental compound,
+Motivations,Protect his neighborhood; find cure for condition,
+Personality,Gruff exterior but genuinely heroic

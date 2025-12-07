@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHT Combat Simulator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #eee; padding: 20px; }
+        h1 { color: #e94560; margin-bottom: 20px; }
+        h2 { color: #0f3460; background: #e94560; padding: 10px; margin: 20px 0 10px; }
+        h3 { color: #16213e; background: #00fff5; padding: 8px; margin: 15px 0 8px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .character-card { background: #16213e; border: 2px solid #0f3460; border-radius: 10px; padding: 15px; }
+        .character-card h3 { background: #e94560; margin: -15px -15px 15px; padding: 10px; border-radius: 8px 8px 0 0; }
+        .stat-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #0f3460; }
+        .stat-label { color: #00fff5; }
+        .stat-value { color: #fff; font-weight: bold; }
+        .power-tag { display: inline-block; background: #e94560; padding: 3px 8px; margin: 2px; border-radius: 4px; font-size: 12px; }
+        .skill-tag { display: inline-block; background: #0f3460; padding: 3px 8px; margin: 2px; border-radius: 4px; font-size: 12px; }
+        .combat-log { background: #0f3460; border-radius: 10px; padding: 15px; margin-top: 20px; max-height: 600px; overflow-y: auto; }
+        .log-entry { padding: 8px; margin: 5px 0; border-radius: 5px; border-left: 4px solid #e94560; background: #16213e; }
+        .log-entry.success { border-left-color: #00ff00; }
+        .log-entry.fail { border-left-color: #ff0000; }
+        .log-entry.major { border-left-color: #ffff00; background: #2a2a4e; }
+        .log-entry.minor { border-left-color: #888; }
+        .log-entry.system { border-left-color: #00fff5; background: #1a3a5e; }
+        button { background: #e94560; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 5px; }
+        button:hover { background: #ff6b6b; }
+        button:disabled { background: #555; cursor: not-allowed; }
+        .health-bar { height: 20px; background: #333; border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        .health-fill { height: 100%; background: linear-gradient(90deg, #00ff00, #88ff00); transition: width 0.5s; }
+        .health-fill.low { background: linear-gradient(90deg, #ff0000, #ff6600); }
+        .controls { background: #16213e; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        select, input { background: #0f3460; color: #fff; border: 1px solid #e94560; padding: 8px; border-radius: 5px; margin: 5px; }
+        .formula { background: #1a3a5e; padding: 10px; margin: 10px 0; border-radius: 5px; font-family: monospace; font-size: 14px; }
+        .step-breakdown { background: #16213e; padding: 15px; margin: 10px 0; border-radius: 10px; }
+        .step-breakdown h4 { color: #00fff5; margin-bottom: 10px; }
+        .calc-line { padding: 3px 0; color: #ccc; }
+        .calc-result { color: #00ff00; font-weight: bold; }
+        .table-ref { background: #2a2a4e; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { padding: 8px; border: 1px solid #0f3460; text-align: center; }
+        th { background: #e94560; }
+        .highlight { background: #00fff5; color: #000; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SuperHero Tactics Combat Simulator</h1>
+        <p style="margin-bottom:20px;color:#888;">Demonstrating the 4C System combat resolution with powers, skills, and the Universal Table</p>
+
+        <div class="controls">
+            <button onclick="runFullCombat()">Run Full Combat</button>
+            <button onclick="runSingleAttack('attacker')">Attacker Attacks</button>
+            <button onclick="runSingleAttack('defender')">Defender Attacks</button>
+            <button onclick="resetCombat()">Reset Combat</button>
+            <button onclick="randomizeCharacters()">Randomize Characters</button>
+        </div>
+
+        <div class="grid">
+            <!-- Attacker Card -->
+            <div class="character-card" id="attackerCard">
+                <h3>ATTACKER: <span id="attackerName">Inferno</span></h3>
+                <div class="health-bar"><div class="health-fill" id="attackerHealthBar" style="width:100%"></div></div>
+                <div id="attackerHealth" style="text-align:center;margin-bottom:10px;">Health: 180/180</div>
+
+                <h4 style="color:#00fff5;margin:10px 0;">Primary Stats</h4>
+                <div class="stat-row"><span class="stat-label">MEL (Melee)</span><span class="stat-value" id="aMEL">35</span></div>
+                <div class="stat-row"><span class="stat-label">AGL (Agility)</span><span class="stat-value" id="aAGL">45</span></div>
+                <div class="stat-row"><span class="stat-label">STR (Strength)</span><span class="stat-value" id="aSTR">30</span></div>
+                <div class="stat-row"><span class="stat-label">STA (Stamina)</span><span class="stat-value" id="aSTA">40</span></div>
+                <div class="stat-row"><span class="stat-label">INT (Intelligence)</span><span class="stat-value" id="aINT">50</span></div>
+                <div class="stat-row"><span class="stat-label">INS (Instinct)</span><span class="stat-value" id="aINS">55</span></div>
+                <div class="stat-row"><span class="stat-label">CON (Concentration)</span><span class="stat-value" id="aCON">60</span></div>
+
+                <h4 style="color:#00fff5;margin:10px 0;">Powers</h4>
+                <div id="attackerPowers">
+                    <span class="power-tag">Fire Generation (High) - 75 dmg</span>
+                    <span class="power-tag">Flight (Low)</span>
+                </div>
+
+                <h4 style="color:#00fff5;margin:10px 0;">Skills</h4>
+                <div id="attackerSkills">
+                    <span class="skill-tag">Energy Weapons +2CS</span>
+                    <span class="skill-tag">Dodge +2CS</span>
+                </div>
+
+                <div class="stat-row" style="margin-top:10px;"><span class="stat-label">Threat Level</span><span class="stat-value" id="aThreat">3</span></div>
+                <div class="stat-row"><span class="stat-label">Dodge CS (AGL+INS)</span><span class="stat-value" id="aDodgeCS">-5CS</span></div>
+            </div>
+
+            <!-- Defender Card -->
+            <div class="character-card" id="defenderCard">
+                <h3>DEFENDER: <span id="defenderName">Granite</span></h3>
+                <div class="health-bar"><div class="health-fill" id="defenderHealthBar" style="width:100%"></div></div>
+                <div id="defenderHealth" style="text-align:center;margin-bottom:10px;">Health: 205/205</div>
+
+                <h4 style="color:#00fff5;margin:10px 0;">Primary Stats</h4>
+                <div class="stat-row"><span class="stat-label">MEL (Melee)</span><span class="stat-value" id="dMEL">55</span></div>
+                <div class="stat-row"><span class="stat-label">AGL (Agility)</span><span class="stat-value" id="dAGL">25</span></div>
+                <div class="stat-row"><span class="stat-label">STR (Strength)</span><span class="stat-value" id="dSTR">65</span></div>
+                <div class="stat-row"><span class="stat-label">STA (Stamina)</span><span class="stat-value" id="dSTA">70</span></div>
+                <div class="stat-row"><span class="stat-label">INT (Intelligence)</span><span class="stat-value" id="dINT">15</span></div>
+                <div class="stat-row"><span class="stat-label">INS (Instinct)</span><span class="stat-value" id="dINS">20</span></div>
+                <div class="stat-row"><span class="stat-label">CON (Concentration)</span><span class="stat-value" id="dCON">18</span></div>
+
+                <h4 style="color:#00fff5;margin:10px 0;">Powers</h4>
+                <div id="defenderPowers">
+                    <span class="power-tag">Super Strength (High) - STR+50</span>
+                    <span class="power-tag">Super Durability (High) - 15 DR</span>
+                </div>
+
+                <h4 style="color:#00fff5;margin:10px 0;">Skills</h4>
+                <div id="defenderSkills">
+                    <span class="skill-tag">Martial Arts +2CS</span>
+                    <span class="skill-tag">Wrestling +2CS</span>
+                    <span class="skill-tag">Roll With Blow</span>
+                </div>
+
+                <div class="stat-row" style="margin-top:10px;"><span class="stat-label">Threat Level</span><span class="stat-value" id="dThreat">2</span></div>
+                <div class="stat-row"><span class="stat-label">Dodge CS (AGL+INS)</span><span class="stat-value" id="dDodgeCS">-2CS</span></div>
+            </div>
+        </div>
+
+        <!-- Universal Table Reference -->
+        <div class="table-ref">
+            <h3 style="background:#e94560;margin:-10px -10px 10px;padding:10px;">Universal Table Reference (Simplified)</h3>
+            <table>
+                <tr>
+                    <th>Roll</th>
+                    <th>Poor<br>(3-5)</th>
+                    <th>Typical<br>(6-10)</th>
+                    <th>Good<br>(11-20)</th>
+                    <th>Excellent<br>(21-30)</th>
+                    <th>Remarkable<br>(31-40)</th>
+                    <th>Incredible<br>(41-50)</th>
+                    <th>Amazing<br>(51-75)</th>
+                    <th>Monstrous<br>(76-100)</th>
+                </tr>
+                <tr><td>01-05</td><td>Failed</td><td>Minor</td><td>Minor</td><td>Success</td><td>Success</td><td>Success</td><td>Major</td><td>Major</td></tr>
+                <tr><td>06-14</td><td>Failed</td><td>Minor</td><td>Success</td><td>Success</td><td>Success</td><td>Major</td><td>Major</td><td>Major</td></tr>
+                <tr><td>15-24</td><td>Minor</td><td>Minor</td><td>Success</td><td>Success</td><td>Major</td><td>Major</td><td>Major</td><td>Major</td></tr>
+                <tr><td>25-39</td><td>Minor</td><td>Success</td><td>Success</td><td>Major</td><td>Major</td><td>Major</td><td>Major</td><td>Major</td></tr>
+                <tr><td>40-59</td><td>Minor</td><td>Success</td><td>Major</td><td>Major</td><td>Major</td><td>Major</td><td>Major</td><td>Major</td></tr>
+                <tr><td>60-89</td><td>Success</td><td>Success</td><td>Major</td><td>Major</td><td>Major</td><td>Major</td><td>Major</td><td>Major</td></tr>
+                <tr><td>90-96</td><td>Minor</td><td>Success</td><td>Success</td><td>Success</td><td>Success</td><td>Success</td><td>Success</td><td>Success</td></tr>
+                <tr><td>97-98</td><td>Minor</td><td>Minor</td><td>Minor</td><td>Minor</td><td>Minor</td><td>Minor</td><td>Minor</td><td>Minor</td></tr>
+                <tr><td>99</td><td>Failed</td><td>Failed</td><td>Failed</td><td>Failed</td><td>Failed</td><td>Failed</td><td>Failed</td><td>Failed</td></tr>
+                <tr><td>00</td><td>Major</td><td>Major</td><td>Major</td><td>Major</td><td>Major</td><td>Major</td><td>Major</td><td>Major</td></tr>
+            </table>
+            <p style="color:#888;font-size:12px;margin-top:5px;">Result Multipliers: Failed=0x | Minor=0.5x | Success=1x | Major=1.5x</p>
+        </div>
+
+        <!-- Combat Log -->
+        <div class="combat-log" id="combatLog">
+            <h3 style="background:#e94560;margin:-15px -15px 15px;padding:10px;border-radius:10px 10px 0 0;">Combat Log</h3>
+            <div id="logEntries">
+                <div class="log-entry system">Combat Simulator Ready. Click "Run Full Combat" or attack buttons to begin.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // SHT COMBAT SYSTEM IMPLEMENTATION
+        // ============================================
+
+        // Character data structures
+        let attacker = {
+            name: "Inferno",
+            MEL: 35, AGL: 45, STR: 30, STA: 40, INT: 50, INS: 55, CON: 60,
+            health: 180, maxHealth: 180,
+            powers: [
+                { name: "Fire Generation", level: "High", type: "Energy", damage: 75, range: 20, hitStat: "AGL", statusEffect: "Burning", areaEffect: "5x5" },
+                { name: "Flight", level: "Low", type: "Movement", damage: 0 }
+            ],
+            skills: [
+                { name: "Energy Weapons", bonus: 2, type: "ranged" },
+                { name: "Dodge", bonus: 2, type: "defense" }
+            ],
+            threatLevel: 3,
+            damageReduction: 0
+        };
+
+        let defender = {
+            name: "Granite",
+            MEL: 55, AGL: 25, STR: 65, STA: 70, INT: 15, INS: 20, CON: 18,
+            health: 205, maxHealth: 205,
+            powers: [
+                { name: "Super Strength", level: "High", type: "Physical", damage: 50, range: 1, hitStat: "MEL", statusEffect: "Knockback + Stun", addToSTR: true },
+                { name: "Super Durability", level: "High", type: "Defense", damageReduction: 15 }
+            ],
+            skills: [
+                { name: "Martial Arts", bonus: 2, type: "melee" },
+                { name: "Wrestling", bonus: 2, type: "melee" },
+                { name: "Roll With Blow", bonus: 2, type: "defense", special: "halve_blunt" }
+            ],
+            threatLevel: 2,
+            damageReduction: 15  // From Super Durability
+        };
+
+        // ============================================
+        // UNIVERSAL TABLE LOOKUP
+        // ============================================
+        function getStatRank(statValue) {
+            if (statValue <= 0) return { name: "Shift_0", column: 0 };
+            if (statValue <= 2) return { name: "Feeble", column: 1 };
+            if (statValue <= 5) return { name: "Poor", column: 2 };
+            if (statValue <= 10) return { name: "Typical", column: 3 };
+            if (statValue <= 20) return { name: "Good", column: 4 };
+            if (statValue <= 30) return { name: "Excellent", column: 5 };
+            if (statValue <= 40) return { name: "Remarkable", column: 6 };
+            if (statValue <= 50) return { name: "Incredible", column: 7 };
+            if (statValue <= 75) return { name: "Amazing", column: 8 };
+            if (statValue <= 100) return { name: "Monstrous", column: 9 };
+            if (statValue <= 150) return { name: "Unearthly", column: 10 };
+            return { name: "Shift_X+", column: 11 };
+        }
+
+        function applyColumnShift(column, shift) {
+            return Math.max(0, Math.min(11, column + shift));
+        }
+
+        function rollUniversalTable(roll, column) {
+            // Simplified Universal Table lookup
+            // Returns: "Failed", "Minor", "Success", "Major"
+
+            if (roll === 0) return "Major";  // 00 = always Major
+            if (roll === 99) return "Failed"; // 99 = always Failed
+            if (roll >= 97) return "Minor";   // 97-98 = always Minor
+
+            // Column-based resolution (higher column = better results)
+            const thresholds = {
+                // [Failed max, Minor max, Success max] - above Success max = Major
+                0: [89, 96, 100],      // Shift_0
+                1: [14, 49, 89],       // Feeble
+                2: [9, 39, 79],        // Poor
+                3: [5, 24, 69],        // Typical
+                4: [5, 14, 59],        // Good
+                5: [5, 9, 49],         // Excellent
+                6: [5, 9, 39],         // Remarkable
+                7: [5, 9, 29],         // Incredible
+                8: [5, 9, 19],         // Amazing
+                9: [5, 9, 14],         // Monstrous
+                10: [5, 9, 9],         // Unearthly
+                11: [5, 5, 5]          // Shift_X+
+            };
+
+            const t = thresholds[column] || thresholds[6];
+            if (roll <= t[0]) return column <= 2 ? "Failed" : "Minor";
+            if (roll <= t[1]) return "Minor";
+            if (roll <= t[2]) return "Success";
+            return "Major";
+        }
+
+        function getResultMultiplier(result) {
+            switch(result) {
+                case "Failed": return 0;
+                case "Minor": return 0.5;
+                case "Success": return 1.0;
+                case "Major": return 1.5;
+                default: return 1.0;
+            }
+        }
+
+        // ============================================
+        // DODGE CHART LOOKUP
+        // ============================================
+        function getDodgeColumnShift(agl, ins, isMelee) {
+            const combined = isMelee ? agl + ins : agl;
+
+            if (combined < 20) return 0;
+            if (combined < 40) return -1;
+            if (combined < 60) return -2;
+            if (combined < 80) return -3;
+            if (combined < 100) return -4;
+            if (combined < 120) return -5;
+            if (combined < 140) return -6;
+            if (combined < 170) return -7;
+            if (combined < 200) return -8;
+            if (combined < 300) return -9;
+            if (combined < 500) return -10;
+            if (combined < 1000) return -11;
+            return -12;
+        }
+
+        // ============================================
+        // KNOCKBACK CALCULATION
+        // ============================================
+        function getKnockbackSquares(strength) {
+            if (strength < 10) return 0;
+            if (strength < 20) return 1;
+            if (strength < 30) return 2;
+            if (strength < 40) return 3;
+            if (strength < 50) return 4;
+            if (strength < 60) return 6;
+            if (strength < 70) return 8;
+            if (strength < 80) return 10;
+            if (strength < 100) return 9;
+            if (strength < 150) return 10;
+            if (strength < 250) return 15;
+            return 20;
+        }
+
+        // ============================================
+        // COMBAT RESOLUTION
+        // ============================================
+        function resolveAttack(attackerChar, defenderChar, attackType = "power") {
+            let log = [];
+
+            // STEP 1: Determine Attack Type and Stat
+            let power = attackerChar.powers[0];
+            let hitStat = power.hitStat || "MEL";
+            let hitStatValue = attackerChar[hitStat];
+
+            log.push({
+                type: "system",
+                text: `<strong>=== ${attackerChar.name} attacks ${defenderChar.name} with ${power.name} ===</strong>`
+            });
+
+            // STEP 2: Calculate Base Column
+            let baseRank = getStatRank(hitStatValue);
+            log.push({
+                type: "system",
+                text: `<strong>Step 1: Determine Attack Column</strong><br>
+                       Hit Stat: ${hitStat} = ${hitStatValue}<br>
+                       Base Rank: ${baseRank.name} (Column ${baseRank.column})`
+            });
+
+            // STEP 3: Apply Skill Bonuses
+            let skillBonus = 0;
+            let skillsApplied = [];
+            attackerChar.skills.forEach(skill => {
+                if ((power.type === "Energy" && skill.type === "ranged") ||
+                    (power.type === "Physical" && skill.type === "melee")) {
+                    skillBonus += skill.bonus;
+                    skillsApplied.push(`${skill.name} (+${skill.bonus}CS)`);
+                }
+            });
+
+            // STEP 4: Apply Power Bonuses
+            let powerBonus = power.level === "High" ? 3 : 1;  // From power description
+
+            // STEP 5: Apply Defender Dodge Penalty
+            let isMelee = power.range <= 1;
+            let dodgeCS = getDodgeColumnShift(defenderChar.AGL, defenderChar.INS, isMelee);
+
+            // Add defender's dodge skill if present
+            let defenderDodgeBonus = 0;
+            defenderChar.skills.forEach(skill => {
+                if (skill.name === "Dodge") {
+                    defenderDodgeBonus = skill.bonus;
+                }
+            });
+            dodgeCS -= defenderDodgeBonus;  // Dodge skill makes it harder to hit
+
+            log.push({
+                type: "system",
+                text: `<strong>Step 2: Apply Column Shifts</strong><br>
+                       Skill Bonuses: ${skillsApplied.length ? skillsApplied.join(', ') : 'None'} = +${skillBonus}CS<br>
+                       Power Accuracy: ${power.level} level = +${powerBonus}CS<br>
+                       Target Dodge (${isMelee ? 'AGL+INS' : 'AGL'}=${isMelee ? defenderChar.AGL + defenderChar.INS : defenderChar.AGL}): ${dodgeCS}CS<br>
+                       Defender Dodge Skill: -${defenderDodgeBonus}CS (harder to hit)`
+            });
+
+            // STEP 6: Calculate Final Column
+            let totalCS = skillBonus + powerBonus + dodgeCS;
+            let finalColumn = applyColumnShift(baseRank.column, totalCS);
+            let finalRank = Object.entries({
+                0: "Shift_0", 1: "Feeble", 2: "Poor", 3: "Typical", 4: "Good",
+                5: "Excellent", 6: "Remarkable", 7: "Incredible", 8: "Amazing",
+                9: "Monstrous", 10: "Unearthly", 11: "Shift_X+"
+            }).find(([k,v]) => parseInt(k) === finalColumn)?.[1] || "Unknown";
+
+            log.push({
+                type: "system",
+                text: `<strong>Step 3: Final Attack Column</strong><br>
+                       Base Column: ${baseRank.column} (${baseRank.name})<br>
+                       Total Column Shift: ${totalCS >= 0 ? '+' : ''}${totalCS}CS<br>
+                       Final Column: ${finalColumn} (${finalRank})`
+            });
+
+            // STEP 7: Roll d100 on Universal Table
+            let roll = Math.floor(Math.random() * 100);  // 0-99 represents 00-99
+            let result = rollUniversalTable(roll, finalColumn);
+            let multiplier = getResultMultiplier(result);
+
+            let resultClass = result.toLowerCase();
+            log.push({
+                type: resultClass,
+                text: `<strong>Step 4: Universal Table Roll</strong><br>
+                       Roll: ${roll.toString().padStart(2, '0')} on Column ${finalColumn} (${finalRank})<br>
+                       Result: <span style="font-size:18px;color:${result === 'Major' ? '#ffff00' : result === 'Success' ? '#00ff00' : result === 'Minor' ? '#888' : '#ff0000'}">${result.toUpperCase()}</span><br>
+                       Damage Multiplier: ${multiplier}x`
+            });
+
+            // STEP 8: Calculate Base Damage
+            let baseDamage = power.damage || 0;
+            if (power.addToSTR) {
+                baseDamage = attackerChar.STR + baseDamage;
+            }
+
+            log.push({
+                type: "system",
+                text: `<strong>Step 5: Calculate Base Damage</strong><br>
+                       Power Base Damage: ${power.damage}<br>
+                       ${power.addToSTR ? `+ STR (${attackerChar.STR}): ${attackerChar.STR + power.damage}` : ''}<br>
+                       Base Damage: ${baseDamage}`
+            });
+
+            // STEP 9: Apply Result Multiplier
+            let modifiedDamage = Math.floor(baseDamage * multiplier);
+
+            // STEP 10: Apply Defender's Damage Reduction
+            let dr = defenderChar.damageReduction || 0;
+
+            // Check if Roll With Blow applies (halve blunt damage)
+            let rollWithBlow = defenderChar.skills.find(s => s.special === "halve_blunt");
+            let rwbReduction = 0;
+            if (rollWithBlow && power.type === "Physical") {
+                rwbReduction = Math.floor(modifiedDamage * 0.5);
+            }
+
+            let finalDamage = Math.max(0, modifiedDamage - dr - rwbReduction);
+
+            log.push({
+                type: "system",
+                text: `<strong>Step 6: Apply Damage Modifiers</strong><br>
+                       Damage after multiplier: ${baseDamage} × ${multiplier} = ${modifiedDamage}<br>
+                       Damage Reduction (Super Durability): -${dr}<br>
+                       ${rollWithBlow && power.type === "Physical" ? `Roll With Blow (halve blunt): -${rwbReduction}<br>` : ''}
+                       <strong>Final Damage: ${finalDamage}</strong>`
+            });
+
+            // STEP 11: Apply Damage
+            if (result !== "Failed") {
+                defenderChar.health = Math.max(0, defenderChar.health - finalDamage);
+            }
+
+            // STEP 12: Check Knockback (Major Success with Super Strength or high STR)
+            let knockback = 0;
+            if (result === "Major" && (power.name === "Super Strength" || attackerChar.STR >= 40)) {
+                knockback = getKnockbackSquares(power.addToSTR ? attackerChar.STR : attackerChar.STR / 2);
+            }
+
+            // STEP 13: Apply Status Effects
+            let statusApplied = "";
+            if (result === "Major" && power.statusEffect) {
+                statusApplied = power.statusEffect;
+            } else if (result === "Success" && power.statusEffect && power.statusEffect.includes("Burning")) {
+                statusApplied = "Burning";
+            }
+
+            log.push({
+                type: result === "Failed" ? "fail" : (result === "Major" ? "major" : "success"),
+                text: `<strong>Step 7: Final Results</strong><br>
+                       Damage Dealt: ${result === "Failed" ? "MISS!" : finalDamage}<br>
+                       ${defenderChar.name}'s Health: ${defenderChar.health}/${defenderChar.maxHealth}<br>
+                       ${knockback > 0 ? `Knockback: ${knockback} squares<br>` : ''}
+                       ${statusApplied ? `Status Effect: ${statusApplied}<br>` : ''}
+                       ${defenderChar.health <= 0 ? '<span style="color:#ff0000;font-size:18px;">*** DEFEATED ***</span>' : ''}`
+            });
+
+            return log;
+        }
+
+        // ============================================
+        // UI FUNCTIONS
+        // ============================================
+        function addToLog(entries) {
+            const logDiv = document.getElementById('logEntries');
+            entries.forEach(entry => {
+                const div = document.createElement('div');
+                div.className = `log-entry ${entry.type}`;
+                div.innerHTML = entry.text;
+                logDiv.appendChild(div);
+            });
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateHealthBars() {
+            const aBar = document.getElementById('attackerHealthBar');
+            const dBar = document.getElementById('defenderHealthBar');
+            const aHealth = document.getElementById('attackerHealth');
+            const dHealth = document.getElementById('defenderHealth');
+
+            let aPercent = (attacker.health / attacker.maxHealth) * 100;
+            let dPercent = (defender.health / defender.maxHealth) * 100;
+
+            aBar.style.width = aPercent + '%';
+            dBar.style.width = dPercent + '%';
+
+            if (aPercent < 30) aBar.classList.add('low');
+            else aBar.classList.remove('low');
+
+            if (dPercent < 30) dBar.classList.add('low');
+            else dBar.classList.remove('low');
+
+            aHealth.textContent = `Health: ${attacker.health}/${attacker.maxHealth}`;
+            dHealth.textContent = `Health: ${defender.health}/${defender.maxHealth}`;
+        }
+
+        function runSingleAttack(who) {
+            if (who === 'attacker') {
+                addToLog(resolveAttack(attacker, defender));
+            } else {
+                addToLog(resolveAttack(defender, attacker));
+            }
+            updateHealthBars();
+        }
+
+        function runFullCombat() {
+            const logDiv = document.getElementById('logEntries');
+            logDiv.innerHTML = '<div class="log-entry system"><strong>=== FULL COMBAT BEGINS ===</strong></div>';
+
+            // Calculate initiative
+            let aInit = (attacker.AGL + attacker.INS) / 2;
+            let dInit = (defender.AGL + defender.INS) / 2;
+
+            addToLog([{
+                type: "system",
+                text: `<strong>Initiative</strong><br>
+                       ${attacker.name}: (AGL ${attacker.AGL} + INS ${attacker.INS}) / 2 = ${aInit}<br>
+                       ${defender.name}: (AGL ${defender.AGL} + INS ${defender.INS}) / 2 = ${dInit}<br>
+                       <strong>${aInit >= dInit ? attacker.name : defender.name} goes first!</strong>`
+            }]);
+
+            let round = 1;
+            let first = aInit >= dInit ? attacker : defender;
+            let second = aInit >= dInit ? defender : attacker;
+
+            while (attacker.health > 0 && defender.health > 0 && round <= 10) {
+                addToLog([{ type: "system", text: `<strong>--- ROUND ${round} ---</strong>` }]);
+
+                // First attacker
+                addToLog(resolveAttack(first, second));
+                updateHealthBars();
+
+                if (second.health <= 0) break;
+
+                // Second attacker
+                addToLog(resolveAttack(second, first));
+                updateHealthBars();
+
+                round++;
+            }
+
+            // Announce winner
+            let winner = attacker.health > 0 ? attacker.name : defender.name;
+            addToLog([{
+                type: "major",
+                text: `<strong>=== COMBAT COMPLETE ===</strong><br>
+                       <span style="font-size:24px;color:#00fff5;">WINNER: ${winner}</span>`
+            }]);
+        }
+
+        function resetCombat() {
+            attacker.health = attacker.maxHealth;
+            defender.health = defender.maxHealth;
+            updateHealthBars();
+            document.getElementById('logEntries').innerHTML =
+                '<div class="log-entry system">Combat Reset. Ready for new battle.</div>';
+        }
+
+        function randomizeCharacters() {
+            // Randomize attacker
+            attacker.MEL = 20 + Math.floor(Math.random() * 40);
+            attacker.AGL = 20 + Math.floor(Math.random() * 50);
+            attacker.STR = 20 + Math.floor(Math.random() * 40);
+            attacker.STA = 30 + Math.floor(Math.random() * 40);
+            attacker.CON = 30 + Math.floor(Math.random() * 50);
+            attacker.maxHealth = (attacker.STA * 2) + attacker.STR;
+            attacker.health = attacker.maxHealth;
+
+            // Randomize defender
+            defender.MEL = 20 + Math.floor(Math.random() * 50);
+            defender.AGL = 15 + Math.floor(Math.random() * 30);
+            defender.STR = 30 + Math.floor(Math.random() * 50);
+            defender.STA = 40 + Math.floor(Math.random() * 50);
+            defender.maxHealth = (defender.STA * 2) + defender.STR;
+            defender.health = defender.maxHealth;
+
+            // Update display
+            document.getElementById('aMEL').textContent = attacker.MEL;
+            document.getElementById('aAGL').textContent = attacker.AGL;
+            document.getElementById('aSTR').textContent = attacker.STR;
+            document.getElementById('aSTA').textContent = attacker.STA;
+            document.getElementById('aCON').textContent = attacker.CON;
+
+            document.getElementById('dMEL').textContent = defender.MEL;
+            document.getElementById('dAGL').textContent = defender.AGL;
+            document.getElementById('dSTR').textContent = defender.STR;
+            document.getElementById('dSTA').textContent = defender.STA;
+            document.getElementById('dCON').textContent = defender.CON;
+
+            // Update dodge CS display
+            let aCS = getDodgeColumnShift(attacker.AGL, attacker.INS, true);
+            let dCS = getDodgeColumnShift(defender.AGL, defender.INS, true);
+            document.getElementById('aDodgeCS').textContent = `${aCS}CS`;
+            document.getElementById('dDodgeCS').textContent = `${dCS}CS`;
+
+            updateHealthBars();
+
+            document.getElementById('logEntries').innerHTML =
+                '<div class="log-entry system">Characters randomized! Ready for combat.</div>';
+        }
+
+        // Initialize
+        updateHealthBars();
+    </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+Rank_Name,Stat_Value_Min,Stat_Value_Max,Universal_Table_Column,Threat_Level,Description,Example_Characters,Lifting_Capacity_lbs
+Shift_0,0,0,Shift_0,None,No capability in this area,Inanimate objects,0
+Feeble,1,2,Feeble,None,Severely impaired or child-level,Small children; severely injured,50-60
+Poor,3,5,Poor,None,Below average human,Sedentary adults; elderly,80-120
+Typical,6,10,Typical,None,Average human capability,Normal civilians; office workers,140-220
+Good,11,20,Good,None,Above average trained human,Athletes; trained soldiers,240-400
+Excellent,21,30,Excellent,Alpha,Peak human performance,Olympic athletes; special forces,425-800
+Remarkable,31,40,Remarkable,Threat 1,Low superhuman,Captain America level; enhanced humans,900-2200
+Incredible,41,50,Incredible,Threat 2,Superhuman,Spider-Man level; mutants,2500-22400
+Amazing,51,75,Amazing,Threat 3,High superhuman,Thing level; powerful mutants,25000-50000
+Monstrous,76,100,Monstrous,Threat 4,Extreme superhuman,Hulk (calm); major powerhouses,50000-100000
+Unearthly,101,150,Unearthly,Threat 5,Near-cosmic power,Thor level; Hulk (angry),100000-500000
+Shift_X,151,250,Shift_X,Earthshaker,Low cosmic,Herald of Galactus level,500000-1000000
+Shift_Y,251,500,Shift_Y,Earthbreaker,Cosmic,Silver Surfer level,1000000-5000000
+Shift_Z,501,1000,Shift_Z,Eartheater,High cosmic,Thanos level,5000000-10000000
+Class_1000,1001,2500,Class_1000,Sunbreaker,Supreme cosmic,Celestial level,Planetary
+Class_3000,2501,5000,Class_3000,Suneater,Near-deity,Galactus level,Stellar
+Class_5000,5001,10000,Class_5000,Omnipotent,Deity level,Living Tribunal level,Galactic
+Beyond,10001,999999,Beyond,Beyond,Abstract entity,One-Above-All,Universal
+
+---COLUMN SHIFT REFERENCE---
+Column_Shift,Effect,Example_Application
++4CS,Shift 4 columns right (better),Major power advantage
++3CS,Shift 3 columns right,Significant skill bonus
++2CS,Shift 2 columns right,Good equipment or skill
++1CS,Shift 1 column right,Minor advantage
+0CS,No shift,Standard action
+-1CS,Shift 1 column left (worse),Minor disadvantage
+-2CS,Shift 2 columns left,Poor conditions
+-3CS,Shift 3 columns left,Significant penalty
+-4CS,Shift 4 columns left,Major disadvantage
+-5CS,Shift 5 columns left,Severe impairment
+-6CS,Shift 6 columns left,Near impossible
+
+---RESULT EFFECTS---
+Result,Combat_Effect,Damage_Multiplier,Special_Effect
+Failed,Attack misses completely,0x,No effect
+Minor,Glancing blow or partial success,0.5x,Reduced effect; may still apply status
+Success,Solid hit or full success,1x,Full damage and intended effect
+Major,Critical hit or exceptional success,1.5x,Extra damage; bonus effects (knockback stun etc.)

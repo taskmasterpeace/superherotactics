@@ -1,0 +1,54 @@
+Faction_ID,Faction_Name,Full_Name,Headquarters,Starting_Countries,Playstyle,Strengths,Weaknesses,Unique_Ability
+
+US,United States,United States LSW Division,Washington DC,"United States, Canada, United Kingdom, Australia, Japan, South Korea, Germany, France, Israel",Military-Industrial Complex,"+3CS military operations; +2CS technology; Best equipment access; Strongest military response","Public accountability (-2CS covert); Media scrutiny; Political oversight",Arsenal of Democracy: Access to all military equipment at 20% discount
+
+IN,India,Indian Supernatural Affairs Bureau,New Delhi,"India, Bangladesh, Nepal, Sri Lanka, Bhutan, Mauritius, Fiji",Spiritual-Diplomatic,"+3CS mystical/spiritual; +2CS diplomatic; Strong cultural networks; Best healing/meditation","Limited military budget; Regional rivals; Complex bureaucracy",Karma Network: +2CS to all relationship building; spiritual LSW recruitment bonus
+
+CN,China,Ministry of State Superhuman Security,Beijing,"China, North Korea, Laos, Cambodia, Myanmar, Pakistan (partial)",Surveillance-Control,"+3CS surveillance; +2CS corporate infiltration; Mass production; Population control expertise","International distrust (-2CS diplomatic); Human rights scrutiny; Information isolation",Great Firewall: +3CS information control; can suppress media in controlled territory
+
+NG,Nigeria,Pan-African LSW Coalition,Lagos,"Nigeria, Ghana, Kenya, South Africa, Ethiopia, Senegal, Tanzania",Resource-Network,"+3CS underground networks; +2CS resource operations; Best tribal/clan intelligence; Africa-wide reach","Limited technology; Infrastructure challenges; Corruption complications",Ubuntu Bond: +2CS in all African operations; tribal network access across continent
+
+---FACTION RELATIONSHIPS---,,,,,,,,
+Faction_A,Faction_B,Relationship,Effect,,,,,
+US,IN,Allied,+1CS joint operations; intelligence sharing,,,,,
+US,CN,Rival,-1CS in each other's territory; competition for allies,,,,,
+US,NG,Friendly,No penalty; occasional cooperation,,,,,
+IN,CN,Tense,-1CS diplomatic; border conflicts,,,,,
+IN,NG,Allied,+1CS joint operations; development cooperation,,,,,
+CN,NG,Neutral,Standard operations; economic competition,,,,,
+
+---FACTION TERRITORY CONTROL---,,,,,,,,
+Territory_Type,Description,Effects,,,,,
+Home_Territory,Faction's core countries,+3CS all methods; full equipment; legal immunity; instant communication,,,,,
+Allied_Territory,Countries aligned with faction,+1CS diplomatic; reduced equipment access; local cooperation,,,,,
+Contested_Territory,Multiple factions competing,No bonus; increased encounter chance; political sensitivity,,,,,
+Hostile_Territory,Controlled by rival faction,-2CS all methods; equipment restrictions; detection risk,,,,,
+Neutral_Territory,No faction control,Standard operations; must build relationships from scratch,,,,,
+
+---FACTION STARTING RESOURCES---,,,,,,,,
+Faction,Starting_LSWs,Starting_Budget,Starting_Tech_Level,Starting_Contacts,Starting_Reputation
+US,5 (mixed threat levels),High,Advanced,Military + Corporate,+50 (known heroes)
+IN,4 (spiritual focus),Medium,Standard,Diplomatic + Religious,+30 (respected)
+CN,6 (quantity focus),High,Advanced,Surveillance + Corporate,+10 (feared)
+NG,4 (diverse origins),Low,Basic,Underground + Tribal,+20 (underdog)
+
+---FACTION UNIQUE INVESTIGATION METHODS---,,,,,,,,
+Faction,Unique_Method,Bonus,Requirement,Cooldown
+US,Shock and Awe,+4CS force deployment; immediate resolution,Military authorization,7 days
+IN,Spiritual Consultation,+3CS mystical investigations; commune with spirits,Spiritual LSW,3 days
+CN,Mass Surveillance,+4CS tracking any target in controlled territory,Tech infrastructure,1 day
+NG,Pan-African Network,+3CS in any African country; instant local contacts,African operation,None
+
+---FACTION WIN CONDITIONS---,,,,,,,,
+Faction,Primary_Goal,Secondary_Goal,Victory_Condition
+US,Military superiority,Global LSW registration,Control 60% of global LSW population through registration
+IN,Spiritual harmony,Cultural preservation,Achieve balance between mystical and technological LSW development
+CN,Total control,Economic dominance,Establish LSW control system across all allied and neutral territories
+NG,African unity,Resource independence,Unite African continent under LSW protection; achieve resource independence
+
+---FACTION PLAYSTYLE SUMMARY---,,,,,,,,
+Faction,Combat_Focus,Investigation_Focus,Diplomacy_Focus,Recommended_For
+US,Heavy firepower; shock tactics,Technology; corporate espionage,Strong-arm diplomacy; military alliances,Players who prefer direct action and military solutions
+IN,Defensive; spiritual techniques,Mystical; cultural; historical,Soft power; cultural exchange; spiritual authority,Players who prefer diplomacy and mystical approaches
+CN,Numbers; surveillance; control,Corporate; technology; surveillance,Economic pressure; information warfare,Players who prefer strategic planning and information control
+NG,Guerrilla; underground,Tribal; underground; resource,Community building; tribal alliances,Players who prefer building networks and unconventional methods

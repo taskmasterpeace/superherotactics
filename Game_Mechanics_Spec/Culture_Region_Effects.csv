@@ -1,0 +1,43 @@
+Culture_Code,Region_Name,Countries_Example,Investigation_Modifier,LSW_Power_Affinity,Social_Modifier,Language_Family,Religion_Influence,Special_Characteristic
+
+1,North Africa,"Algeria, Morocco, Egypt, Libya, Tunisia",+1CS historical investigations,Fire; Sand; Sun powers common,Arabic hospitality customs; tea ceremony,Arabic,Islamic traditions strong,Ancient technology possible (Egyptian)
+
+2,Central Africa,"Congo, Cameroon, Central African Republic, Gabon",+1CS tribal network investigations,Nature; Animal; Spirit powers common,Tribal hierarchy respect required,Bantu languages,Traditional + Christian mix,Deep jungle concealment; tribal LSW traditions
+
+3,Southern Africa,"South Africa, Zimbabwe, Namibia, Botswana, Angola",+1CS mining/resource investigations,Earth; Animal powers common,Ubuntu philosophy; community focus,Bantu + English,Christian + Traditional,Mineral-enhanced LSWs; apartheid history affects relations
+
+4,Central Asia,"Kazakhstan, Uzbekistan, Turkmenistan, Kyrgyzstan, Tajikistan",+1CS Silk Road/trade investigations,Nomadic; Horse; Wind powers,Nomadic hospitality; yurt culture,Turkic languages,Islamic + Soviet secular,Vast distances; nomadic informant networks
+
+5,South Asia,"India, Bangladesh, Pakistan, Nepal, Sri Lanka",+2CS spiritual/mystical investigations,Mystical; Divine; Elemental powers common,Caste awareness; karma concepts,Indo-Aryan languages,Hindu/Buddhist/Islamic mix,Ancient mystical traditions; yoga-enhanced LSWs
+
+6,East + Southeast Asia,"China, Japan, Korea, Vietnam, Thailand, Indonesia",+1CS corporate/tech investigations,Martial; Tech; Spirit powers common,Face/honor culture; hierarchy,Sino-Tibetan; Austronesian,Buddhist/Confucian/Shinto,Martial arts LSW traditions; corporate LSW programs
+
+7,The Caribbean,"Jamaica, Bahamas, Cuba, Trinidad, Haiti",+1CS smuggling investigations,Voodoo; Water; Music powers,Island time; reggae culture,English/Spanish/French Creole,Christianity + Voodoo/Santeria,Voodoo-origin LSWs; pirate smuggling routes
+
+8,Central America,"Mexico, Guatemala, Honduras, Nicaragua, Panama",+1CS cartel/trafficking investigations,Aztec; Jungle; Death powers,Family loyalty; cartel influence,Spanish,Catholic + Indigenous,Aztec/Mayan mystical LSWs; cartel LSW armies
+
+9,Western Europe,"UK, France, Germany, Italy, Spain, Netherlands",+1CS corporate/political investigations,Tech; Noble; Classical powers,Formal business culture; EU unity,Germanic; Romance languages,Secular Christian,Oldest LSW documentation; aristocratic LSW families
+
+10,Eastern Europe,"Russia, Ukraine, Poland, Belarus, Romania",+1CS Cold War/spy investigations,Winter; Nuclear; Psychic powers,Soviet legacy; Orthodox traditions,Slavic languages,Orthodox Christian,Soviet super-soldier programs; Chernobyl mutants
+
+11,Oceania,"Australia, New Zealand, Fiji, Papua New Guinea",+1CS environmental investigations,Nature; Ocean; Aboriginal powers,Laid-back culture; indigenous respect,English + Indigenous,Christian + Indigenous,Dreamtime LSWs; isolated evolution
+
+12,South America,"Brazil, Argentina, Colombia, Peru, Chile",+1CS jungle/cartel investigations,Jungle; Ancient; Passion powers,Passionate culture; football,Portuguese; Spanish,Catholic,Amazon mystical LSWs; Incan technology
+
+13,North America,"United States, Canada",+2CS technology investigations,Tech; Mutation; Patriotic powers,Corporate culture; individualism,English; French,Christian secular,Most documented LSW population; superhero culture
+
+14,Middle Eastern,"Saudi Arabia, Iran, Iraq, UAE, Israel, Turkey",+1CS religious/political investigations,Divine; Desert; Ancient powers,Honor culture; hospitality rules,Arabic; Farsi; Hebrew; Turkish,Islamic + Jewish,Djinn-type LSWs; holy site powers; ancient civilizations
+
+---CULTURE CODE MECHANICAL RULES---,,,,,,,,
+Rule,Description,,,,,,,
+Investigation_Bonus,Applies to investigations matching regional specialty,,,,,,,
+Power_Affinity,LSWs from region 2x likely to have listed power types,,,,,,,
+Social_Modifier,Affects relationship building and social infiltration,,,,,,,
+Language_Barrier,-2CS all social methods if no regional language speaker,,,,,,,
+Religion_Respect,-1CS if disrespecting local religious customs,,,,,,,
+Cross_Cultural,Shared culture code = +1CS social interactions between countries,,,,,,,
+
+---CULTURE INTERACTION MATRIX---,,,,,,,,
+Your_Culture,Same_Culture,Similar_Culture,Neutral_Culture,Opposed_Culture,,,
+Any,+2CS social,+1CS social,No modifier,-1CS social,,,
+Note: Similar = adjacent regions or shared history,,,,,,,

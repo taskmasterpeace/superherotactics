@@ -1,0 +1,140 @@
+Section,Description
+---PENETRATION AND CONTINUATION SYSTEM---,Rules for attacks passing through obstacles and continuing to additional targets
+
+===CORE FORMULA===
+Rule,Formula,Description
+Effective_Penetration,Base_Damage × Penetration_Multiplier,Calculate penetration power
+Penetration_Check,Effective_Penetration > Obstacle_HP,If true attack penetrates
+Continuing_Damage,Base_Damage - (Obstacle_HP ÷ 2),Damage that continues to next target
+Minimum_Continuing,1,If penetration occurs minimum 1 damage continues
+Thrown_Object_Penetration,Throw_Damage + (STR ÷ 5),Thrown objects add STR bonus to penetration
+
+===MATERIAL HP VALUES===
+Material_Type,HP,Thickness,Common_Examples,Penetrated_By
+Glass,10,Standard,Windows; display cases; mirrors,Pistol+
+Drywall,25,1/2 inch,Interior walls; cubicle partitions,Rifle AP; Heavy weapons
+Plywood,30,3/4 inch,Cheap construction; shipping crates,Rifle AP; Heavy weapons
+Wood_Solid,40,Standard wall,Exterior walls; doors; furniture,Heavy weapons; Super powers
+Wood_Reinforced,50,Double layer,Security doors; reinforced walls,Heavy weapons; Super powers
+Brick_Single,80,4 inch,Exterior walls; older buildings,Anti-materiel; STR 80+
+Concrete_Standard,120,6 inch,Modern buildings; floors,Anti-materiel; STR 100+
+Concrete_Reinforced,180,8+ inch,Bunkers; foundations; highways,STR 150+; Explosives
+Steel_Thin,100,1/8 inch,Car bodies; filing cabinets; ducts,Anti-materiel; STR 100+
+Steel_Structural,150,1/4 inch,I-beams; vault walls; containers,STR 150+
+Steel_Armored,200,1/2+ inch,Bank vaults; military vehicles,STR 200+; Special weapons
+Blast_Rated,300,Variable,Bunker doors; bomb shelters,Cosmic STR only
+
+===AMMUNITION PENETRATION MULTIPLIERS===
+Ammo_Type,Penetration_Multiplier,Cost_Modifier,Availability,Effect_On_Unarmored,Notes
+Hollow_Point,0.5x,1.2x,Common,-,Expands on impact; stops in soft targets; +25% damage to unarmored
+Standard_FMJ,1.0x,1.0x,Common,-,Full metal jacket; baseline penetration
+Armor_Piercing,2.0x,3x,Restricted,-25% damage to unarmored,Hardened core; punches through armor/cover
+Tungsten_Core,2.5x,10x,Military only,-25% damage to unarmored,Military anti-armor rounds
+Depleted_Uranium,2.5x,Military,Military only,-25% damage; radiation,Self-sharpening; pyrophoric
+Incendiary,1.0x,5x,Restricted,Fire damage over time,Can ignite flammables behind cover
+Tracer,1.0x,2x,Common,-,Visible trail; -1CS stealth
+Subsonic,0.75x,1.5x,Common,-,Quieter (-20 dB); reduced velocity
+Frangible,0.25x,2x,Special,-,Designed to shatter; safe for aircraft
+
+===WEAPON PENETRATION PROFILES===
+Weapon_Type,Base_Damage,Default_Ammo,Effective_Penetration,Can_Penetrate_Drywall,Can_Penetrate_Wood,Can_Penetrate_Brick
+Pistol_Light,15,Standard,15,No,No,No
+Pistol_Standard,20,Standard,20,No,No,No
+Pistol_Heavy,25,Standard,25,Barely,No,No
+SMG,25,Standard,25,Barely,No,No
+Assault_Rifle,30,Standard,30,Yes,No,No
+Battle_Rifle,35,Standard,35,Yes,No,No
+Sniper_Rifle,45,Standard,45,Yes,Yes,No
+Shotgun_Buck,35,Buckshot (0.5x),17,No,No,No
+Shotgun_Slug,35,Slug (1.5x),52,Yes,Yes,No
+Heavy_MG,40,AP (2.0x),80,Yes,Yes,Barely
+Anti_Materiel,60,Tungsten (2.5x),150,Yes,Yes,Yes
+
+===POWER PENETRATION MULTIPLIERS===
+Power_Type,Penetration_Multiplier,Notes,Blocked_By
+Energy_Blast,1.5x,Generic energy attacks,Energy shields
+Fire_Generation,1.25x,Burns through; slower,Fire resistance; water
+Ice_Generation,0.75x,Tends to shatter/spread,Heat sources
+Electricity,1.0x (conductive) / 0.5x (insulated),Depends on material,Insulation; grounding
+Psychic_Blast,2.0x,Ignores physical barriers,Mental shields; psi dampeners
+Sonic_Attack,0.5x,Disperses through materials,Sound dampening; vacuum
+Laser,2.0x,Concentrated heat energy,Reflective surfaces; smoke
+Concussive_Blast,1.0x,Raw kinetic force,Physical barriers
+Radiation,1.5x,Passes through most materials,Lead; thick concrete
+Plasma,2.0x,Extreme heat,Nothing short of force fields
+Magic_Bolt,1.0x to 2.0x,Varies by spell,Magic resistance; wards
+
+===THROWN OBJECT CONTINUATION===
+Object_Category,Weight_Range,Base_Throw_Damage,STR_Bonus_Formula,Example_Objects
+Light,1-10 kg,5,STR/10,Chair; rock; trash can
+Medium,11-50 kg,15,STR/10,Table; person; motorcycle engine
+Heavy,51-200 kg,30,STR/10,Motorcycle; refrigerator; safe
+Very_Heavy,201-1000 kg,50,STR/5,Car; dumpster; small truck
+Massive,1001-5000 kg,100,STR/2,Bus; semi truck; tank
+Colossal,5001+ kg,150,STR,Building section; train car
+
+===THROWN OBJECT HP (FOR DESTRUCTION CHECK)===
+Object,HP,Destroyed_Effect
+Chair,15,Splinters
+Table_Wood,25,Breaks apart
+Table_Metal,40,Dents/bends
+Motorcycle,60,Crumples; fuel leak
+Car_Compact,80,Totaled; possible fire
+Car_Standard,100,Totaled; possible fire
+Car_SUV,120,Totaled; possible fire
+Truck_Pickup,130,Totaled
+Van,140,Totaled
+Bus,200,Structural failure
+Semi_Truck,250,Jackknifes
+
+===KNOCKBACK IMPACT RULES===
+Rule,Formula,Description
+Impact_Damage,Remaining_Knockback_Squares × 5,Damage from hitting wall
+Wall_Penetration_Check,Impact_Damage > Wall_HP,If true character goes through wall
+Through_Wall_Damage,Wall_HP ÷ 2,Damage to character from punching through
+Knockback_Reduction,2 squares,Knockback reduced after going through wall
+Embedded_In_Wall,Impact_Damage between 75-100% of Wall_HP,Character stuck; 2 AP to extract; Prone
+Prone_On_Impact,Any wall impact,Character is Prone after stopping
+
+===IMPACT DAMAGE REFERENCE===
+Remaining_Knockback,Impact_Damage,Effect
+1 square,5,Minor impact
+2 squares,10,Solid hit
+3 squares,15,Hard impact; possible Dazed
+4 squares,20,Heavy impact; Dazed 1 turn
+5 squares,25,Severe impact; Dazed 1 turn
+6 squares,30,Brutal impact; Stunned 1 turn
+8 squares,40,Devastating; Stunned 1 turn
+10 squares,50,Catastrophic; Stunned 2 turns
+12+ squares,60+,Lethal impact zone
+
+===LINE ATTACK RULES===
+Rule,Description,Examples
+Sequential_Check,Check penetration for each target in order nearest to farthest,Rail gun; laser beam
+Damage_Reduction,Each penetration reduces continuing damage,Prevents infinite penetration
+Maximum_Penetrations,5 targets/obstacles maximum,Hard cap for sanity
+Area_Behind_Penetration,3x3 area of reduced damage after penetration,Debris/shrapnel effect
+
+===SPECIAL PENETRATION CASES===
+Case,Rule,Notes
+Explosive_Weapons,0.75x penetration; blast goes AROUND cover,Grenades; rockets; bombs
+Shotgun_Spread,Each pellet checks separately; -1 damage per pellet per obstacle,Buckshot degrades quickly
+Ricochets,On failed penetration; 25% chance of ricochet; random direction,-2CS accuracy; half damage
+Over_Penetration,Hollow point 0.5x pen specifically to PREVENT over-pen,Safer for hostage situations
+Collateral_Damage,GM tracks what's behind targets,Environmental storytelling
+
+===COVER EFFECTIVENESS POST-PENETRATION===
+Original_Cover_Bonus,After_Penetration,New_Cover_Bonus,Duration
+Light (+1CS),Penetrated,None,Until repaired/replaced
+Medium (+2CS),Penetrated,Light (+1CS),Degraded protection
+Heavy (+3CS),Penetrated,Medium (+2CS),Still provides some cover
+Full Cover,Penetrated,Heavy (+3CS),Hole in cover
+
+===DESIGNER NOTES===
+Topic,Note
+Balance_Intent,Standard weapons should NOT penetrate standard cover (brick; car doors)
+AP_Ammo_Tradeoff,Better penetration but reduced damage to soft targets; tactical choice
+Super_Strength_Fantasy,STR 80+ throwing cars through walls IS the intended experience
+Natural_Damage_Falloff,Multiple penetrations naturally reduce damage; prevents infinite chains
+Narrative_Override,GM can adjust obstacle HP for dramatic moments
+Psychic_Exception,Mental attacks bypass ALL physical cover; balanced by range/shields

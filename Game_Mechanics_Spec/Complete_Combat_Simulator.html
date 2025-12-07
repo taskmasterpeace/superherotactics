@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHT Complete Combat Simulator v3.0</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e; color: #eee; padding: 10px;
+        }
+        .container { display: grid; grid-template-columns: 650px 320px 380px; gap: 10px; max-width: 1400px; margin: 0 auto; }
+        h1 { text-align: center; color: #e94560; margin-bottom: 10px; font-size: 1.5em; }
+        h2 { color: #e94560; border-bottom: 2px solid #e94560; padding-bottom: 5px; margin-bottom: 10px; font-size: 1.1em; }
+        h3 { color: #16c79a; margin: 10px 0 5px 0; font-size: 1em; }
+
+        /* Control Bar */
+        .control-bar {
+            grid-column: 1 / -1; background: #16213e; padding: 10px; border-radius: 8px;
+            display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+        }
+        button {
+            background: #e94560; color: white; border: none; padding: 8px 15px;
+            border-radius: 5px; cursor: pointer; font-weight: bold; transition: all 0.2s;
+        }
+        button:hover { background: #ff6b6b; transform: scale(1.05); }
+        button:disabled { background: #555; cursor: not-allowed; transform: none; }
+        button.secondary { background: #16c79a; }
+        button.secondary:hover { background: #1dd1a1; }
+        select, input {
+            padding: 6px 10px; border-radius: 5px; border: 1px solid #444;
+            background: #0f3460; color: #eee;
+        }
+
+        /* Tactical Map */
+        .map-container { background: #16213e; padding: 10px; border-radius: 8px; position: relative; }
+        #tacticalMap {
+            display: grid; grid-template-columns: repeat(25, 24px); gap: 1px;
+            background: #0f3460; padding: 5px; border-radius: 5px;
+            position: relative;
+        }
+        .cell {
+            width: 24px; height: 24px; background: #1a1a2e; border: 1px solid #333;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; cursor: pointer; position: relative;
+            transition: background 0.2s;
+        }
+        .cell:hover { background: #2d2d4a; }
+        .cell.wall { background: #654321; }
+        .cell.cover-low { background: #3d5c3d; }
+        .cell.cover-high { background: #2d4a2d; border: 2px solid #4a6741; }
+        .cell.door { background: #8b4513; border: 2px solid #daa520; }
+        .cell.selected { box-shadow: 0 0 0 2px #e94560 inset; }
+        .cell.move-range { background: rgba(22, 199, 154, 0.4) !important; }
+        .cell.attack-range { background: rgba(233, 69, 96, 0.3) !important; }
+
+        /* Cover height indicator */
+        .cover-label {
+            position: absolute; top: 1px; right: 1px;
+            font-size: 8px; color: #8f8; font-weight: bold;
+        }
+
+        /* Altitude indicator */
+        .altitude-label {
+            position: absolute; top: 1px; left: 1px;
+            font-size: 8px; color: #88f; font-weight: bold;
+        }
+
+        /* Unit tokens */
+        .unit {
+            width: 20px; height: 20px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 10px;
+            position: relative; z-index: 10;
+            transition: transform 0.3s;
+        }
+        .unit.team-a { background: #3498db; color: white; border: 2px solid #2980b9; }
+        .unit.team-b { background: #e74c3c; color: white; border: 2px solid #c0392b; }
+        .unit.selected-unit { box-shadow: 0 0 8px 3px #f1c40f; transform: scale(1.1); }
+        .unit.grappling { border: 3px dashed #9b59b6 !important; }
+        .unit.no-ap { opacity: 0.5; }
+        .unit.flying {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            transform: translateY(-3px);
+        }
+
+        /* HP bar */
+        .hp-bar {
+            position: absolute; bottom: -2px; left: 0; right: 0; height: 4px;
+            background: #333; border-radius: 2px;
+        }
+        .hp-bar-fill { height: 100%; background: #2ecc71; border-radius: 2px; transition: width 0.3s; }
+        .hp-bar-fill.medium { background: #f39c12; }
+        .hp-bar-fill.low { background: #e74c3c; }
+
+        /* AP indicator */
+        .ap-pips {
+            position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 1px;
+        }
+        .ap-pip {
+            width: 4px; height: 4px; border-radius: 50%;
+            background: #f1c40f;
+        }
+        .ap-pip.spent { background: #444; }
+
+        /* Floating damage text */
+        .floating-text {
+            position: absolute; font-weight: bold; font-size: 14px;
+            pointer-events: none; z-index: 100;
+            animation: floatUp 1.5s ease-out forwards;
+            text-shadow: 2px 2px 2px #000;
+        }
+        .floating-text.damage { color: #ff4444; }
+        .floating-text.miss { color: #888; font-style: italic; }
+        .floating-text.critical { color: #ffff00; font-size: 18px; }
+        .floating-text.heal { color: #44ff44; }
+        .floating-text.grapple { color: #9b59b6; }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-40px); }
+        }
+
+        /* Projectile animation */
+        .projectile {
+            position: absolute; width: 8px; height: 8px;
+            border-radius: 50%; z-index: 50;
+            pointer-events: none;
+        }
+        .projectile.bullet { background: #ff0; box-shadow: 0 0 6px #ff0; }
+        .projectile.energy { background: #0ff; box-shadow: 0 0 10px #0ff; }
+        .projectile.shotgun { background: #f80; box-shadow: 0 0 4px #f80; }
+
+        /* Grapple line */
+        .grapple-line {
+            position: absolute; height: 3px; background: #9b59b6;
+            transform-origin: left center; z-index: 5;
+            box-shadow: 0 0 5px #9b59b6;
+        }
+
+        /* Energy beam effect */
+        .beam {
+            position: absolute; height: 4px;
+            transform-origin: left center; z-index: 50;
+            pointer-events: none;
+            background: linear-gradient(90deg, #0ff, #fff, #0ff);
+            box-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+            animation: beamPulse 0.2s ease-in-out;
+        }
+        .beam.plasma {
+            background: linear-gradient(90deg, #f0f, #fff, #f0f);
+            box-shadow: 0 0 10px #f0f, 0 0 20px #f0f;
+            height: 6px;
+        }
+        @keyframes beamPulse {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Shotgun cone effect */
+        .shotgun-cone {
+            position: absolute;
+            width: 0; height: 0;
+            border-left: 100px solid rgba(255, 136, 0, 0.4);
+            border-top: 50px solid transparent;
+            border-bottom: 50px solid transparent;
+            transform-origin: left center;
+            z-index: 45;
+            pointer-events: none;
+            animation: coneFade 0.4s ease-out forwards;
+        }
+        /* Flame cone effect - wider spread */
+        .flame-cone {
+            position: absolute;
+            width: 0; height: 0;
+            border-left: 80px solid rgba(255, 100, 0, 0.6);
+            border-top: 60px solid transparent;
+            border-bottom: 60px solid transparent;
+            transform-origin: left center;
+            z-index: 45;
+            pointer-events: none;
+            animation: flamePulse 0.5s ease-out forwards;
+            filter: blur(2px);
+        }
+        @keyframes flamePulse {
+            0% { opacity: 0.8; filter: blur(2px); }
+            50% { opacity: 1; filter: blur(4px); }
+            100% { opacity: 0; filter: blur(6px); }
+        }
+        /* Plasma spread beam */
+        .beam.spread {
+            height: 12px;
+            background: linear-gradient(90deg, #f0f, #fff, #f0f, #fff, #f0f);
+            box-shadow: 0 0 15px #f0f, 0 0 30px #f0f;
+        }
+        /* Shockwave 360 effect */
+        .shockwave {
+            position: absolute;
+            border-radius: 50%;
+            border: 4px solid rgba(0, 255, 255, 0.8);
+            background: radial-gradient(circle, rgba(0,255,255,0.3) 0%, transparent 70%);
+            z-index: 55;
+            pointer-events: none;
+            animation: shockwaveExpand 0.4s ease-out forwards;
+        }
+        @keyframes shockwaveExpand {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(4); opacity: 0; }
+        }
+        @keyframes coneFade {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        @keyframes meleeFade {
+            0% { opacity: 1; transform: scaleX(0); }
+            50% { opacity: 1; transform: scaleX(1); }
+            100% { opacity: 0; transform: scaleX(1.2); }
+        }
+
+        /* Explosion effect */
+        .explosion {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ff0 0%, #f80 30%, #f00 60%, transparent 70%);
+            z-index: 60;
+            pointer-events: none;
+            animation: explode 0.5s ease-out forwards;
+        }
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            50% { opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        /* Sound ring visualization */
+        .sound-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 0, 0.6);
+            background: transparent;
+            z-index: 40;
+            pointer-events: none;
+            animation: soundExpand 1.5s ease-out forwards;
+        }
+        .sound-ring.loud {
+            border-color: rgba(255, 100, 100, 0.7);
+            border-width: 3px;
+        }
+        .sound-ring.quiet {
+            border-color: rgba(100, 255, 100, 0.5);
+            border-width: 1px;
+        }
+        @keyframes soundExpand {
+            0% { transform: scale(0.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+
+        /* Stance indicator on unit */
+        .stance-indicator {
+            position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+            font-size: 7px; font-weight: bold;
+            padding: 1px 3px; border-radius: 2px;
+            white-space: nowrap;
+        }
+        .stance-indicator.defensive { background: #27ae60; color: white; }
+        .stance-indicator.aggressive { background: #e74c3c; color: white; }
+        .stance-indicator.grappling { background: #9b59b6; color: white; }
+        .stance-indicator.sniper { background: #3498db; color: white; }
+        .stance-indicator.mobile { background: #f39c12; color: black; }
+        .stance-indicator.overwatch { background: #1abc9c; color: white; }
+
+        /* Unit Panel */
+        .unit-panel { background: #16213e; padding: 10px; border-radius: 8px; }
+        .stat-row { display: flex; justify-content: space-between; margin: 4px 0; font-size: 0.9em; }
+        .stat-label { color: #888; }
+        .stat-value { color: #16c79a; font-weight: bold; }
+        .stat-value.warning { color: #f39c12; }
+        .stat-value.danger { color: #e74c3c; }
+
+        /* AP Display - Big and clear */
+        .ap-display {
+            background: #0f3460; padding: 10px; border-radius: 8px; margin: 10px 0;
+            text-align: center;
+        }
+        .ap-display .ap-big {
+            font-size: 2em; font-weight: bold; color: #f1c40f;
+        }
+        .ap-display .ap-label { color: #888; font-size: 0.8em; }
+        .ap-pips-large { display: flex; justify-content: center; gap: 5px; margin-top: 5px; }
+        .ap-pip-large {
+            width: 20px; height: 20px; border-radius: 50%;
+            background: #f1c40f; border: 2px solid #d4a40a;
+        }
+        .ap-pip-large.spent { background: #333; border-color: #222; }
+
+        /* Status Effects */
+        .status-list { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px; }
+        .status-tag {
+            background: #0f3460; padding: 3px 8px; border-radius: 3px;
+            font-size: 0.75em; color: #f39c12; border: 1px solid #f39c12;
+        }
+        .status-tag.grapple { background: #2d1f4e; border-color: #9b59b6; color: #9b59b6; }
+        .status-tag.flying { background: #1f2d4e; border-color: #3498db; color: #3498db; }
+
+        /* Equipment Select */
+        .equipment-select { margin: 8px 0; }
+        .equipment-select label { font-size: 0.85em; color: #888; }
+        .equipment-select select { width: 100%; margin-top: 3px; }
+
+        /* Action Buttons */
+        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 10px; }
+        .action-buttons button { padding: 12px; font-size: 0.9em; }
+        .action-buttons button.active { background: #27ae60; box-shadow: 0 0 10px #27ae60; }
+
+        /* Grapple Panel */
+        .grapple-panel {
+            background: #2d1f4e; border: 2px solid #9b59b6;
+            padding: 10px; border-radius: 8px; margin-top: 10px;
+        }
+        .grapple-info {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; background: #1f1435; border-radius: 5px; margin-bottom: 10px;
+        }
+        .grapple-vs { font-size: 1.5em; color: #9b59b6; }
+        .position-display {
+            text-align: center; padding: 15px;
+            background: #9b59b6; border-radius: 8px;
+            font-size: 1.2em; font-weight: bold;
+        }
+        .grapple-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 10px; }
+        .grapple-actions button { background: #9b59b6; }
+        .grapple-actions button:hover { background: #a569bd; }
+
+        /* Combat Log */
+        .log-panel { background: #16213e; padding: 10px; border-radius: 8px; }
+        #combatLog {
+            height: 520px; overflow-y: auto; background: #0a0a15;
+            padding: 10px; border-radius: 5px; font-family: monospace; font-size: 0.85em;
+        }
+        .log-entry { margin: 3px 0; padding: 4px 6px; border-radius: 3px; border-left: 3px solid transparent; }
+        .log-entry.attack { background: rgba(233, 69, 96, 0.2); border-left-color: #e94560; }
+        .log-entry.damage { background: rgba(231, 76, 60, 0.3); border-left-color: #e74c3c; }
+        .log-entry.miss { background: rgba(100, 100, 100, 0.2); border-left-color: #666; }
+        .log-entry.move { background: rgba(22, 199, 154, 0.2); border-left-color: #16c79a; }
+        .log-entry.grapple { background: rgba(155, 89, 182, 0.3); border-left-color: #9b59b6; }
+        .log-entry.turn { background: rgba(241, 196, 15, 0.2); border-left-color: #f1c40f; font-weight: bold; }
+        .log-entry.info { color: #888; }
+        .log-entry.kill { background: rgba(231, 76, 60, 0.5); border-left-color: #c0392b; font-weight: bold; }
+
+        /* Turn Order */
+        .unit-list { max-height: 180px; overflow-y: auto; }
+        .unit-list-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px; background: #0f3460; margin: 4px 0; border-radius: 5px;
+            cursor: pointer; font-size: 0.85em; transition: all 0.2s;
+        }
+        .unit-list-item:hover { background: #1a4a8a; }
+        .unit-list-item.current-turn {
+            border-left: 4px solid #f1c40f;
+            background: #1a3a5a;
+        }
+        .unit-list-item .unit-hp {
+            font-size: 0.8em;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .unit-list-item .unit-hp.healthy { background: #27ae60; }
+        .unit-list-item .unit-hp.hurt { background: #f39c12; }
+        .unit-list-item .unit-hp.critical { background: #e74c3c; }
+
+        /* Legend */
+        .legend {
+            margin-top: 10px; padding: 10px; background: #0f3460;
+            border-radius: 5px; font-size: 0.8em;
+        }
+        .legend-item { display: inline-block; margin-right: 15px; }
+        .legend-color {
+            display: inline-block; width: 12px; height: 12px;
+            border-radius: 2px; vertical-align: middle; margin-right: 4px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: #16213e; padding: 20px; border-radius: 10px;
+            max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;
+        }
+        .close-modal { float: right; cursor: pointer; font-size: 1.5em; }
+
+        /* Batch Stats */
+        .batch-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .batch-stat { background: #0f3460; padding: 15px; border-radius: 8px; text-align: center; }
+        .batch-stat .value { font-size: 2em; color: #16c79a; font-weight: bold; }
+        .batch-stat .label { font-size: 0.85em; color: #888; margin-top: 5px; }
+
+        /* Instructions */
+        .instructions {
+            background: #0f3460; padding: 10px; border-radius: 5px;
+            margin-top: 10px; font-size: 0.8em; color: #aaa;
+        }
+        .instructions strong { color: #16c79a; }
+    </style>
+</head>
+<body>
+    <h1>SHT Complete Combat Simulator v3.0</h1>
+
+    <div class="control-bar">
+        <select id="scenarioSelect">
+            <option value="duel">1v1 Duel (Pistol vs Pistol)</option>
+            <option value="rifle_vs_shotgun">1v1 Rifle vs Shotgun</option>
+            <option value="squad">Squad Battle (4v4)</option>
+            <option value="super_vs_squad">Super vs Squad</option>
+            <option value="grapple">Grappling Match</option>
+            <option value="sniper_duel">Sniper Duel (with cover)</option>
+            <option value="custom">Custom Setup</option>
+        </select>
+        <button onclick="loadScenario()">Load Scenario</button>
+        <button onclick="runSingleTurn()" id="runTurnBtn">Run Turn</button>
+        <button onclick="runMultipleTurns(10)" class="secondary">Run 10 Turns</button>
+        <button onclick="openBatchModal()" class="secondary">Batch 100</button>
+        <button onclick="resetSimulation()">Reset</button>
+        <span style="margin-left: auto; color: #f1c40f; font-weight: bold;">
+            Turn: <span id="turnCounter">1</span>
+        </span>
+    </div>
+
+    <div class="container">
+        <!-- Tactical Map -->
+        <div class="map-container">
+            <h2>Tactical Map (25x25) - Click units to select, click cells to act</h2>
+            <div id="tacticalMap"></div>
+
+            <div class="legend">
+                <span class="legend-item"><span class="legend-color" style="background:#654321;"></span>Wall (blocks all)</span>
+                <span class="legend-item"><span class="legend-color" style="background:#3d5c3d;"></span>Low Cover (+1CS)</span>
+                <span class="legend-item"><span class="legend-color" style="background:#2d4a2d; border:2px solid #4a6741;"></span>High Cover (+2CS)</span>
+                <span class="legend-item"><span class="legend-color" style="background:#3498db;border-radius:50%;"></span>Team A</span>
+                <span class="legend-item"><span class="legend-color" style="background:#e74c3c;border-radius:50%;"></span>Team B</span>
+            </div>
+
+            <div class="instructions">
+                <strong>How to Play:</strong><br>
+                1. Click a unit to select it<br>
+                2. Click MOVE then click a green cell to move there<br>
+                3. Click ATTACK then click an enemy to attack<br>
+                4. Click GRAPPLE then click adjacent enemy to grab them<br>
+                5. Or just click RUN TURN for AI auto-play
+            </div>
+        </div>
+
+        <!-- Unit Panel -->
+        <div class="unit-panel">
+            <h2>Selected Unit</h2>
+            <div id="selectedUnitInfo">
+                <p style="color: #888; text-align: center; padding: 20px;">Click a unit on the map to view details</p>
+            </div>
+
+            <div id="unitActions" style="display: none;">
+                <div class="ap-display">
+                    <div class="ap-label">ACTION POINTS</div>
+                    <div class="ap-big"><span id="apCurrent">6</span> / <span id="apMax">6</span></div>
+                    <div class="ap-pips-large" id="apPips"></div>
+                </div>
+
+                <div class="equipment-select">
+                    <label>Weapon:</label>
+                    <select id="weaponSelect" onchange="changeWeapon()">
+                        <optgroup label="Pistols">
+                            <option value="pistol_light">Light Pistol (15 dmg)</option>
+                            <option value="pistol">Pistol (20 dmg)</option>
+                            <option value="pistol_heavy">Heavy Pistol (25 dmg)</option>
+                            <option value="revolver">Revolver (28 dmg)</option>
+                        </optgroup>
+                        <optgroup label="Rifles">
+                            <option value="rifle_carbine">Carbine (25 dmg)</option>
+                            <option value="rifle_assault">Assault Rifle (28 dmg)</option>
+                            <option value="rifle_battle">Battle Rifle (35 dmg)</option>
+                            <option value="sniper">Sniper Rifle (45 dmg)</option>
+                            <option value="sniper_anti">Anti-Materiel (60 dmg)</option>
+                        </optgroup>
+                        <optgroup label="SMGs">
+                            <option value="smg_compact">Compact SMG (15 dmg)</option>
+                            <option value="smg">SMG (18 dmg)</option>
+                        </optgroup>
+                        <optgroup label="Shotguns">
+                            <option value="shotgun_tactical">Tactical (30 dmg, 20° cone)</option>
+                            <option value="shotgun_combat">Combat (35 dmg, 25° cone)</option>
+                            <option value="shotgun_sawed">Sawed-Off (40 dmg, 50° cone)</option>
+                            <option value="shotgun_slug">Slug (40 dmg, focused)</option>
+                        </optgroup>
+                        <optgroup label="Melee">
+                            <option value="fists">Fists (5 + STR)</option>
+                            <option value="knife">Knife (10 dmg)</option>
+                            <option value="sword">Sword (15 dmg)</option>
+                            <option value="power_attack">Power Attack (15 + STR, 3AP)</option>
+                        </optgroup>
+                        <optgroup label="Energy (ignores armor)">
+                            <option value="beam_focused">Focused Beam (35 dmg)</option>
+                            <option value="beam_wide">Wide Beam (25 dmg, 45° cone)</option>
+                            <option value="beam_scatter">Scatter Beam (20 dmg, 70° cone)</option>
+                            <option value="blast_cone">Cone Blast (28 dmg, 60° cone)</option>
+                            <option value="burst_radial">Radial Burst (30 dmg, 360°)</option>
+                        </optgroup>
+                        <optgroup label="Thrown">
+                            <option value="thrown">Thrown Object (30 + STR)</option>
+                            <option value="grenade">Grenade (40 dmg, AOE)</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="equipment-select">
+                    <label>Armor:</label>
+                    <select id="armorSelect" onchange="changeArmor()">
+                        <option value="none">None (DR 0)</option>
+                        <option value="leather">Leather Jacket (DR 2)</option>
+                        <option value="kevlar">Kevlar Vest (DR 8)</option>
+                        <option value="tactical">Tactical Vest (DR 12)</option>
+                        <option value="combat">Combat Armor (DR 18)</option>
+                        <option value="power">Power Armor (DR 25)</option>
+                    </select>
+                </div>
+                <div class="equipment-select">
+                    <label>Stance:</label>
+                    <select id="stanceSelect" onchange="changeStance()">
+                        <option value="neutral">Neutral (no bonuses)</option>
+                        <option value="defensive">Defensive (+2 DEF, -2 ATK)</option>
+                        <option value="aggressive">Aggressive (+2 ATK, -2 DEF)</option>
+                        <option value="sniper">Sniper (+2 range ATK, can't move)</option>
+                        <option value="mobile">Mobile (-1 DEF, +2 move)</option>
+                        <option value="overwatch">Overwatch (interrupt enemies)</option>
+                    </select>
+                </div>
+
+                <h3>Actions</h3>
+                <div class="action-buttons">
+                    <button onclick="setMode('move')" id="btnMove">MOVE</button>
+                    <button onclick="setMode('attack')" id="btnAttack">ATTACK</button>
+                    <button onclick="setMode('grapple')" id="btnGrapple">GRAPPLE</button>
+                    <button onclick="endTurnManual()">END TURN</button>
+                </div>
+
+                <div id="grapplePanel" class="grapple-panel" style="display: none;">
+                    <h3 style="color: #9b59b6;">GRAPPLING!</h3>
+                    <div class="grapple-info">
+                        <span id="grappler1">-</span>
+                        <span class="grapple-vs">VS</span>
+                        <span id="grappler2">-</span>
+                    </div>
+                    <div class="position-display" id="positionDisplay">CLINCH</div>
+                    <div class="grapple-actions">
+                        <button onclick="grappleAction('hold')">APPLY HOLD</button>
+                        <button onclick="grappleAction('escape')">ESCAPE</button>
+                        <button onclick="grappleAction('transition')">TRANSITION</button>
+                        <button onclick="grappleAction('release')">RELEASE</button>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Turn Order</h3>
+            <div class="unit-list" id="turnOrder"></div>
+        </div>
+
+        <!-- Combat Log -->
+        <div class="log-panel">
+            <h2>Combat Log</h2>
+            <div id="combatLog"></div>
+        </div>
+    </div>
+
+    <!-- Batch Modal -->
+    <div class="modal" id="batchModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeBatchModal()">&times;</span>
+            <h2>Batch Simulation Results</h2>
+            <div id="batchProgress">Running simulations...</div>
+            <div class="batch-stats" id="batchResults"></div>
+        </div>
+    </div>
+
+    <script>
+    // ============ DATA ============
+    // ============ GENERIC VISUAL SYSTEM ============
+    // Visual types: projectile (dot), beam (line), cone (spread area), ring (360 AOE)
+    // Any weapon/power can use any visual type with configurable: type, color, spread (degrees)
+    // spread: 0 = focused, 15-30 = tight, 45-60 = medium, 90+ = wide, 360 = all around
+
+    const WEAPONS = {
+        // === PISTOLS ===
+        pistol_light: { name: 'Light Pistol', damage: 15, range: 20, accuracy: 0, ap: 2, sound: 130, drPen: 0,
+                        visual: { type: 'projectile', color: '#ff0', spread: 0 } },
+        pistol: { name: 'Pistol', damage: 20, range: 25, accuracy: 0, ap: 2, sound: 140, drPen: 0,
+                  visual: { type: 'projectile', color: '#ff0', spread: 0 } },
+        pistol_heavy: { name: 'Heavy Pistol', damage: 25, range: 25, accuracy: -1, ap: 2, sound: 150, drPen: 2,
+                        visual: { type: 'projectile', color: '#ff0', spread: 0 } },
+        revolver: { name: 'Revolver', damage: 28, range: 20, accuracy: 0, ap: 2, sound: 155, drPen: 3,
+                    visual: { type: 'projectile', color: '#ff0', spread: 0 } },
+
+        // === RIFLES === (BALANCE v1.2)
+        rifle_assault: { name: 'Assault Rifle', damage: 25, range: 60, accuracy: 0, ap: 2, sound: 160, drPen: 2,
+                         visual: { type: 'projectile', color: '#ff0', spread: 0 } },
+        rifle_battle: { name: 'Battle Rifle', damage: 35, range: 70, accuracy: 0, ap: 2, sound: 165, drPen: 4,
+                        visual: { type: 'projectile', color: '#ff0', spread: 0 } },
+        rifle_carbine: { name: 'Carbine', damage: 25, range: 50, accuracy: 1, ap: 2, sound: 155, drPen: 1,
+                         visual: { type: 'projectile', color: '#ff0', spread: 0 } },
+        sniper: { name: 'Sniper Rifle', damage: 45, range: 100, accuracy: 2, ap: 3, sound: 165, drPen: 5,
+                  visual: { type: 'projectile', color: '#fff', spread: 0 } },
+        sniper_anti: { name: 'Anti-Materiel', damage: 60, range: 150, accuracy: 1, ap: 4, sound: 180, drPen: 10,
+                       visual: { type: 'projectile', color: '#fff', spread: 0 } },
+
+        // === SMGS === (BALANCE v1.2: AP 1 for burst, lower dmg)
+        smg: { name: 'SMG', damage: 15, range: 20, accuracy: 0, ap: 1, sound: 150, drPen: 0,
+               visual: { type: 'projectile', color: '#ff0', spread: 0 } },
+        smg_compact: { name: 'Compact SMG', damage: 12, range: 15, accuracy: -1, ap: 1, sound: 145, drPen: 0,
+                       visual: { type: 'projectile', color: '#ff0', spread: 0 } },
+
+        // === SHOTGUNS (cone spread varies by type) ===
+        shotgun_combat: { name: 'Combat Shotgun', damage: 35, range: 10, accuracy: 0, ap: 2, closeBonus: 2, sound: 155, drPen: 0,
+                          visual: { type: 'cone', color: '#f80', spread: 25 } },
+        shotgun_tactical: { name: 'Tactical Shotgun', damage: 30, range: 12, accuracy: 1, ap: 2, closeBonus: 1, sound: 150, drPen: 0,
+                            visual: { type: 'cone', color: '#f80', spread: 20 } },
+        shotgun_sawed: { name: 'Sawed-Off', damage: 40, range: 5, accuracy: -1, ap: 2, closeBonus: 3, sound: 160, drPen: 0,
+                         visual: { type: 'cone', color: '#f80', spread: 50 } },
+        shotgun_slug: { name: 'Slug Shotgun', damage: 40, range: 20, accuracy: 0, ap: 2, sound: 155, drPen: 3,
+                        visual: { type: 'projectile', color: '#f80', spread: 0 } },
+
+        // === MELEE === (BALANCE v1.2)
+        knife: { name: 'Knife', damage: 10, range: 1, accuracy: 1, ap: 1, sound: 30, drPen: 0,
+                 visual: { type: 'melee', color: '#aaa', spread: 0 } },
+        sword: { name: 'Sword', damage: 15, range: 2, accuracy: 0, ap: 2, sound: 40, drPen: 2,
+                 visual: { type: 'melee', color: '#aaa', spread: 0 } },
+        fists: { name: 'Fists', damage: 8, range: 1, accuracy: 0, ap: 1, strBonus: true, sound: 50, drPen: 0,
+                 visual: { type: 'melee', color: '#fff', spread: 0 } },
+        super_punch: { name: 'Super Punch', damage: 25, range: 2, accuracy: 1, ap: 2, strBonus: true, sound: 80, drPen: 10,
+                       visual: { type: 'melee', color: '#f44', spread: 0 } },
+        power_attack: { name: 'Power Attack', damage: 15, range: 2, accuracy: -1, ap: 3, strBonus: true, sound: 70, drPen: 5, knockback: true,
+                        visual: { type: 'melee', color: '#f44', spread: 0 } },
+
+        // === ENERGY WEAPONS (use beam/cone/ring based on spread) ===
+        beam_focused: { name: 'Focused Beam', damage: 35, range: 40, accuracy: 0, ap: 2, sound: 70, ignoresArmor: 0.5,
+                        visual: { type: 'beam', color: '#0ff', spread: 0 } },
+        beam_wide: { name: 'Wide Beam', damage: 25, range: 15, accuracy: 1, ap: 2, sound: 70, ignoresArmor: 0.5,
+                     visual: { type: 'cone', color: '#0ff', spread: 45 } },
+        beam_scatter: { name: 'Scatter Beam', damage: 20, range: 10, accuracy: 2, ap: 2, sound: 70, ignoresArmor: 0.4,
+                        visual: { type: 'cone', color: '#0ff', spread: 70 } },
+        burst_radial: { name: 'Radial Burst', damage: 30, range: 6, accuracy: 2, ap: 4, sound: 90, ignoresArmor: 0.3,
+                        visual: { type: 'ring', color: '#0ff', spread: 360 } },
+        blast_cone: { name: 'Cone Blast', damage: 28, range: 8, accuracy: 1, ap: 3, sound: 85, ignoresArmor: 0.4,
+                      visual: { type: 'cone', color: '#f0f', spread: 60 } },
+
+        // === THROWN / EXPLOSIVES ===
+        thrown: { name: 'Thrown Object', damage: 30, range: 12, accuracy: -1, ap: 2, sound: 60, strBonus: true,
+                  visual: { type: 'projectile', color: '#888', spread: 0 } },
+        grenade: { name: 'Grenade', damage: 40, range: 15, accuracy: -1, ap: 2, sound: 170, aoe: 3,
+                   visual: { type: 'projectile', color: '#4a4', spread: 0 } }
+    };
+
+    const STANCES = {
+        neutral: { name: 'Neutral', offense: 0, defense: 0, movement: 0, color: '' },
+        defensive: { name: 'Defensive', offense: -2, defense: 2, movement: 0, color: 'defensive' },
+        aggressive: { name: 'Aggressive', offense: 2, defense: -2, movement: 0, color: 'aggressive' },
+        sniper: { name: 'Sniper', offense: 2, defense: -2, movement: -999, rangeOnly: true, color: 'sniper' },
+        mobile: { name: 'Mobile', offense: 0, defense: -1, movement: 2, color: 'mobile' },
+        overwatch: { name: 'Overwatch', offense: 0, defense: 0, movement: -999, interrupt: true, color: 'overwatch' }
+    };
+
+    // BALANCE v1.2: Further DR reductions for better weapon viability
+    const ARMORS = {
+        none: { name: 'None', dr: 0, energyDR: 0 },
+        leather: { name: 'Leather Jacket', dr: 2, energyDR: 1 },
+        kevlar: { name: 'Kevlar Vest', dr: 6, energyDR: 3 },
+        tactical: { name: 'Tactical Vest', dr: 8, energyDR: 4 },
+        combat: { name: 'Combat Armor', dr: 12, energyDR: 6 },
+        power: { name: 'Power Armor', dr: 18, energyDR: 12, strBonus: 10 }
+    };
+
+    const GRAPPLE_POSITIONS = ['Standing', 'Clinch', 'Front Mount', 'Back Mount', 'Side Control', 'Guard'];
+    const GRAPPLE_DAMAGE = { 'Clinch': 5, 'Front Mount': 10, 'Back Mount': 15, 'Side Control': 8, 'Guard': 3 };
+
+    // ============ STATE ============
+    let state = {
+        turn: 1,
+        units: [],
+        currentIndex: 0,
+        map: [],
+        selected: null,
+        mode: 'select',
+        width: 25,
+        height: 25,
+        animating: false
+    };
+
+    // ============ INIT ============
+    function initMap() {
+        state.map = [];
+        for (let y = 0; y < state.height; y++) {
+            let row = [];
+            for (let x = 0; x < state.width; x++) {
+                row.push({ x, y, type: 'floor', coverHeight: 0, unit: null });
+            }
+            state.map.push(row);
+        }
+    }
+
+    function render() {
+        const mapEl = document.getElementById('tacticalMap');
+        mapEl.innerHTML = '';
+
+        for (let y = 0; y < state.height; y++) {
+            for (let x = 0; x < state.width; x++) {
+                const cell = state.map[y][x];
+                const div = document.createElement('div');
+                div.className = 'cell';
+                div.dataset.x = x;
+                div.dataset.y = y;
+
+                // Cell type styling
+                if (cell.type === 'wall') div.classList.add('wall');
+                else if (cell.type === 'cover') {
+                    div.classList.add(cell.coverHeight === 1 ? 'cover-low' : 'cover-high');
+                    // Add cover height label
+                    const label = document.createElement('span');
+                    label.className = 'cover-label';
+                    label.textContent = cell.coverHeight === 1 ? 'L' : 'H';
+                    div.appendChild(label);
+                }
+
+                // Unit
+                if (cell.unit && cell.unit.hp > 0) {
+                    const u = cell.unit;
+                    const unitDiv = document.createElement('div');
+                    unitDiv.className = `unit team-${u.team}`;
+                    if (state.selected === u) unitDiv.classList.add('selected-unit');
+                    if (u.grappling || u.grappledBy) unitDiv.classList.add('grappling');
+                    if (u.ap <= 0) unitDiv.classList.add('no-ap');
+                    if (u.altitude > 0) unitDiv.classList.add('flying');
+                    unitDiv.textContent = u.name[0];
+
+                    // HP bar
+                    const hpBar = document.createElement('div');
+                    hpBar.className = 'hp-bar';
+                    const hpFill = document.createElement('div');
+                    const pct = (u.hp / u.maxHp) * 100;
+                    hpFill.className = 'hp-bar-fill' + (pct <= 25 ? ' low' : pct <= 50 ? ' medium' : '');
+                    hpFill.style.width = pct + '%';
+                    hpBar.appendChild(hpFill);
+                    unitDiv.appendChild(hpBar);
+
+                    // AP pips
+                    const apPips = document.createElement('div');
+                    apPips.className = 'ap-pips';
+                    for (let i = 0; i < u.maxAp; i++) {
+                        const pip = document.createElement('div');
+                        pip.className = 'ap-pip' + (i >= u.ap ? ' spent' : '');
+                        apPips.appendChild(pip);
+                    }
+                    unitDiv.appendChild(apPips);
+
+                    // Altitude label
+                    if (u.altitude > 0) {
+                        const altLabel = document.createElement('span');
+                        altLabel.className = 'altitude-label';
+                        altLabel.textContent = 'A' + u.altitude;
+                        div.appendChild(altLabel);
+                    }
+
+                    // Stance indicator
+                    if (u.stance && u.stance !== 'neutral') {
+                        const stanceEl = document.createElement('span');
+                        const stanceData = STANCES[u.stance];
+                        stanceEl.className = 'stance-indicator ' + stanceData.color;
+                        stanceEl.textContent = stanceData.name.substring(0, 3).toUpperCase();
+                        unitDiv.appendChild(stanceEl);
+                    }
+
+                    unitDiv.onclick = (e) => { e.stopPropagation(); selectUnit(u); };
+                    div.appendChild(unitDiv);
+                }
+
+                div.onclick = () => cellClick(x, y);
+                mapEl.appendChild(div);
+            }
+        }
+
+        // Draw grapple lines
+        state.units.forEach(u => {
+            if (u.grappling && u.hp > 0) {
+                drawGrappleLine(u, u.grappling);
+            }
+        });
+
+        updateTurnOrder();
+        updateUnitPanel();
+    }
+
+    // ============ UNITS ============
+    function createUnit(name, team, x, y, opts = {}) {
+        const u = {
+            id: state.units.length + 1,
+            name, team, x, y,
+            hp: opts.hp || 100,
+            maxHp: opts.hp || 100,
+            ap: opts.ap || 6,
+            maxAp: opts.ap || 6,
+            str: opts.str || 30,
+            agl: opts.agl || 30,
+            ins: opts.ins || 30, // Instinct for hearing
+            weapon: opts.weapon || 'pistol',
+            armor: opts.armor || 'none',
+            altitude: opts.altitude || 0,
+            stance: opts.stance || 'neutral',
+            grappling: null,
+            grappledBy: null,
+            grapplePosition: 'Standing',
+            statuses: [],
+            heardSounds: [] // Track what sounds this unit detected
+        };
+        state.units.push(u);
+        state.map[y][x].unit = u;
+        return u;
+    }
+
+    function selectUnit(u) {
+        state.selected = u;
+        state.mode = 'select';
+        clearHighlights();
+        render();
+    }
+
+    function updateUnitPanel() {
+        const info = document.getElementById('selectedUnitInfo');
+        const actions = document.getElementById('unitActions');
+        const u = state.selected;
+
+        if (!u) {
+            info.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">Click a unit on the map to view details</p>';
+            actions.style.display = 'none';
+            return;
+        }
+
+        const w = WEAPONS[u.weapon];
+        const a = ARMORS[u.armor];
+        const hpClass = u.hp <= u.maxHp * 0.25 ? 'danger' : u.hp <= u.maxHp * 0.5 ? 'warning' : '';
+
+        info.innerHTML = `
+            <div class="stat-row"><span class="stat-label">Name:</span><span class="stat-value">${u.name}</span></div>
+            <div class="stat-row"><span class="stat-label">Team:</span><span class="stat-value" style="color:${u.team === 'a' ? '#3498db' : '#e74c3c'}">${u.team.toUpperCase()}</span></div>
+            <div class="stat-row"><span class="stat-label">HP:</span><span class="stat-value ${hpClass}">${u.hp} / ${u.maxHp}</span></div>
+            <div class="stat-row"><span class="stat-label">STR:</span><span class="stat-value">${u.str}</span></div>
+            <div class="stat-row"><span class="stat-label">AGL:</span><span class="stat-value">${u.agl}</span></div>
+            <div class="stat-row"><span class="stat-label">Weapon:</span><span class="stat-value">${w.name} (${w.damage} dmg)</span></div>
+            <div class="stat-row"><span class="stat-label">Armor:</span><span class="stat-value">${a.name} (DR ${a.dr})</span></div>
+            <div class="stat-row"><span class="stat-label">Position:</span><span class="stat-value">(${u.x}, ${u.y})${u.altitude > 0 ? ' Alt:' + u.altitude : ''}</span></div>
+            ${u.statuses.length ? '<div class="status-list">' + u.statuses.map(s => `<span class="status-tag">${s}</span>`).join('') + '</div>' : ''}
+            ${u.grappling || u.grappledBy ? '<div class="status-list"><span class="status-tag grapple">GRAPPLING</span></div>' : ''}
+        `;
+
+        actions.style.display = 'block';
+
+        // AP display
+        document.getElementById('apCurrent').textContent = u.ap;
+        document.getElementById('apMax').textContent = u.maxAp;
+        const pipsEl = document.getElementById('apPips');
+        pipsEl.innerHTML = '';
+        for (let i = 0; i < u.maxAp; i++) {
+            const pip = document.createElement('div');
+            pip.className = 'ap-pip-large' + (i >= u.ap ? ' spent' : '');
+            pipsEl.appendChild(pip);
+        }
+
+        document.getElementById('weaponSelect').value = u.weapon;
+        document.getElementById('armorSelect').value = u.armor;
+        document.getElementById('stanceSelect').value = u.stance || 'neutral';
+
+        // Grapple panel
+        const gPanel = document.getElementById('grapplePanel');
+        if (u.grappling || u.grappledBy) {
+            gPanel.style.display = 'block';
+            const other = u.grappling || u.grappledBy;
+            document.getElementById('grappler1').textContent = u.name;
+            document.getElementById('grappler2').textContent = other.name;
+            document.getElementById('positionDisplay').textContent = u.grapplePosition;
+        } else {
+            gPanel.style.display = 'none';
+        }
+
+        // Update button states
+        document.querySelectorAll('.action-buttons button').forEach(b => b.classList.remove('active'));
+        if (state.mode === 'move') document.getElementById('btnMove').classList.add('active');
+        if (state.mode === 'attack') document.getElementById('btnAttack').classList.add('active');
+        if (state.mode === 'grapple') document.getElementById('btnGrapple').classList.add('active');
+    }
+
+    function updateTurnOrder() {
+        const el = document.getElementById('turnOrder');
+        const alive = state.units.filter(u => u.hp > 0);
+        el.innerHTML = alive.map((u, i) => {
+            const isCurrent = i === state.currentIndex % alive.length;
+            const hpPct = (u.hp / u.maxHp) * 100;
+            const hpClass = hpPct <= 25 ? 'critical' : hpPct <= 50 ? 'hurt' : 'healthy';
+            return `<div class="unit-list-item ${isCurrent ? 'current-turn' : ''}" onclick="selectUnit(state.units[${state.units.indexOf(u)}])">
+                <span style="color:${u.team === 'a' ? '#3498db' : '#e74c3c'}">${u.name}</span>
+                <span class="unit-hp ${hpClass}">${u.hp}/${u.maxHp}</span>
+            </div>`;
+        }).join('');
+    }
+
+    // ============ ACTIONS ============
+    function setMode(mode) {
+        if (!state.selected || state.animating) return;
+        state.mode = mode;
+        clearHighlights();
+
+        const u = state.selected;
+
+        if (mode === 'move') {
+            // Show move range
+            const range = u.ap * 2;
+            for (let dy = -range; dy <= range; dy++) {
+                for (let dx = -range; dx <= range; dx++) {
+                    const nx = u.x + dx, ny = u.y + dy;
+                    if (nx < 0 || nx >= state.width || ny < 0 || ny >= state.height) continue;
+                    if (Math.abs(dx) + Math.abs(dy) > range) continue;
+                    const c = state.map[ny][nx];
+                    if (c.type !== 'wall' && !c.unit) {
+                        const el = document.querySelector(`.cell[data-x="${nx}"][data-y="${ny}"]`);
+                        if (el) el.classList.add('move-range');
+                    }
+                }
+            }
+        } else if (mode === 'attack') {
+            // Show attack range
+            const w = WEAPONS[u.weapon];
+            for (let dy = -w.range; dy <= w.range; dy++) {
+                for (let dx = -w.range; dx <= w.range; dx++) {
+                    const nx = u.x + dx, ny = u.y + dy;
+                    if (nx < 0 || nx >= state.width || ny < 0 || ny >= state.height) continue;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist <= w.range) {
+                        const el = document.querySelector(`.cell[data-x="${nx}"][data-y="${ny}"]`);
+                        if (el) el.classList.add('attack-range');
+                    }
+                }
+            }
+        } else if (mode === 'grapple') {
+            // Show adjacent enemies
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const nx = u.x + dx, ny = u.y + dy;
+                    if (nx < 0 || nx >= state.width || ny < 0 || ny >= state.height) continue;
+                    const c = state.map[ny][nx];
+                    if (c.unit && c.unit.team !== u.team && c.unit.hp > 0) {
+                        const el = document.querySelector(`.cell[data-x="${nx}"][data-y="${ny}"]`);
+                        if (el) el.classList.add('attack-range');
+                    }
+                }
+            }
+        }
+
+        updateUnitPanel();
+    }
+
+    function cellClick(x, y) {
+        if (state.animating) return;
+        const cell = state.map[y][x];
+        const u = state.selected;
+
+        if (state.mode === 'move' && u) {
+            if (cell.type !== 'wall' && !cell.unit) {
+                const dist = Math.abs(x - u.x) + Math.abs(y - u.y);
+                const cost = Math.ceil(dist / 2);
+                if (u.ap >= cost) {
+                    doMove(u, x, y, cost);
+                }
+            }
+        } else if (state.mode === 'attack' && u) {
+            if (cell.unit && cell.unit.team !== u.team && cell.unit.hp > 0) {
+                doAttack(u, cell.unit);
+            }
+        } else if (state.mode === 'grapple' && u) {
+            const dist = Math.abs(x - u.x) + Math.abs(y - u.y);
+            if (cell.unit && cell.unit.team !== u.team && cell.unit.hp > 0 && dist <= 1.5) {
+                doGrapple(u, cell.unit);
+            }
+        } else if (cell.unit) {
+            selectUnit(cell.unit);
+        }
+    }
+
+    function doMove(u, x, y, cost) {
+        state.map[u.y][u.x].unit = null;
+        u.x = x; u.y = y;
+        state.map[y][x].unit = u;
+        u.ap -= cost;
+        addLog(`${u.name} moves to (${x}, ${y}) [-${cost} AP]`, 'move');
+        state.mode = 'select';
+        clearHighlights();
+        render();
+    }
+
+    function doAttack(attacker, defender) {
+        const w = WEAPONS[attacker.weapon];
+        if (attacker.ap < w.ap) {
+            addLog(`${attacker.name} doesn't have enough AP!`, 'info');
+            return;
+        }
+
+        const dist = Math.sqrt(Math.pow(defender.x - attacker.x, 2) + Math.pow(defender.y - attacker.y, 2));
+        if (dist > w.range) {
+            addLog(`Target out of range!`, 'info');
+            return;
+        }
+
+        attacker.ap -= w.ap;
+        state.animating = true;
+
+        // Show sound ring for weapon fire
+        if (w.sound) {
+            showSoundRing(attacker, w.sound);
+        }
+
+        // Apply stance modifiers
+        const attackerStance = STANCES[attacker.stance] || STANCES.neutral;
+        const defenderStance = STANCES[defender.stance] || STANCES.neutral;
+
+        // Fire visual effect based on weapon type (uses generic visual system)
+        fireVisualEffect(attacker, defender, w, () => {
+            // Calculate hit
+            const roll = Math.floor(Math.random() * 100) + 1;
+            const aglBonus = Math.floor((attacker.agl - 30) / 10) * 5;
+            const accBonus = w.accuracy * 5;
+            const stanceBonus = attackerStance.offense * 5;
+            const defenseBonus = defenderStance.defense * 5;
+            let totalBonus = aglBonus + accBonus + stanceBonus;
+
+            // Shotgun close range bonus
+            let closeBonus = 0;
+            if (w.closeBonus && dist <= 3) {
+                closeBonus = w.closeBonus * 5;
+                addLog(`Shotgun close range! +${w.closeBonus}CS`, 'info');
+            }
+            totalBonus += closeBonus;
+
+            // Cover penalty - BALANCE v1.1: reduced from 10/20 to 8/15
+            let coverPen = 0;
+            const cover = checkCover(attacker, defender);
+            if (cover) {
+                coverPen = cover === 1 ? 8 : 15; // Low = -8, High = -15 (was -10/-20)
+                addLog(`Target in ${cover === 1 ? 'low' : 'high'} cover (-${coverPen})`, 'info');
+            }
+
+            // Defender stance reduces hit
+            coverPen += defenseBonus;
+
+            const finalRoll = roll + totalBonus - coverPen;
+            addLog(`${attacker.name} attacks ${defender.name} with ${w.name}`, 'attack');
+
+            // Build breakdown string
+            let breakdown = `Roll: ${roll}`;
+            if (aglBonus !== 0) breakdown += ` ${aglBonus >= 0 ? '+' : ''}${aglBonus} (AGL)`;
+            if (accBonus !== 0) breakdown += ` ${accBonus >= 0 ? '+' : ''}${accBonus} (acc)`;
+            if (stanceBonus !== 0) breakdown += ` ${stanceBonus >= 0 ? '+' : ''}${stanceBonus} (stance)`;
+            if (closeBonus !== 0) breakdown += ` +${closeBonus} (close)`;
+            if (coverPen !== 0) breakdown += ` -${coverPen} (defense)`;
+            breakdown += ` = ${finalRoll}`;
+            addLog(breakdown, 'info');
+
+            let result, mult;
+            if (finalRoll < 40) { result = 'MISS'; mult = 0; }
+            else if (finalRoll < 70) { result = 'Graze'; mult = 0.5; }
+            else if (finalRoll < 95) { result = 'HIT'; mult = 1.0; }
+            else { result = 'CRITICAL!'; mult = 1.5; }
+
+            if (mult > 0) {
+                let dmg = w.damage;
+                if (w.strBonus) dmg += Math.floor(attacker.str / 10);
+                dmg = Math.floor(dmg * mult);
+
+                const armor = ARMORS[defender.armor];
+
+                // Calculate effective DR based on weapon properties
+                let effectiveDR = armor.dr;
+
+                // Energy weapons use energyDR and may ignore some armor
+                if (w.type === 'energy' || w.type === 'plasma' || w.type === 'flame') {
+                    effectiveDR = armor.energyDR || Math.floor(armor.dr * 0.5);
+                    if (w.ignoresArmor) {
+                        effectiveDR = Math.floor(effectiveDR * (1 - w.ignoresArmor));
+                    }
+                }
+
+                // Apply weapon's DR penetration
+                if (w.drPen) {
+                    effectiveDR = Math.max(0, effectiveDR - w.drPen);
+                }
+
+                const net = Math.max(0, dmg - effectiveDR);
+                defender.hp -= net;
+
+                let drText = effectiveDR !== armor.dr ? `${effectiveDR} (pen)` : `${armor.dr}`;
+                showFloatingText(defender, net > 0 ? `-${net}` : 'BLOCKED', mult >= 1.5 ? 'critical' : 'damage');
+                addLog(`${result}: ${dmg} - ${drText} DR = ${net} damage!`, 'damage');
+
+                if (defender.hp <= 0) {
+                    defender.hp = 0;
+                    showFloatingText(defender, 'DOWN!', 'critical');
+                    addLog(`${defender.name} is DOWN!`, 'kill');
+                }
+            } else {
+                showFloatingText(defender, 'MISS', 'miss');
+                addLog(result, 'miss');
+            }
+
+            state.animating = false;
+            state.mode = 'select';
+            clearHighlights();
+            render();
+        });
+    }
+
+    function doGrapple(attacker, defender) {
+        if (attacker.ap < 2) {
+            addLog(`Not enough AP to grapple!`, 'info');
+            return;
+        }
+        if (attacker.grappling || attacker.grappledBy) {
+            addLog(`Already grappling someone!`, 'info');
+            return;
+        }
+        if (defender.grappling || defender.grappledBy) {
+            addLog(`Target already grappling!`, 'info');
+            return;
+        }
+
+        attacker.ap -= 2;
+
+        const aRoll = Math.floor(Math.random() * 100) + attacker.str;
+        const dRoll = Math.floor(Math.random() * 100) + Math.max(defender.str, defender.agl);
+
+        addLog(`${attacker.name} attempts to GRAPPLE ${defender.name}!`, 'grapple');
+        addLog(`Attacker: ${aRoll} vs Defender: ${dRoll}`, 'info');
+
+        if (aRoll > dRoll) {
+            attacker.grappling = defender;
+            defender.grappledBy = attacker;
+            attacker.grapplePosition = 'Clinch';
+            defender.grapplePosition = 'Clinch';
+            showFloatingText(attacker, 'GRABBED!', 'grapple');
+            showFloatingText(defender, 'GRABBED!', 'grapple');
+            addLog(`GRAPPLE SUCCESS! Both in Clinch!`, 'grapple');
+        } else {
+            showFloatingText(defender, 'RESISTED', 'miss');
+            addLog(`${defender.name} resists the grapple!`, 'grapple');
+        }
+
+        state.mode = 'select';
+        clearHighlights();
+        render();
+    }
+
+    function grappleAction(action) {
+        const u = state.selected;
+        if (!u) return;
+
+        if (action === 'hold' && u.grappling) {
+            if (u.ap < 2) { addLog('Not enough AP!', 'info'); return; }
+            u.ap -= 2;
+            const target = u.grappling;
+            const dmg = (GRAPPLE_DAMAGE[u.grapplePosition] || 5) + Math.floor(u.str / 10);
+            target.hp -= dmg;
+            showFloatingText(target, `-${dmg}`, 'grapple');
+            addLog(`${u.name} applies HOLD for ${dmg} damage!`, 'grapple');
+            if (target.hp <= 0) {
+                target.hp = 0;
+                releaseGrapple(u);
+                addLog(`${target.name} is SUBMITTED!`, 'kill');
+            }
+        } else if (action === 'escape' && u.grappledBy) {
+            if (u.ap < 2) { addLog('Not enough AP!', 'info'); return; }
+            u.ap -= 2;
+            const controller = u.grappledBy;
+            const escRoll = Math.floor(Math.random() * 100) + Math.max(u.str, u.agl);
+            const ctrlRoll = Math.floor(Math.random() * 100) + controller.str + 20;
+            addLog(`Escape attempt: ${escRoll} vs ${ctrlRoll}`, 'grapple');
+            if (escRoll > ctrlRoll) {
+                releaseGrapple(u);
+                showFloatingText(u, 'ESCAPED!', 'grapple');
+                addLog(`${u.name} ESCAPES!`, 'grapple');
+            } else {
+                addLog(`${controller.name} maintains control!`, 'grapple');
+            }
+        } else if (action === 'transition' && (u.grappling || u.grappledBy)) {
+            if (u.ap < 1) { addLog('Not enough AP!', 'info'); return; }
+            u.ap -= 1;
+            const positions = ['Clinch', 'Front Mount', 'Back Mount', 'Side Control', 'Guard'];
+            const newPos = positions[Math.floor(Math.random() * positions.length)];
+            const roll = Math.floor(Math.random() * 100) + u.agl;
+            if (roll > 50) {
+                u.grapplePosition = newPos;
+                if (u.grappling) u.grappling.grapplePosition = newPos;
+                if (u.grappledBy) u.grappledBy.grapplePosition = newPos;
+                addLog(`${u.name} transitions to ${newPos}!`, 'grapple');
+            } else {
+                addLog(`Transition failed!`, 'grapple');
+            }
+        } else if (action === 'release') {
+            releaseGrapple(u);
+            addLog(`${u.name} releases the grapple.`, 'grapple');
+        }
+
+        render();
+    }
+
+    function releaseGrapple(u) {
+        if (u.grappling) {
+            u.grappling.grappledBy = null;
+            u.grappling.grapplePosition = 'Standing';
+            u.grappling = null;
+        }
+        if (u.grappledBy) {
+            u.grappledBy.grappling = null;
+            u.grappledBy.grapplePosition = 'Standing';
+            u.grappledBy = null;
+        }
+        u.grapplePosition = 'Standing';
+    }
+
+    // ============ VISUALS ============
+    // Generic visual system - uses weapon.visual properties
+    function fireVisualEffect(from, to, weapon, callback) {
+        const map = document.getElementById('tacticalMap');
+        const fromEl = document.querySelector(`.cell[data-x="${from.x}"][data-y="${from.y}"]`);
+        const toEl = document.querySelector(`.cell[data-x="${to.x}"][data-y="${to.y}"]`);
+
+        if (!fromEl || !toEl) { callback(); return; }
+
+        const fromRect = fromEl.getBoundingClientRect();
+        const toRect = toEl.getBoundingClientRect();
+        const mapRect = map.getBoundingClientRect();
+
+        const startX = fromRect.left - mapRect.left + 12;
+        const startY = fromRect.top - mapRect.top + 12;
+        const endX = toRect.left - mapRect.left + 12;
+        const endY = toRect.top - mapRect.top + 12;
+
+        const visual = weapon.visual || { type: 'projectile', color: '#ff0', spread: 0 };
+
+        switch (visual.type) {
+            case 'beam':
+                fireBeam(startX, startY, endX, endY, visual.color, visual.spread, callback);
+                break;
+            case 'cone':
+                fireCone(startX, startY, endX, endY, visual.color, visual.spread, callback);
+                break;
+            case 'ring':
+                fireRing(startX, startY, visual.color, callback);
+                break;
+            case 'melee':
+                showMeleeEffect(startX, startY, endX, endY, visual.color, callback);
+                break;
+            case 'projectile':
+            default:
+                fireProjectile(startX, startY, endX, endY, visual.color, weapon.aoe, callback);
+                break;
+        }
+    }
+
+    // Animated projectile (bullet, arrow, thrown object)
+    function fireProjectile(startX, startY, endX, endY, color, hasAoe, callback) {
+        const map = document.getElementById('tacticalMap');
+        const proj = document.createElement('div');
+        proj.className = 'projectile';
+        proj.style.background = color;
+        proj.style.boxShadow = `0 0 6px ${color}`;
+        proj.style.left = startX + 'px';
+        proj.style.top = startY + 'px';
+        map.appendChild(proj);
+
+        const duration = hasAoe ? 400 : 200;
+        const startTime = performance.now();
+
+        function animate(time) {
+            const elapsed = time - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const x = startX + (endX - startX) * progress;
+            const y = startY + (endY - startY) * progress;
+            proj.style.left = x + 'px';
+            proj.style.top = y + 'px';
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                proj.remove();
+                if (hasAoe) {
+                    showExplosion(endX, endY, 80);
+                    setTimeout(callback, 300);
+                } else {
+                    callback();
+                }
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+
+    // Fire beam (continuous line) - spread=0 for focused, higher for wider beam
+    function fireBeam(startX, startY, endX, endY, color, spread, callback) {
+        const map = document.getElementById('tacticalMap');
+        const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+        const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+        const beamHeight = 4 + (spread / 10); // Wider spread = thicker beam
+
+        const beam = document.createElement('div');
+        beam.className = 'beam';
+        beam.style.left = startX + 'px';
+        beam.style.top = (startY - beamHeight/2) + 'px';
+        beam.style.width = length + 'px';
+        beam.style.height = beamHeight + 'px';
+        beam.style.background = `linear-gradient(90deg, ${color}, #fff, ${color})`;
+        beam.style.boxShadow = `0 0 ${10 + spread/5}px ${color}, 0 0 ${20 + spread/3}px ${color}`;
+        beam.style.transform = `rotate(${angle}deg)`;
+        map.appendChild(beam);
+
+        setTimeout(() => {
+            beam.remove();
+            callback();
+        }, 200);
+    }
+
+    // Fire cone effect - spread determines angle (20-90 degrees typical)
+    function fireCone(startX, startY, endX, endY, color, spread, callback) {
+        const map = document.getElementById('tacticalMap');
+        const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+        const dist = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+
+        // Create cone using CSS borders - spread determines how wide
+        const coneLength = Math.min(dist, 100);
+        const coneWidth = coneLength * Math.tan((spread / 2) * Math.PI / 180);
+
+        const cone = document.createElement('div');
+        cone.style.cssText = `
+            position: absolute; width: 0; height: 0;
+            border-left: ${coneLength}px solid ${color}80;
+            border-top: ${coneWidth}px solid transparent;
+            border-bottom: ${coneWidth}px solid transparent;
+            transform-origin: left center;
+            z-index: 45; pointer-events: none;
+            left: ${startX}px; top: ${startY}px;
+            transform: rotate(${angle}deg);
+            animation: coneFade 0.4s ease-out forwards;
+        `;
+        map.appendChild(cone);
+
+        setTimeout(() => {
+            cone.remove();
+            callback();
+        }, 400);
+    }
+
+    // Fire ring effect (360 AOE burst)
+    function fireRing(startX, startY, color, callback) {
+        const map = document.getElementById('tacticalMap');
+        const size = 60;
+
+        const ring = document.createElement('div');
+        ring.style.cssText = `
+            position: absolute;
+            border-radius: 50%;
+            border: 4px solid ${color};
+            background: radial-gradient(circle, ${color}40 0%, transparent 70%);
+            z-index: 55; pointer-events: none;
+            left: ${startX - size/2}px; top: ${startY - size/2}px;
+            width: ${size}px; height: ${size}px;
+            animation: shockwaveExpand 0.4s ease-out forwards;
+        `;
+        map.appendChild(ring);
+
+        setTimeout(() => {
+            ring.remove();
+            callback();
+        }, 400);
+    }
+
+    // Melee attack effect (quick slash/punch)
+    function showMeleeEffect(startX, startY, endX, endY, color, callback) {
+        const map = document.getElementById('tacticalMap');
+        const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+
+        const slash = document.createElement('div');
+        slash.style.cssText = `
+            position: absolute;
+            width: 30px; height: 4px;
+            background: linear-gradient(90deg, transparent, ${color}, ${color}, transparent);
+            transform-origin: left center;
+            z-index: 50; pointer-events: none;
+            left: ${startX}px; top: ${startY}px;
+            transform: rotate(${angle}deg);
+            animation: meleeFade 0.2s ease-out forwards;
+        `;
+        map.appendChild(slash);
+
+        setTimeout(() => {
+            slash.remove();
+            callback();
+        }, 200);
+    }
+
+    // Show explosion effect
+    function showExplosion(x, y, size) {
+        const map = document.getElementById('tacticalMap');
+        const explosion = document.createElement('div');
+        explosion.className = 'explosion';
+        explosion.style.left = (x - size/2) + 'px';
+        explosion.style.top = (y - size/2) + 'px';
+        explosion.style.width = size + 'px';
+        explosion.style.height = size + 'px';
+        map.appendChild(explosion);
+
+        setTimeout(() => explosion.remove(), 500);
+    }
+
+    // Show sound ring (decibel visualization)
+    function showSoundRing(unit, decibels) {
+        const map = document.getElementById('tacticalMap');
+        const cellEl = document.querySelector(`.cell[data-x="${unit.x}"][data-y="${unit.y}"]`);
+        if (!cellEl) return;
+
+        const rect = cellEl.getBoundingClientRect();
+        const mapRect = map.getBoundingClientRect();
+        const cx = rect.left - mapRect.left + 12;
+        const cy = rect.top - mapRect.top + 12;
+
+        // Calculate ring size based on decibels (scaled down for visibility)
+        const ringSize = Math.min((decibels / 10) * 25, 400);
+
+        const ring = document.createElement('div');
+        ring.className = 'sound-ring' + (decibels >= 100 ? ' loud' : decibels <= 50 ? ' quiet' : '');
+        ring.style.left = (cx - ringSize/2) + 'px';
+        ring.style.top = (cy - ringSize/2) + 'px';
+        ring.style.width = ringSize + 'px';
+        ring.style.height = ringSize + 'px';
+        map.appendChild(ring);
+
+        // Show decibel label
+        const dbLabel = document.createElement('div');
+        dbLabel.className = 'floating-text info';
+        dbLabel.textContent = decibels + 'dB';
+        dbLabel.style.left = cx + 'px';
+        dbLabel.style.top = (cy - 20) + 'px';
+        dbLabel.style.color = decibels >= 100 ? '#f66' : '#ff0';
+        dbLabel.style.fontSize = '11px';
+        map.appendChild(dbLabel);
+
+        setTimeout(() => {
+            ring.remove();
+            dbLabel.remove();
+        }, 1500);
+    }
+
+    function showFloatingText(unit, text, type) {
+        const map = document.getElementById('tacticalMap');
+        const cellEl = document.querySelector(`.cell[data-x="${unit.x}"][data-y="${unit.y}"]`);
+        if (!cellEl) return;
+
+        const rect = cellEl.getBoundingClientRect();
+        const mapRect = map.getBoundingClientRect();
+
+        const float = document.createElement('div');
+        float.className = 'floating-text ' + type;
+        float.textContent = text;
+        float.style.left = (rect.left - mapRect.left + 12) + 'px';
+        float.style.top = (rect.top - mapRect.top) + 'px';
+        map.appendChild(float);
+
+        setTimeout(() => float.remove(), 1500);
+    }
+
+    function drawGrappleLine(u1, u2) {
+        const map = document.getElementById('tacticalMap');
+        const el1 = document.querySelector(`.cell[data-x="${u1.x}"][data-y="${u1.y}"]`);
+        const el2 = document.querySelector(`.cell[data-x="${u2.x}"][data-y="${u2.y}"]`);
+        if (!el1 || !el2) return;
+
+        const r1 = el1.getBoundingClientRect();
+        const r2 = el2.getBoundingClientRect();
+        const mapR = map.getBoundingClientRect();
+
+        const x1 = r1.left - mapR.left + 12;
+        const y1 = r1.top - mapR.top + 12;
+        const x2 = r2.left - mapR.left + 12;
+        const y2 = r2.top - mapR.top + 12;
+
+        const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+        const line = document.createElement('div');
+        line.className = 'grapple-line';
+        line.style.left = x1 + 'px';
+        line.style.top = y1 + 'px';
+        line.style.width = length + 'px';
+        line.style.transform = `rotate(${angle}deg)`;
+        map.appendChild(line);
+    }
+
+    function checkCover(attacker, defender) {
+        // Simple cover check - look for cover between
+        const dx = Math.sign(defender.x - attacker.x);
+        const dy = Math.sign(defender.y - attacker.y);
+        let x = attacker.x, y = attacker.y;
+        let maxCover = 0;
+
+        while (x !== defender.x || y !== defender.y) {
+            if (x !== defender.x) x += dx;
+            if (y !== defender.y) y += dy;
+            if (x === defender.x && y === defender.y) break;
+
+            const cell = state.map[y]?.[x];
+            if (cell && cell.type === 'cover') {
+                maxCover = Math.max(maxCover, cell.coverHeight);
+            }
+            if (cell && cell.type === 'wall') {
+                return 3; // Full block
+            }
+        }
+
+        // Check if defender is in cover cell
+        const defCell = state.map[defender.y][defender.x];
+        if (defCell.type === 'cover') {
+            maxCover = Math.max(maxCover, defCell.coverHeight);
+        }
+
+        return maxCover;
+    }
+
+    function clearHighlights() {
+        document.querySelectorAll('.cell').forEach(c => {
+            c.classList.remove('move-range', 'attack-range');
+        });
+    }
+
+    // ============ TURN ============
+    function runSingleTurn() {
+        if (state.animating) return;
+
+        const alive = state.units.filter(u => u.hp > 0);
+        if (alive.length === 0) return;
+
+        // Check win
+        const teams = new Set(alive.map(u => u.team));
+        if (teams.size === 1) {
+            const winner = [...teams][0].toUpperCase();
+            addLog(`=== TEAM ${winner} WINS! ===`, 'turn');
+            return;
+        }
+
+        const unit = alive[state.currentIndex % alive.length];
+        addLog(`--- Turn ${state.turn}: ${unit.name}'s turn (AP: ${unit.ap}) ---`, 'turn');
+
+        // Simple AI
+        runAI(unit, alive);
+
+        // End turn
+        unit.ap = unit.maxAp;
+        state.currentIndex++;
+        if (state.currentIndex % alive.length === 0) state.turn++;
+
+        document.getElementById('turnCounter').textContent = state.turn;
+        render();
+    }
+
+    function runAI(unit, alive) {
+        // If grappled, try to escape (only if we have AP)
+        if (unit.grappledBy) {
+            if (unit.ap >= 2) {
+                state.selected = unit;
+                grappleAction('escape');
+            }
+            return; // Can't do much else while grappled
+        }
+
+        // If grappling, apply hold (only if we have AP)
+        if (unit.grappling) {
+            if (unit.ap >= 2) {
+                state.selected = unit;
+                grappleAction('hold');
+            }
+            return; // Focus on the grapple
+        }
+
+        // Find nearest enemy
+        const enemies = alive.filter(u => u.team !== unit.team);
+        if (enemies.length === 0) return;
+
+        enemies.sort((a, b) => {
+            const da = Math.abs(a.x - unit.x) + Math.abs(a.y - unit.y);
+            const db = Math.abs(b.x - unit.x) + Math.abs(b.y - unit.y);
+            return da - db;
+        });
+
+        const target = enemies[0];
+        const w = WEAPONS[unit.weapon];
+        const dist = Math.sqrt(Math.pow(target.x - unit.x, 2) + Math.pow(target.y - unit.y, 2));
+
+        // Attack if in range
+        if (dist <= w.range && unit.ap >= w.ap) {
+            state.selected = unit;
+            doAttack(unit, target);
+            // Second attack if possible
+            setTimeout(() => {
+                if (unit.ap >= w.ap && target.hp > 0) {
+                    doAttack(unit, target);
+                }
+            }, 300);
+        } else {
+            // Move toward target
+            const dx = Math.sign(target.x - unit.x);
+            const dy = Math.sign(target.y - unit.y);
+
+            for (let steps = Math.min(unit.ap * 2, 6); steps >= 1; steps--) {
+                const nx = unit.x + dx * Math.min(steps, Math.abs(target.x - unit.x));
+                const ny = unit.y + dy * Math.min(steps, Math.abs(target.y - unit.y));
+
+                if (nx >= 0 && nx < state.width && ny >= 0 && ny < state.height) {
+                    const cell = state.map[ny][nx];
+                    if (!cell.unit && cell.type !== 'wall') {
+                        const cost = Math.ceil((Math.abs(nx - unit.x) + Math.abs(ny - unit.y)) / 2);
+                        if (unit.ap >= cost) {
+                            doMove(unit, nx, ny, cost);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    function runMultipleTurns(n) {
+        for (let i = 0; i < n; i++) {
+            runSingleTurn();
+            const teams = new Set(state.units.filter(u => u.hp > 0).map(u => u.team));
+            if (teams.size <= 1) break;
+        }
+    }
+
+    function endTurnManual() {
+        if (state.selected) {
+            state.selected.ap = 0;
+        }
+        runSingleTurn();
+    }
+
+    // ============ SCENARIOS ============
+    function loadScenario() {
+        const s = document.getElementById('scenarioSelect').value;
+        resetSimulation();
+
+        switch(s) {
+            case 'duel':
+                createUnit('Alpha', 'a', 8, 12, { weapon: 'pistol', armor: 'kevlar' });
+                createUnit('Beta', 'b', 16, 12, { weapon: 'pistol', armor: 'kevlar' });
+                // Cover
+                state.map[12][11].type = 'cover'; state.map[12][11].coverHeight = 1;
+                state.map[12][13].type = 'cover'; state.map[12][13].coverHeight = 2;
+                break;
+
+            case 'rifle_vs_shotgun':
+                createUnit('Rifleman', 'a', 5, 12, { weapon: 'rifle', armor: 'tactical' });
+                createUnit('Shotgunner', 'b', 19, 12, { weapon: 'shotgun', armor: 'combat' });
+                // Walls and cover
+                for (let i = 10; i < 15; i++) state.map[10][i].type = 'wall';
+                state.map[12][10].type = 'cover'; state.map[12][10].coverHeight = 2;
+                state.map[12][14].type = 'cover'; state.map[12][14].coverHeight = 1;
+                break;
+
+            case 'squad':
+                createUnit('A1', 'a', 3, 3, { weapon: 'rifle', armor: 'tactical' });
+                createUnit('A2', 'a', 3, 5, { weapon: 'rifle', armor: 'tactical' });
+                createUnit('A3', 'a', 5, 3, { weapon: 'smg', armor: 'kevlar' });
+                createUnit('A4', 'a', 5, 5, { weapon: 'sniper', armor: 'kevlar' });
+                createUnit('B1', 'b', 20, 20, { weapon: 'rifle', armor: 'tactical' });
+                createUnit('B2', 'b', 20, 22, { weapon: 'rifle', armor: 'tactical' });
+                createUnit('B3', 'b', 22, 20, { weapon: 'smg', armor: 'kevlar' });
+                createUnit('B4', 'b', 22, 22, { weapon: 'shotgun', armor: 'combat' });
+                // Walls
+                for (let i = 10; i < 15; i++) state.map[12][i].type = 'wall';
+                for (let i = 10; i < 15; i++) { state.map[i][12].type = 'cover'; state.map[i][12].coverHeight = 1; }
+                break;
+
+            case 'super_vs_squad':
+                createUnit('TITAN', 'a', 12, 12, { hp: 200, str: 80, agl: 50, weapon: 'fists', armor: 'power' });
+                createUnit('S1', 'b', 5, 5, { hp: 80, weapon: 'rifle', armor: 'tactical' });
+                createUnit('S2', 'b', 19, 5, { hp: 80, weapon: 'rifle', armor: 'tactical' });
+                createUnit('S3', 'b', 5, 19, { hp: 80, weapon: 'rifle', armor: 'tactical' });
+                createUnit('S4', 'b', 19, 19, { hp: 80, weapon: 'sniper', armor: 'kevlar' });
+                break;
+
+            case 'grapple':
+                createUnit('Wrestler1', 'a', 11, 12, { hp: 100, str: 50, agl: 40, weapon: 'fists' });
+                createUnit('Wrestler2', 'b', 13, 12, { hp: 100, str: 45, agl: 45, weapon: 'fists' });
+                break;
+
+            case 'sniper_duel':
+                createUnit('Sniper1', 'a', 2, 12, { weapon: 'sniper', armor: 'kevlar' });
+                createUnit('Sniper2', 'b', 22, 12, { weapon: 'sniper', armor: 'kevlar' });
+                // Lots of cover
+                state.map[12][6].type = 'cover'; state.map[12][6].coverHeight = 2;
+                state.map[12][10].type = 'cover'; state.map[12][10].coverHeight = 1;
+                state.map[12][14].type = 'cover'; state.map[12][14].coverHeight = 1;
+                state.map[12][18].type = 'cover'; state.map[12][18].coverHeight = 2;
+                state.map[10][12].type = 'wall';
+                state.map[14][12].type = 'wall';
+                break;
+        }
+
+        render();
+        addLog(`Loaded scenario: ${s}`, 'turn');
+    }
+
+    // ============ BATCH ============
+    function openBatchModal() {
+        document.getElementById('batchModal').classList.add('active');
+        document.getElementById('batchProgress').textContent = 'Running 100 simulations...';
+        document.getElementById('batchResults').innerHTML = '';
+
+        setTimeout(() => runBatch(100), 100);
+    }
+
+    function closeBatchModal() {
+        document.getElementById('batchModal').classList.remove('active');
+    }
+
+    function runBatch(count) {
+        const results = { aWins: 0, bWins: 0, totalTurns: 0 };
+        const scenario = document.getElementById('scenarioSelect').value;
+
+        for (let i = 0; i < count; i++) {
+            resetSimulation(true);
+            loadScenarioSilent(scenario);
+
+            let turns = 0;
+            while (turns < 100) {
+                runTurnSilent();
+                turns++;
+                const teams = new Set(state.units.filter(u => u.hp > 0).map(u => u.team));
+                if (teams.size <= 1) {
+                    if (teams.has('a')) results.aWins++;
+                    else if (teams.has('b')) results.bWins++;
+                    break;
+                }
+            }
+            results.totalTurns += turns;
+        }
+
+        const avgTurns = (results.totalTurns / count).toFixed(1);
+        document.getElementById('batchProgress').textContent = `Completed ${count} simulations!`;
+        document.getElementById('batchResults').innerHTML = `
+            <div class="batch-stat"><div class="value">${results.aWins}</div><div class="label">Team A Wins</div></div>
+            <div class="batch-stat"><div class="value">${results.bWins}</div><div class="label">Team B Wins</div></div>
+            <div class="batch-stat"><div class="value">${((results.aWins/count)*100).toFixed(1)}%</div><div class="label">Team A Win Rate</div></div>
+            <div class="batch-stat"><div class="value">${avgTurns}</div><div class="label">Avg Turns</div></div>
+        `;
+
+        // Restore display
+        resetSimulation();
+        loadScenario();
+    }
+
+    function loadScenarioSilent(s) {
+        // Same as loadScenario but no logging
+        switch(s) {
+            case 'duel':
+                createUnit('A', 'a', 8, 12, { weapon: 'pistol', armor: 'kevlar' });
+                createUnit('B', 'b', 16, 12, { weapon: 'pistol', armor: 'kevlar' });
+                break;
+            case 'rifle_vs_shotgun':
+                createUnit('A', 'a', 5, 12, { weapon: 'rifle', armor: 'tactical' });
+                createUnit('B', 'b', 19, 12, { weapon: 'shotgun', armor: 'combat' });
+                break;
+            case 'squad':
+                createUnit('A1', 'a', 3, 3, { weapon: 'rifle', armor: 'tactical' });
+                createUnit('A2', 'a', 3, 5, { weapon: 'rifle', armor: 'tactical' });
+                createUnit('A3', 'a', 5, 3, { weapon: 'smg', armor: 'kevlar' });
+                createUnit('A4', 'a', 5, 5, { weapon: 'sniper', armor: 'kevlar' });
+                createUnit('B1', 'b', 20, 20, { weapon: 'rifle', armor: 'tactical' });
+                createUnit('B2', 'b', 20, 22, { weapon: 'rifle', armor: 'tactical' });
+                createUnit('B3', 'b', 22, 20, { weapon: 'smg', armor: 'kevlar' });
+                createUnit('B4', 'b', 22, 22, { weapon: 'shotgun', armor: 'combat' });
+                break;
+            case 'super_vs_squad':
+                createUnit('T', 'a', 12, 12, { hp: 200, str: 80, agl: 50, weapon: 'fists', armor: 'power' });
+                createUnit('S1', 'b', 5, 5, { hp: 80, weapon: 'rifle', armor: 'tactical' });
+                createUnit('S2', 'b', 19, 5, { hp: 80, weapon: 'rifle', armor: 'tactical' });
+                createUnit('S3', 'b', 5, 19, { hp: 80, weapon: 'rifle', armor: 'tactical' });
+                createUnit('S4', 'b', 19, 19, { hp: 80, weapon: 'sniper', armor: 'kevlar' });
+                break;
+            case 'grapple':
+                createUnit('W1', 'a', 11, 12, { hp: 100, str: 50, agl: 40, weapon: 'fists' });
+                createUnit('W2', 'b', 13, 12, { hp: 100, str: 45, agl: 45, weapon: 'fists' });
+                break;
+            case 'sniper_duel':
+                createUnit('S1', 'a', 2, 12, { weapon: 'sniper', armor: 'kevlar' });
+                createUnit('S2', 'b', 22, 12, { weapon: 'sniper', armor: 'kevlar' });
+                break;
+        }
+    }
+
+    function runTurnSilent() {
+        const alive = state.units.filter(u => u.hp > 0);
+        if (alive.length === 0) return;
+
+        const unit = alive[state.currentIndex % alive.length];
+
+        // AI without animations
+        if (unit.grappledBy) {
+            // Escape attempt
+            const esc = Math.floor(Math.random() * 100) + Math.max(unit.str, unit.agl);
+            const ctrl = Math.floor(Math.random() * 100) + unit.grappledBy.str + 20;
+            if (esc > ctrl) releaseGrapple(unit);
+            unit.ap -= 2;
+        } else if (unit.grappling) {
+            const dmg = 5 + Math.floor(unit.str / 10);
+            unit.grappling.hp -= dmg;
+            if (unit.grappling.hp <= 0) releaseGrapple(unit);
+            unit.ap -= 2;
+        } else {
+            const enemies = alive.filter(u => u.team !== unit.team);
+            if (enemies.length > 0) {
+                const target = enemies.sort((a, b) =>
+                    (Math.abs(a.x - unit.x) + Math.abs(a.y - unit.y)) -
+                    (Math.abs(b.x - unit.x) + Math.abs(b.y - unit.y))
+                )[0];
+
+                const w = WEAPONS[unit.weapon];
+                const dist = Math.sqrt(Math.pow(target.x - unit.x, 2) + Math.pow(target.y - unit.y, 2));
+
+                if (dist <= w.range && unit.ap >= w.ap) {
+                    // Attack
+                    unit.ap -= w.ap;
+                    const roll = Math.floor(Math.random() * 100) + w.accuracy * 5;
+                    if (roll >= 40) {
+                        let dmg = w.damage;
+                        if (w.strBonus) dmg += Math.floor(unit.str / 10);
+                        if (roll >= 95) dmg = Math.floor(dmg * 1.5);
+                        else if (roll < 70) dmg = Math.floor(dmg * 0.5);
+                        const net = Math.max(0, dmg - ARMORS[target.armor].dr);
+                        target.hp -= net;
+                    }
+                } else {
+                    // Move
+                    const dx = Math.sign(target.x - unit.x);
+                    const dy = Math.sign(target.y - unit.y);
+                    const nx = unit.x + dx * 2;
+                    const ny = unit.y + dy * 2;
+                    if (nx >= 0 && nx < state.width && ny >= 0 && ny < state.height) {
+                        const cell = state.map[ny]?.[nx];
+                        if (cell && !cell.unit && cell.type !== 'wall') {
+                            state.map[unit.y][unit.x].unit = null;
+                            unit.x = nx; unit.y = ny;
+                            state.map[ny][nx].unit = unit;
+                        }
+                    }
+                }
+            }
+        }
+
+        unit.ap = unit.maxAp;
+        state.currentIndex++;
+        if (state.currentIndex % alive.length === 0) state.turn++;
+    }
+
+    // ============ UTILITY ============
+    function addLog(msg, type = 'info') {
+        const log = document.getElementById('combatLog');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry ' + type;
+        entry.textContent = msg;
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function changeWeapon() {
+        if (state.selected) state.selected.weapon = document.getElementById('weaponSelect').value;
+        updateUnitPanel();
+    }
+
+    function changeArmor() {
+        if (state.selected) state.selected.armor = document.getElementById('armorSelect').value;
+        updateUnitPanel();
+    }
+
+    function changeStance() {
+        if (state.selected) {
+            const newStance = document.getElementById('stanceSelect').value;
+            const oldStance = state.selected.stance;
+            state.selected.stance = newStance;
+            addLog(`${state.selected.name} changes stance: ${STANCES[oldStance].name} -> ${STANCES[newStance].name}`, 'move');
+            render();
+        }
+    }
+
+    function resetSimulation(silent = false) {
+        state.turn = 1;
+        state.units = [];
+        state.currentIndex = 0;
+        state.selected = null;
+        state.mode = 'select';
+        state.animating = false;
+        initMap();
+        if (!silent) {
+            document.getElementById('combatLog').innerHTML = '';
+            document.getElementById('turnCounter').textContent = '1';
+            addLog('Simulation reset', 'info');
+        }
+        render();
+    }
+
+    // ============ INIT ============
+    initMap();
+    loadScenario();
+    </script>
+</body>
+</html>

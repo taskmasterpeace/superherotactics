@@ -1,0 +1,71 @@
+Effect_Name,Severity_Level,Duration_Type,Duration_Value,Gameplay_Effect,Movement_Penalty,Action_Penalty,Recovery_Method,Medical_Treatment,Clone_Required,Description,Prerequisites
+Bleeding,I,Turns,3,Lose 5 health per turn,None,-1CS to physical actions,First Aid or Medical,Bandages and antiseptic,No,Minor cuts causing slow blood loss,Physical damage
+Bleeding,II,Turns,5,Lose 10 health per turn,-1 movement,-2CS to physical actions,Medical treatment required,Hospital visit required,No,Serious wounds with significant blood loss,Major physical damage
+Bleeding,III,Turns,Until treated,Lose 20 health per turn,-2 movement,-3CS all actions,Emergency medical required,Surgery required,Possible,Arterial bleeding requiring immediate intervention,Critical physical damage
+Poisoned,I,Turns,6,Lose 3 health per turn; -1CS Constitution,None,-1CS to all rolls,Time or antidote,Basic antidote,No,Mild toxin affecting performance,Poison exposure
+Poisoned,II,Turns,10,Lose 8 health per turn; -2CS Constitution,-1 movement,-2CS to all rolls,Antidote or medical,Hospital detox required,No,Serious poisoning requiring treatment,Major poison exposure
+Poisoned,III,Turns,Until treated,Lose 15 health per turn; -3CS Constitution,-2 movement,-3CS all actions,Immediate medical,Intensive care required,Possible,Life-threatening toxicity,Severe poison exposure
+Diseased,I,Days,7,Daily stat reduction rolls,None,-1CS to affected stats,Time or medical,Basic medical care,No,Minor illness affecting daily function,Disease exposure
+Diseased,II,Days,14,-1CS all stats daily,None,-2CS to all actions,Medical treatment,Extended hospital stay,No,Serious infection requiring intervention,Major disease exposure
+Diseased,III,Weeks,Until treated,-2CS all stats daily,-1 movement,-3CS all actions,Advanced medical,Quarantine and intensive care,Yes,Exotic disease requiring extreme measures,Critical disease exposure
+Radiation Sickness,I,Days,5,Nausea; -1CS Constitution,None,Intermittent action loss,Rad-away or time,Radiation treatment,No,Low-level radiation exposure,Radiation exposure
+Radiation Sickness,II,Weeks,3,Hair loss; -2CS Constitution and Stamina,None,-2CS physical actions,Medical treatment,Extended treatment,No,Moderate radiation requiring hospitalization,Major radiation exposure
+Radiation Sickness,III,Weeks,Until treated,Organ failure; -3CS all physical stats,-2 movement,-3CS all actions,Advanced medical,Bone marrow transplant,Yes,Lethal radiation requiring extreme intervention,Critical radiation exposure
+Sickness,I,Days,3,Flu-like symptoms; -1CS to two random stats,None,25% chance to lose turn,Rest or basic medical,Bed rest,No,Common illness,Natural causes
+Sickness,II,Days,7,Fever and weakness; -2CS to three random stats,None,50% chance to lose turn,Medical attention,Hospital treatment,No,Serious illness requiring care,Major illness
+Sickness,III,Weeks,Until treated,Critical illness; -3CS to all stats,-1 movement,Cannot take strenuous actions,Intensive medical care,Life support required,Possible,Life-threatening condition,Critical illness
+Frightened,None,Turns,5,Must move away from fear source,-2 movement,Cannot attack fear source,Remove fear source,Psychological counseling,No,Overwhelming terror,Fear effect
+Panicked,None,Turns,3,Random movement; cannot take planned actions,Uncontrolled movement,Cannot coordinate with team,Time or calming influence,Sedatives,No,Complete loss of rational thought,Extreme fear
+Berserk,None,Turns,4,Must attack nearest target (ally or enemy),+1 movement,Cannot use skills or tactics,Restraint or unconsciousness,Sedatives,No,Uncontrolled rage,Mental manipulation
+Psychotic,None,Turns,6,Target random enemy until dead or incapacitated,Normal,Cannot switch targets,Restraint or knockout,Psychiatric intervention,No,Fixed obsessive targeting,Mental breakdown
+Mind Controlled,None,Turns,Variable,Enemy controls all actions,Controlled by enemy,Controlled by enemy,Break controller concentration,Psychiatric deprogramming,No,Complete mental domination,Psychic attack
+Charmed,None,Turns,10,Friendly to charm source; won't attack them,Normal,-2CS vs charm source,Distance or dispel,Therapy,No,Supernatural attraction or loyalty,Supernatural influence
+Confused,None,Turns,4,50% chance of random action each turn,Normal,Random action chance,Time or clarity effect,Psychiatric evaluation,No,Mental disorientation,Mental attack
+Stunned,None,Turns,2,Cannot take actions but aware of surroundings,Cannot move,Cannot act,Time or medical stimulant,Stimulants,No,Temporary incapacitation,Physical shock
+Dazed,None,Turns,3,Can take only one action per turn; -2CS all rolls,Halved movement,One action only,Time or medical aid,Basic medical,No,Reduced mental function,Head trauma
+Unconscious,None,Special,Until awakened,Cannot take any actions; all defenses -3CS,Cannot move,Cannot act,External awakening or time,Medical examination,No,Complete loss of consciousness,Knockout damage
+Dying,None,Turns,Variable,Lose consciousness; make death saves each turn,Cannot move,Cannot act,Medical intervention,Emergency medicine,Yes if death occurs,On the verge of death,Health reaches 0
+Dead,None,Permanent,Permanent,No actions; ghost/spirit form possible,Cannot move,Cannot act,Resurrection or cloning,Morgue,Yes,Clinical death,Dying condition failure
+Exhausted,None,Hours,8,-2CS to all actions; movement halved,Halved movement,-2CS all actions,8 hours rest,Stimulants short-term,No,Physical and mental fatigue,Overexertion
+Tired,None,Hours,4,-1CS to all actions,Normal,-1CS all actions,4 hours rest,Caffeine or stimulants,No,Reduced performance from fatigue,Extended activity
+Paralyzed,None,Turns,5,Cannot move or take physical actions,Cannot move,No physical actions,Time or medical intervention,Nerve stimulation,No,Complete loss of motor function,Nerve damage/toxin
+Sleep,None,Special,Until awakened,Unconscious; can only be awakened by others,Cannot move,Cannot act,External awakening,Wake-up stimulants,No,Natural or induced sleep,Sleep effect
+Frozen,None,Turns,3,Immobile unless Strength exceeds freeze rank,Cannot move,Physical actions at -3CS,Heat source or superior strength,Warming treatment,No,Body temperature critically low,Cold exposure
+Burning,None,Turns,4,Increasing fire damage each turn; spread to others,Normal,-1CS concentration,Stop drop roll or water,Burn treatment,No,Clothing or body on fire,Fire exposure
+Prone,None,Instant,1 action to stand,-2CS ranged defense; +2CS melee defense when down,Crawling speed only,Standing takes 1 action,Stand up action,None,No,Knocked down or lying flat,Knockdown effect
+Blind,None,Turns,Variable,Cannot target visually; -4CS all actions requiring sight,Halved movement,-4CS sight-based actions,Restore sight or adaptation,Eye treatment,Possible,Cannot see,Blindness effect
+Deaf,None,Turns,Variable,Cannot hear; immune to sonic attacks,Normal,-2CS audio-based perception,Restore hearing,Hearing treatment,Possible,Cannot hear,Deafness effect
+Mute,None,Turns,Variable,Cannot speak; no verbal spells/commands,Normal,No verbal abilities,Restore speech,Throat treatment,Possible,Cannot speak,Throat damage
+Drug Influenced,Variable,Hours,Variable,Temporary stat decreases,Variable,Variable effects,Time or medical intervention,Detox treatment,No,Substance affecting performance,Drug exposure
+Drug Enhanced,Variable,Hours,Variable,Temporary stat increases with side effects,Variable,Variable effects,Time or crash effects,Medical monitoring,No,Performance enhancing substances,Enhancement drugs
+Shrunk,None,Turns,10,Harder to hit with melee; easier with ranged,+2CS dodge melee; -2CS dodge ranged,Size-based combat modifiers,Dispel or time,Size restoration,No,Physically reduced in size,Size manipulation
+Gigantic,None,Turns,10,Easier to hit; +2CS melee damage; structural issues,-1CS dodge; +2CS melee,Size-based combat effects,Dispel or time,Size restoration,No,Physically increased in size,Size manipulation
+Invisible,None,Turns,Variable,Cannot be targeted visually; +3CS stealth,Normal,+3CS surprise attacks,Dispel or concentration loss,None,No,Cannot be seen,Invisibility power
+Intangible,None,Turns,Variable,Immune to physical attacks; cannot touch physical objects,Phase through solid matter,Cannot affect physical world,Power concentration,None,No,Existing between dimensions,Phasing power
+Aged,Rapid,Days,Variable,Age quickly; stats decrease over time,Decreasing mobility,Decreasing all stats,Time reversal or medical,Age regression therapy,Yes,Supernatural rapid aging,Time manipulation
+Time Displaced,None,Turns,Variable,Existing partially outside normal time,Intermittent presence,Actions delayed or advanced,Time correction,Temporal stabilization,No,Temporal existence disruption,Time travel effects
+Reality Phased,None,Turns,Variable,Partially exists in alternate reality,Unpredictable movement,Unpredictable action results,Reality anchor,Dimensional medicine,Possible,Slipping between realities,Reality manipulation
+Quantum Unstable,None,Turns,Variable,May teleport randomly; duplicate selves possible,Random location changes,Unpredictable duplicates,Quantum stabilization,Quantum medicine,Possible,Quantum existence uncertainty,Quantum manipulation
+Soul Separated,None,Special,Until reunited,Body unconscious; spirit can act as ghost,Spirit movement only,Spirit actions only,Soul restoration,Spiritual healing,Yes if permanent,Soul exists separately from body,Soul manipulation
+Memory Loss,I,Days,7,Cannot remember recent events,Normal,-2CS knowledge-based actions,Memory restoration,Therapy,No,Recent memory affected,Memory manipulation
+Memory Loss,II,Weeks,4,Cannot remember personal history,Normal,-3CS all knowledge,Professional therapy,Psychiatric treatment,No,Personal identity affected,Major memory loss
+Memory Loss,III,Permanent,Until treated,Complete amnesia; new personality possible,Normal,Start over with basic knowledge,Miracle cure or acceptance,Long-term care,Possible,Complete memory erasure,Total memory wipe
+Power Dampened,None,Turns,Variable,LSW abilities reduced by 50%,Normal,Power effectiveness halved,Remove dampener,Power restoration therapy,No,Supernatural abilities suppressed,Power suppression
+Power Drained,None,Hours,Variable,LSW abilities completely unavailable,Normal,No supernatural abilities,Time or power restoration,Energy restoration,No,Supernatural abilities temporarily gone,Power drain attack
+Power Overloaded,None,Turns,Variable,Powers uncontrollable; random activation,Variable,Powers activate randomly,Power control training,Medical stabilization,Possible,Abilities beyond user control,Power overuse
+Cloned,None,Permanent,Permanent,New body with previous memories,Full mobility restored,All capabilities restored,Not applicable,Clone adjustment therapy,Complete,Death avoided through cloning,Death with clone backup
+Hospitalized,None,Days,Variable,Must remain in medical facility,Facility-bound,Medical supervision required,Recovery completion,Professional medical care,No,Requires extended medical treatment,Serious injury/illness
+Critical Condition,None,Days,Variable,Life support required; unconscious,Cannot move,Cannot act,Medical intervention,Intensive care unit,Possible,On life support systems,Near-death state
+Stable Condition,None,Days,Variable,Conscious but bedridden,Bed-bound,Limited actions only,Continued treatment,Hospital monitoring,No,Recovering but still hospitalized,Medical stabilization
+Quarantined,None,Days,Variable,Isolated due to contagion risk,Facility isolated,No contact with others,Disease cure,Containment protocols,No,Separated due to infection risk,Contagious condition
+Cybernetic Rejection,None,Weeks,Variable,Artificial implants causing immune response,Variable,Technology malfunctions,Immunosuppressive therapy,Cybernetic surgery,Possible,Body rejecting artificial parts,Cybernetic implants
+Temporal Echo,None,Turns,Variable,Actions happen multiple times across timelines,Multiple simultaneous selves,Actions ripple across time,Timeline stabilization,Temporal medicine,No,Existence across multiple timelines,Time travel side effects
+Pinned,None,Turns,Until escaped,Immobilized by grappler; can only attempt escape,Cannot move,Escape attempts only,Escape success,None,No,Held in dominant wrestling position,Wrestling Pin Hold
+Choked,None,Turns,Until released,-1CS cumulative per turn; unconscious after 3-4 turns,Cannot move,Increasing penalty per turn,Release or escape,Oxygen restoration,No,Blood/air choke restricting consciousness,Choke hold applied
+Arm_Damaged,None,Until healed,-2CS to MEL actions with affected arm,Normal,-2CS MEL actions,Medical treatment,Splint or surgery,No,Arm joint or bone damaged from lock,Arm lock submission
+Leg_Damaged,None,Until healed,-2CS to AGL; -2 movement per leg damaged,-2 movement,-2CS AGL actions,Medical treatment,Splint or surgery,No,Leg joint or bone damaged from lock,Leg lock submission
+Shoulder_Damaged,None,Until healed,-2CS with affected arm; cannot lift heavy objects,Normal,-2CS arm actions,Medical treatment,Physical therapy,No,Shoulder dislocated or damaged from Kimura/Americana,Shoulder submission
+Crushed,None,Turns,Until released,Internal damage continues even after release; -2CS all,Normal,-2CS all actions,Release + medical,Hospital treatment,Possible,Internal organs compressed by super strength,Crushing Hold from STR 50+
+Dislocated,None,Until reset,-3CS all actions due to extreme pain,Normal,-3CS all actions,Joint reset (painful),Medical reset,No,Joint popped out of socket,Critical submission failure
+Arms_Pinned,None,Turns,Until released,Cannot use arms for any actions,Normal,No arm-based actions,Release or escape,None,No,Both arms trapped by crucifix or similar hold,Crucifix hold applied
+Grappled,None,Turns,Until escaped,In grappling combat; limited action options,Half movement if permitted,Grappling actions only,Escape success,None,No,Engaged in close-quarters grappling combat,Grapple initiated

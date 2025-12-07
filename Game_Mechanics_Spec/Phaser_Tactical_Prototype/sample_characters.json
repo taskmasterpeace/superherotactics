@@ -1,0 +1,1506 @@
+{
+  "characters": [
+    {
+      "id": "hero-batman",
+      "identity": {
+        "character_name": "Bruce Wayne",
+        "alias": "Batman",
+        "nationality": "American",
+        "faction": "Independent",
+        "origin_type": "skilled_human",
+        "threat_level": "level2",
+        "age": 42,
+        "gender": "Male"
+      },
+      "primary_stats": {
+        "mel": 45,
+        "agl": 45,
+        "str": 25,
+        "sta": 35,
+        "int": 50,
+        "ins": 50,
+        "con": 45
+      },
+      "derived_stats": {
+        "health": 95,
+        "initiative": 47,
+        "karma": 48,
+        "dodge_melee": "+1CS",
+        "dodge_ranged": "-1CS",
+        "movement": 10,
+        "carry_cap": 250
+      },
+      "threat_assessment": {
+        "pcf": 2.5,
+        "stam": 2.0,
+        "spam": "Controlled"
+      },
+      "education_career": {
+        "education_level": "Doctorate",
+        "career_category": "BIZ",
+        "career_rank": 5,
+        "current_job": "CEO / Vigilante",
+        "career_skills": ["Business +4CS", "Finance +3CS", "Negotiation +3CS"],
+        "secondary_career": "PHY",
+        "secondary_rank": 4,
+        "secondary_job": "Detective",
+        "secondary_skills": ["Detective +5CS", "Forensics +4CS", "Martial Arts +4CS"],
+        "research_capability": "Expert",
+        "research_speed": "1.5x",
+        "research_types": ["All_Tech", "Weapons", "Armor", "Vehicles"],
+        "investigation_bonus": "+5CS Criminal, +5CS Forensic"
+      },
+      "powers": [],
+      "skills": [
+        {"name": "Martial Arts", "bonus": "+4CS"},
+        {"name": "Detective", "bonus": "+5CS"},
+        {"name": "Stealth", "bonus": "+4CS"},
+        {"name": "Intimidation", "bonus": "+4CS"},
+        {"name": "Piloting", "bonus": "+3CS"}
+      ],
+      "talents": [
+        {"name": "Danger Sense", "effect": "Cannot be surprised"},
+        {"name": "Iron Will", "effect": "+2CS vs mental attacks"},
+        {"name": "Quick Draw", "effect": "Draw weapon as free action"}
+      ],
+      "equipment": {
+        "primary_weapon": {
+          "id": "WPN_BAT_001",
+          "name": "Batarangs",
+          "damage": 15,
+          "type": "Slashing/Blunt",
+          "range": 50,
+          "ammo": "12/throwing",
+          "special": "Returning, can carry multiple types (explosive, electric, etc.)"
+        },
+        "secondary_weapon": {
+          "id": "WPN_BAT_002",
+          "name": "Grapple Gun",
+          "damage": 10,
+          "range": 100,
+          "special": "Utility - rapid vertical movement, can restrain"
+        },
+        "tertiary_weapon": {
+          "id": "WPN_MEL_MARTIAL",
+          "name": "Martial Arts",
+          "damage": "MEL+15",
+          "type": "Blunt",
+          "special": "+4CS to hit, can choose lethal or non-lethal"
+        },
+        "armor": {
+          "id": "ARM_BAT_SUIT",
+          "name": "Batsuit",
+          "category": "Medium",
+          "dr_physical": 18,
+          "dr_energy": 12,
+          "dr_mental": 5,
+          "condition": 100,
+          "weight": 20,
+          "str_required": 15,
+          "movement_penalty": 0,
+          "stealth_penalty": "+1CS",
+          "special": "Cape glider, cowl HUD, encrypted comms, gas mask built-in"
+        },
+        "gear": [
+          {"id": "UTIL_BAT_001", "name": "Utility Belt", "contents": ["Smoke Pellets (10)", "Flash Grenades (4)", "Lockpicks", "Forensic Kit", "Rebreather", "First Aid", "Trackers (6)"]},
+          {"id": "VEH_BAT_001", "name": "Batmobile (Nearby)", "stats": "Speed 200mph, Armor 30 DR, Weapons"},
+          {"id": "DRN_BAT_001", "name": "Bat-Drone", "stats": "Recon, thermal, 2hr battery"},
+          {"id": "COM_BAT_001", "name": "Cowl Comm System", "stats": "Encrypted, Oracle uplink"}
+        ]
+      },
+      "combat_state": {
+        "current_hp": 95,
+        "current_ap": 6,
+        "stance": "Defensive",
+        "mode": "Alert",
+        "status_effects": [],
+        "pos_x": 0,
+        "pos_y": 0,
+        "elevation": 0
+      },
+      "personality": {
+        "type": "Tactical",
+        "type_id": 3,
+        "traits": "Paranoid, prepared, refuses to kill",
+        "target_preference": "Major Threat"
+      },
+      "weaknesses": [
+        {"type": "Physical", "description": "No superhuman abilities", "effect": "Must rely on equipment, tactics, and preparation"},
+        {"type": "Psychological", "description": "No killing rule", "effect": "Will not use lethal force, can be exploited"},
+        {"type": "Psychological", "description": "Parents' murder trauma", "effect": "-2CS vs fear effects involving loss"}
+      ],
+      "contacts": [
+        {"name": "Alfred Pennyworth", "relationship": "Butler/Father Figure", "faction": "Independent", "trust": 5, "usefulness": "Base support, medical, wisdom"},
+        {"name": "Commissioner Gordon", "relationship": "Police Ally", "faction": "US", "trust": 5, "usefulness": "Law enforcement access, case intel"},
+        {"name": "Lucius Fox", "relationship": "Tech Supplier", "faction": "Independent", "trust": 5, "usefulness": "Wayne Tech R&D, equipment"}
+      ],
+      "background": {
+        "appearance": "6'2\" muscular man, black hair, intense eyes. Batsuit is dark grey/black with cape and cowl",
+        "backstory": "Billionaire orphan who witnessed parents' murder. Spent years training around the world. Uses wealth and skills to fight crime as Batman.",
+        "motivations": "Prevent others from suffering his trauma, protect Gotham, never kill",
+        "reputation": 60
+      },
+      "resources": {
+        "level": "Elite",
+        "monthly_income": 5000000,
+        "income_source": "Wayne Enterprises CEO",
+        "fame": 40,
+        "infamy": 50
+      },
+      "world_position": {
+        "current_country": "United States",
+        "current_city": "Gotham City",
+        "city_type": "Criminal",
+        "current_location": "Batcave",
+        "home_base": "Gotham City",
+        "travel_status": "Stationary"
+      },
+      "faction_relations": {
+        "standing_us": 45,
+        "standing_india": 20,
+        "standing_china": 10,
+        "standing_nigeria": 15,
+        "wanted": {
+          "us": false,
+          "india": false,
+          "china": false,
+          "nigeria": false
+        }
+      },
+      "investigation_state": {
+        "active_cases": [],
+        "investigation_skill": "INT",
+        "investigation_cs": "+5CS"
+      }
+    },
+    {
+      "id": "hero-ironman",
+      "identity": {
+        "character_name": "Tony Stark",
+        "alias": "Iron Man",
+        "nationality": "American",
+        "faction": "US",
+        "origin_type": "tech_enhanced",
+        "threat_level": "level4",
+        "age": 48,
+        "gender": "Male"
+      },
+      "primary_stats": {
+        "mel": 25,
+        "agl": 30,
+        "str": 20,
+        "sta": 25,
+        "int": 70,
+        "ins": 40,
+        "con": 35
+      },
+      "derived_stats": {
+        "health": 70,
+        "initiative": 35,
+        "karma": 48,
+        "dodge_melee": "-2CS",
+        "dodge_ranged": "-2CS",
+        "movement": 9,
+        "carry_cap": 200
+      },
+      "threat_assessment": {
+        "pcf": 8.5,
+        "stam": 3.5,
+        "spam": "Controlled"
+      },
+      "education_career": {
+        "education_level": "Doctorate",
+        "career_category": "TECH",
+        "career_rank": 5,
+        "current_job": "Genius Engineer / CEO",
+        "career_skills": ["Engineering +5CS", "Physics +5CS", "AI Research +4CS", "Robotics +5CS"],
+        "research_capability": "Cutting_Edge",
+        "research_speed": "2.0x",
+        "research_types": ["All_Tech", "AI", "Robotics", "Propulsion", "Energy_Weapons", "Armor"],
+        "investigation_bonus": "+4CS Technical, +3CS Cyber"
+      },
+      "powers": [
+        {
+          "name": "Iron Man Armor",
+          "level": "High",
+          "rank": 65,
+          "effects": "STR 60, Flight Mach 3, DR 35/30, Repulsors, Missiles, AI assist"
+        }
+      ],
+      "skills": [
+        {"name": "Engineering", "bonus": "+5CS"},
+        {"name": "Physics", "bonus": "+5CS"},
+        {"name": "Computers", "bonus": "+4CS"},
+        {"name": "Shooting", "bonus": "+2CS"},
+        {"name": "Persuasion", "bonus": "+2CS"}
+      ],
+      "talents": [
+        {"name": "Photographic Memory", "effect": "Perfect recall"},
+        {"name": "Speed Reader", "effect": "Research in half time"},
+        {"name": "Resources", "effect": "Effectively unlimited funds"}
+      ],
+      "equipment": {
+        "primary_weapon": {
+          "id": "PWR_REPULSOR",
+          "name": "Repulsor Beams",
+          "damage": 45,
+          "type": "Energy",
+          "range": 200,
+          "special": "Armor-integrated, variable power (stun to lethal)"
+        },
+        "secondary_weapon": {
+          "id": "PWR_UNIBEAM",
+          "name": "Unibeam",
+          "damage": 70,
+          "type": "Energy",
+          "range": 300,
+          "special": "Chest-mounted, 3 uses per charge, penetrating"
+        },
+        "tertiary_weapon": {
+          "id": "PWR_MISSILES",
+          "name": "Micro-Missiles",
+          "damage": 50,
+          "type": "Explosive",
+          "range": 500,
+          "ammo": "20/missiles",
+          "special": "Smart targeting, various warhead types"
+        },
+        "armor": {
+          "id": "ARM_IRONMAN_MK50",
+          "name": "Iron Man Armor Mark 50",
+          "category": "Power",
+          "dr_physical": 35,
+          "dr_energy": 30,
+          "dr_mental": 10,
+          "condition": 100,
+          "weight": 0,
+          "str_required": 0,
+          "movement_penalty": 0,
+          "stealth_penalty": "-2CS",
+          "special": "Nanotech, STR 60, Flight Mach 3, Life support, JARVIS AI, Self-repair, 8hr power"
+        },
+        "gear": [
+          {"id": "AI_JARVIS", "name": "JARVIS AI", "stats": "+2CS all research, tactical analysis, suit control"},
+          {"id": "VEH_QUINJET", "name": "Quinjet Access", "stats": "Team transport, global range"},
+          {"id": "FAC_STARK_TOWER", "name": "Stark Tower Lab", "stats": "All facility types, cutting-edge equipment"}
+        ]
+      },
+      "combat_state": {
+        "current_hp": 70,
+        "current_ap": 6,
+        "stance": "Mobile",
+        "mode": "None",
+        "status_effects": [],
+        "pos_x": 0,
+        "pos_y": 0,
+        "elevation": 0
+      },
+      "personality": {
+        "type": "Pragmatic",
+        "type_id": 3,
+        "traits": "Arrogant, genius, sarcastic, ultimately heroic",
+        "target_preference": "Major Threat"
+      },
+      "weaknesses": [
+        {"type": "Equipment Dependency", "description": "Powerless without armor", "effect": "Out of suit: only 70 HP, no powers, human stats"},
+        {"type": "Power Source", "description": "Arc reactor dependency", "effect": "EMP disables suit, must maintain power"},
+        {"type": "Psychological", "description": "PTSD and anxiety", "effect": "-2CS vs fear, panic attacks possible"}
+      ],
+      "contacts": [
+        {"name": "Pepper Potts", "relationship": "CEO/Partner", "faction": "US", "trust": 5, "usefulness": "Stark Industries resources"},
+        {"name": "James Rhodes", "relationship": "Best Friend/War Machine", "faction": "US", "trust": 5, "usefulness": "Military access, combat backup"},
+        {"name": "SHIELD", "relationship": "Government Ally", "faction": "US", "trust": 3, "usefulness": "Intel, coordination, resources"}
+      ],
+      "background": {
+        "appearance": "5'10\" fit man, goatee, usually in expensive suits or the iconic red/gold armor",
+        "backstory": "Genius billionaire weapons manufacturer who built first armor while captive. Reformed, now uses tech to protect the world.",
+        "motivations": "Protect Earth, advance technology, atone for past weapons dealing",
+        "reputation": 85
+      },
+      "resources": {
+        "level": "Elite",
+        "monthly_income": 50000000,
+        "income_source": "Stark Industries",
+        "fame": 95,
+        "infamy": 15
+      },
+      "world_position": {
+        "current_country": "United States",
+        "current_city": "New York City",
+        "city_type": "Economic",
+        "current_location": "Stark Tower",
+        "home_base": "New York City",
+        "travel_status": "Stationary"
+      },
+      "faction_relations": {
+        "standing_us": 85,
+        "standing_india": 40,
+        "standing_china": 20,
+        "standing_nigeria": 35,
+        "wanted": {
+          "us": false,
+          "india": false,
+          "china": false,
+          "nigeria": false
+        }
+      },
+      "investigation_state": {
+        "active_cases": [],
+        "investigation_skill": "INT",
+        "investigation_cs": "+4CS"
+      }
+    },
+    {
+      "id": "hero-spiderman",
+      "identity": {
+        "character_name": "Peter Parker",
+        "alias": "Spider-Man",
+        "nationality": "American",
+        "faction": "Independent",
+        "origin_type": "altered_human",
+        "threat_level": "level3",
+        "age": 25,
+        "gender": "Male"
+      },
+      "primary_stats": {
+        "mel": 40,
+        "agl": 65,
+        "str": 50,
+        "sta": 40,
+        "int": 50,
+        "ins": 60,
+        "con": 35
+      },
+      "derived_stats": {
+        "health": 130,
+        "initiative": 62,
+        "karma": 48,
+        "dodge_melee": "+3CS",
+        "dodge_ranged": "+2CS",
+        "movement": 12,
+        "carry_cap": 500
+      },
+      "threat_assessment": {
+        "pcf": 5.5,
+        "stam": 2.0,
+        "spam": "Controlled"
+      },
+      "education_career": {
+        "education_level": "Masters",
+        "career_category": "TECH",
+        "career_rank": 3,
+        "current_job": "Scientist / Photographer",
+        "career_skills": ["Chemistry +3CS", "Physics +3CS", "Engineering +2CS", "Photography +2CS"],
+        "research_capability": "Advanced",
+        "research_speed": "1.25x",
+        "research_types": ["Chemistry", "Materials", "Web_Tech"],
+        "investigation_bonus": "+3CS Scientific, +2CS Street"
+      },
+      "powers": [
+        {
+          "name": "Spider-Strength",
+          "level": "High",
+          "rank": 50,
+          "effects": "Lift 10 tons, +25 melee damage"
+        },
+        {
+          "name": "Spider-Agility",
+          "level": "High",
+          "rank": 65,
+          "effects": "+3CS dodge, wall-crawling, enhanced reflexes"
+        },
+        {
+          "name": "Spider-Sense",
+          "level": "High",
+          "rank": 60,
+          "effects": "Cannot be surprised, danger precognition, +2CS initiative"
+        },
+        {
+          "name": "Wall-Crawling",
+          "level": "Low",
+          "rank": 40,
+          "effects": "Climb any surface, stick to walls/ceilings"
+        }
+      ],
+      "skills": [
+        {"name": "Acrobatics", "bonus": "+4CS"},
+        {"name": "Chemistry", "bonus": "+3CS"},
+        {"name": "Photography", "bonus": "+2CS"},
+        {"name": "Quipping", "bonus": "+3CS"},
+        {"name": "Dodge", "bonus": "+3CS"}
+      ],
+      "talents": [
+        {"name": "Danger Sense", "effect": "Cannot be surprised, +2CS vs ambush"},
+        {"name": "Escape Artist", "effect": "Exit combat unseen when unobserved"},
+        {"name": "Ambidextrous", "effect": "No off-hand penalty"}
+      ],
+      "equipment": {
+        "primary_weapon": {
+          "id": "WPN_WEBS",
+          "name": "Web-Shooters",
+          "damage": "Special",
+          "type": "Restraint",
+          "range": 100,
+          "ammo": "Cartridges (1hr each)",
+          "special": "Web lines, nets, balls, impact webs. STR 50 to break."
+        },
+        "secondary_weapon": {
+          "id": "PWR_FISTS_SPIDER",
+          "name": "Spider-Punch",
+          "damage": "STR+25 (75)",
+          "type": "Blunt",
+          "special": "Pulls punches vs normal humans"
+        },
+        "armor": {
+          "id": "ARM_SPIDER_SUIT",
+          "name": "Spider-Suit",
+          "category": "Light",
+          "dr_physical": 5,
+          "dr_energy": 3,
+          "dr_mental": 0,
+          "condition": 100,
+          "weight": 2,
+          "str_required": 0,
+          "movement_penalty": 0,
+          "stealth_penalty": "+1CS",
+          "special": "Flexible, web-shooter mounts, lenses with HUD (Stark upgrade)"
+        },
+        "gear": [
+          {"id": "UTIL_WEBCART", "name": "Web Cartridges (6)", "stats": "1hr web fluid each"},
+          {"id": "COM_SPIDER", "name": "Earpiece Comm", "stats": "Encrypted, Avengers frequency"},
+          {"id": "CAM_001", "name": "Camera", "stats": "For Daily Bugle freelance"}
+        ]
+      },
+      "combat_state": {
+        "current_hp": 130,
+        "current_ap": 6,
+        "stance": "Mobile",
+        "mode": "None",
+        "status_effects": [],
+        "pos_x": 0,
+        "pos_y": 0,
+        "elevation": 0
+      },
+      "personality": {
+        "type": "Protector",
+        "type_id": 1,
+        "traits": "Quippy, responsible, guilt-driven, refuses to let innocents die",
+        "target_preference": "Most Health"
+      },
+      "weaknesses": [
+        {"type": "Psychological", "description": "Overwhelming responsibility guilt", "effect": "Cannot abandon civilians, will sacrifice self"},
+        {"type": "Environmental", "description": "Ethyl chloride weakness", "effect": "Spider-sense nullified, -3CS all stats"},
+        {"type": "Resource", "description": "Always broke", "effect": "Limited equipment budget, can't afford repairs"}
+      ],
+      "contacts": [
+        {"name": "Mary Jane Watson", "relationship": "Partner", "faction": "Civilian", "trust": 5, "usefulness": "Emotional support"},
+        {"name": "J. Jonah Jameson", "relationship": "Boss (hostile)", "faction": "Civilian", "trust": 1, "usefulness": "Income source"},
+        {"name": "Avengers", "relationship": "Team Member", "faction": "US", "trust": 4, "usefulness": "Backup, resources when needed"}
+      ],
+      "background": {
+        "appearance": "5'10\" lean athletic build, brown hair. Red/blue costume with web pattern and large white eyes",
+        "backstory": "Teenager bitten by radioactive spider, gained powers. Uncle's death taught him that with great power comes great responsibility.",
+        "motivations": "Honor Uncle Ben's memory, protect New York, never let anyone die if he can prevent it",
+        "reputation": 55
+      },
+      "resources": {
+        "level": "Low",
+        "monthly_income": 2000,
+        "income_source": "Freelance Photography / Lab Work",
+        "fame": 70,
+        "infamy": 35
+      },
+      "world_position": {
+        "current_country": "United States",
+        "current_city": "New York City",
+        "city_type": "Economic",
+        "current_location": "Queens Apartment",
+        "home_base": "New York City",
+        "travel_status": "Stationary"
+      },
+      "faction_relations": {
+        "standing_us": 50,
+        "standing_india": 25,
+        "standing_china": 15,
+        "standing_nigeria": 20,
+        "wanted": {
+          "us": false,
+          "india": false,
+          "china": false,
+          "nigeria": false
+        }
+      },
+      "investigation_state": {
+        "active_cases": [],
+        "investigation_skill": "INS",
+        "investigation_cs": "+3CS"
+      }
+    },
+    {
+      "id": "hero-superman",
+      "identity": {
+        "character_name": "Clark Kent / Kal-El",
+        "alias": "Superman",
+        "nationality": "American (Kryptonian)",
+        "faction": "US",
+        "origin_type": "alien",
+        "threat_level": "level5",
+        "age": 38,
+        "gender": "Male"
+      },
+      "primary_stats": {
+        "mel": 50,
+        "agl": 60,
+        "str": 150,
+        "sta": 150,
+        "int": 40,
+        "ins": 45,
+        "con": 60
+      },
+      "derived_stats": {
+        "health": 450,
+        "initiative": 52,
+        "karma": 48,
+        "dodge_melee": "+2CS",
+        "dodge_ranged": "+1CS",
+        "movement": 12,
+        "carry_cap": 1500
+      },
+      "threat_assessment": {
+        "pcf": 15.0,
+        "stam": 1.5,
+        "spam": "Controlled"
+      },
+      "education_career": {
+        "education_level": "Bachelors",
+        "career_category": "EDU",
+        "career_rank": 2,
+        "current_job": "Journalist",
+        "career_skills": ["Writing +3CS", "Investigation +3CS", "Research +2CS"],
+        "research_capability": "Intermediate",
+        "research_speed": "1.0x",
+        "research_types": ["Historical", "Kryptonian_Tech"],
+        "investigation_bonus": "+4CS Journalism, +3CS Political"
+      },
+      "powers": [
+        {
+          "name": "Kryptonian Physiology",
+          "level": "High",
+          "rank": 150,
+          "effects": "STR 150 (class 100+ tons), STA 150, virtually invulnerable"
+        },
+        {
+          "name": "Heat Vision",
+          "level": "High",
+          "rank": 100,
+          "effects": "80 energy damage, can be surgical or wide beam"
+        },
+        {
+          "name": "Flight",
+          "level": "High",
+          "rank": 100,
+          "effects": "Faster than light travel possible, typically Mach 10+ in atmosphere"
+        },
+        {
+          "name": "Super Senses",
+          "level": "High",
+          "rank": 80,
+          "effects": "X-ray vision, telescopic, microscopic, super-hearing"
+        },
+        {
+          "name": "Freeze Breath",
+          "level": "Low",
+          "rank": 50,
+          "effects": "40 cold damage, can freeze area"
+        },
+        {
+          "name": "Invulnerability",
+          "level": "High",
+          "rank": 150,
+          "effects": "DR 100 physical, DR 80 energy (except Kryptonite/magic)"
+        }
+      ],
+      "skills": [
+        {"name": "Journalism", "bonus": "+3CS"},
+        {"name": "Investigation", "bonus": "+3CS"},
+        {"name": "Martial Arts", "bonus": "+2CS"},
+        {"name": "Persuasion", "bonus": "+2CS"},
+        {"name": "Leadership", "bonus": "+2CS"}
+      ],
+      "talents": [
+        {"name": "Iron Will", "effect": "+2CS vs mental attacks"},
+        {"name": "Photographic Memory", "effect": "Perfect recall"},
+        {"name": "Danger Sense", "effect": "Super-hearing detects threats"}
+      ],
+      "equipment": {
+        "primary_weapon": {
+          "id": "PWR_HEAT_VISION",
+          "name": "Heat Vision",
+          "damage": 80,
+          "type": "Energy/Heat",
+          "range": 1000,
+          "special": "Variable intensity, can be surgical or devastating"
+        },
+        "secondary_weapon": {
+          "id": "PWR_SUPER_PUNCH",
+          "name": "Kryptonian Punch",
+          "damage": "STR (150)",
+          "type": "Blunt",
+          "special": "World-breaking at full power, always holds back"
+        },
+        "armor": {
+          "id": "ARM_KRYPTONIAN",
+          "name": "Kryptonian Biology",
+          "category": "Natural",
+          "dr_physical": 100,
+          "dr_energy": 80,
+          "dr_mental": 10,
+          "condition": 100,
+          "weight": 0,
+          "str_required": 0,
+          "movement_penalty": 0,
+          "stealth_penalty": "0CS",
+          "special": "Invulnerable to conventional weapons. Vulnerable to Kryptonite and magic."
+        },
+        "gear": [
+          {"id": "SUIT_SUPERMAN", "name": "Kryptonian Suit", "stats": "Indestructible, S-shield"},
+          {"id": "KEY_FORTRESS", "name": "Fortress of Solitude Access", "stats": "Kryptonian database, technology"},
+          {"id": "GLASSES", "name": "Clark Kent Glasses", "stats": "+5CS Disguise (somehow)"}
+        ]
+      },
+      "combat_state": {
+        "current_hp": 450,
+        "current_ap": 6,
+        "stance": "Neutral",
+        "mode": "None",
+        "status_effects": [],
+        "pos_x": 0,
+        "pos_y": 0,
+        "elevation": 0
+      },
+      "personality": {
+        "type": "Protector",
+        "type_id": 1,
+        "traits": "Boy scout, hopeful, believes in humanity's potential",
+        "target_preference": "Most Health"
+      },
+      "weaknesses": [
+        {"type": "Environmental", "description": "Kryptonite vulnerability", "effect": "Green: -10 all stats per round exposed, eventually fatal. Red: random effects"},
+        {"type": "Environmental", "description": "Magic vulnerability", "effect": "No special resistance to magic, normal DR only"},
+        {"type": "Environmental", "description": "Red sun radiation", "effect": "Loses all powers under red sun"}
+      ],
+      "contacts": [
+        {"name": "Lois Lane", "relationship": "Wife", "faction": "Civilian", "trust": 5, "usefulness": "Investigation partner, emotional anchor"},
+        {"name": "Justice League", "relationship": "Team Leader", "faction": "International", "trust": 5, "usefulness": "Global hero network"},
+        {"name": "Batman", "relationship": "Best Friend/Ally", "faction": "Independent", "trust": 5, "usefulness": "Tactical planning, contingencies"}
+      ],
+      "background": {
+        "appearance": "6'3\" perfect physique, black hair with curl, blue eyes. Iconic blue suit with red cape and S-shield",
+        "backstory": "Last son of Krypton, sent to Earth as infant. Raised by Kansas farmers, learned human values. Became Earth's greatest protector.",
+        "motivations": "Protect Earth, inspire hope, honor Kryptonian heritage and Kansas upbringing",
+        "reputation": 100
+      },
+      "resources": {
+        "level": "Medium",
+        "monthly_income": 8000,
+        "income_source": "Daily Planet Reporter",
+        "fame": 100,
+        "infamy": 5
+      },
+      "world_position": {
+        "current_country": "United States",
+        "current_city": "Metropolis",
+        "city_type": "Economic",
+        "current_location": "Daily Planet",
+        "home_base": "Metropolis",
+        "travel_status": "Stationary"
+      },
+      "faction_relations": {
+        "standing_us": 95,
+        "standing_india": 80,
+        "standing_china": 60,
+        "standing_nigeria": 75,
+        "wanted": {
+          "us": false,
+          "india": false,
+          "china": false,
+          "nigeria": false
+        }
+      },
+      "investigation_state": {
+        "active_cases": [],
+        "investigation_skill": "INT",
+        "investigation_cs": "+4CS"
+      }
+    },
+    {
+      "id": "hero-wonderwoman",
+      "identity": {
+        "character_name": "Diana Prince",
+        "alias": "Wonder Woman",
+        "nationality": "Themysciran",
+        "faction": "Independent",
+        "origin_type": "divine",
+        "threat_level": "level5",
+        "age": 3000,
+        "gender": "Female"
+      },
+      "primary_stats": {
+        "mel": 70,
+        "agl": 55,
+        "str": 100,
+        "sta": 90,
+        "int": 45,
+        "ins": 55,
+        "con": 60
+      },
+      "derived_stats": {
+        "health": 280,
+        "initiative": 55,
+        "karma": 53,
+        "dodge_melee": "+2CS",
+        "dodge_ranged": "+1CS",
+        "movement": 11,
+        "carry_cap": 1000
+      },
+      "threat_assessment": {
+        "pcf": 12.0,
+        "stam": 2.0,
+        "spam": "Controlled"
+      },
+      "education_career": {
+        "education_level": "Masters",
+        "career_category": "PHY",
+        "career_rank": 5,
+        "current_job": "Amazon Warrior / Ambassador",
+        "career_skills": ["Combat +5CS", "Tactics +4CS", "Diplomacy +4CS", "History +4CS"],
+        "research_capability": "Advanced",
+        "research_speed": "1.25x",
+        "research_types": ["Historical", "Divine", "Ancient_Weapons"],
+        "investigation_bonus": "+4CS Historical, +3CS Mythological"
+      },
+      "powers": [
+        {
+          "name": "Divine Strength",
+          "level": "High",
+          "rank": 100,
+          "effects": "Class 100 strength, +50 melee damage"
+        },
+        {
+          "name": "Divine Durability",
+          "level": "High",
+          "rank": 90,
+          "effects": "DR 60 physical, DR 50 energy"
+        },
+        {
+          "name": "Flight",
+          "level": "High",
+          "rank": 70,
+          "effects": "Mach 3 flight speed"
+        },
+        {
+          "name": "Combat Mastery",
+          "level": "High",
+          "rank": 70,
+          "effects": "3000 years combat experience, +3CS all melee"
+        }
+      ],
+      "skills": [
+        {"name": "Martial Arts", "bonus": "+5CS"},
+        {"name": "Swordsmanship", "bonus": "+5CS"},
+        {"name": "Tactics", "bonus": "+4CS"},
+        {"name": "Diplomacy", "bonus": "+4CS"},
+        {"name": "History", "bonus": "+4CS"}
+      ],
+      "talents": [
+        {"name": "Block", "effect": "Can parry any melee attack"},
+        {"name": "Iron Will", "effect": "+2CS vs mental attacks"},
+        {"name": "Linguist", "effect": "Speaks all Earth languages"}
+      ],
+      "equipment": {
+        "primary_weapon": {
+          "id": "WPN_GOD_KILLER",
+          "name": "God Killer Sword",
+          "damage": 60,
+          "type": "Slashing/Divine",
+          "special": "Magical, can harm gods and magical beings, indestructible"
+        },
+        "secondary_weapon": {
+          "id": "WPN_LASSO",
+          "name": "Lasso of Truth",
+          "damage": 0,
+          "type": "Restraint/Magic",
+          "range": 50,
+          "special": "Unbreakable, forces truth, STR 150 to escape"
+        },
+        "armor": {
+          "id": "ARM_AMAZON",
+          "name": "Amazon Armor",
+          "category": "Medium",
+          "dr_physical": 30,
+          "dr_energy": 25,
+          "dr_mental": 15,
+          "condition": 100,
+          "weight": 15,
+          "str_required": 30,
+          "movement_penalty": 0,
+          "stealth_penalty": "0CS",
+          "special": "Divine forging, Bracelets of Submission deflect projectiles"
+        },
+        "gear": [
+          {"id": "WPN_BRACELETS", "name": "Bracelets of Submission", "stats": "Indestructible, deflect ranged attacks as reaction"},
+          {"id": "WPN_TIARA", "name": "Tiara", "stats": "Throwable, 30 damage, returns"},
+          {"id": "INVISIBLE_JET", "name": "Invisible Jet (when needed)", "stats": "Mach 5, stealth"}
+        ]
+      },
+      "combat_state": {
+        "current_hp": 280,
+        "current_ap": 6,
+        "stance": "Aggressive",
+        "mode": "None",
+        "status_effects": [],
+        "pos_x": 0,
+        "pos_y": 0,
+        "elevation": 0
+      },
+      "personality": {
+        "type": "Honorable",
+        "type_id": 1,
+        "traits": "Warrior's honor, compassionate, believes in love and truth",
+        "target_preference": "Most Health"
+      },
+      "weaknesses": [
+        {"type": "Psychological", "description": "Bound by honor", "effect": "Cannot attack surrendered foes, must accept formal challenges"},
+        {"type": "Equipment", "description": "Bracelets binding", "effect": "If bound by a man with her own lasso, loses powers temporarily"},
+        {"type": "Psychological", "description": "Faith in humanity", "effect": "Can be manipulated through appeals to hope/love"}
+      ],
+      "contacts": [
+        {"name": "Hippolyta", "relationship": "Mother/Queen", "faction": "Themyscira", "trust": 5, "usefulness": "Amazon army, divine knowledge"},
+        {"name": "Steve Trevor", "relationship": "Love Interest", "faction": "US", "trust": 5, "usefulness": "Military liaison"},
+        {"name": "Justice League", "relationship": "Team Member", "faction": "International", "trust": 5, "usefulness": "Global hero network"}
+      ],
+      "background": {
+        "appearance": "6'0\" athletic Amazonian beauty, black hair, blue eyes. Red/blue/gold armor with tiara and silver bracelets",
+        "backstory": "Princess of Themyscira, daughter of Zeus (some versions). Left paradise island to fight alongside humanity in man's world.",
+        "motivations": "Bring peace through strength, protect the innocent, honor Amazon ideals",
+        "reputation": 95
+      },
+      "resources": {
+        "level": "High",
+        "monthly_income": 15000,
+        "income_source": "Themysciran Artifacts / Museum Work",
+        "fame": 90,
+        "infamy": 5
+      },
+      "world_position": {
+        "current_country": "United States",
+        "current_city": "Washington DC",
+        "city_type": "Political",
+        "current_location": "Embassy",
+        "home_base": "Washington DC",
+        "travel_status": "Stationary"
+      },
+      "faction_relations": {
+        "standing_us": 90,
+        "standing_india": 70,
+        "standing_china": 50,
+        "standing_nigeria": 65,
+        "wanted": {
+          "us": false,
+          "india": false,
+          "china": false,
+          "nigeria": false
+        }
+      },
+      "investigation_state": {
+        "active_cases": [],
+        "investigation_skill": "INS",
+        "investigation_cs": "+4CS"
+      }
+    },
+    {
+      "id": "hero-blackwidow",
+      "identity": {
+        "character_name": "Natasha Romanoff",
+        "alias": "Black Widow",
+        "nationality": "Russian",
+        "faction": "US",
+        "origin_type": "skilled_human",
+        "threat_level": "level2",
+        "age": 35,
+        "gender": "Female"
+      },
+      "primary_stats": {
+        "mel": 45,
+        "agl": 50,
+        "str": 20,
+        "sta": 30,
+        "int": 40,
+        "ins": 50,
+        "con": 40
+      },
+      "derived_stats": {
+        "health": 80,
+        "initiative": 50,
+        "karma": 43,
+        "dodge_melee": "+2CS",
+        "dodge_ranged": "+0CS",
+        "movement": 11,
+        "carry_cap": 200
+      },
+      "threat_assessment": {
+        "pcf": 1.8,
+        "stam": 3.0,
+        "spam": "Controlled"
+      },
+      "education_career": {
+        "education_level": "Intelligence",
+        "career_category": "PHY",
+        "career_rank": 4,
+        "current_job": "Spy / Assassin (Reformed)",
+        "career_skills": ["Espionage +5CS", "Infiltration +4CS", "Interrogation +4CS", "Assassination +4CS"],
+        "research_capability": "None",
+        "research_speed": "N/A",
+        "research_types": [],
+        "investigation_bonus": "+5CS Espionage, +4CS Criminal"
+      },
+      "powers": [],
+      "skills": [
+        {"name": "Martial Arts", "bonus": "+4CS"},
+        {"name": "Shooting", "bonus": "+4CS"},
+        {"name": "Stealth", "bonus": "+4CS"},
+        {"name": "Deception", "bonus": "+5CS"},
+        {"name": "Interrogation", "bonus": "+4CS"}
+      ],
+      "talents": [
+        {"name": "Quick Draw", "effect": "Draw weapon as free action"},
+        {"name": "Escape Artist", "effect": "Exit combat unseen when unobserved"},
+        {"name": "Danger Sense", "effect": "Spy training, hard to surprise"}
+      ],
+      "equipment": {
+        "primary_weapon": {
+          "id": "WPN_WIDOW_BITE",
+          "name": "Widow's Bite",
+          "damage": 30,
+          "type": "Electric",
+          "range": 20,
+          "ammo": "Unlimited (wrist-mounted)",
+          "special": "Stun or lethal setting, can be fired as projectile"
+        },
+        "secondary_weapon": {
+          "id": "WPN_RNG_006",
+          "name": "Glock 26 (x2)",
+          "damage": 20,
+          "range": 50,
+          "ammo": "10/9mm each",
+          "special": "Dual-wielded, suppressed"
+        },
+        "tertiary_weapon": {
+          "id": "WPN_GARROTE",
+          "name": "Garrote Wire",
+          "damage": 25,
+          "type": "Slashing",
+          "special": "Silent kill, requires grapple"
+        },
+        "armor": {
+          "id": "ARM_WIDOW_SUIT",
+          "name": "Black Widow Tactical Suit",
+          "category": "Light",
+          "dr_physical": 10,
+          "dr_energy": 8,
+          "dr_mental": 0,
+          "condition": 100,
+          "weight": 5,
+          "str_required": 0,
+          "movement_penalty": 0,
+          "stealth_penalty": "+2CS",
+          "special": "Built-in Widow's Bite, encrypted comms, EMP shielding"
+        },
+        "gear": [
+          {"id": "UTIL_SPY", "name": "Spy Kit", "contents": ["Lockpicks", "USB Hacking Device", "Trackers (4)", "Sedatives (3)", "Disguise Kit"]},
+          {"id": "WPN_BATONS", "name": "Electrified Batons", "stats": "25 electric damage, collapsible"},
+          {"id": "COM_AVENGERS", "name": "Avengers Comm", "stats": "Encrypted, global range"}
+        ]
+      },
+      "combat_state": {
+        "current_hp": 80,
+        "current_ap": 6,
+        "stance": "Mobile",
+        "mode": "Alert",
+        "status_effects": [],
+        "pos_x": 0,
+        "pos_y": 0,
+        "elevation": 0
+      },
+      "personality": {
+        "type": "Pragmatic",
+        "type_id": 3,
+        "traits": "Calculating, adaptable, haunted by past, fiercely loyal to friends",
+        "target_preference": "Major Threat"
+      },
+      "weaknesses": [
+        {"type": "Physical", "description": "No superhuman abilities", "effect": "Must rely on skill and equipment"},
+        {"type": "Psychological", "description": "Red in ledger", "effect": "Guilt over past kills, can be manipulated with past sins"},
+        {"type": "Resource", "description": "Former enemies", "effect": "Russian intelligence, Red Room may still hunt her"}
+      ],
+      "contacts": [
+        {"name": "Clint Barton (Hawkeye)", "relationship": "Best Friend", "faction": "US", "trust": 5, "usefulness": "Combat partner, emotional support"},
+        {"name": "Nick Fury", "relationship": "Handler", "faction": "US", "trust": 4, "usefulness": "SHIELD resources, intel"},
+        {"name": "Avengers", "relationship": "Team Member", "faction": "US", "trust": 4, "usefulness": "Backup, resources"}
+      ],
+      "background": {
+        "appearance": "5'7\" athletic redhead, striking features. Black tactical suit with belt of weapons",
+        "backstory": "Trained from childhood in Red Room to be perfect assassin. Defected to SHIELD, now works with Avengers to balance her ledger.",
+        "motivations": "Atone for past, protect new family (Avengers), prevent others from suffering her fate",
+        "reputation": 50
+      },
+      "resources": {
+        "level": "High",
+        "monthly_income": 15000,
+        "income_source": "SHIELD / Avengers Stipend",
+        "fame": 55,
+        "infamy": 45
+      },
+      "world_position": {
+        "current_country": "United States",
+        "current_city": "New York City",
+        "city_type": "Economic",
+        "current_location": "Avengers Compound",
+        "home_base": "New York City",
+        "travel_status": "Stationary"
+      },
+      "faction_relations": {
+        "standing_us": 70,
+        "standing_india": 30,
+        "standing_china": -20,
+        "standing_nigeria": 25,
+        "wanted": {
+          "us": false,
+          "india": false,
+          "china": true,
+          "nigeria": false
+        }
+      },
+      "investigation_state": {
+        "active_cases": [],
+        "investigation_skill": "INS",
+        "investigation_cs": "+5CS"
+      }
+    },
+    {
+      "id": "hero-drstrange",
+      "identity": {
+        "character_name": "Stephen Strange",
+        "alias": "Doctor Strange",
+        "nationality": "American",
+        "faction": "Independent",
+        "origin_type": "mystic",
+        "threat_level": "level4",
+        "age": 45,
+        "gender": "Male"
+      },
+      "primary_stats": {
+        "mel": 20,
+        "agl": 25,
+        "str": 15,
+        "sta": 25,
+        "int": 60,
+        "ins": 55,
+        "con": 70
+      },
+      "derived_stats": {
+        "health": 65,
+        "initiative": 40,
+        "karma": 61,
+        "dodge_melee": "-2CS",
+        "dodge_ranged": "-3CS",
+        "movement": 8,
+        "carry_cap": 150
+      },
+      "threat_assessment": {
+        "pcf": 9.5,
+        "stam": 3.0,
+        "spam": "Controlled"
+      },
+      "education_career": {
+        "education_level": "Doctorate",
+        "career_category": "MED",
+        "career_rank": 4,
+        "current_job": "Former Neurosurgeon / Sorcerer Supreme",
+        "career_skills": ["Surgery +5CS (damaged hands)", "Medicine +4CS", "Occult +5CS"],
+        "research_capability": "Expert",
+        "research_speed": "1.5x",
+        "research_types": ["Medical", "Magical", "Dimensional"],
+        "investigation_bonus": "+5CS Magical, +4CS Medical"
+      },
+      "powers": [
+        {
+          "name": "Sorcery",
+          "level": "High",
+          "rank": 70,
+          "effects": "Energy bolts (50 damage), shields (DR 40), teleportation, flight"
+        },
+        {
+          "name": "Dimensional Magic",
+          "level": "High",
+          "rank": 65,
+          "effects": "Open portals, access other dimensions, banish entities"
+        },
+        {
+          "name": "Time Manipulation",
+          "level": "Low",
+          "rank": 50,
+          "effects": "Limited time loops, viewing future/past (Eye of Agamotto)"
+        },
+        {
+          "name": "Astral Projection",
+          "level": "High",
+          "rank": 60,
+          "effects": "Leave body, travel as spirit, attack on astral plane"
+        }
+      ],
+      "skills": [
+        {"name": "Occult", "bonus": "+5CS"},
+        {"name": "Medicine", "bonus": "+4CS"},
+        {"name": "Research", "bonus": "+3CS"},
+        {"name": "Willpower", "bonus": "+4CS"},
+        {"name": "Martial Arts", "bonus": "+2CS"}
+      ],
+      "talents": [
+        {"name": "Iron Will", "effect": "+2CS vs mental attacks"},
+        {"name": "Photographic Memory", "effect": "Perfect recall"},
+        {"name": "Linguist", "effect": "Ancient and mystical languages"}
+      ],
+      "equipment": {
+        "primary_weapon": {
+          "id": "PWR_MAGIC_BOLT",
+          "name": "Eldritch Bolt",
+          "damage": 50,
+          "type": "Magic",
+          "range": 200,
+          "special": "Ignores physical armor, various spell types"
+        },
+        "secondary_weapon": {
+          "id": "PWR_CRIMSON_BANDS",
+          "name": "Crimson Bands of Cyttorak",
+          "damage": 0,
+          "type": "Restraint/Magic",
+          "range": 100,
+          "special": "STR 80 to break, magical binding"
+        },
+        "armor": {
+          "id": "ARM_CLOAK_LEV",
+          "name": "Cloak of Levitation",
+          "category": "Light",
+          "dr_physical": 5,
+          "dr_energy": 10,
+          "dr_mental": 20,
+          "condition": 100,
+          "weight": 0,
+          "str_required": 0,
+          "movement_penalty": 0,
+          "stealth_penalty": "-1CS",
+          "special": "Grants flight, semi-sentient, protects wearer autonomously"
+        },
+        "gear": [
+          {"id": "ART_EYE_AGAMOTTO", "name": "Eye of Agamotto", "stats": "Time Stone container, see through illusions, light beam"},
+          {"id": "ART_BOOK_VISHANTI", "name": "Book of the Vishanti", "stats": "Defensive spells, +2CS magic defense"},
+          {"id": "LOC_SANCTUM", "name": "Sanctum Sanctorum", "stats": "New York base, magical defenses, artifact storage"}
+        ]
+      },
+      "combat_state": {
+        "current_hp": 65,
+        "current_ap": 6,
+        "stance": "Defensive",
+        "mode": "None",
+        "status_effects": [],
+        "pos_x": 0,
+        "pos_y": 0,
+        "elevation": 0
+      },
+      "personality": {
+        "type": "Calculating",
+        "type_id": 3,
+        "traits": "Arrogant but wiser now, protective of reality, sees bigger picture",
+        "target_preference": "Major Threat"
+      },
+      "weaknesses": [
+        {"type": "Physical", "description": "Damaged hands", "effect": "Cannot perform surgery, -2CS fine manipulation"},
+        {"type": "Physical", "description": "Physically fragile", "effect": "Only 65 HP, must rely on shields"},
+        {"type": "Power Source", "description": "Spells require concentration", "effect": "Interrupted casting fails"}
+      ],
+      "contacts": [
+        {"name": "Wong", "relationship": "Ally/Librarian", "faction": "Independent", "trust": 5, "usefulness": "Magical knowledge, combat backup"},
+        {"name": "Ancient One (Spirit)", "relationship": "Mentor (deceased)", "faction": "Independent", "trust": 5, "usefulness": "Spiritual guidance"},
+        {"name": "Avengers", "relationship": "Associate", "faction": "US", "trust": 3, "usefulness": "When reality is threatened"}
+      ],
+      "background": {
+        "appearance": "6'2\" distinguished man, gray temples, goatee. Blue robes with red Cloak of Levitation, Eye of Agamotto",
+        "backstory": "Brilliant neurosurgeon whose hands were destroyed in car accident. Sought magical cure, became Sorcerer Supreme instead.",
+        "motivations": "Protect Earth from mystical threats, guard the Time Stone, atone for past arrogance",
+        "reputation": 60
+      },
+      "resources": {
+        "level": "High",
+        "monthly_income": 0,
+        "income_source": "Sanctum Sanctorum (self-sustaining)",
+        "fame": 40,
+        "infamy": 20
+      },
+      "world_position": {
+        "current_country": "United States",
+        "current_city": "New York City",
+        "city_type": "Economic",
+        "current_location": "Sanctum Sanctorum",
+        "home_base": "New York City",
+        "travel_status": "Stationary"
+      },
+      "faction_relations": {
+        "standing_us": 50,
+        "standing_india": 40,
+        "standing_china": 30,
+        "standing_nigeria": 35,
+        "wanted": {
+          "us": false,
+          "india": false,
+          "china": false,
+          "nigeria": false
+        }
+      },
+      "investigation_state": {
+        "active_cases": [],
+        "investigation_skill": "INT",
+        "investigation_cs": "+5CS"
+      }
+    },
+    {
+      "id": "villain-magneto",
+      "identity": {
+        "character_name": "Erik Lehnsherr",
+        "alias": "Magneto",
+        "nationality": "German-Polish",
+        "faction": "Independent",
+        "origin_type": "mutant",
+        "threat_level": "level5",
+        "age": 89,
+        "gender": "Male"
+      },
+      "primary_stats": {
+        "mel": 30,
+        "agl": 25,
+        "str": 20,
+        "sta": 30,
+        "int": 55,
+        "ins": 50,
+        "con": 70
+      },
+      "derived_stats": {
+        "health": 80,
+        "initiative": 37,
+        "karma": 58,
+        "dodge_melee": "-2CS",
+        "dodge_ranged": "-3CS",
+        "movement": 8,
+        "carry_cap": 200
+      },
+      "threat_assessment": {
+        "pcf": 14.0,
+        "stam": 6.5,
+        "spam": "High"
+      },
+      "education_career": {
+        "education_level": "Doctorate",
+        "career_category": "TECH",
+        "career_rank": 4,
+        "current_job": "Mutant Revolutionary / Former Engineer",
+        "career_skills": ["Engineering +4CS", "Physics +4CS", "Leadership +4CS", "Tactics +4CS"],
+        "research_capability": "Expert",
+        "research_speed": "1.5x",
+        "research_types": ["Metallurgy", "Genetics", "Mutant_Tech"],
+        "investigation_bonus": "+4CS Technical, +3CS Political"
+      },
+      "powers": [
+        {
+          "name": "Magnetokinesis",
+          "level": "High",
+          "rank": 100,
+          "effects": "Control all metal, lift thousands of tons, create magnetic fields"
+        },
+        {
+          "name": "Magnetic Shield",
+          "level": "High",
+          "rank": 80,
+          "effects": "DR 50 vs physical (metal projectiles), DR 30 vs energy"
+        },
+        {
+          "name": "Flight",
+          "level": "High",
+          "rank": 60,
+          "effects": "Ride magnetic fields, Mach 1 speed"
+        },
+        {
+          "name": "Electromagnetic Pulse",
+          "level": "High",
+          "rank": 70,
+          "effects": "Disable all electronics in 1km radius"
+        }
+      ],
+      "skills": [
+        {"name": "Leadership", "bonus": "+4CS"},
+        {"name": "Tactics", "bonus": "+4CS"},
+        {"name": "Engineering", "bonus": "+4CS"},
+        {"name": "Intimidation", "bonus": "+4CS"},
+        {"name": "History", "bonus": "+3CS"}
+      ],
+      "talents": [
+        {"name": "Iron Will", "effect": "+2CS vs mental attacks (Holocaust survivor)"},
+        {"name": "Linguist", "effect": "German, Polish, English, Hebrew, others"},
+        {"name": "Resources", "effect": "Asteroid M, Brotherhood resources"}
+      ],
+      "equipment": {
+        "primary_weapon": {
+          "id": "PWR_METAL_CONTROL",
+          "name": "Metal Manipulation",
+          "damage": "Variable (up to 100)",
+          "type": "Physical/Magnetic",
+          "range": 1000,
+          "special": "Control any metal, form weapons, crush, throw"
+        },
+        "secondary_weapon": {
+          "id": "PWR_METAL_STORM",
+          "name": "Metal Storm",
+          "damage": 60,
+          "type": "Physical",
+          "range": 500,
+          "special": "Area attack, thousands of metal shards"
+        },
+        "armor": {
+          "id": "ARM_MAG_HELMET",
+          "name": "Magneto Helmet",
+          "category": "Light",
+          "dr_physical": 20,
+          "dr_energy": 15,
+          "dr_mental": "Immune",
+          "condition": 100,
+          "weight": 5,
+          "str_required": 0,
+          "movement_penalty": 0,
+          "stealth_penalty": "-2CS",
+          "special": "Blocks all telepathy, iconic design"
+        },
+        "gear": [
+          {"id": "BASE_ASTEROID_M", "name": "Asteroid M", "stats": "Orbital base, mutant sanctuary"},
+          {"id": "TEAM_BROTHERHOOD", "name": "Brotherhood of Mutants", "stats": "Mutant army, various powers"},
+          {"id": "SUIT_MAG", "name": "Battle Suit", "stats": "DR 15/10, integrated metal for manipulation"}
+        ]
+      },
+      "combat_state": {
+        "current_hp": 80,
+        "current_ap": 6,
+        "stance": "Aggressive",
+        "mode": "None",
+        "status_effects": [],
+        "pos_x": 0,
+        "pos_y": 0,
+        "elevation": 0
+      },
+      "personality": {
+        "type": "Calculating",
+        "type_id": 3,
+        "traits": "Ruthless but principled, protects mutants at any cost, haunted by past",
+        "target_preference": "Major Threat"
+      },
+      "weaknesses": [
+        {"type": "Environmental", "description": "Non-metallic materials", "effect": "Cannot control wood, plastic, etc."},
+        {"type": "Physical", "description": "Elderly body", "effect": "Only 80 HP, physically fragile without powers"},
+        {"type": "Psychological", "description": "Holocaust trauma", "effect": "Parallels to Nazi persecution trigger rage or flashbacks"}
+      ],
+      "contacts": [
+        {"name": "Charles Xavier", "relationship": "Frenemy", "faction": "Independent", "trust": 3, "usefulness": "Shared history, occasional alliance"},
+        {"name": "Brotherhood of Mutants", "relationship": "Army", "faction": "Independent", "trust": 4, "usefulness": "Soldiers, resources"},
+        {"name": "Genosha (Former)", "relationship": "Nation", "faction": "Independent", "trust": 4, "usefulness": "Mutant nation resources"}
+      ],
+      "background": {
+        "appearance": "6'2\" older man, white hair, commanding presence. Purple/red costume with iconic helmet",
+        "backstory": "Holocaust survivor whose family was killed by Nazis. Discovered mutant powers, befriended Xavier, but chose militant path after seeing humanity's hatred of mutants.",
+        "motivations": "Ensure mutant survival by any means, prevent another Holocaust against his people",
+        "reputation": -40
+      },
+      "resources": {
+        "level": "Elite",
+        "monthly_income": 0,
+        "income_source": "Asteroid M/Brotherhood Resources",
+        "fame": 85,
+        "infamy": 90
+      },
+      "world_position": {
+        "current_country": "International Airspace",
+        "current_city": "Asteroid M",
+        "city_type": "N/A",
+        "current_location": "Asteroid M",
+        "home_base": "Asteroid M",
+        "travel_status": "Stationary"
+      },
+      "faction_relations": {
+        "standing_us": -70,
+        "standing_india": -50,
+        "standing_china": -60,
+        "standing_nigeria": -45,
+        "wanted": {
+          "us": true,
+          "india": true,
+          "china": true,
+          "nigeria": true
+        }
+      },
+      "investigation_state": {
+        "active_cases": [],
+        "investigation_skill": "INT",
+        "investigation_cs": "+4CS"
+      }
+    }
+  ],
+  "metadata": {
+    "version": "3.0",
+    "schema_version": "Character_Schema_Complete_v1",
+    "total_characters": 8,
+    "last_updated": "2024-12-05",
+    "character_list": [
+      "Batman - Skilled Human, Gadgets, Detective, Billionaire",
+      "Iron Man - Tech Enhanced, Power Armor, Engineer, Researcher",
+      "Spider-Man - Altered Human, Web-Shooters, College Student",
+      "Superman - Alien, No Equipment Needed, Journalist",
+      "Wonder Woman - Divine, Ancient Warrior, Divine Weapons",
+      "Black Widow - Skilled Human, Spy, Tactical Gear",
+      "Doctor Strange - Mystic, Former Surgeon, Magical Artifacts",
+      "Magneto - Mutant, No Equipment Needed, Revolutionary"
+    ],
+    "playtest_coverage": {
+      "origins": ["skilled_human (2)", "tech_enhanced (1)", "altered_human (1)", "alien (1)", "divine (1)", "mystic (1)", "mutant (1)"],
+      "threat_levels": ["level2 (3)", "level3 (1)", "level4 (2)", "level5 (2)"],
+      "equipment_dependency": ["high (Batman, Iron Man)", "medium (Spider-Man, Black Widow, Dr Strange)", "low (Superman, Wonder Woman, Magneto)"],
+      "research_capability": ["cutting_edge (Iron Man)", "expert (Batman, Dr Strange, Magneto)", "advanced (Spider-Man, Wonder Woman)", "intermediate (Superman)", "none (Black Widow)"],
+      "career_variety": ["TECH (Iron Man, Magneto)", "PHY (Batman-secondary, Black Widow, Wonder Woman)", "BIZ (Batman)", "MED (Dr Strange)", "EDU (Superman)"]
+    },
+    "systems_tested": [
+      "Identity (8 fields)",
+      "Primary Stats (7 fields) - from street level to cosmic",
+      "Derived Stats (7 fields) - HP from 65 to 450",
+      "Threat Assessment (3 fields) - PCF from 1.8 to 15.0",
+      "Education & Career - All education levels, multiple categories",
+      "Powers - From 0 (skilled humans) to 6 (Superman)",
+      "Skills (5 slots) - Combat, investigation, social",
+      "Talents (3 slots) - Various utility talents",
+      "Equipment - Power armor, gadgets, divine weapons, nothing",
+      "Combat State (8 fields)",
+      "Personality (3 fields) - Various targeting preferences",
+      "Weaknesses (2+ slots) - Physical, psychological, environmental",
+      "Contacts (3 slots) - Personal and professional",
+      "Background (4 fields)",
+      "Resources - From broke (Spider-Man) to billionaire (Batman, Iron Man)",
+      "World Position (6 fields) - Various city types",
+      "Faction Relations - Allied to wanted",
+      "Investigation State - Various specialties"
+    ]
+  }
+}

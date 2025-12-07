@@ -1,0 +1,153 @@
+Section,Description
+---VEHICLES COMPLETE DATABASE---,Comprehensive vehicle specifications for TACTICAL COMBAT movement (not world map travel). These stats apply during tactical combat scenarios - for world map travel see the strategic layer systems.
+
+===VEHICLE CATEGORIES===
+Category,Description,Skill_Required,Examples
+Ground_Civilian,Standard civilian ground vehicles,Piloting_Ground,Car; Motorcycle; Van
+Ground_Military,Military ground vehicles,Piloting_Ground + Military_Training,APC; Tank; Humvee
+Aircraft_Civilian,Civilian aircraft,Piloting_Air,Helicopter; Private Jet; Ultralight
+Aircraft_Military,Military aircraft,Piloting_Air + Military_Training,Fighter Jet; Attack Helicopter
+Watercraft_Civilian,Civilian watercraft,Piloting_Water,Speedboat; Yacht
+Watercraft_Military,Military watercraft,Piloting_Water + Military_Training,Patrol Boat; Submarine
+Exotic,Superhero/alien vehicles,Special_License,Hover Car; Teleporter; Space Ship
+
+===GROUND VEHICLES - MOTORCYCLES===
+Vehicle_ID,Name,Type,Top_Speed_MPH,Acceleration,Handling,Passengers,Cargo_Lbs,HP,DR,Fuel_Range_Miles,Cost_Level,Availability,Weapon_Mounts,Special_Properties
+VG_001,Motorcycle_Sport,Two_Wheeler,180,Excellent,Excellent,1,25,60,5,200,Medium,Common,0,+2CS evasion; exposed rider; easy to conceal
+VG_002,Motorcycle_Cruiser,Two_Wheeler,120,Good,Good,2,100,70,8,350,Medium,Common,0,Comfortable; touring capable
+VG_003,Motorcycle_Dirt,Two_Wheeler,80,Excellent,Good,1,25,50,3,150,Medium,Common,0,Off-road capable; jump capable
+VG_004,Motorcycle_Police,Two_Wheeler,140,Excellent,Excellent,1,50,80,8,250,High,Law_Enforcement,0,Pursuit mode; radio; lights/sirens
+VG_005,ATV,Four_Wheeler,60,Good,Good,2,200,80,5,100,Medium,Common,0,All terrain; utility bed
+VG_006,Snowmobile,Tracked,80,Good,Fair,2,100,60,5,150,Medium,Common,0,Snow/ice only
+
+===GROUND VEHICLES - CARS===
+Vehicle_ID,Name,Type,Top_Speed_MPH,Acceleration,Handling,Passengers,Cargo_Lbs,HP,DR,Fuel_Range_Miles,Cost_Level,Availability,Weapon_Mounts,Special_Properties
+VG_010,Car_Economy,Sedan,100,Fair,Good,4,300,70,5,450,Low,Common,0,Fuel efficient; reliable
+VG_011,Car_Sedan,Sedan,130,Good,Good,5,500,100,8,400,Medium,Common,0,Standard vehicle; balanced
+VG_012,Car_Sports,Sports,200,Excellent,Excellent,2,150,80,5,300,Very_High,Common,0,+1CS pursuit; low profile
+VG_013,Car_Muscle,Muscle,180,Excellent,Good,4,400,100,8,250,High,Common,0,Intimidating; loud
+VG_014,Car_Luxury,Luxury,160,Good,Good,4,400,120,10,400,Very_High,Common,0,Status symbol; comfortable
+VG_015,Car_Armored,Armored,120,Fair,Fair,4,300,200,25,300,Ultra_High,VIP_Only,0,Bulletproof glass; run-flat tires
+VG_016,Limousine,Luxury,100,Fair,Fair,8,400,150,15,350,Very_High,VIP_Only,0,Extended; luxury; can be armored
+VG_017,Taxi,Sedan,110,Fair,Good,4,300,90,5,400,Low,Commercial,0,GPS; meter; partition
+VG_018,Police_Cruiser,Sedan,150,Good,Good,4,300,120,10,400,High,Law_Enforcement,0,Pursuit rated; radio; cage; lights
+VG_019,Unmarked_Police,Sedan,150,Good,Good,4,300,110,8,400,High,Law_Enforcement,0,Hidden lights; pursuit capable
+
+===GROUND VEHICLES - TRUCKS AND UTILITY===
+Vehicle_ID,Name,Type,Top_Speed_MPH,Acceleration,Handling,Passengers,Cargo_Lbs,HP,DR,Fuel_Range_Miles,Cost_Level,Availability,Weapon_Mounts,Special_Properties
+VG_020,Pickup_Truck,Truck,110,Fair,Fair,3,2500,130,8,450,Medium,Common,1 (bed),Towing; utility bed; durable
+VG_021,SUV,SUV,120,Good,Good,7,1000,120,10,400,High,Common,0,All terrain; family sized
+VG_022,SUV_Armored,SUV,100,Fair,Fair,6,800,200,25,350,Ultra_High,VIP_Only,0,Executive protection; bulletproof
+VG_023,Van_Cargo,Van,90,Fair,Fair,2,5000,100,5,400,Medium,Commercial,0,Maximum cargo; mobile base option
+VG_024,Van_Passenger,Van,95,Fair,Fair,12,500,100,5,400,Medium,Common,0,Group transport
+VG_025,Van_Armored,Van,80,Poor,Fair,8,1000,200,25,300,Very_High,Law_Enforcement,2,SWAT transport; gun ports
+VG_026,Ambulance,Emergency,100,Fair,Fair,4,1000,120,8,350,High,Emergency,0,Medical equipment; sirens
+VG_027,Fire_Truck,Emergency,70,Poor,Poor,6,500,200,15,250,Very_High,Emergency,0,Water cannon (non-lethal); ladder
+VG_028,Tow_Truck,Utility,80,Poor,Fair,3,1000,150,10,300,Medium,Commercial,0,Towing; recovery
+
+===GROUND VEHICLES - HEAVY===
+Vehicle_ID,Name,Type,Top_Speed_MPH,Acceleration,Handling,Passengers,Cargo_Lbs,HP,DR,Fuel_Range_Miles,Cost_Level,Availability,Weapon_Mounts,Special_Properties
+VG_030,Bus_City,Bus,50,Poor,Poor,40,1000,180,8,300,High,Commercial,0,Mass transit; wheelchair accessible
+VG_031,Bus_Charter,Bus,70,Poor,Fair,50,2000,180,8,500,Very_High,Commercial,0,Long distance; luggage storage
+VG_032,Semi_Truck,Truck,75,Poor,Poor,2,80000,250,8,800,High,Commercial,0,Massive cargo; requires CDL
+VG_033,Dump_Truck,Construction,45,Poor,Poor,2,40000,200,12,200,High,Commercial,0,Construction; can dump load as attack
+VG_034,Cement_Mixer,Construction,40,Poor,Poor,2,30000,180,10,200,High,Commercial,0,Construction vehicle
+VG_035,Bulldozer,Construction,5,Poor,Poor,1,0,300,20,100,Very_High,Commercial,1 (improvised),Ram attack; demolition capable
+VG_036,Crane,Construction,5,Poor,Poor,1,Lift 100000,200,10,100,Very_High,Commercial,0,Lifting; wrecking ball option
+
+===GROUND VEHICLES - MILITARY===
+Vehicle_ID,Name,Type,Top_Speed_MPH,Acceleration,Handling,Passengers,Cargo_Lbs,HP,DR,Fuel_Range_Miles,Cost_Level,Availability,Weapon_Mounts,Special_Properties
+VG_040,Humvee,Military,70,Fair,Fair,4,2500,200,20,350,Very_High,Military,1,All terrain; weapon mount
+VG_041,APC,Military,60,Poor,Fair,12,500,300,35,350,Ultra_High,Military,2,Troop transport; amphibious option
+VG_042,MRAP,Military,65,Poor,Fair,6,500,350,40,300,Ultra_High,Military,1,Mine resistant; ambush protected
+VG_043,Tank_Light,Military,45,Poor,Poor,3,200,400,50,300,Ultra_High,Military_Only,1 Main + 1 MG,Main gun; heavy armor
+VG_044,Tank_Main,Military,40,Poor,Poor,4,200,500,60,250,Ultra_High,Military_Only,1 Main + 2 MG,Main battle tank; heavy armor
+VG_045,Artillery,Military,35,Poor,Poor,5,200,250,30,200,Ultra_High,Military_Only,1 Artillery,Long range bombardment
+VG_046,Mobile_AA,Military,50,Poor,Fair,3,200,300,35,300,Ultra_High,Military_Only,AA System,Anti-aircraft capability
+VG_047,Recon_Vehicle,Military,80,Good,Good,2,100,150,20,400,Very_High,Military,1 Light,Fast reconnaissance
+
+===AIRCRAFT - CIVILIAN===
+Vehicle_ID,Name,Type,Top_Speed_MPH,Ceiling_Ft,Passengers,Cargo_Lbs,HP,DR,Range_Miles,Cost_Level,Availability,Weapon_Mounts,Special_Properties
+VA_001,Ultralight,Light,80,10000,1,100,30,2,150,Medium,Licensed,0,Personal flight; very slow
+VA_002,Cessna_Single,Light,150,15000,3,500,60,5,800,High,Licensed,0,Light aircraft; common
+VA_003,Helicopter_Light,Rotary,150,15000,4,500,100,8,400,Very_High,Licensed,0,VTOL; hover; common
+VA_004,Helicopter_Medium,Rotary,180,20000,8,2000,150,12,500,Very_High,Licensed,0,Transport; tour
+VA_005,Jet_Private,Jet,500,45000,8,1000,100,8,3000,Ultra_High,Licensed,0,Executive; fast long range
+VA_006,Jet_Commercial,Jet,550,40000,200,10000,300,10,8000,Ultra_High,Commercial,0,Airliner; not combat capable
+VA_007,Seaplane,Light,120,12000,6,800,80,5,600,Very_High,Licensed,0,Water landing capable
+VA_008,Hot_Air_Balloon,Balloon,30,10000,4,300,50,2,Variable,Medium,Licensed,0,Silent; slow; altitude control
+
+===AIRCRAFT - MILITARY===
+Vehicle_ID,Name,Type,Top_Speed_MPH,Ceiling_Ft,Passengers,Cargo_Lbs,HP,DR,Range_Miles,Cost_Level,Availability,Weapon_Mounts,Special_Properties
+VA_010,Helicopter_Attack,Attack,200,20000,2,500,200,20,400,Ultra_High,Military_Only,4,Gun; rockets; missiles
+VA_011,Helicopter_Transport,Transport,180,20000,20,5000,180,15,500,Ultra_High,Military,2,Troop transport; door guns
+VA_012,Fighter_Jet,Fighter,1500,60000,1,500,150,15,2000,Ultra_High,Military_Only,6,Air superiority; supersonic
+VA_013,Bomber,Bomber,600,50000,4,50000,200,20,5000,Ultra_High,Military_Only,8,Strategic bombing
+VA_014,Cargo_Military,Transport,400,35000,5,100000,200,12,4000,Ultra_High,Military,2,Heavy lift; paradrop capable
+VA_015,VTOL_Military,VTOL,400,30000,8,2000,150,15,800,Ultra_High,Military,2,Vertical takeoff + jet speed
+VA_016,Stealth_Fighter,Stealth,1000,50000,1,500,100,10,1500,Ultra_High,Military_Only,4,Radar invisible; advanced
+VA_017,Gunship,Attack,350,30000,12,2000,250,25,2500,Ultra_High,Military_Only,6,Heavy weapons platform
+VA_018,Drone_Combat,UAV,400,40000,0,500,80,10,1000,Very_High,Military,2,Remote controlled; AI capable
+
+===WATERCRAFT - CIVILIAN===
+Vehicle_ID,Name,Type,Top_Speed_Knots,Passengers,Cargo_Lbs,HP,DR,Range_Miles,Cost_Level,Availability,Weapon_Mounts,Special_Properties
+VW_001,Jet_Ski,Personal,60,2,50,40,2,100,Medium,Common,0,Agile; recreational
+VW_002,Speedboat,Small,50,4,500,60,5,200,High,Licensed,0,Fast; pursuit capable
+VW_003,Fishing_Boat,Small,20,6,3000,80,5,300,Medium,Common,0,Work boat; storage
+VW_004,Sailboat,Sail,15 (sail),6,1000,100,5,Unlimited,High,Licensed,0,Wind powered; silent
+VW_005,Yacht_Small,Yacht,25,12,2000,120,8,500,Very_High,Licensed,0,Luxury; living quarters
+VW_006,Yacht_Large,Yacht,20,30,5000,200,12,1000,Ultra_High,Licensed,0,Luxury; helicopter pad option
+VW_007,Ferry,Commercial,20,100,20000,300,10,200,Very_High,Commercial,0,Mass transport; vehicle deck
+VW_008,Cargo_Ship,Commercial,15,20,1000000,500,15,5000,Ultra_High,Commercial,0,Massive cargo
+VW_009,Kayak,Personal,5,1,50,20,0,N/A,Low,Common,0,Silent; portable; manual
+VW_010,Inflatable_Raft,Personal,30 (motor),8,500,30,0,100,Medium,Common,0,Portable; quiet approach
+
+===WATERCRAFT - MILITARY===
+Vehicle_ID,Name,Type,Top_Speed_Knots,Passengers,Cargo_Lbs,HP,DR,Range_Miles,Cost_Level,Availability,Weapon_Mounts,Special_Properties
+VW_020,Patrol_Boat,Military,40,8,1000,150,15,400,Very_High,Military,2,Coast guard; law enforcement
+VW_021,Gunboat,Military,35,12,2000,200,25,300,Ultra_High,Military,4,Heavy weapons; coastal
+VW_022,Submarine_Mini,Submarine,15,2,200,200,25,100,Ultra_High,Military,0,Covert insertion; stealth
+VW_023,Submarine_Attack,Submarine,25,30,1000,400,40,Unlimited (nuclear),Ultra_High,Military_Only,Torpedoes,Nuclear; stealth
+VW_024,Aircraft_Carrier,Carrier,30,3000,N/A,1000,50,Unlimited,Ultra_High,Military_Only,Aircraft,Mobile airbase
+VW_025,Destroyer,Warship,35,300,N/A,500,45,5000,Ultra_High,Military_Only,12,Multi-role warship
+VW_026,RHIB,Assault,45,12,1000,80,8,200,High,Military,1,Fast assault; special ops
+
+===EXOTIC VEHICLES===
+Vehicle_ID,Name,Type,Speed,Passengers,HP,DR,Range,Cost_Level,Availability,Special_Properties
+VE_001,Hover_Car,Hover,200 MPH,4,150,15,400 miles,Ultra_High,High_Tech,Flight at low altitude; VTOL
+VE_002,Hover_Bike,Hover,150 MPH,1,80,10,200 miles,Very_High,High_Tech,Agile; exposed rider; flight
+VE_003,Power_Armor_Flight,Powered,300 MPH,1,300,40,100 miles,Ultra_High,High_Tech,Personal flight; combat capable
+VE_004,Teleporter_Pad,Teleport,Instant,4,100,0,Global,Ultra_High,Alien_Tech,Requires receiving pad
+VE_005,Space_Shuttle,Space,17500 MPH,7,200,20,Orbital,Ultra_High,Space_Agency,Orbital capable; reentry
+VE_006,Flying_Car,VTOL,250 MPH,4,120,12,500 miles,Ultra_High,High_Tech,Car + flight modes
+VE_007,Invisible_Jet,Stealth,2000 MPH,2,200,15,5000 miles,Ultra_High,Superhero,Optical stealth; supersonic
+VE_008,Giant_Robot,Mech,60 MPH,1,500,50,200 miles,Ultra_High,Military_Only,20ft tall; weapon systems
+
+===VEHICLE COMBAT RULES===
+Rule,Description,Modifier
+Ram_Attack,Vehicle collides with target,Damage = Speed/10 × Vehicle HP/100
+Chase_Rules,Pursuit between vehicles,Contested Piloting checks
+Drive_By,Attack while moving,Ranged attacks at -2CS
+Vehicle_Cover,Using vehicle as cover,+2CS to +4CS depending on position
+Called_Shot_Tires,Target tires specifically,-2CS; if hit target must make control check
+Called_Shot_Driver,Target driver through windshield,-3CS; windshield provides DR 5-15
+Fuel_Tank_Shot,Target fuel tank,-2CS; explosion risk 25% if penetrated
+Vehicle_Knockback,Vehicle takes Major damage,Driver makes control check or loses control
+
+===VEHICLE DAMAGE STATES===
+Damage_Percent,Status,Effect
+0-25%,Operational,No penalties
+26-50%,Damaged,Top speed -25%; -1CS handling
+51-75%,Heavily_Damaged,Top speed -50%; -2CS handling; systems failing
+76-99%,Critical,Top speed -75%; -3CS handling; fire risk 25%
+100%,Destroyed,Vehicle non-functional; explosion risk
+
+===DESIGNER NOTES===
+Topic,Note
+Vehicle_HP,Vehicles have HP based on size and construction; provides health pool for combat
+Vehicle_DR,Armor reduces incoming damage; military vehicles have high DR
+Speed_Conversion,10 MPH = 2 squares per turn in tactical combat
+Weapon_Mounts,Number indicates how many weapons can be mounted
+Exotic_Balance,Exotic vehicles are campaign-defining; require GM approval
+Chase_Importance,Chases should use dramatic tension; not just dice rolls
+Fuel_Management,Optional rule for extended campaigns; most games ignore

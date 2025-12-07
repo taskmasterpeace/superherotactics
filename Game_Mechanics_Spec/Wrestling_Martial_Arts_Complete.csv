@@ -1,0 +1,152 @@
+Section,Description
+---WRESTLING AND MARTIAL ARTS COMPLETE SYSTEM---,Based on Wrestling System flowchart with full executable rules
+
+===SHEET 1: GRAPPLING POSITIONS===
+Position_ID,Position_Name,Control_Level,Strike_CS_Modifier,Escape_Difficulty_CS,Valid_Holds,Valid_Transitions,AP_to_Maintain,Description
+POS_STAND,Standing Clinch,Neutral,+0CS,Easy (-2CS),"Basic Hold;Body Lock","Mount;Back Control;Guard Pull;Throw;Release",2,Both fighters standing in close grip
+POS_GUARD,Guard (Bottom),Disadvantaged,-2CS,Medium (+0CS),"Triangle Choke;Arm Bar;Guillotine","Sweep to Mount;Stand Up;Release",2,On back with opponent between legs
+POS_MOUNT,Mount (Top),Dominant,+2CS,Hard (+2CS),"Any submission;Ground Pound","Back Control;Side Control;Release",2,Sitting on opponent's torso
+POS_BACK,Back Control,Dominant,+1CS,Very Hard (+3CS),"Rear Naked Choke;Body Triangle","Mount;Release",3,Behind opponent with hooks in
+POS_SIDE,Side Control,Advantaged,+1CS,Medium (+0CS),"Americana;Kimura;Knee on Belly","Mount;Back Control;Release",2,Perpendicular to grounded opponent
+POS_HALF,Half Guard,Slight Disadvantage,-1CS,Easy (-1CS),"Basic Hold;Kimura attempt","Full Guard;Mount;Sweep",2,One leg trapped by bottom fighter
+POS_TURTLE,Turtle,Defensive,-3CS,Medium (+0CS),"None (defensive only)","Stand Up;Back taken by opponent",1,On hands and knees defensively
+
+===SHEET 2: CORE GRAPPLING MECHANICS===
+Mechanic,Description,Formula,Notes
+Initiate_Grapple,Starting a grapple from standing,(STR + MEL) / 2 vs Universal Table,4 AP cost
+Defend_Grapple,Resisting grapple initiation,(STA + MEL) / 2 vs Universal Table,Free action
+Weight_Check,Can you grapple this target,Attacker_STR >= Defender_Weight_Category,See Strength_Scale_Equivalencies.csv
+Super_Strength_Bonus,Bonus for high STR difference,+1CS per 20 STR above opponent,Max +5CS
+
+===SHEET 3: 3-ROLL STRUGGLE SYSTEM===
+Roll_Number,Attacker_Formula,Defender_Formula,Points_Failed,Points_Minor,Points_Success,Points_Major
+Roll_1,(STR+MEL)/2 vs Universal Table,(STA+MEL)/2 vs Universal Table,Random(0-1),Random(2-3),Random(4-5),Random(6-7)
+Roll_2,(STR+MEL)/2 vs Universal Table,(STA+MEL)/2 vs Universal Table,Random(0-1),Random(2-3),Random(4-5),Random(6-7)
+Roll_3,(STR+MEL)/2 vs Universal Table,(STA+MEL)/2 vs Universal Table,Random(0-1),Random(2-3),Random(4-5),Random(6-7)
+
+Outcome,Condition,Result
+Attacker_Dominant_Win,Attacker_Total > Defender_Total + 5,Attacker chooses position + free action
+Attacker_Win,Attacker_Total > Defender_Total,Attacker chooses position
+Draw,Attacker_Total = Defender_Total,Both return to Standing Clinch
+Defender_Win,Defender_Total > Attacker_Total,Defender escapes or reverses
+Defender_Dominant_Win,Defender_Total > Attacker_Total + 5,Defender escapes + free reversal attempt
+
+===SHEET 4: HOLD TYPES===
+Hold_ID,Hold_Name,AP_to_Apply,AP_to_Maintain,Damage_Formula,Escape_CS_Modifier,Status_Effect,Turns_to_Effect,Valid_From_Positions,Martial_Art_Bonus,Critical_Effect
+HOLD_BASIC,Basic Hold,2,2,0,+0CS,Immobilized,Instant,Any,Wrestling +1CS,None
+HOLD_ARMLOCK,Arm Lock,3,3,STR/5,+1CS,Arm_Damaged,1,"Mount;Side Control;Guard",Aikido +2CS,Broken Arm (arm unusable)
+HOLD_LEGLOCK,Leg Lock,3,3,STR/5,+1CS,Leg_Damaged,1,"Guard;Half Guard",Martial Arts +1CS,Broken Leg (-4 movement)
+HOLD_RNC,Rear Naked Choke,4,4,STR/3,+2CS,Unconscious,3,Back Control,Ninjitsu +2CS,Instant KO on Major
+HOLD_GUILLOTINE,Guillotine,4,3,STR/4,+1CS,Choked (-1CS all),2,"Standing Clinch;Guard",Krav Maga +1CS,Unconscious
+HOLD_TRIANGLE,Triangle Choke,4,3,STR/3,+3CS,Unconscious,4,Guard,Martial Arts +2CS,Unconscious + arm damaged
+HOLD_KIMURA,Kimura,3,3,STR/4,+2CS,Shoulder_Damaged,1,"Side Control;Mount;Guard",Wrestling +1CS,Dislocated Shoulder
+HOLD_AMERICANA,Americana,3,3,STR/4,+2CS,Shoulder_Damaged,1,"Side Control;Mount",Wrestling +1CS,Dislocated Shoulder
+HOLD_CRUCIFIX,Crucifix,4,4,STR/5,+3CS,Arms_Pinned,Instant,"Back Control;Side Control",Wrestling +2CS,Free Ground Pound
+HOLD_BODYLOCK,Body Lock,2,2,STR/10,+0CS,Compression,1,"Standing Clinch;Back Control",Wrestling +2CS,Can transition to Suplex
+HOLD_CRUSH,Crushing Hold,4,4,STR/3,+2CS,Crushed (internal damage),1,Any,Super Strength only (STR 50+),Broken Ribs
+
+===SHEET 5: THROW TYPES===
+Throw_ID,Throw_Name,AP_Cost,Base_Damage_Formula,Knockback_Squares,Result_Position,Martial_Art_Bonus,STR_Requirement,Special_Effect,Environmental_Interaction
+THROW_HIP,Hip Throw,4,STR/4,1,Prone,Judo +2CS,None,Target Prone,None
+THROW_SHOULDER,Shoulder Throw,4,STR/3,2,Prone,Judo +3CS,None,Dazed on Major Success,Possible wall impact
+THROW_SUPLEX,Suplex,5,STR/2,0,Mount,Wrestling +2CS,STR 30+,Thrower lands in Mount,Floor damage possible
+THROW_SLAM,Power Slam,5,STR/2 + 10,2,Prone,Wrestling +2CS,STR 40+,Environmental knockback,Wall/floor destruction
+THROW_SWEEP,Foot Sweep,3,STR/6,1,Prone,"Judo +2CS;Capoeira +2CS",None,Target Prone only,None
+THROW_SPIN,Spinning Throw,5,STR/3 + 5,3,Prone,Aikido +3CS,None,Disoriented 1 turn,Possible multi-target
+THROW_COUNTER,Counter Throw,3,Opponent STR/3,2,Prone,"Aikido +3CS;Judo +2CS",None,Uses attacker momentum,Uses attacker's knockback
+THROW_LAUNCH,Superhuman Launch,6,STR/2,STR/10 squares,Prone,Super Strength only,STR 70+,Full knockback rules apply,Building destruction possible
+
+===SHEET 6: TRANSITION MATRIX===
+From_Position,To_Position,AP_Cost,Roll_Formula,Difficulty_Result,Martial_Art_Bonus,Failure_Consequence,Super_Strength_Modifier
+Standing Clinch,Mount,4,(STR+MEL)/2,Success,Wrestling +2CS,Remain in Clinch,+1CS per 20 STR above opponent
+Standing Clinch,Back Control,5,(AGL+MEL)/2,Major,Ninjitsu +2CS,Remain in Clinch,+1CS per 30 STR above opponent
+Standing Clinch,Guard Pull,2,Auto,None,Judo +1CS defense,N/A,N/A
+Mount,Back Control,3,MEL,Success,Wrestling +1CS,Lose Mount to Half Guard,+1CS per 20 STR
+Mount,Side Control,2,Auto,None,None,N/A,N/A
+Side Control,Mount,3,(STR+MEL)/2,Minor,Wrestling +1CS,Remain in Side Control,+1CS per 20 STR
+Side Control,Back Control,4,(AGL+MEL)/2,Success,Ninjitsu +1CS,Remain in Side Control,+1CS per 20 STR
+Guard,Sweep to Mount,4,(AGL+STR)/2,Major,Judo +2CS,Remain in Guard,+1CS per 20 STR
+Guard,Stand Up,3,(AGL+STA)/2,Success,Capoeira +2CS,Remain in Guard,None
+Half Guard,Full Guard,2,AGL,Minor,None,Lose to Side Control,None
+Turtle,Stand Up,4,(AGL+STA)/2,Success,Wrestling +1CS,Back Control taken,None
+Any,Release,0,Auto,None,None,N/A,N/A
+
+===SHEET 7: MARTIAL ARTS GRAPPLING BONUSES===
+Martial_Art,Grapple_Initiate_CS,Grapple_Defense_CS,Escape_CS,Reversal_CS,Ground_Strike_CS,Throw_CS,Submission_CS,Special_Ability,Weakness
+Wrestling,+2CS,+1CS,+0CS,+1CS,+0CS,+1CS,+2CS,Pin Hold: Auto-maintain for 2 turns,-1CS vs strikes while grappling
+Judo,+0CS,+1CS,+1CS,+2CS,+0CS,+2CS,+0CS,Sacrifice Throw: Reversal becomes throw,-1CS sustained submission holds
+Boxing,+0CS,+0CS,+0CS,+0CS,+2CS,+0CS,+0CS,Clinch Uppercut: +3CS strike from clinch,-2CS all ground positions
+Krav Maga,+1CS,+0CS,+3CS,+0CS,+3CS,+0CS,+1CS,Groin Strike Escape: Auto-slip once per fight,No control position bonuses
+Capoeira,-1CS,+1CS,+2CS,+1CS,+0CS,+1CS,+0CS,Cartwheel Escape: +3CS standing escape,-2CS ground control
+Aikido,+0CS,+3CS,+1CS,+3CS,+0CS,+3CS,+1CS,Redirect: Use attacker's STR for throw damage,-1CS initiating grapples
+Ninjitsu,+1CS,+0CS,+1CS,+0CS,+1CS,+0CS,+2CS (chokes),Silent Choke: No noise on KO,-1CS frontal grapple entry
+Katana,-2CS,-1CS,-1CS,-1CS,+1CS,+0CS,-2CS,Saya Strike: Pommel stun attack +2CS,-3CS all grappling (weapon focus)
+Staff,-1CS,+2CS,+0CS,+0CS,+0CS,+0CS,-1CS,Staff Trip: +3CS sweep from range,-2CS if grappled (loses weapon)
+Martial Arts,+2CS,+1CS,+1CS,+1CS,+2CS,+1CS,+1CS,Universal Competence: No penalties anywhere,No specialization bonus (+3CS)
+
+===SHEET 8: SUPER STRENGTH GRAPPLING===
+STR_Range,STR_Rank,Grapple_CS_Bonus,Auto_Win_Threshold,Crushing_Damage_Per_Turn,Throw_Enhancement,Special_Abilities,Environmental_Effect
+1-19,Feeble-Poor,-2CS,N/A,None,None,None,None
+20-29,Typical,+0CS,N/A,None,Normal throws,None,None
+30-39,Good,+0CS,N/A,None,Normal throws,None,None
+40-49,Excellent,+1CS,STR diff 30+,None,+1 knockback,Weight advantage,None
+50-59,Remarkable,+2CS,STR diff 25+,STR/10,+2 knockback,Crushing Hold available,Minor floor cracks
+60-69,Incredible,+2CS,STR diff 20+,STR/8,+3 knockback + wall impact,Throw through walls,Wall damage on throws
+70-79,Amazing,+3CS,STR diff 15+,STR/6,+4 knockback + structure damage,Launch opponent,Building damage possible
+80-89,Monstrous,+3CS,STR diff 10+,STR/5,+5 knockback + area damage,Orbital throw,Significant destruction
+90-99,Unearthly,+4CS,Any non-super,STR/4,Full knockback table,Reality-tier grappling,Massive environmental damage
+100+,Shift X+,+5CS,All normal humans,STR/3,Unlimited knockback,Cosmic grappling,Catastrophic destruction
+
+===SHEET 9: GROUND STRIKE MATRIX===
+Position,Strike_Type,AP_Cost,Damage_Modifier,Accuracy_CS,Valid_Martial_Arts,Defender_Options,Stun_Chance
+Mount,Punch,2,Full STR,+2CS,"Boxing +2CS;Krav Maga +3CS;Martial Arts +2CS","Block -2CS;Cover (half dmg);Escape",15%
+Mount,Elbow,2,STR + 5,+1CS,"Krav Maga +3CS;Martial Arts +2CS","Block -2CS;Cover (half dmg);Escape",25%
+Mount,Hammer Fist,2,STR + 3,+2CS,"Boxing +1CS;Wrestling +1CS","Block -2CS;Cover (half dmg);Escape",20%
+Side Control,Knee Strike,3,STR + 8,+1CS,"Krav Maga +3CS;Martial Arts +2CS","Cover only;Escape",10%
+Side Control,Elbow,2,STR + 5,+1CS,Krav Maga +3CS,"Block -3CS;Cover;Escape",25%
+Back Control,Punch (side head),2,STR/2,-1CS (bad angle),"Boxing +1CS;Krav Maga +2CS","Cover only;Escape",10%
+Guard (top),Punch,3,STR/2,+0CS (defended),"Boxing +2CS;Martial Arts +2CS","Block;Sweep attempt;Triangle attempt",5%
+Guard (top),Elbow,3,STR/2 + 3,-1CS (risky),"Krav Maga +2CS","Block;Sweep attempt;Triangle attempt",15%
+
+===SHEET 10: ESCAPE METHODS===
+Escape_Type,AP_Cost,Roll_Formula,Base_Difficulty_CS,Martial_Art_Bonus,Success_Result,Major_Success_Result,Super_Strength_Modifier
+Technical Escape,3,(AGL + INS) / 2,+0CS,"Escape Artist +2CS;Aikido +1CS",Improve position by 1,Full escape to standing,Opponent STR/20 penalty
+Explosive Escape,4,(STR + STA) / 2,+1CS,"Wrestling +1CS;Krav Maga +2CS",Break hold to neutral,Full escape + free strike,Your STR/20 bonus
+Reversal Escape,4,(AGL + MEL) / 2,+2CS,"Aikido +3CS;Judo +2CS",Reverse positions,Reverse + apply submission,Harder vs higher STR
+Guard Recovery,2,AGL,+0CS,"Judo +1CS;Martial Arts +1CS",Move to guard from worse position,Guard + sweep attempt,None
+Turtle Defense,1,STA,-1CS,Wrestling +1CS,Move to turtle from any bad position,Turtle + stand attempt,Opponent STR/30 penalty
+Stand Up,3,(AGL + STA) / 2,+0CS,"Capoeira +2CS;Wrestling +1CS",Return to standing,Standing + free movement,Opponent STR/30 penalty
+
+===SHEET 11: REVERSAL MECHANICS===
+Reversal_Trigger,Reversal_Type,Roll_Requirement,Martial_Art_Bonus,Result_Position,Damage_Dealt,Special_Notes
+Escape Roll Major vs Failed,Position Reversal,Major Success on escape,"Aikido +3CS;Judo +2CS",Swap all positions,None,Immediate position swap
+Throw Defense Major,Counter Throw,Major Success defense,"Aikido +3CS;Judo +2CS",Thrower becomes thrown,Attacker's STR/3,Uses momentum against attacker
+Strike Parry Major,Strike Reversal,Major Success parry,"Aikido +2CS;Boxing +1CS",Free counter strike,Normal strike damage,Immediate counter opportunity
+Submission Escape Major,Submission Reversal,Major Success escape,"Aikido +2CS;Wrestling +1CS",Apply submission back,Standard submission,Turn the tables
+Grapple Entry Failure,Entry Reversal,Attacker Failed + Def Major,Aikido +3CS,Defender chooses throw or clinch,Varies by choice,Punish failed entry
+Any Position,Desperate Reversal,Critical Success (roll 00),All martial arts +1CS,Full position swap + free action,10 damage minimum,Once per combat maximum
+
+===SHEET 12: AP COST SUMMARY===
+Action,AP_Cost,Description,Skill_Modifiers
+Initiate_Grapple,4,Start grappling from standing,Wrestling +2CS
+Defend_Grapple,0,Resist grapple attempt (free reaction),Aikido +3CS defense
+Maintain_Hold,2,Keep current hold active next turn,Wrestling: auto for 2 turns
+Apply_Submission,3,Apply arm lock or choke or other hold,Varies by hold type
+Transition_Easy,2,Move to adjacent position (auto success),None
+Transition_Normal,3,Move to better position (needs roll),Varies by martial art
+Transition_Hard,4-5,Move to dominant position (hard roll),Varies by martial art
+Escape_Attempt,3,Try to get free from hold,Escape Artist +2CS
+Ground_Strike,2,Punch/elbow from dominant position,"Boxing +2CS;Krav Maga +3CS"
+Throw_Light,3-4,Hip throw or sweep,Judo +2CS
+Throw_Heavy,5,Suplex or power slam,Wrestling +2CS
+Throw_Super,6,Superhuman launch,STR 70+ required
+Release_Opponent,0,Let go of opponent (free action),None
+
+===INTEGRATION WITH EXISTING SYSTEMS===
+Reference,Integration_Point,Details
+Complete_Skills_Talents.csv,10 Martial Arts skills,All bonuses defined in Sheet 7 above
+Universal_Table.csv,d100 resolution,All rolls use Failed/Minor/Success/Major results
+Knockback_Mechanics.csv,Throw knockback,Throws use standard knockback rules
+Status_Effects_Complete.csv,New effects needed,Add: Pinned;Choked;Crushed;Dislocated;Arm_Damaged;Leg_Damaged
+LSW_Power_Combat_Mechanics.csv,Super Strength,STR 50+ enables Crushing Hold per Sheet 8
+Combat_System_Master_Reference.csv,Combat flow,Grappling is alternative to standard attack at Step 2

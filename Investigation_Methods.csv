@@ -1,0 +1,26 @@
+Method_ID,Method_Name,Success_Modifier,Risk_Level,Political_Impact,Resource_Cost,Duration_Modifier,Detection_Chance,Description,Faction_Bonus,Requirements
+METH_001,Covert Operation,0,Medium,None,Low,1.0,15%,Single investigator works in secret to gather intelligence,All factions +0,Stealth-capable LSW
+METH_002,Deep Cover,+2,High,Low,Medium,1.5,5%,Investigator assumes false identity for extended operation,US +1; China +2,Acting skill; False identity documents
+METH_003,Official Investigation,+1,Low,Medium,Low,0.8,40%,Work through local authorities and legal channels,US +2; India +1,Government authorization
+METH_004,Joint Task Force,-1,Low,High,High,0.6,60%,Multi-agency cooperation with full resources,US +3; India +2,Military/Police cooperation
+METH_005,Force Deployment,+3,Very High,Very High,Very High,0.3,95%,Send full combat team to resolve by force,All factions +0,Combat-ready LSW team
+METH_006,Surgical Strike,+2,High,High,High,0.4,80%,Targeted military action against specific threat,US +2; China +1,Military planning; Precision weapons
+METH_007,Diplomatic Inquiry,+0,Very Low,Low,Low,1.2,25%,Use diplomatic channels and embassy resources,India +3; Nigeria +1,Diplomatic immunity; Embassy access
+METH_008,Cultural Exchange,-1,Very Low,None,Medium,1.8,10%,Embed investigators as cultural or academic visitors,India +2; Nigeria +2,Cultural knowledge; Academic credentials
+METH_009,Corporate Infiltration,+1,Medium,Low,Medium,1.3,20%,Pose as business interests or corporate partners,US +1; China +2,Corporate identity; Business credentials
+METH_010,Economic Pressure,+2,Low,Medium,Very High,2.0,70%,Use economic leverage to force cooperation,US +3; China +3,Economic influence; Financial resources
+METH_011,Tribal Network,+2,Low,None,Low,1.1,12%,Leverage traditional kinship and tribal connections,Nigeria +4,Tribal membership; Cultural authenticity
+METH_012,Spiritual Investigation,+1,Low,Very Low,Low,1.4,8%,Use religious or spiritual authority for access,India +3; Nigeria +2,Religious authority; Spiritual credibility
+METH_013,Technology Surveillance,+2,Medium,Medium,High,0.9,35%,Electronic monitoring and cyber intelligence,US +3; China +3,Advanced technology; Cyber warfare capabilities
+METH_014,Social Network Analysis,+1,Low,Low,Medium,1.0,25%,Map relationships and communications digitally,China +4,Social media access; Data analysis capabilities
+METH_015,Asset Recruitment,+0,Medium,Low,High,2.5,30%,Turn local contacts into permanent intelligence sources,All factions +1,Recruitment budget; Handler training
+METH_016,Black Market Contact,+2,High,Very Low,Medium,1.2,20%,Use criminal networks for information and access,Nigeria +2,Criminal contacts; Underground credibility
+METH_017,Academic Research,+0,Very Low,None,Low,2.0,5%,Conduct legitimate academic study of phenomenon,India +1,Academic credentials; Research facility
+METH_018,Media Investigation,+1,Low,Medium,Low,1.1,45%,Use journalists and media contacts for information,US +1,Media relationships; Press credentials
+METH_019,Medical Cover,+1,Low,Very Low,Medium,1.3,15%,Pose as medical personnel providing humanitarian aid,India +2; Nigeria +1,Medical training; Humanitarian credentials
+METH_020,Military Exchange,+0,Low,Low,Medium,0.9,30%,Official military cooperation and intelligence sharing,US +2; China +1,Military rank; Official orders
+METH_021,Tourist Cover,-1,Very Low,None,Low,1.6,8%,Investigators pose as tourists or travelers,All factions +0,Tourist visas; Travel documentation
+METH_022,Emergency Response,+1,Medium,Medium,High,0.5,50%,Respond to crisis as humanitarian or disaster relief,India +2; Nigeria +1,Emergency credentials; Relief supplies
+METH_023,Scientific Expedition,+0,Low,Very Low,High,1.8,12%,Legitimate scientific research with investigation goals,US +1; China +1,Scientific credentials; Research equipment
+METH_024,Religious Mission,+1,Very Low,Very Low,Low,1.5,6%,Use religious missionary work as investigation cover,India +3; Nigeria +2,Religious ordination; Mission authorization
+METH_025,Vigilante Action,+2,Very High,Very High,Low,0.4,90%,Unsanctioned direct action against targets,All factions -1,Combat capability; Willingness to break law

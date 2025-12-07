@@ -1,0 +1,16 @@
+Weapon,SHT Range,SHT Damage
+,,
+Pistol,16,14-18
+Rifle,20,19-22
+Sniper,,
+Sub Machine Run,,
+Shotgun,30/12/6,25-32
+Flame Thrower,,
+Laser Pistol,20,
+Laser Rifle,40,
+Throwing Knife,12,
+,,
+,,
+,,
+Attack,,
+Punch,1,Strength Rating

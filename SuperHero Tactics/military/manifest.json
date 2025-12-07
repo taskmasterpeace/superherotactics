@@ -1,0 +1,232 @@
+{
+  "version": "1.0",
+  "generated": "2025-12-07T07:35:27.255Z",
+  "assets": {
+    "misc": [
+      {
+        "id": "sprite_01",
+        "file": "assets/misc/sprite_01.png",
+        "width": 119,
+        "height": 164,
+        "tags": []
+      },
+      {
+        "id": "sprite_02",
+        "file": "assets/misc/sprite_02.png",
+        "width": 119,
+        "height": 163,
+        "tags": []
+      },
+      {
+        "id": "sprite_03",
+        "file": "assets/misc/sprite_03.png",
+        "width": 133,
+        "height": 167,
+        "tags": []
+      },
+      {
+        "id": "sprite_04",
+        "file": "assets/misc/sprite_04.png",
+        "width": 164,
+        "height": 170,
+        "tags": []
+      },
+      {
+        "id": "sprite_05",
+        "file": "assets/misc/sprite_05.png",
+        "width": 120,
+        "height": 167,
+        "tags": []
+      },
+      {
+        "id": "sprite_06",
+        "file": "assets/misc/sprite_06.png",
+        "width": 153,
+        "height": 166,
+        "tags": []
+      },
+      {
+        "id": "sprite_07",
+        "file": "assets/misc/sprite_07.png",
+        "width": 172,
+        "height": 164,
+        "tags": []
+      },
+      {
+        "id": "sprite_08",
+        "file": "assets/misc/sprite_08.png",
+        "width": 119,
+        "height": 163,
+        "tags": []
+      },
+      {
+        "id": "sprite_09",
+        "file": "assets/misc/sprite_09.png",
+        "width": 113,
+        "height": 165,
+        "tags": []
+      },
+      {
+        "id": "sprite_10",
+        "file": "assets/misc/sprite_10.png",
+        "width": 129,
+        "height": 168,
+        "tags": []
+      },
+      {
+        "id": "sprite_11",
+        "file": "assets/misc/sprite_11.png",
+        "width": 154,
+        "height": 165,
+        "tags": []
+      },
+      {
+        "id": "sprite_12",
+        "file": "assets/misc/sprite_12.png",
+        "width": 122,
+        "height": 163,
+        "tags": []
+      },
+      {
+        "id": "sprite_13",
+        "file": "assets/misc/sprite_13.png",
+        "width": 119,
+        "height": 169,
+        "tags": []
+      },
+      {
+        "id": "sprite_14",
+        "file": "assets/misc/sprite_14.png",
+        "width": 119,
+        "height": 164,
+        "tags": []
+      },
+      {
+        "id": "sprite_15",
+        "file": "assets/misc/sprite_15.png",
+        "width": 144,
+        "height": 164,
+        "tags": []
+      },
+      {
+        "id": "sprite_16",
+        "file": "assets/misc/sprite_16.png",
+        "width": 96,
+        "height": 164,
+        "tags": []
+      },
+      {
+        "id": "sprite_17",
+        "file": "assets/misc/sprite_17.png",
+        "width": 117,
+        "height": 164,
+        "tags": []
+      },
+      {
+        "id": "sprite_18",
+        "file": "assets/misc/sprite_18.png",
+        "width": 129,
+        "height": 164,
+        "tags": []
+      },
+      {
+        "id": "sprite_19",
+        "file": "assets/misc/sprite_19.png",
+        "width": 156,
+        "height": 164,
+        "tags": []
+      },
+      {
+        "id": "sprite_20",
+        "file": "assets/misc/sprite_20.png",
+        "width": 116,
+        "height": 170,
+        "tags": []
+      },
+      {
+        "id": "sprite_21",
+        "file": "assets/misc/sprite_21.png",
+        "width": 103,
+        "height": 162,
+        "tags": []
+      },
+      {
+        "id": "sprite_22",
+        "file": "assets/misc/sprite_22.png",
+        "width": 150,
+        "height": 167,
+        "tags": []
+      },
+      {
+        "id": "sprite_23",
+        "file": "assets/misc/sprite_23.png",
+        "width": 117,
+        "height": 164,
+        "tags": []
+      },
+      {
+        "id": "sprite_24",
+        "file": "assets/misc/sprite_24.png",
+        "width": 117,
+        "height": 163,
+        "tags": []
+      },
+      {
+        "id": "sprite_25",
+        "file": "assets/misc/sprite_25.png",
+        "width": 91,
+        "height": 164,
+        "tags": []
+      },
+      {
+        "id": "sprite_26",
+        "file": "assets/misc/sprite_26.png",
+        "width": 118,
+        "height": 166,
+        "tags": []
+      },
+      {
+        "id": "sprite_27",
+        "file": "assets/misc/sprite_27.png",
+        "width": 116,
+        "height": 169,
+        "tags": []
+      },
+      {
+        "id": "sprite_28",
+        "file": "assets/misc/sprite_28.png",
+        "width": 133,
+        "height": 168,
+        "tags": []
+      },
+      {
+        "id": "sprite_29",
+        "file": "assets/misc/sprite_29.png",
+        "width": 125,
+        "height": 169,
+        "tags": []
+      },
+      {
+        "id": "sprite_30",
+        "file": "assets/misc/sprite_30.png",
+        "width": 110,
+        "height": 164,
+        "tags": []
+      },
+      {
+        "id": "sprite_31",
+        "file": "assets/misc/sprite_31.png",
+        "width": 106,
+        "height": 168,
+        "tags": []
+      },
+      {
+        "id": "sprite_32",
+        "file": "assets/misc/sprite_32.png",
+        "width": 122,
+        "height": 168,
+        "tags": []
+      }
+    ]
+  }
+}

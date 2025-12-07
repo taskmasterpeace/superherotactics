@@ -1,0 +1,129 @@
+,,,,,🔪DAMAGE TYPE TABLE🔫,,
+,,Sub-Type,,Specific,Effect,Weapon,Power
+,PHYSICAL,🔨,,,"Knockback:
+- moves target backwards with fall animation
+- makes character dazed N secs
+
+FAST Knockback:
+- skips 1 turn",,
+,,SMASHING MELEE,M,Punch,"N% chance of knockback depends on attacker's and target's STR
+M damage depends on attacker's STR",,
+,,SMASHING MELEE,,Blunt Weapon,"N% chance of knockback depends on attacker's and target's STR
+M damage depends on attacker's STR + weapon's damage","Lead Pipe, Battle Staff, Hammer",
+,,SMASHING PROJECTILE,,Thrown object,"N% chance of knockback depends on attacker's and target's STR
+M damage depends on attacker's STR + object's weight",,
+,,SMASHING PROJECTILE,,Thrown large object,"N% chance of knockback depends on attacker's and target's STR
+K-L% chance that the object will land on the target (without knockback) and the target must check STR or will remain immobile
+M damage depends on attacker's STR + object's weight",,
+,,IMPACT,,Kinetic/Force,"N% chance of knockback depends on target's STR
+M damage depends on additional factors (uses additional table)",,"Fall damage, Gravity, Telekinesis, Celestial bodies"
+,,GUNFIRE,,Buckshot,"N% chance of knockback inversely depends on range [uses formula]
+all types of armor are HIGHLY effective [x1.5 blocking damage]
+M damage depends on weapon's damage",Shotgun,
+,,EXPLOSION,,Concussion Blast,"N% chance of knockback inversely depends on explosion area [uses formula]
+M damage depends on weapon's damage",Standard Grenade,
+,,SOUND,,Ultrasonic,"N% chance of knockback depends on weapon type [balance in weapon's info]
+M damage depends on distance",,
+,,SOUND,,Sonic,"N% chance of knockback depends on weapon type [balance in weapon's info]
+M damage depends on distance",,
+,BLEED PHYSICAL,🏹,,,"Bleeding: 
+- deals N damage each M secs
+- dealing extra K damage when you move for each L sec of movement
+
+FAST Bleeding:
+- deals N damage each M turns",,
+,,EXPLOSION,,Shrapnel Explosion,"N% chance of bleeding inversely depends on explosion area [uses formula]
+M damage depends on weapon's damage",Shrapnel Grenade,
+,,PIERCING PROJECTILE,,Thrown object,"N% chance of bleeding depends on attacker's STR
+M damage depends on attacker's STR + weapon's damage","Throwing Knife, Bow (some arrows)",
+,,GUNFIRE,,Shot,"N% chance of bleeding depends on weapon's type [balance in weapon's info]
+M damage depends on weapon's damage",,
+,,EDGED MELEE,,Piercing,"N-M% chance of bleeding (if no armor or it's ignored)
+K-L% chance to ignore armor (except Force Shield)
+O damage depends on weapon's damage",Knife,
+,,EDGED MELEE,,Slashing,"N-M% chance of bleeding (if no armor)
+K% chance to cut body parts depends on attacker's STR
+L damage depends on weapon's damage",Katana,
+,ENERGY,⚡,,,"Disintegration:
+- has N-M% chance to turn target into molecules",,
+,,WILD ENERGY,,Fire,"applies only on flamable surfaces (use additional table)
+effect stays on the target after attack end (use additional table)
+effect lowers when moving/cooling/etc (use additional table)
+deals N+M*K damage (each Kth sec damage rises for M points)",Flamethrower,Flames
+,,WILD ENERGY,,Thermal,"after attack's end effect fastly disappears (temp lowers)
+deals N+M*K damage (each Kth sec of attack damage rises for M points)
+L% chance of disintegration depends on reached temp of attack",Thermal Rifle,Thermal Beam
+,,WILD ENERGY,,Plasma,"effect stays on the target after attack end (use additional table)
+effect lowers when moving/cooling/etc (use additional table)
+deals N damage each sec
+M-K% chance of disintegration",Plasma Rifle,Plasma
+,,WILD ENERGY,,Ice,"deals N damage each sec depending on temp (grows while attacking and lowers while not)
+K-L% chance to froze target depends on temp (use additional table)
+frozen target must check STR to break free from ice immediately
+M% chance of disintegration depends on reached temp of attack",Ice Rifle,Cold
+,,ELECTROMAGNETIC,,Pure Energy,"N% chance of disintegration
+M damage depends on weapon/superpower/etc
+K% chance to explode and disintegrate everything in certain area",Energy Rifle,
+,,ELECTROMAGNETIC,,Еlectricity,"N% chance to paralize living origin for K-L secs (uses additional table)
+M damage depends on weapon/superpower/etc
+damage to robotic origins get X2
+O% chance to break robotic origins
+P% chance of disintegration",Electric Rifle,Lightning
+,,ELECTROMAGNETIC,,Radiation,"doesn't deal damage
+N% chance to melt living origin depends on attack time's length",,"Cosmic Radiation, Nuclear Radiation"
+,,ELECTROMAGNETIC,,Laser,"N% chance to blind target
+can't be dodged by target slower than speed of light
+M damage depends on weapon/superpower/etc
+K% chance of disintegration",Laser Rifle,Laser Beam
+,BIOLOGICAL,💉,,,"Sickness:
+- makes character sick with temporary reduction in stats [table of stats with probs and amounts]",,
+,,TOXIN,,Poison,"deals N-M*K damage (each Kth sec damage lowers on M till it's gone)
+applies by any type of attack except piercing and bite
+L% chance to get sickness
+doesn't affect robotic origins",,
+,,TOXIN,,Venom,"deals N-M*K damage (each Kth sec damage lowers on M till it's gone)
+applies only by piercing or bite
+damage stronger and longer than poison
+L% chance to get sickness
+doesn't affect robotic origins",,
+,,TOXIN,,Acid,"deals N damage each sec for K-L secs
+deals X2 damage to armor
+M% chance to get sickness",,Acid
+,,BIOTOXIN,,Virus,"doesn't deal damage
+applies Sickness 100% while active
+after N secs turns into Disease (if not removed)
+doesn't affect robotic origins",,
+,,BIOTOXIN,,Disease,"N damage each M secs
+applies Sickness 100% while active
+can be removed only in hospital
+doesn't affect robotic origins",,
+,,BIO PROCESS,,Decomposition,"applies Sickness 100% while active
+N% chance to lose body parts",,Aging
+,,BIO PROCESS,,Asphyxiation,"deals N+M*K damage (each Kth sec of attack damage rises for M points)
+L% chance to get sickness
+O% chance for target to lose consciousness for P secs (depends on attack time's length)
+doesn't affect robotic origins",,
+,,BIO PROCESS,,Ebullism,"deals N+M*K damage (each Kth sec of attack damage rises for M points)
+after L secs living origin will collapse
+O% chance to get sickness",,
+,MENTAL,🧠,,,"Weakness:
+- lowers N-M% of one random character's energy
+
+FAST Weakness:
+- character able to attack only one randomly chosen enemy",,
+,,MIND,,Mind Control,"doesn't deal damage
+allows to control target for N secs
+M% chance to get weakness",,
+,,MIND,,Mental Blast,"N damage depends on superpower/etc
+M% chance to get weakness",,
+,,SPIRITUAL,,Exile,"doesn't deal damage
+N% chance for target's life to left body depends on attack time's length",,
+,,SPIRITUAL,,Siphon,N damage each sec while attacking and +N heal each sec to attacker,,
+,Out of Combat,😴,,,,,
+,,,,Starvation,,,
+,,,,Time,,,"Aging, Decompose"
+,,SICKNESS,,Illness,temporary reduction in stats,,
+,,,,,,,
+,,,,,"Note: N M K L O P - are just examples of variables needed for balancing these effects in configs
+
+for example if we need M-N% chance, that means that in config we need 2 variables to set as min chance and max chance, and effect will be randomly chosen between these min and max",,

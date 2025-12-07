@@ -1,0 +1,92 @@
+Section,Description
+---ORIGIN DAMAGE INTERACTIONS---,Defines how each origin type interacts with damage types and effects
+
+===ORIGIN EFFECT IMMUNITIES===
+Origin_ID,Origin_Name,Bleeds,Burns,Freezes,Stuns,Poisons,EMP_Vulnerable,Notes
+1,Skilled Human,YES,YES,YES,YES,YES,NO,Standard human vulnerabilities
+2,Altered Human,USUALLY,YES,YES,YES,VARIES,NO,Depends on specific alteration
+3,Mutant,USUALLY,YES,YES,YES,VARIES,NO,Some mutations grant immunity
+4,Tech Enhancement,PARTIAL,YES,YES,YES,PARTIAL,YES,Organic parts bleed; cybernetics spark
+5,Mystic,USUALLY,YES,YES,YES,VARIES,NO,May have magical protections
+6,Alien,SPECIES,SPECIES,SPECIES,YES,SPECIES,NO,Varies by alien physiology
+7,Cosmic,RARELY,VARIES,VARIES,VARIES,NO,NO,Often energy beings; immune to most
+8,Divine,ICHOR,VARIES,RARELY,RARELY,NO,NO,Gods have different biology
+9,Construct,NO,PARTIAL,YES,YES,NO,YES,Robots spark/leak; don't bleed
+
+===DAMAGE TYPE EFFECTS===
+Damage_SubType,Causes_Bleeding,Causes_Burning,Causes_Freezing,Causes_Knockback,Death_Visual,Hit_Verb_Graze,Hit_Verb_Hit,Hit_Verb_Crit,Armor_Verb_Block,Armor_Verb_Partial,Armor_Verb_Bypass
+EDGED_MELEE,YES,NO,NO,NO,slash_wound,nicks,slashes,CLEAVES,deflects off,cuts through,RENDS through
+SMASHING_MELEE,NO,NO,NO,YES,blunt_trauma,glances off,smashes,CRUSHES,bounces off,dents,SHATTERS through
+PIERCING_MELEE,YES,NO,NO,NO,stab_wound,grazes,stabs,IMPALES,scrapes,pierces,SKEWERS through
+GUNFIRE,YES,NO,NO,SMALL,bullet_wound,clips,drills into,TEARS THROUGH,deflects off,punches through,RIPS through
+BUCKSHOT,YES,NO,NO,YES,shotgun_wound,peppers,blasts,SHREDS,scatters off,penetrates,DEVASTATES
+SLUG,YES,NO,NO,YES,massive_wound,grazes,slams into,DESTROYS,deflects,punches through,OBLITERATES
+SHRAPNEL,YES,NO,NO,NO,shrapnel_wound,scratches,shreds,TEARS APART,pings off,embeds in,RIDDLES with
+THROWN,VARIES,NO,NO,SMALL,impact,bounces off,strikes,SMASHES INTO,deflects,impacts,CRASHES through
+ARROW,YES,NO,NO,NO,arrow_wound,grazes,pierces,SKEWERS,deflects,penetrates,PINS through
+BOLT,YES,NO,NO,NO,bolt_wound,grazes,punches through,IMPALES,deflects,penetrates,TRANSFIXES
+EXPLOSION,NO,CHANCE,NO,YES,explosion,buffets,blasts,DEVASTATES,absorbs,impacts,ENGULFS
+SONIC,NO,NO,NO,YES,sonic_death,rattles,disrupts,RUPTURES,dampens,penetrates,SHATTERS
+CONCUSSIVE,NO,NO,NO,YES,concussion,staggers,slams,LAUNCHES,absorbs,impacts,SENDS FLYING
+LASER,NO,YES,NO,NO,laser_burn,scorches,burns through,VAPORIZES,reflects off,penetrates,BURNS THROUGH
+PLASMA,NO,YES,NO,NO,plasma_burn,sears,melts through,INCINERATES,splashes off,burns into,IMMOLATES
+THERMAL,NO,YES,NO,NO,burn_death,singes,burns,CHARS,absorbs,conducts through,COMBUSTS
+ICE,NO,NO,YES,NO,frozen,chills,freezes,FLASH FREEZES,resists,cracks through,SHATTERS FROZEN
+PURE_ENERGY,NO,NO,NO,SMALL,disintegration,grazes,blasts,ANNIHILATES,absorbs,penetrates,OBLITERATES
+ELECTRICAL,NO,CHANCE,NO,NO,electrocution,shocks,electrocutes,OVERLOADS,grounds,arcs through,FRIES
+DISINTEGRATION,NO,NO,NO,NO,dust,grazes,disrupts,DISINTEGRATES,resists,breaks down,ERASES
+STUN,NO,NO,NO,NO,unconscious,dazes,stuns,OVERLOADS,resists,affects,INCAPACITATES
+FIRE,NO,YES,NO,NO,burned,singes,ignites,ENGULFS,resists,spreads to,CONSUMES
+
+===DEATH VISUALS BY TYPE===
+Death_Visual_ID,Description,Animation_Type,Sound_Cue,Leaves_Body,Blood_Effect
+slash_wound,Deep cutting wound,fade_red,slash_sound,YES,blood_pool
+blunt_trauma,Crushed/broken bones,ragdoll,crunch_sound,YES,minimal
+stab_wound,Piercing wound,fade_red,stab_sound,YES,blood_pool
+bullet_wound,Gunshot wounds,fall_back,gunshot_echo,YES,blood_splatter
+shotgun_wound,Multiple pellet wounds,knockback_fall,shotgun_echo,YES,heavy_blood
+massive_wound,Catastrophic damage,ragdoll_far,heavy_impact,YES,massive_blood
+shrapnel_wound,Multiple fragment wounds,collapse,explosion_echo,YES,blood_splatter
+impact,Blunt force trauma,ragdoll,thud_sound,YES,minimal
+arrow_wound,Arrow protruding,fall_forward,arrow_impact,YES,blood_pool
+bolt_wound,Crossbow bolt embedded,fall_forward,bolt_impact,YES,blood_pool
+explosion,Blast damage,ragdoll_far,explosion,PARTIAL,charred
+sonic_death,Internal rupture,collapse_vibrate,sonic_boom,YES,internal_bleed
+concussion,Massive impact,launch_ragdoll,boom_sound,YES,minimal
+laser_burn,Cauterized wound,fade_red_glow,zap_sound,YES,NO (cauterized)
+plasma_burn,Melted flesh,dissolve_orange,plasma_hiss,PARTIAL,charred
+burn_death,Severe burns,collapse_smoke,fire_crackle,YES,charred
+frozen,Frozen solid,freeze_shatter,ice_crack,SHATTER,ice_shards
+disintegration,Molecular breakdown,dissolve_particles,disintegrate,NO,dust
+electrocution,Electrical overload,convulse_spark,electric_zap,YES,smoke
+dust,Complete disintegration,scatter_dust,whoosh,NO,dust_particles
+unconscious,Knocked out,collapse_gentle,thud_soft,YES (alive),none
+burned,Fire death,collapse_burning,fire_sound,YES,charred
+
+===CONSTRUCT SPECIFIC EFFECTS===
+Effect_Type,Normal_Effect,Construct_Effect,Visual_Change
+Bleeding,HP loss per turn,Sparking (cosmetic only),sparks instead of blood
+Burning,Fire DOT,Overheating (same DOT),smoke instead of flames
+Poison,Various debuffs,Immune,no effect
+EMP,No effect,Stunned + damage,electrical arcs
+Critical_Hit,Injury roll,Malfunction roll,sparks + error sounds
+Healing,Restored HP,Requires Repair skill,wrench icon instead of medkit
+
+===ALIEN PHYSIOLOGY EXAMPLES===
+Alien_Type,Bleeds,Blood_Color,Special_Vulnerabilities,Special_Immunities
+Humanoid,YES,varies (green/blue/purple),species-specific,species-specific
+Silicon-Based,NO,ite powder,extreme cold,acid; poison
+Energy_Being,NO,none,energy drain; containment,physical; most energy
+Insectoid,YES,ichor (yellow/green),fire; poison gas,cold; blunt trauma
+Aquatic,YES,blue,dehydration; fire,cold; pressure
+Plant-Based,YES,sap (green),fire; herbicide,most poisons; cold
+
+===DESIGNER NOTES===
+Topic,Note
+Bleeding_Gate,Always check origin.bleeds before applying bleeding status
+Construct_Damage,Constructs take full damage but show sparks/smoke instead of blood
+Divine_Ichor,Divine beings "bleed" golden ichor - cosmetic difference same mechanics
+Alien_Flexibility,Use Alien_Physiology_Examples as templates; custom aliens can vary
+Death_Visuals,Match death visual to final damage type that killed the character
+Status_Stacking,Bleeding from multiple sources stacks; burning does not (refreshes duration)
+Tech_Enhancement_Split,Characters with 50%+ cybernetics count as PARTIAL for bleeding

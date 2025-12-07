@@ -1,0 +1,26 @@
+Stat_Code,Stat_Name,Full_Name,Description,Primary_Uses,Combat_Application,Investigation_Application,Column_Shift_Source
+MEL,Melee,Melee Combat,Hand-to-hand fighting ability and combat training,Attack rolls for melee weapons and unarmed combat,Hit roll for punches/kicks/melee weapons; determines if attack connects,Interrogation; physical evidence handling,Martial Arts skills add +CS
+AGL,Agility,Agility,Physical coordination reflexes and body control,Dodge rolls; acrobatic maneuvers; ranged weapon accuracy,Dodge incoming attacks; initiative modifier; ranged hit rolls,Stealth; escape; pursuit,Acrobatics/Dodge skills add +CS
+STR,Strength,Strength,Raw physical power and muscle force,Damage calculation; lifting capacity; knockback distance,Damage bonus on melee hits; knockback calculation; grappling,Breaking objects; moving heavy evidence,Super Strength power adds +CS
+STA,Stamina,Stamina,Physical endurance health and resistance to damage,Health points; resistance to poison/disease/fatigue,Determines max health; resistance to status effects,Long investigations; stakeouts; torture resistance,Durability powers add +CS
+INT,Intelligence,Intelligence,Reasoning ability memory and technical aptitude,Technology use; research; puzzle solving; investigation analysis,Tactical planning; device operation; weak point identification,Primary investigation stat; clue analysis; research,Science/Engineering skills add +CS
+INS,Instinct,Instinct,Intuition awareness and danger sense,Perception; initiative; detecting lies and traps,Initiative bonus; detect ambush; sense hidden enemies,Reading people; finding hidden clues; gut feelings,Perception/Detective skills add +CS
+CON,Concentration,Concentration,Mental focus willpower and psychic resistance,Resisting mental attacks; maintaining powers; focus under pressure,Resist mind control; maintain sustained powers; concentration checks,Resisting interrogation; mental puzzles; psychic investigation,Psychic powers use this for attacks
+
+---STAT INTERACTIONS---
+Stat_Combination,Combined_Name,Usage,Formula
+MEL+STR,Combat Power,Total melee damage potential,MEL for hit + STR for damage
+AGL+INS,Reflexes,Initiative and surprise resistance,Higher of two determines initiative column
+STR+STA,Physical Power,Total physical capability,(STR + STA) / 2 for physical feats
+INT+INS,Awareness,Investigation effectiveness,(INT + INS) / 2 for investigation checks
+AGL+INS,Melee Defense,Dodge against melee attacks,AGL + INS determines dodge column shift
+AGL,Ranged Defense,Dodge against ranged attacks,AGL alone for ranged dodge
+CON+STA,Resistance,Mental and physical endurance,(CON + STA) / 2 for torture/endurance
+
+---DERIVED STATS---
+Derived_Stat,Formula,Description
+Health,STA * 2 + STR,Total hit points before incapacitation
+Initiative,(AGL + INS) / 2 + modifiers,Turn order in combat
+Karma,(INT + INS + CON) / 3,Luck/fate points for rerolls
+Resources,Based on career/faction,Economic capability rank
+Popularity,Based on actions,Public reputation (-100 to +100)

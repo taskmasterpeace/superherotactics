@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperHero Tactics - Country & City Selection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .country-card {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            border: 2px solid #6b7280;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .country-card:hover {
+            border-color: #fbbf24;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
+        }
+        .country-card.selected {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+        }
+        .power-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .power-extreme { background: #ef4444; }
+        .power-high { background: #f59e0b; }
+        .power-moderate { background: #eab308; }
+        .power-low { background: #84cc16; }
+        .stat-bar {
+            height: 4px;
+            background: #374151;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .stat-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        .city-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .faction-banner {
+            background: linear-gradient(45deg, var(--faction-color-1), var(--faction-color-2));
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-800 border-b border-yellow-400 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-yellow-400">⚡ SuperHero Tactics</h1>
+            <div class="text-sm text-gray-400">Choose Your Faction & Headquarters</div>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-6">
+        <!-- Step Indicator -->
+        <div class="flex justify-center mb-8">
+            <div class="flex items-center space-x-4">
+                <div class="step-indicator active">
+                    <span class="bg-yellow-400 text-black w-8 h-8 rounded-full flex items-center justify-center font-bold">1</span>
+                    <span class="ml-2">Select Faction</span>
+                </div>
+                <div class="w-12 h-1 bg-gray-600"></div>
+                <div class="step-indicator">
+                    <span class="bg-gray-600 w-8 h-8 rounded-full flex items-center justify-center font-bold">2</span>
+                    <span class="ml-2">Select Country</span>
+                </div>
+                <div class="w-12 h-1 bg-gray-600"></div>
+                <div class="step-indicator">
+                    <span class="bg-gray-600 w-8 h-8 rounded-full flex items-center justify-center font-bold">3</span>
+                    <span class="ml-2">Select City HQ</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Faction Selection -->
+        <div id="faction-selection" class="">
+            <h2 class="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                Choose Your Faction
+            </h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+                <!-- US FIST -->
+                <div class="country-card" onclick="selectFaction('US')" style="--faction-color-1: #1e40af; --faction-color-2: #dc2626">
+                    <div class="faction-banner">
+                        <div class="text-xl">🇺🇸 United States</div>
+                        <div class="text-sm opacity-75">FIST Organization</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="mb-4">
+                            <h4 class="font-bold text-blue-400 mb-2">Technology Supremacy</h4>
+                            <p class="text-sm text-gray-300">Advanced equipment, military cooperation, federal authority</p>
+                        </div>
+                        
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span>Military Power:</span>
+                                <span class="power-indicator power-extreme"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Technology:</span>
+                                <span class="power-indicator power-extreme"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Resources:</span>
+                                <span class="power-indicator power-high"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Diplomacy:</span>
+                                <span class="power-indicator power-moderate"></span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-3 bg-gray-700 rounded text-xs">
+                            <div class="font-bold text-yellow-400 mb-1">Faction Bonuses:</div>
+                            <div>• +3CS Technology investigations</div>
+                            <div>• Military equipment access</div>
+                            <div>• Federal law enforcement authority</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- India Establishment 24 -->
+                <div class="country-card" onclick="selectFaction('India')" style="--faction-color-1: #ff6600; --faction-color-2: #ffffff">
+                    <div class="faction-banner">
+                        <div class="text-xl">🇮🇳 India</div>
+                        <div class="text-sm opacity-75">Establishment 24</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="mb-4">
+                            <h4 class="font-bold text-orange-400 mb-2">Spiritual Harmony</h4>
+                            <p class="text-sm text-gray-300">Mystical powers, cultural diversity, diplomatic approach</p>
+                        </div>
+                        
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span>Spirituality:</span>
+                                <span class="power-indicator power-extreme"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Diplomacy:</span>
+                                <span class="power-indicator power-high"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Culture:</span>
+                                <span class="power-indicator power-high"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Military:</span>
+                                <span class="power-indicator power-moderate"></span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-3 bg-gray-700 rounded text-xs">
+                            <div class="font-bold text-yellow-400 mb-1">Faction Bonuses:</div>
+                            <div>• +4CS Spiritual investigations</div>
+                            <div>• Mystical enhancement access</div>
+                            <div>• Diplomatic immunity worldwide</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- China -->
+                <div class="country-card" onclick="selectFaction('China')" style="--faction-color-1: #dc2626; --faction-color-2: #fbbf24">
+                    <div class="faction-banner">
+                        <div class="text-xl">🇨🇳 China</div>
+                        <div class="text-sm opacity-75">Collective Strategy</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="mb-4">
+                            <h4 class="font-bold text-red-400 mb-2">Mass Coordination</h4>
+                            <p class="text-sm text-gray-300">State resources, surveillance, collective tactics</p>
+                        </div>
+                        
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span>Organization:</span>
+                                <span class="power-indicator power-extreme"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Manufacturing:</span>
+                                <span class="power-indicator power-extreme"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Surveillance:</span>
+                                <span class="power-indicator power-high"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Diplomacy:</span>
+                                <span class="power-indicator power-low"></span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-3 bg-gray-700 rounded text-xs">
+                            <div class="font-bold text-yellow-400 mb-1">Faction Bonuses:</div>
+                            <div>• +4CS Social network analysis</div>
+                            <div>• Mass surveillance capabilities</div>
+                            <div>• State manufacturing access</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nigeria -->
+                <div class="country-card" onclick="selectFaction('Nigeria')" style="--faction-color-1: #16a34a; --faction-color-2: #ffffff">
+                    <div class="faction-banner">
+                        <div class="text-xl">🇳🇬 Nigeria</div>
+                        <div class="text-sm opacity-75">Adaptive Initiative</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="mb-4">
+                            <h4 class="font-bold text-green-400 mb-2">Continental Unity</h4>
+                            <p class="text-sm text-gray-300">Power diversity, African networks, adaptability</p>
+                        </div>
+                        
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span>Adaptability:</span>
+                                <span class="power-indicator power-extreme"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Diversity:</span>
+                                <span class="power-indicator power-high"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Continental:</span>
+                                <span class="power-indicator power-high"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Resources:</span>
+                                <span class="power-indicator power-moderate"></span>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 p-3 bg-gray-700 rounded text-xs">
+                            <div class="font-bold text-yellow-400 mb-1">Faction Bonuses:</div>
+                            <div>• +4CS Tribal networks</div>
+                            <div>• Power variety access</div>
+                            <div>• African continental authority</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Country Selection -->
+        <div id="country-selection" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="goBack()" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded flex items-center gap-2">
+                    ← Back to Factions
+                </button>
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
+                    Select Your Country
+                </h2>
+                <div class="text-sm text-gray-400">
+                    <span id="selected-faction-display">US Faction</span>
+                </div>
+            </div>
+
+            <!-- Country Filter Controls -->
+            <div class="mb-6 flex gap-4 items-center">
+                <input type="text" id="country-search" placeholder="🔍 Search countries..." class="flex-1 p-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-yellow-400" oninput="filterCountries()">
+                <select id="region-filter" class="p-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-yellow-400" onchange="filterCountries()">
+                    <option value="">All Regions</option>
+                    <option value="north-america">🌎 North America</option>
+                    <option value="europe">🇪🇺 Europe</option>
+                    <option value="asia">🌏 Asia</option>
+                    <option value="africa">🌍 Africa</option>
+                    <option value="oceania">🏝️ Oceania</option>
+                </select>
+                <select id="power-filter" class="p-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-yellow-400" onchange="filterCountries()">
+                    <option value="">All Power Levels</option>
+                    <option value="superpower">💪 Superpowers</option>
+                    <option value="major">🏆 Major Powers</option>
+                    <option value="regional">🌟 Regional Powers</option>
+                    <option value="emerging">📈 Emerging Powers</option>
+                </select>
+            </div>
+
+            <!-- Country Grid -->
+            <div id="country-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <!-- Countries will be populated here -->
+            </div>
+        </div>
+
+        <!-- City Selection -->
+        <div id="city-selection" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <button onclick="goBackToCountries()" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded flex items-center gap-2">
+                    ← Back to Countries
+                </button>
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    Select Your Headquarters City
+                </h2>
+                <div class="text-sm text-gray-400">
+                    <span id="selected-country-display">United States</span>
+                </div>
+            </div>
+
+            <!-- City Filter Controls -->
+            <div class="mb-6 flex gap-4 items-center">
+                <input type="text" id="city-search" placeholder="🔍 Search cities..." class="flex-1 p-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-yellow-400" oninput="filterCities()">
+                <select id="city-type-filter" class="p-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-yellow-400" onchange="filterCities()">
+                    <option value="">All City Types</option>
+                    <option value="political">🏛️ Political</option>
+                    <option value="military">⚔️ Military</option>
+                    <option value="industrial">🏭 Industrial</option>
+                    <option value="educational">🎓 Educational</option>
+                    <option value="company">🏢 Corporate</option>
+                    <option value="seaport">⚓ Seaport</option>
+                </select>
+                <select id="safety-filter" class="p-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-yellow-400" onchange="filterCities()">
+                    <option value="">All Safety Levels</option>
+                    <option value="high">✅ High Safety (0-30 crime)</option>
+                    <option value="medium">⚠️ Medium Safety (31-70 crime)</option>
+                    <option value="low">❌ Low Safety (71-100 crime)</option>
+                </select>
+            </div>
+
+            <!-- City Grid -->
+            <div id="city-grid" class="city-grid">
+                <!-- Cities will be populated here -->
+            </div>
+        </div>
+
+        <!-- Selection Summary -->
+        <div id="selection-summary" class="hidden">
+            <div class="bg-gray-800 p-6 rounded-xl border border-green-400 mb-6">
+                <h2 class="text-2xl font-bold text-green-400 mb-4">🎯 Your Selection Summary</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-gray-700 p-4 rounded-lg">
+                        <h4 class="font-bold text-blue-400 mb-2">Faction</h4>
+                        <div id="summary-faction" class="text-lg">🇺🇸 United States (FIST)</div>
+                        <div class="text-sm text-gray-400">Technology Supremacy</div>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded-lg">
+                        <h4 class="font-bold text-green-400 mb-2">Country</h4>
+                        <div id="summary-country" class="text-lg">🇬🇷 Greece</div>
+                        <div class="text-sm text-gray-400">Ancient Wisdom Superpower</div>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded-lg">
+                        <h4 class="font-bold text-purple-400 mb-2">Headquarters</h4>
+                        <div id="summary-city" class="text-lg">🏛️ Athens</div>
+                        <div class="text-sm text-gray-400">Political • Population: 3.7M</div>
+                    </div>
+                </div>
+
+                <div class="mt-6 text-center">
+                    <button onclick="confirmSelection()" class="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 px-8 py-4 rounded-xl font-bold text-xl transition-all transform hover:scale-105">
+                        🚀 START YOUR SUPERHERO ORGANIZATION
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game data
+        let selectedFaction = '';
+        let selectedCountry = '';
+        let selectedCity = '';
+
+        // Fictional world powers data
+        const countries = {
+            'Greece': {
+                name: 'Greece',
+                flag: '🇬🇷',
+                powerLevel: 'superpower',
+                region: 'europe',
+                description: 'Ancient Wisdom Superpower',
+                backstory: 'Discovery of ancient Greek LSW enhancement temples containing alien technology from classical era',
+                advantages: ['Ancient alien technology', 'Mystical LSW enhancement', 'Mediterranean authority'],
+                stats: {
+                    military: 85,
+                    technology: 90,
+                    economy: 75,
+                    culture: 95,
+                    lswActivity: 88
+                },
+                cities: [
+                    {name: 'Athens', type: 'political', population: 3700000, crime: 25, safety: 75, description: 'Ancient capital with mystical LSW research centers'},
+                    {name: 'Thessaloniki', type: 'industrial', population: 1100000, crime: 35, safety: 65, description: 'Industrial port with ancient technology manufacturing'},
+                    {name: 'Patras', type: 'seaport', population: 280000, crime: 20, safety: 80, description: 'Strategic Mediterranean port with ancient naval authority'}
+                ]
+            },
+            'Uganda': {
+                name: 'Uganda',
+                flag: '🇺🇬', 
+                powerLevel: 'superpower',
+                region: 'africa',
+                description: 'Genetic Enhancement Leader',
+                backstory: 'Ugandan genetic research breakthrough creates most advanced LSW enhancement program globally',
+                advantages: ['Genetic LSW enhancement', 'African continental leadership', 'Medical advancement'],
+                stats: {
+                    military: 70,
+                    technology: 85,
+                    economy: 80,
+                    culture: 75,
+                    lswActivity: 92
+                },
+                cities: [
+                    {name: 'Kampala', type: 'political', population: 3500000, crime: 45, safety: 55, description: 'Continental capital with genetic research facilities'},
+                    {name: 'Entebbe', type: 'military', population: 120000, crime: 15, safety: 85, description: 'Secure military base with genetic enhancement labs'},
+                    {name: 'Mbarara', type: 'educational', population: 500000, crime: 30, safety: 70, description: 'University town with advanced genetic studies'}
+                ]
+            },
+            'United_States': {
+                name: 'United States',
+                flag: '🇺🇸',
+                powerLevel: 'superpower', 
+                region: 'north-america',
+                description: 'Technology Military Superpower',
+                backstory: 'Advanced military-industrial complex with federal LSW program',
+                advantages: ['Military supremacy', 'Advanced technology', 'Federal authority'],
+                stats: {
+                    military: 95,
+                    technology: 92,
+                    economy: 88,
+                    culture: 70,
+                    lswActivity: 85
+                },
+                cities: [
+                    {name: 'Washington DC', type: 'political', population: 6200000, crime: 40, safety: 60, description: 'Federal capital with government LSW oversight'},
+                    {name: 'New York', type: 'company', population: 8400000, crime: 55, safety: 45, description: 'Corporate headquarters and media center'},
+                    {name: 'Los Angeles', type: 'company', population: 12400000, crime: 60, safety: 40, description: 'Entertainment industry and tech innovation'}
+                ]
+            },
+            'Portugal': {
+                name: 'Portugal',
+                flag: '🇵🇹',
+                powerLevel: 'regional',
+                region: 'europe', 
+                description: 'Maritime Empire Revival',
+                backstory: 'Portuguese oceanic research discovers water-based LSW enhancement and Atlantic control',
+                advantages: ['Oceanic powers', 'Atlantic authority', 'Maritime networks'],
+                stats: {
+                    military: 60,
+                    technology: 70,
+                    economy: 65,
+                    culture: 75,
+                    lswActivity: 78
+                },
+                cities: [
+                    {name: 'Lisbon', type: 'political', population: 2800000, crime: 25, safety: 75, description: 'Maritime capital with oceanic LSW research'},
+                    {name: 'Porto', type: 'seaport', population: 1700000, crime: 30, safety: 70, description: 'Major Atlantic port with maritime operations'}
+                ]
+            }
+        };
+
+        function selectFaction(faction) {
+            selectedFaction = faction;
+            
+            // Update step indicator
+            updateStepIndicator(2);
+            
+            // Show country selection
+            document.getElementById('faction-selection').classList.add('hidden');
+            document.getElementById('country-selection').classList.remove('hidden');
+            
+            // Update faction display
+            document.getElementById('selected-faction-display').textContent = `${faction} Faction`;
+            
+            // Load countries for selected faction
+            loadCountriesForFaction(faction);
+        }
+
+        function loadCountriesForFaction(faction) {
+            const grid = document.getElementById('country-grid');
+            grid.innerHTML = '';
+            
+            // Load faction-appropriate countries
+            let availableCountries = [];
+            
+            if (faction === 'US') {
+                availableCountries = ['United_States', 'Greece', 'Portugal']; // Allied nations
+            } else if (faction === 'India') {
+                availableCountries = ['Greece', 'Uganda']; // Cultural cooperation
+            } else if (faction === 'China') {
+                availableCountries = ['Uganda']; // Economic partnership
+            } else if (faction === 'Nigeria') {
+                availableCountries = ['Uganda', 'Greece']; // South-south cooperation
+            }
+            
+            availableCountries.forEach(countryKey => {
+                const country = countries[countryKey];
+                const card = createCountryCard(country);
+                grid.appendChild(card);
+            });
+        }
+
+        function createCountryCard(country) {
+            const card = document.createElement('div');
+            card.className = 'country-card p-4 rounded-xl';
+            card.onclick = () => selectCountry(country);
+            
+            card.innerHTML = `
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="text-3xl">${country.flag}</div>
+                    <div>
+                        <h3 class="font-bold text-lg text-yellow-400">${country.name}</h3>
+                        <div class="text-sm text-gray-400">${country.description}</div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="text-xs text-gray-300 mb-2">${country.backstory}</div>
+                </div>
+                
+                <div class="space-y-2 mb-4">
+                    <div class="flex justify-between text-xs">
+                        <span>Military:</span>
+                        <div class="flex-1 mx-2">
+                            <div class="stat-bar"><div class="stat-fill bg-red-400" style="width: ${country.stats.military}%"></div></div>
+                        </div>
+                        <span class="text-red-400">${country.stats.military}</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span>Technology:</span>
+                        <div class="flex-1 mx-2">
+                            <div class="stat-bar"><div class="stat-fill bg-blue-400" style="width: ${country.stats.technology}%"></div></div>
+                        </div>
+                        <span class="text-blue-400">${country.stats.technology}</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span>LSW Activity:</span>
+                        <div class="flex-1 mx-2">
+                            <div class="stat-bar"><div class="stat-fill bg-purple-400" style="width: ${country.stats.lswActivity}%"></div></div>
+                        </div>
+                        <span class="text-purple-400">${country.stats.lswActivity}</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-700 p-3 rounded text-xs">
+                    <div class="font-bold text-yellow-400 mb-1">Advantages:</div>
+                    ${country.advantages.map(adv => `<div>• ${adv}</div>`).join('')}
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function selectCountry(country) {
+            selectedCountry = country.name;
+            
+            // Update step indicator
+            updateStepIndicator(3);
+            
+            // Show city selection
+            document.getElementById('country-selection').classList.add('hidden');
+            document.getElementById('city-selection').classList.remove('hidden');
+            
+            // Update country display
+            document.getElementById('selected-country-display').textContent = country.name;
+            
+            // Load cities for selected country
+            loadCitiesForCountry(country);
+        }
+
+        function loadCitiesForCountry(country) {
+            const grid = document.getElementById('city-grid');
+            grid.innerHTML = '';
+            
+            country.cities.forEach(city => {
+                const card = createCityCard(city);
+                grid.appendChild(card);
+            });
+        }
+
+        function createCityCard(city) {
+            const card = document.createElement('div');
+            card.className = 'country-card p-4 rounded-xl';
+            card.onclick = () => selectCity(city);
+            
+            const typeIcons = {
+                'political': '🏛️',
+                'military': '⚔️', 
+                'industrial': '🏭',
+                'educational': '🎓',
+                'company': '🏢',
+                'seaport': '⚓'
+            };
+            
+            card.innerHTML = `
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="text-3xl">${typeIcons[city.type] || '🏙️'}</div>
+                    <div>
+                        <h3 class="font-bold text-lg text-yellow-400">${city.name}</h3>
+                        <div class="text-sm text-gray-400">${city.type.charAt(0).toUpperCase() + city.type.slice(1)} City</div>
+                    </div>
+                </div>
+                
+                <div class="mb-4 text-xs text-gray-300">
+                    ${city.description}
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4 text-xs">
+                    <div>
+                        <div class="text-gray-400">Population:</div>
+                        <div class="font-bold text-blue-400">${(city.population / 1000000).toFixed(1)}M</div>
+                    </div>
+                    <div>
+                        <div class="text-gray-400">Safety Rating:</div>
+                        <div class="font-bold ${city.safety > 70 ? 'text-green-400' : city.safety > 40 ? 'text-yellow-400' : 'text-red-400'}">${city.safety}/100</div>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span>Safety:</span>
+                        <div class="flex-1 mx-2">
+                            <div class="stat-bar"><div class="stat-fill bg-green-400" style="width: ${city.safety}%"></div></div>
+                        </div>
+                        <span class="text-green-400">${city.safety}</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span>Crime Index:</span>
+                        <div class="flex-1 mx-2">
+                            <div class="stat-bar"><div class="stat-fill bg-red-400" style="width: ${city.crime}%"></div></div>
+                        </div>
+                        <span class="text-red-400">${city.crime}</span>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function selectCity(city) {
+            selectedCity = city.name;
+            
+            // Show selection summary
+            document.getElementById('city-selection').classList.add('hidden');
+            document.getElementById('selection-summary').classList.remove('hidden');
+            
+            // Update summary
+            updateSelectionSummary();
+        }
+
+        function updateSelectionSummary() {
+            // This would be populated with actual selection data
+            document.getElementById('summary-faction').textContent = `🇺🇸 ${selectedFaction} Faction`;
+            document.getElementById('summary-country').textContent = `🇬🇷 ${selectedCountry}`;
+            document.getElementById('summary-city').textContent = `🏛️ ${selectedCity}`;
+        }
+
+        function updateStepIndicator(step) {
+            // Update visual step indicator
+            document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+                const circle = indicator.querySelector('span:first-child');
+                if (index + 1 <= step) {
+                    circle.className = 'bg-yellow-400 text-black w-8 h-8 rounded-full flex items-center justify-center font-bold';
+                } else {
+                    circle.className = 'bg-gray-600 w-8 h-8 rounded-full flex items-center justify-center font-bold';
+                }
+            });
+        }
+
+        function goBack() {
+            document.getElementById('country-selection').classList.add('hidden');
+            document.getElementById('faction-selection').classList.remove('hidden');
+            updateStepIndicator(1);
+        }
+
+        function goBackToCountries() {
+            document.getElementById('city-selection').classList.add('hidden');
+            document.getElementById('country-selection').classList.remove('hidden');
+            updateStepIndicator(2);
+        }
+
+        function confirmSelection() {
+            alert(`Welcome to SuperHero Tactics!\n\nFaction: ${selectedFaction}\nCountry: ${selectedCountry}\nHeadquarters: ${selectedCity}\n\nYour superhero organization is now established!`);
+        }
+
+        function filterCountries() {
+            // Implementation for country filtering
+            const search = document.getElementById('country-search').value.toLowerCase();
+            const region = document.getElementById('region-filter').value;
+            const power = document.getElementById('power-filter').value;
+            
+            // Filter logic would be implemented here
+        }
+
+        function filterCities() {
+            // Implementation for city filtering  
+            const search = document.getElementById('city-search').value.toLowerCase();
+            const type = document.getElementById('city-type-filter').value;
+            const safety = document.getElementById('safety-filter').value;
+            
+            // Filter logic would be implemented here
+        }
+
+        // Initialize
+        window.onload = function() {
+            updateStepIndicator(1);
+        };
+    </script>
+</body>
+</html>

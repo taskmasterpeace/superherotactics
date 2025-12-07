@@ -1,0 +1,96 @@
+Section,Description
+---ADVANCED UNIVERSAL TABLE---,The proper 4C/FASERIP Advanced Table with 18 ranks
+Result_Types,Failed (White) / Minor (Green) / Success (Yellow) / Major (Red)
+
+---THRESHOLD FORMAT---,Each rank shows the MINIMUM ROLL needed for each result level
+Format,Roll >= threshold = that result; check from highest (Major) down
+
+---RANK THRESHOLDS---
+Rank_Name,Stat_Value,Failed_Max,Minor_Min,Minor_Max,Success_Min,Success_Max,Major_Min
+Shift_0,0,65,66,94,95,99,100
+Feeble,1-2,60,61,90,91,99,100
+Poor,3-5,55,56,85,86,99,100
+Typical,6-10,50,51,80,81,97,98
+Good,11-20,45,46,75,76,97,98
+Excellent,21-30,40,41,70,71,94,95
+Remarkable,31-40,35,36,65,66,94,95
+Incredible,41-50,30,31,60,61,90,91
+Amazing,51-75,25,26,55,56,90,91
+Monstrous,76-100,20,21,50,51,85,86
+Unearthly,101-150,15,16,45,46,85,86
+Shift_X,151-250,10,11,40,41,80,81
+Shift_Y,251-500,6,7,40,41,80,81
+Shift_Z,501-1000,3,4,35,36,75,76
+Class_1000,1001-2500,2,3,30,31,70,71
+Class_3000,2501-5000,1,2,25,26,65,66
+Class_5000,5001-10000,1,2,20,21,60,61
+Beyond,10001+,1,2,15,16,55,56
+
+---LOOKUP LOGIC---
+Step_1,Find the column matching your stat value (after all CS applied)
+Step_2,Roll d100 (01-00 where 00=100)
+Step_3,Compare roll to thresholds - check Major first then work down
+Step_4,Roll >= Major_Min = Major Success
+Step_5,Roll >= Success_Min AND Roll <= Success_Max = Success
+Step_6,Roll >= Minor_Min AND Roll <= Minor_Max = Minor Success
+Step_7,Roll <= Failed_Max = Failed
+
+---SPECIAL RULES---
+Roll_99,ALWAYS Failed (critical fumble) at ANY rank
+Roll_00,ALWAYS Major (critical success) at ANY rank - counts as 100
+Column_Shift,+1CS moves you one rank RIGHT (better); -1CS moves LEFT (worse)
+Min_Column,Cannot shift below Shift_0
+Max_Column,Cannot shift above Beyond
+
+---PROBABILITY SUMMARY---
+Rank_Name,Failed_Pct,Minor_Pct,Success_Pct,Major_Pct
+Shift_0,65%,29%,5%,1%
+Feeble,60%,30%,9%,1%
+Poor,55%,30%,14%,1%
+Typical,50%,30%,17%,3%
+Good,45%,30%,22%,3%
+Excellent,40%,30%,24%,6%
+Remarkable,35%,30%,29%,6%
+Incredible,30%,30%,30%,10%
+Amazing,25%,30%,35%,10%
+Monstrous,20%,30%,35%,15%
+Unearthly,15%,30%,40%,15%
+Shift_X,10%,30%,40%,20%
+Shift_Y,6%,34%,40%,20%
+Shift_Z,3%,32%,40%,25%
+Class_1000,2%,28%,40%,30%
+Class_3000,1%,24%,40%,35%
+Class_5000,1%,19%,40%,40%
+Beyond,1%,14%,40%,45%
+
+---ACTION TYPE MODIFIERS---
+Action_Type,Modifier_Description
+Melee_Attack,Use MEL stat; STR for damage
+Ranged_Attack,Use AGL stat; weapon damage
+Power_Attack,Varies by power - see LSW_Power_Combat_Mechanics
+Grappling,Use MEL stat; contested by target MEL or STR
+Dodge,Use (AGL+INS)/2 as defensive penalty
+Strength_Feat,Use STR stat; for lifting/throwing/breaking
+Agility_Feat,Use AGL stat; for acrobatics/balance
+Endurance_Feat,Use STA stat; for resisting fatigue/poison
+Reason_Feat,Use INT stat; for knowledge/deduction
+Intuition_Feat,Use INS stat; for perception/danger sense
+Psyche_Feat,Use CON stat; for willpower/mental resistance
+
+---COMBAT RESULT EFFECTS---
+Result,Damage_Multiplier,Effect
+Failed,0.0x,Miss - no damage or effect
+Minor,0.5x,Glancing blow - half damage; no status effects
+Success,1.0x,Solid hit - full damage; standard status effects
+Major,1.5x,Critical hit - 150% damage; enhanced status effects + knockback
+
+---EXAMPLE RESOLUTION---
+Example_Setup,Super Strength character (STR 65 = Monstrous) punching target
+Step_A,STR 65 maps to Monstrous rank (column 76-100)
+Step_B,Apply Column Shifts: +2CS from Martial Arts skill
+Step_C,Monstrous +2CS = Shift_X column
+Step_D,Roll d100: 47
+Step_E,Check thresholds: Major needs 81+; Success needs 41-80; Minor needs 11-40; Failed needs 1-10
+Step_F,47 >= 41 and 47 <= 80 = SUCCESS
+Step_G,Base damage: STR 65 + Super Strength High bonus 50 = 115
+Step_H,Apply multiplier: 115 × 1.0 = 115 damage

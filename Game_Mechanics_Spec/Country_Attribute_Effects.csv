@@ -1,0 +1,49 @@
+Attribute,Rating_Range,Low_Effect (0-35),Medium_Effect (36-65),High_Effect (66-100),Gameplay_Impact
+
+Population,Rating 20-90,Small country; limited LSW pool; -2CS recruitment,Average country; standard LSW pool,Large country; +2CS recruitment; multiple operations,Affects available LSW count and simultaneous missions
+
+PopulationRating,20-90,Fewer cities available; limited operations,-,More cities; more simultaneous operations,Direct scaling with operational capacity
+
+GovernmentPerception,20-90 (democracy scale),Authoritarian: -2CS legal methods; +2CS covert,Hybrid: -1CS legal; +1CS covert,Democracy: +2CS legal methods; -1CS covert,Determines viable investigation methods
+
+GovernmentCorruption,20-90,Low corruption: +2CS official channels; -2CS bribes,Medium: no modifier,High corruption: -2CS official; +3CS bribes/blackmail,Affects method effectiveness
+
+MilitaryBudget,20-90,Weak military: easy infiltration; poor equipment,Average military: standard difficulty,Strong military: -2CS infiltration; +2CS military equipment access,Affects military city operations
+
+IntelligenceBudget,20-90,Weak intel: +2CS covert ops; easy surveillance,Average: standard detection chance,Strong intel: -2CS covert; +3CS detection risk; better intel rewards,Critical for all covert operations
+
+MediaFreedom,20-90,Controlled media: +2CS propaganda; -2CS media investigation,Partial freedom: moderate effects,Free media: +2CS media investigation; -2CS cover-ups,Affects information warfare
+
+Healthcare,20-90,Poor: -2CS medical cover; +3CS disease investigations,Average: standard medical,Excellent: +2CS medical methods; faster healing; cloning possible,Affects recovery and medical operations
+
+HigherEducation,20-90,Poor education: -2CS academic methods; -1CS tech research,Average: standard academic,Excellent: +2CS academic; +2CS tech research speed,Affects research and academic infiltration
+
+Science,20-90,Low science: -2CS tech investigations; no advanced research,Average: standard tech access,High science: +2CS tech investigations; advanced tech access; +2CS reverse engineering,Critical for technology advancement
+
+Cloning,0-90 (often 0),No cloning: LSW death permanent in this country,Basic cloning: 50% resurrection chance; 30 day recovery,Advanced cloning: 90% resurrection; 7 day recovery; clone army possible,Critical for LSW recovery
+
+LSWActivity,20-90,Low activity: fewer LSWs; -2CS recruitment; peaceful,Medium activity: standard LSW presence,High activity: +2CS recruitment; +2CS LSW combat encounters; frequent events,Determines LSW encounter rate
+
+LSWRegulations,Banned/Regulated/Legal,Banned: all LSW activity illegal; -3CS public operations; +2CS if caught as victim,Regulated: licensed operation; standard legal status,Legal: +2CS public operations; can operate openly; public support possible,Core to operational legality
+
+Vigilantism,Banned/Regulated/Legal,Banned: -3CS vigilante actions; criminal charges if caught,Regulated: licensed vigilantes only,Legal: +2CS vigilante actions; public support for independent action,Affects independent hero operations
+
+TerrorismActivity,Inactive/Rare/Active,Inactive: peaceful; no terror investigations,-,Active: frequent terror events; +2CS anti-terror investigations; combat risk,Drives security-related content
+
+CyberCapabilities,20-90,Low cyber: easy hacking; poor digital security,Medium: standard cyber difficulty,High cyber: -2CS hacking; +2CS cyber surveillance; digital evidence available,Affects all technology operations
+
+---ATTRIBUTE COMBINATION EFFECTS---,,,,,,
+Combination,Effect,,,,,
+High Military + High Intel,Security State: all covert operations -2CS; all official +2CS,,,,,
+Low Government + High Corruption,Failed State: no legal methods work; only force/bribery effective,,,,,
+High Science + High Education,Innovation Hub: +3CS all technology research; unique tech available,,,,,
+High LSWActivity + Legal Regulations,LSW Haven: +4CS recruitment; LSW tourism; international LSW hub,,,,,
+High Healthcare + High Cloning,Medical Center: fastest healing; best resurrection rates,,,,,
+High Corruption + High Crime,Lawless: all criminal methods +3CS; no legal consequences,,,,,
+
+---FACTION TERRITORY BONUSES---,,,,,,
+Faction,Home_Territory_Effect,Allied_Territory,Neutral_Territory,Hostile_Territory,
+United States,+3CS all methods; full equipment; legal immunity,-,Standard operations,-2CS all methods; -2CS equipment access,
+India,+2CS diplomatic; +2CS cultural; +2CS spiritual methods,+1CS diplomatic,-,-3CS in hostile; cultural penalties,
+China,+3CS surveillance; +2CS corporate; +2CS technology,+1CS technology,-,-2CS diplomatic; +2CS covert,
+Nigeria,+2CS tribal; +2CS underground; +2CS resource operations,+1CS African continental,-,-2CS official; rely on unofficial methods,

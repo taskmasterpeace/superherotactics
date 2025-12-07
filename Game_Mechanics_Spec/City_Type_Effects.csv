@@ -1,0 +1,47 @@
+City_Type,Description,Investigation_Bonus,Combat_Modifier,Recruitment_Bonus,Equipment_Access,Special_Ability,Typical_Threats,LSW_Affinity
+
+Temple,Religious and spiritual centers,+2CS Religious/Mystical investigations,Civilians present (-1CS collateral),+2CS recruiting mystical LSWs,Religious artifacts; Mystical equipment,Sanctuary: Can hide from authorities for 24hrs,Cult activity; Artifact theft; Religious extremism,Mystical powers; Divine origin LSWs
+
+Military,Armed forces installations and bases,+2CS Military/Security investigations,Military response if detected,+3CS recruiting military-trained LSWs,Military weapons; Armor; Vehicles,Arsenal Access: Military equipment at -20% cost,Rogue soldiers; Weapon theft; Espionage,Combat powers; Tech-enhanced LSWs
+
+Political,Government centers and capitals,+2CS Political/Diplomatic investigations,High legal consequences if caught,+1CS recruiting government-connected LSWs,Diplomatic credentials; Government intel,Political Cover: Official investigation status,Missing officials; Corruption; Foreign agents,Psychic powers; Social manipulation LSWs
+
+Industrial,Manufacturing and production centers,+2CS Corporate/Sabotage investigations,Environmental hazards in combat,+2CS recruiting tech/science LSWs,Industrial equipment; Custom modifications,Workshop: Equipment repair/modification available,Sabotage; Gang violence; Corporate crime,Strength powers; Durability LSWs
+
+Resort,Tourism and luxury destinations,+1CS Social/Surveillance investigations,Civilian density very high (-2CS collateral),+1CS recruiting wealthy/connected LSWs,Luxury items; Social access,High Society: Access to elite networking events,Tourist disappearances; Smuggling; VIP threats,Appearance powers; Social LSWs
+
+Seaport,Maritime trade and naval facilities,+2CS Smuggling/Maritime investigations,Naval/Coast Guard response possible,+2CS recruiting maritime LSWs,Naval weapons; Boats; Diving gear,Maritime: Water-based operations enabled,Port smuggling; Maritime incidents; Trafficking,Water powers; Aquatic LSWs
+
+Mining,Resource extraction operations,+2CS Environmental/Industrial investigations,Hazardous terrain (cave-ins explosions),+2CS recruiting earth/strength LSWs,Mining equipment; Explosives; Raw materials,Underground: Access to tunnel networks,Illegal mining; Environmental sabotage; Labor abuse,Earth powers; Strength LSWs
+
+Educational,Universities and research centers,+2CS Academic/Research investigations,Student presence (reputation risk),+3CS recruiting intelligent/scientific LSWs,Research data; Laboratory access; Academic contacts,Research: +1CS to all technology investigations,Academic conspiracy; Student radicalization; Tech theft,Intelligence powers; Enhanced invention LSWs
+
+Company,Corporate headquarters and business districts,+2CS Corporate/Financial investigations,Security systems active,+2CS recruiting corporate-connected LSWs,Corporate resources; Business contacts; Legal support,Corporate: Access to business intelligence networks,Corporate espionage; Tech leaks; White collar crime,Tech powers; Wealthy LSWs
+
+Village,Small rural communities,+1CS Rural/Traditional investigations,No backup response available,+1CS recruiting local/traditional LSWs,Traditional weapons; Local knowledge,Local Trust: Faster community relationship building,Rural phenomena; Agricultural sabotage; Isolation threats,Nature powers; Traditional LSWs
+
+---MULTI-TYPE COMBINATION RULES---,,,,,,,
+Rule_Type,Description,,,,,,,
+Stacking,All investigation bonuses stack for matching investigation types,,,,,,,
+Primary_Type,First listed type determines dominant character of city,,,,,,,
+Secondary_Caps,Secondary types provide half bonus (round down) if matching,,,,,,,
+Equipment_Access,All equipment types available if city has matching type,,,,,,,
+Recruitment_Best,Use best applicable recruitment bonus (don't stack),,,,,,,
+Threat_Union,City can generate threats from ANY of its types,,,,,,,
+
+---CITY TYPE + CRIME INDEX INTERACTIONS---,,,,,,,
+Crime_Level,Effect_On_City_Types,,,,,,,
+Very Low (0-20),+1CS all investigations (organized society); -1CS criminal recruitment,,,,,,,
+Low (20-40),No modifier (balanced),,,,,,,
+Moderate (40-60),-1CS political investigations (corruption); +1CS criminal contacts,,,,,,,
+High (60-80),-2CS official methods; +2CS underground methods; combat more likely,,,,,,,
+Very High (80-100),-3CS all legal methods; +3CS criminal methods; constant combat risk,,,,,,,
+
+---CITY TYPE + POPULATION TYPE INTERACTIONS---,,,,,,,
+Population_Type,Effect,,,,,,,
+Village (Pop Rating 2),Limited equipment; +2CS stealth; -2CS resources,,,,,,,
+Small Town (Pop Rating 3),Basic equipment; +1CS stealth; -1CS resources,,,,,,,
+Town (Pop Rating 4),Standard equipment; no modifiers,,,,,,,
+City (Pop Rating 5),Full equipment; +1CS resources; -1CS stealth,,,,,,,
+Large City (Pop Rating 6),Premium equipment; +2CS resources; -2CS stealth,,,,,,,
+Mega City (Pop Rating 7),All equipment available; +3CS resources; -3CS stealth; multiple simultaneous operations possible,,,,,,,
