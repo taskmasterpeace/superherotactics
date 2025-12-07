@@ -1,0 +1,361 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --bg-tertiary: #0f3460;
+    --accent: #e94560;
+    --accent-hover: #ff6b6b;
+    --text-primary: #eaeaea;
+    --text-secondary: #a0a0a0;
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --danger: #ef4444;
+    --border: #2d2d44;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+}
+
+#app {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+    font-size: 1.8rem;
+    color: var(--accent);
+}
+
+#status-bar {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+#api-status.connected {
+    color: var(--success);
+}
+
+#api-status.disconnected {
+    color: var(--danger);
+}
+
+/* Navigation */
+#main-nav {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#main-nav button {
+    padding: 12px 24px;
+    border: none;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+#main-nav button:hover:not(:disabled) {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+#main-nav button.active {
+    background: var(--bg-tertiary);
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+}
+
+#main-nav button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Main Content */
+#content {
+    background: var(--bg-secondary);
+    border-radius: 0 8px 8px 8px;
+    padding: 24px;
+    min-height: 600px;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+/* Panel Grid */
+.panel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.panel-section {
+    background: var(--bg-tertiary);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.panel-section h2 {
+    margin-bottom: 16px;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Buttons */
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+}
+
+.btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-tertiary);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Pending List */
+#pending-list {
+    margin-top: 16px;
+}
+
+.pending-item {
+    background: var(--bg-secondary);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.pending-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.pending-item-header h4 {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.pending-item-header .category {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    background: var(--accent);
+    color: white;
+    border-radius: 4px;
+}
+
+.pending-item-prompt {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.pending-item audio {
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.pending-item-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.pending-item-actions button {
+    flex: 1;
+    padding: 8px;
+    font-size: 0.85rem;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: var(--bg-secondary);
+    padding: 24px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.modal-content h3 {
+    margin-bottom: 16px;
+    color: var(--accent);
+}
+
+#modal-sound-info {
+    background: var(--bg-tertiary);
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+}
+
+#modal-audio {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-actions button {
+    flex: 1;
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--text-secondary);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .panel-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}

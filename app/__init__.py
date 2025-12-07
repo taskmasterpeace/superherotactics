@@ -1,0 +1,1 @@
+# SHT Asset Generator API
