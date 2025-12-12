@@ -17,6 +17,12 @@ import {
   COLORS, TERRAIN_TYPES, TerrainType,
   gridToScreen, screenToGrid, getIsoDepth, MAP_WIDTH, MAP_HEIGHT
 } from '../config';
+import { GRENADES, calculateThrow, calculateExplosion, type Grenade } from '../../data/explosionSystem';
+import { SoundManager } from '../systems/SoundManager';
+import {
+  WeaponRangeBrackets,
+  DEFAULT_RANGE_BRACKETS,
+} from '../../data/equipmentTypes';
 
 // Combat statistics tracking interface
 interface UnitStats {
@@ -64,60 +70,95 @@ interface CombatAwards {
   killstreak: string | null;    // Longest killstreak
 }
 
-// Weapon definitions with visual effects
+// Weapon definitions with visual effects and range brackets
 const WEAPONS = {
   pistol: {
-    name: 'Pistol', emoji: '🔫', damage: 20, range: 6, accuracy: 70, ap: 2,
+    name: 'Pistol', emoji: '🔫', damage: 20, range: 25, accuracy: 70, ap: 2,
     visual: { type: 'projectile', color: 0xffff00 },
-    sound: { decibels: 140, baseRange: 20 }
+    sound: { decibels: 140, baseRange: 20 },
+    rangeBrackets: DEFAULT_RANGE_BRACKETS.pistol,
   },
   rifle: {
-    name: 'Rifle', emoji: '🎯', damage: 30, range: 10, accuracy: 65, ap: 3,
+    name: 'Assault Rifle', emoji: '🎯', damage: 30, range: 65, accuracy: 70, ap: 3,
     visual: { type: 'projectile', color: 0xffff00 },
-    sound: { decibels: 160, baseRange: 25 }
+    sound: { decibels: 160, baseRange: 25 },
+    rangeBrackets: DEFAULT_RANGE_BRACKETS.assault_rifle,
+  },
+  sniper: {
+    name: 'Sniper Rifle', emoji: '🎯', damage: 45, range: 100, accuracy: 75, ap: 4,
+    visual: { type: 'projectile', color: 0xffff00 },
+    sound: { decibels: 170, baseRange: 30 },
+    rangeBrackets: DEFAULT_RANGE_BRACKETS.sniper_rifle,
   },
   shotgun: {
-    name: 'Shotgun', emoji: '💥', damage: 40, range: 4, accuracy: 80, ap: 3,
+    name: 'Shotgun', emoji: '💥', damage: 40, range: 12, accuracy: 85, ap: 3,
     visual: { type: 'cone', color: 0xff8800, spread: 30 },
     sound: { decibels: 165, baseRange: 25 },
-    knockback: 2
+    knockback: 2,
+    rangeBrackets: DEFAULT_RANGE_BRACKETS.shotgun,
+  },
+  smg: {
+    name: 'SMG', emoji: '🔫', damage: 20, range: 22, accuracy: 65, ap: 2,
+    visual: { type: 'projectile', color: 0xffff00 },
+    sound: { decibels: 145, baseRange: 20 },
+    rangeBrackets: DEFAULT_RANGE_BRACKETS.smg,
+  },
+  rpg: {
+    name: 'RPG', emoji: '🚀', damage: 80, range: 100, accuracy: 60, ap: 5,
+    visual: { type: 'projectile', color: 0xff4400 },
+    sound: { decibels: 180, baseRange: 40 },
+    knockback: 5,
+    blastRadius: 2,
+    rangeBrackets: DEFAULT_RANGE_BRACKETS.rocket,
   },
   beam: {
-    name: 'Energy Beam', emoji: '⚡', damage: 30, range: 8, accuracy: 75, ap: 2,
+    name: 'Energy Beam', emoji: '⚡', damage: 30, range: 80, accuracy: 75, ap: 2,
     visual: { type: 'beam', color: 0x00ffff },
     sound: { decibels: 70, baseRange: 15 },
-    knockback: 2
+    knockback: 2,
+    rangeBrackets: DEFAULT_RANGE_BRACKETS.energy,
   },
   beam_wide: {
-    name: 'Wide Beam', emoji: '🌊', damage: 25, range: 5, accuracy: 85, ap: 2,
+    name: 'Wide Beam', emoji: '🌊', damage: 25, range: 40, accuracy: 85, ap: 2,
     visual: { type: 'cone', color: 0x00ffff, spread: 45 },
     sound: { decibels: 75, baseRange: 18 },
-    knockback: 1
+    knockback: 1,
+    rangeBrackets: DEFAULT_RANGE_BRACKETS.energy,
   },
   fist: {
     name: 'Fist', emoji: '👊', damage: 15, range: 1, accuracy: 90, ap: 1,
     visual: { type: 'melee', color: 0xffffff },
     sound: { decibels: 40, baseRange: 5 },
-    knockback: 1
+    knockback: 1,
+    rangeBrackets: DEFAULT_RANGE_BRACKETS.melee,
   },
   psychic: {
-    name: 'Psychic Blast', emoji: '🧠', damage: 35, range: 7, accuracy: 70, ap: 3,
+    name: 'Psychic Blast', emoji: '🧠', damage: 35, range: 60, accuracy: 70, ap: 3,
     visual: { type: 'beam', color: 0x8844ff },
     sound: { decibels: 30, baseRange: 5 },
-    knockback: 1
+    knockback: 1,
+    rangeBrackets: DEFAULT_RANGE_BRACKETS.energy,
   },
   plasma_rifle: {
-    name: 'Plasma Rifle', emoji: '🔥', damage: 45, range: 8, accuracy: 70, ap: 3,
+    name: 'Plasma Rifle', emoji: '🔥', damage: 45, range: 80, accuracy: 70, ap: 3,
     visual: { type: 'projectile', color: 0xff00ff },
     sound: { decibels: 150, baseRange: 22 },
-    knockback: 3
+    knockback: 3,
+    rangeBrackets: DEFAULT_RANGE_BRACKETS.energy,
   },
   super_punch: {
     name: 'Super Punch', emoji: '💪', damage: 50, range: 1, accuracy: 85, ap: 2,
     visual: { type: 'melee', color: 0xffaa00 },
     sound: { decibels: 80, baseRange: 10 },
-    knockback: 4
-  }
+    knockback: 4,
+    rangeBrackets: DEFAULT_RANGE_BRACKETS.melee,
+  },
+  machine_gun: {
+    name: 'Machine Gun', emoji: '🔫', damage: 25, range: 50, accuracy: 55, ap: 3,
+    visual: { type: 'projectile', color: 0xffff00 },
+    sound: { decibels: 165, baseRange: 30 },
+    rangeBrackets: DEFAULT_RANGE_BRACKETS.machine_gun,
+  },
 };
 
 type WeaponType = keyof typeof WEAPONS;
@@ -654,6 +695,11 @@ export class CombatScene extends Phaser.Scene {
   private pendingBlueTeam: CombatCharacter[] = [];
   private pendingRedTeam: CombatCharacter[] = [];
   private useCustomTeams: boolean = false;
+  private pendingGrenade: { id: string; name: string } | null = null;
+
+  // Sound system
+  private soundManager: SoundManager | null = null;
+  private soundConfig: Record<string, string> = {};
 
   // Combat statistics tracking
   private combatStats: CombatStats = this.createEmptyCombatStats();
@@ -739,6 +785,9 @@ export class CombatScene extends Phaser.Scene {
     this.generateTestMap();
     this.spawnTestUnits();
 
+    // Initialize sound system
+    this.initSoundSystem();
+
     // Notify combat started
     EventBridge.emit('combat-started', {
       mapId: 'test_map',
@@ -780,6 +829,132 @@ export class CombatScene extends Phaser.Scene {
     this.effectsLayer = this.add.container(0, 0);
     this.uiLayer = this.add.container(0, 0);
     this.uiLayer.setScrollFactor(0);
+  }
+
+  update(): void {
+    // Sort unitLayer children by depth every frame so selection tiles stay behind sprites
+    this.unitLayer.sort('depth');
+  }
+
+  private async initSoundSystem(): Promise<void> {
+    try {
+      // Load sound config mapping
+      const configResponse = await fetch('soundConfig.json');
+      this.soundConfig = await configResponse.json();
+      console.log('[CombatScene] Loaded sound config:', Object.keys(this.soundConfig).length, 'mappings');
+
+      // Load sound catalog directly (not using SoundManager)
+      const catalogResponse = await fetch('assets/sounds/catalog.json');
+      const catalog = await catalogResponse.json();
+      (this as any).soundCatalog = catalog;
+      console.log('[CombatScene] Sound catalog loaded with', Object.keys(catalog).length - 1, 'sounds');
+    } catch (error) {
+      console.error('[CombatScene] Failed to initialize sound system:', error);
+    }
+  }
+
+  /**
+   * Play a sound by config key (e.g. 'weapon.pistol', 'impact.crit')
+   * Uses HTML5 Audio for direct playback - no preloading needed!
+   */
+  private playSound(configKey: string, position?: { x: number; y: number }): void {
+    const catalogKey = this.soundConfig[configKey];
+    if (!catalogKey) {
+      console.warn(`[CombatScene] No sound mapping for: ${configKey}`);
+      return;
+    }
+
+    const catalog = (this as any).soundCatalog || {};
+    const entry = catalog[catalogKey];
+    if (!entry || !entry.files || entry.files.length === 0) {
+      console.warn(`[CombatScene] Sound not in catalog: ${catalogKey}`);
+      return;
+    }
+
+    // Pick random variant
+    const variantIndex = Math.floor(Math.random() * entry.files.length);
+    const soundPath = `assets/${entry.files[variantIndex]}`;
+
+    // Use HTML5 Audio for direct playback (no preloading needed)
+    try {
+      const audio = new Audio(soundPath);
+      audio.volume = 0.5;
+      audio.play().catch(e => {
+        // Autoplay might be blocked, that's ok
+        console.warn(`[CombatScene] Audio blocked: ${e.message}`);
+      });
+      console.log(`[CombatScene] 🔊 Playing: ${configKey} -> ${catalogKey}`);
+    } catch (error) {
+      console.error(`[CombatScene] Failed to play: ${soundPath}`, error);
+    }
+  }
+
+  /**
+   * Get sound config key for a grenade type
+   */
+  private getGrenadeSoundKey(grenadeName: string): string {
+    const name = grenadeName.toLowerCase();
+    if (name.includes('emp')) return 'grenade.emp';
+    if (name.includes('flash')) return 'grenade.flash';
+    if (name.includes('cryo')) return 'grenade.cryo';
+    if (name.includes('incendiary')) return 'grenade.incendiary';
+    if (name.includes('smoke')) return 'grenade.frag'; // Smoke uses soft pop
+    if (name.includes('plasma')) return 'grenade.frag';
+    return 'grenade.frag'; // Default
+  }
+
+  /**
+   * Play sound only if the selected unit can hear it (within range)
+   * This simulates the player "hearing" through their selected unit
+   */
+  private playSoundIfInRange(configKey: string, position: { x: number; y: number }, hearingRange: number): void {
+    // Get selected unit position as the "listener"
+    const selectedUnit = this.selectedUnitId ? this.units.get(this.selectedUnitId) : null;
+
+    if (!selectedUnit) {
+      // No unit selected - use camera center as listener (fallback)
+      this.playSound(configKey, position);
+      return;
+    }
+
+    // Calculate distance from selected unit to sound source
+    const dx = Math.abs(selectedUnit.position.x - position.x);
+    const dy = Math.abs(selectedUnit.position.y - position.y);
+    const distance = dx + dy; // Manhattan distance
+
+    // Only play if within hearing range
+    if (distance <= hearingRange) {
+      // Volume decreases with distance
+      const volumeFactor = 1 - (distance / hearingRange) * 0.5;
+      this.playSoundWithVolume(configKey, position, volumeFactor);
+      console.log(`[CombatScene] 🔊 Unit ${selectedUnit.name} hears sound at distance ${distance}/${hearingRange}`);
+    } else {
+      console.log(`[CombatScene] 🔇 Unit ${selectedUnit.name} too far to hear (${distance} > ${hearingRange})`);
+    }
+  }
+
+  /**
+   * Play sound with custom volume
+   */
+  private playSoundWithVolume(configKey: string, position: { x: number; y: number }, volumeFactor: number): void {
+    const catalogKey = this.soundConfig[configKey];
+    if (!catalogKey) return;
+
+    const catalog = (this as any).soundCatalog || {};
+    const entry = catalog[catalogKey];
+    if (!entry || !entry.files || entry.files.length === 0) return;
+
+    const variantIndex = Math.floor(Math.random() * entry.files.length);
+    const soundPath = `assets/${entry.files[variantIndex]}`;
+
+    try {
+      const audio = new Audio(soundPath);
+      audio.volume = Math.max(0.1, Math.min(1, 0.5 * volumeFactor));
+      audio.play().catch(() => { });
+      console.log(`[CombatScene] 🔊 Playing at ${Math.round(volumeFactor * 100)}% volume: ${configKey}`);
+    } catch (error) {
+      // Ignore
+    }
   }
 
   private setupCamera(): void {
@@ -961,6 +1136,48 @@ export class CombatScene extends Phaser.Scene {
     EventBridge.on('run-ai-turn', () => {
       this.runAiTurn();
     });
+
+    // Handle grenade throw from QuickInventory
+    EventBridge.on('start-grenade-throw', (data: { grenadeId: string; grenadeName: string }) => {
+      console.log('[GRENADE] Received start-grenade-throw:', data);
+
+      const unit = this.selectedUnitId ? this.units.get(this.selectedUnitId) : null;
+      if (!unit) return;
+
+      if (unit.team !== this.currentTeam) {
+        EventBridge.emit('log-entry', {
+          id: `grenade_${Date.now()}`,
+          timestamp: Date.now(),
+          type: 'system',
+          actor: 'System',
+          message: `❌ Cannot throw - not your turn!`,
+        });
+        return;
+      }
+
+      if (unit.ap < 2) {
+        EventBridge.emit('log-entry', {
+          id: `grenade_${Date.now()}`,
+          timestamp: Date.now(),
+          type: 'system',
+          actor: 'System',
+          message: `❌ Not enough AP! (Need 2)`,
+        });
+        return;
+      }
+
+      this.pendingGrenade = { id: data.grenadeId, name: data.grenadeName };
+      this.setActionMode('throw');
+      this.showGrenadeRange(unit);
+
+      EventBridge.emit('log-entry', {
+        id: `grenade_${Date.now()}`,
+        timestamp: Date.now(),
+        type: 'system',
+        actor: unit.name,
+        message: `💣 ${unit.name} prepares ${data.grenadeName}! Click target...`,
+      });
+    });
   }
 
   private generateTestMap(): void {
@@ -1086,7 +1303,7 @@ export class CombatScene extends Phaser.Scene {
 
         // Check if valid tile
         if (gridPos.x >= 0 && gridPos.x < this.mapWidth &&
-            gridPos.y >= 0 && gridPos.y < this.mapHeight) {
+          gridPos.y >= 0 && gridPos.y < this.mapHeight) {
           this.onTileClick(gridPos.x, gridPos.y);
         }
       }
@@ -1097,7 +1314,7 @@ export class CombatScene extends Phaser.Scene {
       const gridPos = screenToGrid(worldPoint.x, worldPoint.y, this.offsetX, this.offsetY);
 
       if (gridPos.x >= 0 && gridPos.x < this.mapWidth &&
-          gridPos.y >= 0 && gridPos.y < this.mapHeight) {
+        gridPos.y >= 0 && gridPos.y < this.mapHeight) {
         this.onTileHover(gridPos.x, gridPos.y);
       }
     });
@@ -1536,7 +1753,7 @@ export class CombatScene extends Phaser.Scene {
 
     // Team color tint (subtle tint for team identification)
     const teamTint = unit.team === 'blue' ? 0xaaccff :
-                     unit.team === 'red' ? 0xffaaaa : 0xaaffaa;
+      unit.team === 'red' ? 0xffaaaa : 0xaaffaa;
 
     // Use actual soldier sprite if spriteId is set, otherwise fallback to circle
     const spriteTextureKey = unit.spriteId || null;
@@ -1560,7 +1777,7 @@ export class CombatScene extends Phaser.Scene {
     } else {
       // Fallback to placeholder circle sprite
       const teamColor = unit.team === 'blue' ? COLORS.TEAM_BLUE :
-                        unit.team === 'red' ? COLORS.TEAM_RED : COLORS.TEAM_GREEN;
+        unit.team === 'red' ? COLORS.TEAM_RED : COLORS.TEAM_GREEN;
       const unitRadius = TILE_WIDTH / 5;
       const graphics = this.make.graphics({ x: 0, y: 0 });
       graphics.fillStyle(teamColor, 1);
@@ -2253,6 +2470,228 @@ export class CombatScene extends Phaser.Scene {
     }
   }
 
+  private showGrenadeRange(unit: Unit): void {
+    const maxRange = 7;
+    for (let y = 0; y < this.mapHeight; y++) {
+      for (let x = 0; x < this.mapWidth; x++) {
+        const distance = Math.abs(x - unit.position.x) + Math.abs(y - unit.position.y);
+        if (distance === 0 || distance > maxRange) continue;
+
+        const screenPos = gridToScreen(x, y, this.offsetX, this.offsetY);
+        const shrink = 8;
+        const marker = this.add.polygon(
+          screenPos.x, screenPos.y,
+          [0, -TILE_HEIGHT / 2 + shrink, TILE_WIDTH / 2 - shrink, 0, 0, TILE_HEIGHT / 2 - shrink, -TILE_WIDTH / 2 + shrink, 0],
+          0xff6600, 0.3
+        );
+        marker.setDepth(getIsoDepth(x, y) + 50);
+        this.rangeLayer.add(marker);
+      }
+    }
+  }
+
+  private throwGrenade(unit: Unit, x: number, y: number): void {
+    if (!this.pendingGrenade) return;
+
+    const grenadeId = this.pendingGrenade.id.toUpperCase();
+    const grenadeType = GRENADES[grenadeId as keyof typeof GRENADES] || GRENADES.FRAG;
+    const throwResult = calculateThrow(unit.position, { x, y }, unit.str, false, grenadeType);
+
+    unit.ap -= 2;
+    this.emitAllUnitsData();
+
+    EventBridge.emit('log-entry', {
+      id: `grenade_${Date.now()}`,
+      timestamp: Date.now(),
+      type: 'attack',
+      actor: unit.name,
+      actorTeam: unit.team,
+      message: `💣 ${unit.name} throws ${this.pendingGrenade.name}!`,
+    });
+
+    // Emit event to consume the grenade from equipment
+    EventBridge.emit('consume-grenade', {
+      unitId: unit.id,
+      grenadeName: this.pendingGrenade.name
+    });
+
+    // No throw sound - only explosion makes sound
+
+    this.animating = true;
+    const startPos = gridToScreen(unit.position.x, unit.position.y, this.offsetX, this.offsetY);
+    const endPos = gridToScreen(throwResult.actualLandingPosition.x, throwResult.actualLandingPosition.y, this.offsetX, this.offsetY);
+
+    // Use actual grenade sprite image - try to load the specific type, fallback to frag
+    const spriteKey = `grenade_${grenadeId.toLowerCase()}`;
+    const textureExists = this.textures.exists(spriteKey);
+
+    let grenadeSprite: Phaser.GameObjects.Image | Phaser.GameObjects.Arc;
+    if (textureExists) {
+      grenadeSprite = this.add.image(startPos.x, startPos.y - 20, spriteKey);
+      grenadeSprite.setScale(0.4); // Scale down the grenade image
+    } else {
+      // Fallback to orange circle
+      grenadeSprite = this.add.circle(startPos.x, startPos.y - 20, 10, 0xff6600);
+    }
+    grenadeSprite.setDepth(1000);
+
+    this.tweens.add({
+      targets: grenadeSprite,
+      x: endPos.x,
+      y: endPos.y,
+      duration: 600,
+      ease: 'Quad.easeOut',
+      onUpdate: (tween) => {
+        const progress = tween.progress;
+        grenadeSprite.y = startPos.y + (endPos.y - startPos.y) * progress - 80 * Math.sin(progress * Math.PI) - 20;
+        // Add rotation during flight
+        if ('angle' in grenadeSprite) {
+          grenadeSprite.angle = progress * 720; // 2 full rotations
+        }
+      },
+      onComplete: () => {
+        grenadeSprite.destroy();
+        this.explodeGrenade(throwResult.actualLandingPosition.x, throwResult.actualLandingPosition.y, grenadeType, unit);
+      }
+    });
+
+    this.pendingGrenade = null;
+    this.setActionMode('idle');
+  }
+
+  private explodeGrenade(x: number, y: number, grenadeType: Grenade, thrower: Unit): void {
+    const screenPos = gridToScreen(x, y, this.offsetX, this.offsetY);
+
+    // Calculate sound data from grenade's soundLevel
+    const soundData = {
+      decibels: grenadeType.soundLevel,
+      baseRange: Math.ceil(grenadeType.soundLevel / 10) // ~16 tiles for 165dB grenade
+    };
+
+    // Emit sound ring visual - always show this
+    this.emitSoundRing(x, y, soundData);
+
+    // Play sound only if selected unit is within hearing range
+    const soundKey = this.getGrenadeSoundKey(grenadeType.name);
+    this.playSoundIfInRange(soundKey, { x, y }, soundData.baseRange);
+
+    // Handle smoke grenades specially - create smoke cloud instead of explosion
+    if (grenadeType.visualEffect === 'smoke' && grenadeType.damageAtCenter === 0) {
+      this.createSmokeCloud(x, y, grenadeType.blastRadius);
+      EventBridge.emit('log-entry', {
+        id: `smoke_${Date.now()}`,
+        timestamp: Date.now(),
+        type: 'status',
+        actor: thrower.name,
+        message: `💨 ${thrower.name} creates a smoke screen!`,
+      });
+      this.emitAllUnitsData();
+      this.time.delayedCall(500, () => { this.animating = false; });
+      return;
+    }
+
+    // Regular explosion visual
+    let explosionColor = 0xff4400; // Default orange
+    if (grenadeType.visualEffect === 'flash') explosionColor = 0xffffaa;
+    if (grenadeType.visualEffect === 'fire') explosionColor = 0xff6600;
+
+    const explosionCircle = this.add.circle(screenPos.x, screenPos.y, 10, explosionColor, 0.8);
+    explosionCircle.setDepth(1000);
+
+    this.tweens.add({
+      targets: explosionCircle,
+      scaleX: grenadeType.blastRadius * 2,
+      scaleY: grenadeType.blastRadius * 2,
+      alpha: 0,
+      duration: 400,
+      onComplete: () => explosionCircle.destroy()
+    });
+
+    // Deal damage to units in radius
+    this.units.forEach(unit => {
+      const distance = Math.abs(unit.position.x - x) + Math.abs(unit.position.y - y);
+      if (distance <= grenadeType.blastRadius) {
+        const damage = Math.floor(grenadeType.damageAtCenter * (1 - distance / (grenadeType.blastRadius + 1)));
+        if (damage > 0) {
+          unit.hp -= damage;
+          this.updateHealthBar(unit);
+          if (unit.hp <= 0) {
+            this.killUnit(unit, `${grenadeType.name} explosion`);
+          }
+          EventBridge.emit('log-entry', {
+            id: `explosion_${Date.now()}_${unit.id}`,
+            timestamp: Date.now(),
+            type: 'damage',
+            actor: thrower.name,
+            target: unit.name,
+            message: `💥 ${unit.name} takes ${damage} damage!`,
+          });
+        }
+
+        // Apply status effects if any
+        if (grenadeType.statusEffects && grenadeType.statusEffects.length > 0) {
+          grenadeType.statusEffects.forEach(effect => {
+            EventBridge.emit('log-entry', {
+              id: `effect_${Date.now()}_${unit.id}`,
+              timestamp: Date.now(),
+              type: 'status',
+              target: unit.name,
+              message: `⚡ ${unit.name} is ${effect}!`,
+            });
+          });
+        }
+      }
+    });
+
+    this.emitAllUnitsData();
+    this.time.delayedCall(500, () => { this.animating = false; });
+  }
+
+  /**
+   * Creates a smoke cloud visual effect on the map
+   * Smoke provides cover for units inside
+   */
+  private createSmokeCloud(x: number, y: number, radius: number): void {
+    // Create smoke particles at center and surrounding tiles
+    for (let dx = -radius; dx <= radius; dx++) {
+      for (let dy = -radius; dy <= radius; dy++) {
+        const distance = Math.abs(dx) + Math.abs(dy);
+        if (distance <= radius) {
+          const tileX = x + dx;
+          const tileY = y + dy;
+
+          // Make sure tile is within map bounds
+          if (tileX >= 0 && tileX < this.mapWidth && tileY >= 0 && tileY < this.mapHeight) {
+            const screenPos = gridToScreen(tileX, tileY, this.offsetX, this.offsetY);
+
+            // Create smoke effect (semi-transparent gray cloud)
+            const smokeAlpha = 0.6 - (distance * 0.1); // Fades at edges
+            const smoke = this.add.circle(screenPos.x, screenPos.y, 20, 0x888888, smokeAlpha);
+            smoke.setDepth(500); // Above tiles, below units
+
+            // Add some random offset for organic look
+            smoke.x += (Math.random() - 0.5) * 10;
+            smoke.y += (Math.random() - 0.5) * 10;
+
+            // Slow drift animation
+            this.tweens.add({
+              targets: smoke,
+              x: smoke.x + (Math.random() - 0.5) * 30,
+              y: smoke.y - 10,
+              alpha: 0,
+              scale: 1.5,
+              duration: 5000 + Math.random() * 2000,
+              onComplete: () => smoke.destroy()
+            });
+
+            // TODO: Mark tile as having smoke cover for LOS/cover calculations
+            // this.tiles[tileY][tileX].hasSmoke = true;
+          }
+        }
+      }
+    }
+  }
+
   private clearRangeOverlay(): void {
     this.rangeLayer.removeAll(true);
   }
@@ -2285,6 +2724,22 @@ export class CombatScene extends Phaser.Scene {
       const unit = this.units.get(this.selectedUnitId);
       if (unit) {
         this.teleportUnit(unit, x, y);
+      }
+    } else if (this.actionMode === 'throw' && this.selectedUnitId && this.pendingGrenade) {
+      const unit = this.units.get(this.selectedUnitId);
+      if (unit) {
+        const distance = Math.abs(x - unit.position.x) + Math.abs(y - unit.position.y);
+        if (distance <= 7) {
+          this.throwGrenade(unit, x, y);
+        } else {
+          EventBridge.emit('log-entry', {
+            id: `grenade_${Date.now()}`,
+            timestamp: Date.now(),
+            type: 'system',
+            actor: 'System',
+            message: `❌ Out of range!`,
+          });
+        }
       }
     } else if (this.actionMode === 'grapple' && this.selectedUnitId && tile.occupant) {
       this.tryGrapple(this.selectedUnitId, tile.occupant);
@@ -2377,7 +2832,7 @@ export class CombatScene extends Phaser.Scene {
     if (this.actionMode === 'move') {
       const moveCost = this.calculateMoveCost(unit.position.x, unit.position.y, x, y);
       const canMove = moveCost > 0 && moveCost <= unit.ap &&
-                      TERRAIN_TYPES[tile.terrain].walkable && !tile.occupant;
+        TERRAIN_TYPES[tile.terrain].walkable && !tile.occupant;
 
       if (canMove) {
         // Draw footstep path from unit to destination
@@ -2413,12 +2868,13 @@ export class CombatScene extends Phaser.Scene {
           // Calculate and show hit chance
           const hitChance = this.calculateHitChance(unit, target);
           const weapon = WEAPONS[unit.weapon];
+          const rangeBracket = this.getRangeBracketName(unit, target);
           const screenPos = gridToScreen(x, y, this.offsetX, this.offsetY);
 
           this.hoverPreviewText = this.add.text(
             screenPos.x,
             screenPos.y - TILE_HEIGHT / 2 - 25,
-            `${hitChance}% | ${weapon.damage} DMG`,
+            `${rangeBracket} | ${hitChance}% | ${weapon.damage} DMG`,
             {
               fontSize: '14px',
               color: hitChance >= 70 ? '#4ad94a' : hitChance >= 40 ? '#d9d94a' : '#d94a4a',
@@ -2491,9 +2947,32 @@ export class CombatScene extends Phaser.Scene {
     // Base accuracy from weapon
     let hitChance = weapon.accuracy || 70;
 
-    // Distance modifier (-5% per tile beyond 3)
-    if (distance > 3) {
-      hitChance -= Math.floor((distance - 3) * 5);
+    // WEAPON-SPECIFIC RANGE BRACKETS
+    // Use the weapon's range brackets for hit modifiers instead of generic distance penalty
+    const brackets = weapon.rangeBrackets;
+    if (brackets) {
+      // Check if out of max range
+      if (distance > brackets.max) {
+        return 0; // Cannot hit - out of range
+      }
+
+      // Apply range bracket modifier
+      if (distance <= brackets.pointBlank) {
+        hitChance += brackets.pointBlankMod;
+      } else if (distance <= brackets.short) {
+        hitChance += brackets.shortMod;
+      } else if (distance <= brackets.optimal) {
+        hitChance += brackets.optimalMod;
+      } else if (distance <= brackets.long) {
+        hitChance += brackets.longMod;
+      } else {
+        hitChance += brackets.extremeMod;
+      }
+    } else {
+      // Fallback: old generic distance penalty
+      if (distance > 3) {
+        hitChance -= Math.floor((distance - 3) * 5);
+      }
     }
 
     // Cover modifier
@@ -2504,10 +2983,31 @@ export class CombatScene extends Phaser.Scene {
       else if (cover === 'full') hitChance -= 40;
     }
 
-    // AGL bonus for attacker
+    // AGL bonus for attacker (every 10 AGL above 50 = +2%)
     hitChance += Math.floor((attacker.agl - 50) / 5);
 
     return Math.max(5, Math.min(95, hitChance));
+  }
+
+  /**
+   * Get the range bracket name for display in UI
+   */
+  private getRangeBracketName(attacker: Unit, target: Unit): string {
+    const weapon = WEAPONS[attacker.weapon];
+    const distance = Math.sqrt(
+      Math.pow(target.position.x - attacker.position.x, 2) +
+      Math.pow(target.position.y - attacker.position.y, 2)
+    );
+
+    const brackets = weapon.rangeBrackets;
+    if (!brackets) return '';
+
+    if (distance > brackets.max) return 'OUT OF RANGE';
+    if (distance <= brackets.pointBlank) return 'POINT BLANK';
+    if (distance <= brackets.short) return 'SHORT';
+    if (distance <= brackets.optimal) return 'OPTIMAL';
+    if (distance <= brackets.long) return 'LONG';
+    return 'EXTREME';
   }
 
   // ==================== FOG OF WAR ====================
@@ -3287,6 +3787,22 @@ export class CombatScene extends Phaser.Scene {
     attacker.ap -= apCost;
     this.animating = true;
 
+    // Play weapon sound based on weapon type
+    const weaponType = attacker.weapon.toLowerCase();
+    if (weaponType.includes('pistol')) {
+      this.playSound('weapon.pistol', attacker.position);
+    } else if (weaponType.includes('rifle') || weaponType.includes('smg')) {
+      this.playSound('weapon.rifle', attacker.position);
+    } else if (weaponType.includes('shotgun')) {
+      this.playSound('weapon.shotgun', attacker.position);
+    } else if (weaponType.includes('beam') || weaponType.includes('laser') || weaponType.includes('plasma')) {
+      this.playSound('weapon.beam', attacker.position);
+    } else if (weaponType.includes('sword') || weaponType.includes('axe') || weaponType.includes('fist')) {
+      this.playSound('weapon.melee', attacker.position);
+    } else {
+      this.playSound('weapon.pistol', attacker.position); // Default
+    }
+
     // Fire visual effect
     this.fireVisualEffect(attacker, target, weapon, () => {
       // Calculate hit using new verb system
@@ -3305,12 +3821,17 @@ export class CombatScene extends Phaser.Scene {
 
       if (hitResult === 'crit') {
         damage = Math.floor(baseDamage * 1.5); // 150% damage
+        this.playSound('impact.crit', target.position);
       } else if (hitResult === 'hit') {
         damage = baseDamage; // 100% damage
+        this.playSound('impact.flesh', target.position);
       } else if (hitResult === 'graze') {
         damage = Math.floor(baseDamage * 0.5); // 50% damage
+        this.playSound('impact.flesh', target.position);
+      } else {
+        // miss = 0 damage
+        this.playSound('impact.miss', target.position);
       }
-      // miss = 0 damage
 
       const didHit = hitResult !== 'miss';
       const isCrit = hitResult === 'crit';
@@ -3920,8 +4441,8 @@ export class CombatScene extends Phaser.Scene {
         }
 
         const loudness = soundData.decibels >= 140 ? 'GUNFIRE' :
-                        soundData.decibels >= 100 ? 'LOUD NOISE' :
-                        soundData.decibels >= 60 ? 'noise' : 'faint sound';
+          soundData.decibels >= 100 ? 'LOUD NOISE' :
+            soundData.decibels >= 60 ? 'noise' : 'faint sound';
 
         listeners.push(`${unit.name} 👂${direction}`);
       }
@@ -3930,9 +4451,9 @@ export class CombatScene extends Phaser.Scene {
     // Log who heard and from which direction
     if (listeners.length > 0) {
       const hearingEmoji = soundData.decibels >= 140 ? '💥' :
-                          soundData.decibels >= 100 ? '🔊' : '👂';
+        soundData.decibels >= 100 ? '🔊' : '👂';
       const loudness = soundData.decibels >= 140 ? 'GUNFIRE' :
-                      soundData.decibels >= 100 ? 'LOUD NOISE' : 'noise';
+        soundData.decibels >= 100 ? 'LOUD NOISE' : 'noise';
 
       EventBridge.emit('log-entry', {
         id: `sound_${Date.now()}`,

@@ -6,8 +6,10 @@ import {
   User, Shield, Zap, Brain, Heart, Target, Users, MapPin,
   Briefcase, GraduationCap, Swords, Star, Hash, ChevronLeft,
   Activity, Eye, Award, Book, Globe, AlertTriangle, Package,
-  UserPlus, Crosshair, Dumbbell, Scale, Wind, Sparkles, Edit3, X
+  UserPlus, Crosshair, Dumbbell, Scale, Wind, Sparkles, Edit3, X,
+  RefreshCw, Dice6
 } from 'lucide-react'
+import { generateCharacter } from '../data/characterGeneration'
 
 // Full Character Interface based on Character_Schema_Complete.md
 interface FullCharacter {
@@ -238,6 +240,13 @@ export default function CharacterScreen() {
     toast.info('Returning to World Map')
   }
 
+  const handleGenerateRandom = () => {
+    const newChar = generateCharacter()
+    addCharacter(newChar)
+    setSelectedCharacterId(newChar.id)
+    toast.success(`Generated: ${newChar.name}`)
+  }
+
   return (
     <div className="h-full flex bg-gray-900">
       {/* Character Roster Sidebar */}
@@ -261,8 +270,18 @@ export default function CharacterScreen() {
               <ChevronLeft size={18} />
             </button>
           </div>
-          <div className="text-sm text-gray-400">
-            {characters.filter(c => c.status === 'ready').length}/{characters.length} Ready
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-400">
+              {characters.filter(c => c.status === 'ready').length}/{characters.length} Ready
+            </div>
+            <button
+              onClick={handleGenerateRandom}
+              className="flex items-center gap-1 px-2 py-1 bg-purple-600 hover:bg-purple-500 rounded text-xs font-medium transition-colors"
+              title="Generate Random Character"
+            >
+              <Dice6 size={14} />
+              Reroll
+            </button>
           </div>
         </div>
 
@@ -1250,7 +1269,7 @@ function getTalentDescription(talentName: string): string {
 
 function getItemEmoji(item: string): string {
   const emojis: Record<string, string> = {
-    'Vibranium Shield': '🛡️',
+    'Kinetic Shield': '🛡️',
     'Tactical Armor': '🦺',
     'Temporal Stabilizer': '⏰',
     'Pistol': '🔫',

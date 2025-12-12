@@ -1,0 +1,496 @@
+{
+  "beltRanks": [
+    { "belt": "white", "rank": 1, "bonus": 1, "label": "White Belt" },
+    { "belt": "yellow", "rank": 2, "bonus": 2, "label": "Yellow Belt" },
+    { "belt": "orange", "rank": 3, "bonus": 3, "label": "Orange Belt" },
+    { "belt": "green", "rank": 4, "bonus": 4, "label": "Green Belt" },
+    { "belt": "blue", "rank": 5, "bonus": 5, "label": "Blue Belt" },
+    { "belt": "purple", "rank": 6, "bonus": 6, "label": "Purple Belt" },
+    { "belt": "brown", "rank": 7, "bonus": 7, "label": "Brown Belt" },
+    { "belt": "red", "rank": 8, "bonus": 8, "label": "Red Belt" },
+    { "belt": "black1", "rank": 9, "bonus": 9, "label": "Black Belt I" },
+    { "belt": "black2", "rank": 10, "bonus": 10, "label": "Black Belt II" }
+  ],
+  "styles": [
+    {
+      "id": "grappling",
+      "name": "Grappling",
+      "description": "Judo, Wrestling - Control & Positioning. Focuses on takedowns, throws, and positional control.",
+      "role": "control",
+      "primaryStat": "STR",
+      "techniques": [
+        {
+          "id": "tech_clinch",
+          "name": "Clinch",
+          "styleId": "grappling",
+          "beltRequired": 1,
+          "apCost": 1,
+          "effect": "Enter grapple range with target. Both become engaged.",
+          "setsGrappleState": "standing",
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_takedown",
+          "name": "Takedown",
+          "styleId": "grappling",
+          "beltRequired": 2,
+          "apCost": 2,
+          "damage": 5,
+          "effect": "Knock target prone. You remain standing.",
+          "statusApplied": ["prone"],
+          "requiresGrapple": true,
+          "setsGrappleState": "ground"
+        },
+        {
+          "id": "tech_hip_throw",
+          "name": "Hip Throw",
+          "styleId": "grappling",
+          "beltRequired": 3,
+          "apCost": 2,
+          "damage": 8,
+          "effect": "Throw target 1 tile. Target becomes prone.",
+          "statusApplied": ["prone"],
+          "requiresGrapple": true,
+          "setsGrappleState": "ground"
+        },
+        {
+          "id": "tech_suplex",
+          "name": "Suplex",
+          "styleId": "grappling",
+          "beltRequired": 4,
+          "apCost": 3,
+          "damage": 15,
+          "effect": "Slam target onto their back. Both go prone.",
+          "statusApplied": ["prone", "stunned"],
+          "requiresGrapple": true,
+          "setsGrappleState": "ground"
+        },
+        {
+          "id": "tech_slam",
+          "name": "Slam",
+          "styleId": "grappling",
+          "beltRequired": 5,
+          "apCost": 3,
+          "damage": 0,
+          "effect": "Damage equals STR x 0.5. Devastating power slam.",
+          "requiresGrapple": true,
+          "setsGrappleState": "ground"
+        },
+        {
+          "id": "tech_pin",
+          "name": "Pin",
+          "styleId": "grappling",
+          "beltRequired": 6,
+          "apCost": 2,
+          "effect": "Restrain target. They lose 2 AP per turn while pinned.",
+          "requiresGrapple": true,
+          "requiresProne": true,
+          "setsGrappleState": "pinned"
+        },
+        {
+          "id": "tech_lift_carry",
+          "name": "Lift & Carry",
+          "styleId": "grappling",
+          "beltRequired": 7,
+          "apCost": 1,
+          "effect": "Pick up a restrained target. Can move with them.",
+          "requiresRestrained": true,
+          "setsGrappleState": "carried"
+        },
+        {
+          "id": "tech_pile_driver",
+          "name": "Pile Driver",
+          "styleId": "grappling",
+          "beltRequired": 8,
+          "apCost": 4,
+          "damage": 30,
+          "effect": "Devastating head-first slam. Requires lifted target.",
+          "statusApplied": ["stunned", "prone"],
+          "requiresRestrained": true,
+          "setsGrappleState": "ground"
+        }
+      ]
+    },
+    {
+      "id": "submission",
+      "name": "Submission",
+      "description": "BJJ, Catch Wrestling - Finisher & Incapacitation. Joint locks and chokes to end fights.",
+      "role": "finisher",
+      "primaryStat": "MEL",
+      "secondaryStat": "STR",
+      "techniques": [
+        {
+          "id": "tech_guard_pull",
+          "name": "Guard Pull",
+          "styleId": "submission",
+          "beltRequired": 1,
+          "apCost": 1,
+          "effect": "Both go prone. You gain guard control position.",
+          "statusApplied": ["prone"],
+          "setsGrappleState": "ground"
+        },
+        {
+          "id": "tech_armbar",
+          "name": "Armbar",
+          "styleId": "submission",
+          "beltRequired": 2,
+          "apCost": 2,
+          "damage": 10,
+          "effect": "Hyperextend arm joint. Target gets -2 MEL.",
+          "statusApplied": ["arm_injured"],
+          "requiresGrapple": true,
+          "requiresProne": true,
+          "setsGrappleState": "submission"
+        },
+        {
+          "id": "tech_triangle",
+          "name": "Triangle Choke",
+          "styleId": "submission",
+          "beltRequired": 3,
+          "apCost": 2,
+          "effect": "Leg choke. Target loses 1 AP per turn until escape.",
+          "statusApplied": ["choked"],
+          "requiresGrapple": true,
+          "requiresProne": true,
+          "setsGrappleState": "submission"
+        },
+        {
+          "id": "tech_kimura",
+          "name": "Kimura",
+          "styleId": "submission",
+          "beltRequired": 4,
+          "apCost": 2,
+          "damage": 15,
+          "effect": "Shoulder lock. Forces target to drop weapon.",
+          "statusApplied": ["disarmed"],
+          "requiresGrapple": true,
+          "setsGrappleState": "submission"
+        },
+        {
+          "id": "tech_rear_naked",
+          "name": "Rear Naked Choke",
+          "styleId": "submission",
+          "beltRequired": 5,
+          "apCost": 3,
+          "effect": "Blood choke from behind. Unconscious in 3 turns if held.",
+          "statusApplied": ["choked"],
+          "requiresGrapple": true,
+          "setsGrappleState": "submission"
+        },
+        {
+          "id": "tech_heel_hook",
+          "name": "Heel Hook",
+          "styleId": "submission",
+          "beltRequired": 6,
+          "apCost": 2,
+          "damage": 20,
+          "effect": "Devastating leg lock. Target is immobilized.",
+          "statusApplied": ["immobilized"],
+          "requiresGrapple": true,
+          "requiresProne": true,
+          "setsGrappleState": "submission"
+        },
+        {
+          "id": "tech_neck_crank",
+          "name": "Neck Crank",
+          "styleId": "submission",
+          "beltRequired": 7,
+          "apCost": 3,
+          "damage": 25,
+          "effect": "Brutal neck manipulation. High damage spine attack.",
+          "requiresGrapple": true,
+          "setsGrappleState": "submission"
+        },
+        {
+          "id": "tech_blood_choke",
+          "name": "Blood Choke",
+          "styleId": "submission",
+          "beltRequired": 8,
+          "apCost": 3,
+          "effect": "Cut blood to brain. Unconscious in 2 turns if held.",
+          "statusApplied": ["choked"],
+          "requiresGrapple": true,
+          "setsGrappleState": "submission"
+        }
+      ]
+    },
+    {
+      "id": "internal",
+      "name": "Internal Arts",
+      "description": "Tai Chi, Aikido - Redirection & Defense. Use opponent's force against them.",
+      "role": "defense",
+      "primaryStat": "INS",
+      "secondaryStat": "AGL",
+      "techniques": [
+        {
+          "id": "tech_deflect",
+          "name": "Deflect",
+          "styleId": "internal",
+          "beltRequired": 1,
+          "apCost": 0,
+          "effect": "Reaction: Reduce incoming melee damage by 25%.",
+          "isReaction": true,
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_redirect",
+          "name": "Redirect",
+          "styleId": "internal",
+          "beltRequired": 2,
+          "apCost": 1,
+          "effect": "Reaction: Send incoming attack to an adjacent enemy.",
+          "isReaction": true,
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_push",
+          "name": "Push",
+          "styleId": "internal",
+          "beltRequired": 3,
+          "apCost": 1,
+          "damage": 0,
+          "effect": "Knockback target 1 tile. No damage, pure positioning.",
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_joint_lock",
+          "name": "Joint Lock",
+          "styleId": "internal",
+          "beltRequired": 4,
+          "apCost": 2,
+          "damage": 5,
+          "effect": "Control opponent's joint. Immobilize for 1 turn.",
+          "statusApplied": ["immobilized"],
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_energy_steal",
+          "name": "Energy Steal",
+          "styleId": "internal",
+          "beltRequired": 5,
+          "apCost": 2,
+          "effect": "Drain 1 AP from target. You gain that AP.",
+          "requiresGrapple": true
+        },
+        {
+          "id": "tech_circle_walk",
+          "name": "Circle Walk",
+          "styleId": "internal",
+          "beltRequired": 6,
+          "apCost": 1,
+          "effect": "Move without triggering overwatch or opportunity attacks.",
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_iron_body",
+          "name": "Iron Body",
+          "styleId": "internal",
+          "beltRequired": 7,
+          "apCost": 0,
+          "effect": "Passive: +5 Damage Reduction vs all melee attacks.",
+          "isPassive": true
+        },
+        {
+          "id": "tech_dim_mak",
+          "name": "Dim Mak",
+          "styleId": "internal",
+          "beltRequired": 8,
+          "apCost": 4,
+          "damage": 0,
+          "effect": "Death touch. Delayed damage triggers at start of target's next turn.",
+          "statusApplied": ["dim_mak"],
+          "requiresStanding": true
+        }
+      ]
+    },
+    {
+      "id": "counter",
+      "name": "Counter Fighting",
+      "description": "JKD, Krav Maga - Reactive & Efficient. Punish enemy attacks with precise counters.",
+      "role": "reactive",
+      "primaryStat": "AGL",
+      "secondaryStat": "INS",
+      "techniques": [
+        {
+          "id": "tech_intercept",
+          "name": "Intercept",
+          "styleId": "counter",
+          "beltRequired": 1,
+          "apCost": 0,
+          "damage": 8,
+          "effect": "Reaction: Attack during enemy's attack. Both take damage.",
+          "isReaction": true,
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_parry_riposte",
+          "name": "Parry-Riposte",
+          "styleId": "counter",
+          "beltRequired": 2,
+          "apCost": 1,
+          "damage": 10,
+          "effect": "Block attack, then immediate counter-strike.",
+          "isReaction": true,
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_eye_jab",
+          "name": "Eye Jab",
+          "styleId": "counter",
+          "beltRequired": 3,
+          "apCost": 1,
+          "damage": 5,
+          "effect": "Quick strike to eyes. Target is blinded for 1 turn.",
+          "statusApplied": ["blinded"],
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_low_kick",
+          "name": "Low Kick",
+          "styleId": "counter",
+          "beltRequired": 4,
+          "apCost": 1,
+          "damage": 10,
+          "effect": "Calf kick. Target's movement reduced by 2.",
+          "statusApplied": ["slowed"],
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_disarm",
+          "name": "Disarm",
+          "styleId": "counter",
+          "beltRequired": 5,
+          "apCost": 2,
+          "effect": "Strip weapon from enemy's hands. Weapon drops to ground.",
+          "statusApplied": ["disarmed"],
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_throat_strike",
+          "name": "Throat Strike",
+          "styleId": "counter",
+          "beltRequired": 6,
+          "apCost": 2,
+          "damage": 15,
+          "effect": "Strike to throat. Target cannot use powers for 1 turn.",
+          "statusApplied": ["silenced"],
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_break_guard",
+          "name": "Break Guard",
+          "styleId": "counter",
+          "beltRequired": 7,
+          "apCost": 2,
+          "effect": "Remove enemy's defensive stance or block. Opens them up.",
+          "statusApplied": ["exposed"],
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_simultaneous",
+          "name": "Simultaneous Attack",
+          "styleId": "counter",
+          "beltRequired": 8,
+          "apCost": 3,
+          "damage": 20,
+          "effect": "Your attack lands as you take theirs. Ignores enemy attack.",
+          "requiresStanding": true
+        }
+      ]
+    },
+    {
+      "id": "striking",
+      "name": "Striking",
+      "description": "Muay Thai, Boxing, Karate - Damage & Pressure. Pure offense with devastating blows.",
+      "role": "damage",
+      "primaryStat": "STR",
+      "secondaryStat": "AGL",
+      "techniques": [
+        {
+          "id": "tech_jab",
+          "name": "Jab",
+          "styleId": "striking",
+          "beltRequired": 1,
+          "apCost": 1,
+          "damage": 5,
+          "effect": "Quick straight punch. Fast and reliable.",
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_cross",
+          "name": "Cross",
+          "styleId": "striking",
+          "beltRequired": 2,
+          "apCost": 1,
+          "damage": 10,
+          "effect": "Powerful straight punch from rear hand.",
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_hook",
+          "name": "Hook",
+          "styleId": "striking",
+          "beltRequired": 3,
+          "apCost": 1,
+          "damage": 12,
+          "effect": "Curved punch. Bypasses frontal blocks.",
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_uppercut",
+          "name": "Uppercut",
+          "styleId": "striking",
+          "beltRequired": 4,
+          "apCost": 2,
+          "damage": 15,
+          "effect": "Rising punch to chin. Target is staggered.",
+          "statusApplied": ["staggered"],
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_elbow",
+          "name": "Elbow Strike",
+          "styleId": "striking",
+          "beltRequired": 5,
+          "apCost": 1,
+          "damage": 12,
+          "effect": "Sharp elbow strike. Causes bleeding.",
+          "statusApplied": ["bleeding"],
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_knee",
+          "name": "Knee Strike",
+          "styleId": "striking",
+          "beltRequired": 6,
+          "apCost": 2,
+          "damage": 18,
+          "effect": "Devastating knee. Requires clinch for full power.",
+          "requiresGrapple": true,
+          "setsGrappleState": "standing"
+        },
+        {
+          "id": "tech_spinning_back",
+          "name": "Spinning Back Fist",
+          "styleId": "striking",
+          "beltRequired": 7,
+          "apCost": 2,
+          "damage": 20,
+          "effect": "Powerful spinning strike. High damage if lands.",
+          "requiresStanding": true
+        },
+        {
+          "id": "tech_superman_punch",
+          "name": "Superman Punch",
+          "styleId": "striking",
+          "beltRequired": 8,
+          "apCost": 3,
+          "damage": 25,
+          "effect": "Leaping power punch. Knockback 2 tiles on hit.",
+          "statusApplied": ["knockback"],
+          "requiresStanding": true
+        }
+      ]
+    }
+  ]
+}

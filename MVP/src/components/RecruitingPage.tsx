@@ -1,168 +1,46 @@
 import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '../stores/enhancedGameStore'
-import { ArrowLeft, Users, Check, Star, Shield, Zap, DollarSign, GraduationCap, MapPin, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Users, Check, Star, Shield, Zap, DollarSign, GraduationCap, MapPin, ChevronRight, Search, Filter, Shuffle, Globe } from 'lucide-react'
 import { getCountryByName, getEducationLevel } from '../data/worldData'
-
-// Character generation data
-const FIRST_NAMES_BY_REGION: Record<string, string[]> = {
-  US: ['James', 'Sarah', 'Michael', 'Emily', 'David', 'Jessica', 'Robert', 'Ashley', 'William', 'Amanda'],
-  India: ['Arjun', 'Priya', 'Rahul', 'Ananya', 'Vikram', 'Deepa', 'Raj', 'Kavita', 'Sanjay', 'Meera'],
-  China: ['Wei', 'Mei', 'Jun', 'Lin', 'Chen', 'Xiu', 'Ming', 'Yan', 'Feng', 'Hui'],
-  Nigeria: ['Chidi', 'Amara', 'Emeka', 'Adaeze', 'Obinna', 'Ngozi', 'Chukwu', 'Nneka', 'Ifeanyi', 'Chioma'],
-  Japan: ['Takeshi', 'Yuki', 'Kenji', 'Sakura', 'Hiroshi', 'Aiko', 'Ryota', 'Hana', 'Daisuke', 'Mika'],
-  Germany: ['Hans', 'Greta', 'Klaus', 'Heidi', 'Wolfgang', 'Ingrid', 'Fritz', 'Helga', 'Otto', 'Liesel'],
-  Brazil: ['Carlos', 'Maria', 'Pedro', 'Ana', 'Rafael', 'Juliana', 'Lucas', 'Fernanda', 'Gustavo', 'Camila'],
-  UK: ['James', 'Emma', 'Oliver', 'Charlotte', 'Harry', 'Sophie', 'George', 'Olivia', 'William', 'Amelia'],
-  Russia: ['Alexei', 'Natasha', 'Dmitri', 'Olga', 'Ivan', 'Anya', 'Boris', 'Svetlana', 'Nikolai', 'Katya'],
-  default: ['Alex', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Quinn', 'Avery', 'Reese', 'Drew']
-}
-
-const LAST_NAMES_BY_REGION: Record<string, string[]> = {
-  US: ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Miller', 'Davis', 'Wilson', 'Moore', 'Taylor'],
-  India: ['Patel', 'Sharma', 'Kumar', 'Singh', 'Gupta', 'Reddy', 'Rao', 'Verma', 'Mehta', 'Joshi'],
-  China: ['Wang', 'Li', 'Zhang', 'Liu', 'Chen', 'Yang', 'Huang', 'Zhao', 'Wu', 'Zhou'],
-  Nigeria: ['Okonkwo', 'Adeyemi', 'Okafor', 'Nwosu', 'Eze', 'Abubakar', 'Bello', 'Ibrahim', 'Obi', 'Adeola'],
-  Japan: ['Tanaka', 'Yamamoto', 'Suzuki', 'Watanabe', 'Sato', 'Nakamura', 'Kobayashi', 'Takahashi', 'Ito', 'Saito'],
-  Germany: ['Müller', 'Schmidt', 'Schneider', 'Fischer', 'Weber', 'Meyer', 'Wagner', 'Becker', 'Schulz', 'Hoffmann'],
-  Brazil: ['Silva', 'Santos', 'Oliveira', 'Souza', 'Rodrigues', 'Ferreira', 'Alves', 'Pereira', 'Lima', 'Gomes'],
-  UK: ['Smith', 'Jones', 'Williams', 'Taylor', 'Brown', 'Davies', 'Evans', 'Wilson', 'Thomas', 'Johnson'],
-  Russia: ['Ivanov', 'Petrov', 'Sidorov', 'Smirnov', 'Kuznetsov', 'Popov', 'Vasiliev', 'Volkov', 'Fedorov', 'Morozov'],
-  default: ['Walker', 'Stone', 'Fox', 'Cross', 'Grant', 'Chase', 'Storm', 'Frost', 'Black', 'Grey']
-}
-
-const POWERS = [
-  { name: 'Super Strength', emoji: '💪', threatLevel: 'THREAT_2' },
-  { name: 'Flight', emoji: '🦅', threatLevel: 'THREAT_2' },
-  { name: 'Super Speed', emoji: '⚡', threatLevel: 'THREAT_3' },
-  { name: 'Telepathy', emoji: '🧠', threatLevel: 'THREAT_3' },
-  { name: 'Energy Projection', emoji: '✨', threatLevel: 'THREAT_3' },
-  { name: 'Invisibility', emoji: '👻', threatLevel: 'THREAT_2' },
-  { name: 'Enhanced Senses', emoji: '👁️', threatLevel: 'THREAT_1' },
-  { name: 'Healing Factor', emoji: '💚', threatLevel: 'THREAT_2' },
-  { name: 'Martial Arts Mastery', emoji: '🥋', threatLevel: 'THREAT_1' },
-  { name: 'Tech Genius', emoji: '🔧', threatLevel: 'THREAT_1' },
-  { name: 'Elemental Control', emoji: '🔥', threatLevel: 'THREAT_3' },
-  { name: 'Shape Shifting', emoji: '🎭', threatLevel: 'THREAT_2' },
-  { name: 'Super Durability', emoji: '🛡️', threatLevel: 'THREAT_2' },
-  { name: 'Weapon Mastery', emoji: '⚔️', threatLevel: 'THREAT_1' },
-  { name: 'Stealth Expert', emoji: '🥷', threatLevel: 'THREAT_1' },
-]
-
-const ORIGINS = ['Skilled Human', 'Altered Human', 'Tech Enhanced', 'Mutant', 'Mystic', 'Alien']
-const CAREERS = ['Military', 'Law Enforcement', 'Medical', 'Technical', 'Academic', 'Criminal', 'Civilian']
-
-interface GeneratedCharacter {
-  id: string
-  name: string
-  alias: string
-  age: number
-  gender: string
-  identity: 'Secret' | 'Public' | 'Unknown'
-  stats: { MEL: number; AGL: number; STR: number; STA: number; INT: number; INS: number; CON: number }
-  threatLevel: string
-  origin: string
-  powers: { name: string; emoji: string; threatLevel: string }[]
-  career: string
-  careerRank: number
-  education: string
-  weeklyPay: number
-  birthplace: string
-  health: { current: number; maximum: number }
-}
-
-function generateCharacter(country: string, index: number): GeneratedCharacter {
-  // Determine region for names
-  const region =
-    ['United States', 'Canada'].includes(country) ? 'US' :
-    ['India', 'Nepal', 'Bangladesh'].includes(country) ? 'India' :
-    ['China', 'Taiwan', 'Singapore'].includes(country) ? 'China' :
-    ['Nigeria', 'Ghana', 'Kenya'].includes(country) ? 'Nigeria' :
-    ['Japan'].includes(country) ? 'Japan' :
-    ['Germany', 'Austria'].includes(country) ? 'Germany' :
-    ['Brazil', 'Argentina'].includes(country) ? 'Brazil' :
-    ['United Kingdom', 'Australia'].includes(country) ? 'UK' :
-    ['Russia', 'Ukraine'].includes(country) ? 'Russia' :
-    'default'
-
-  const firstNames = FIRST_NAMES_BY_REGION[region] || FIRST_NAMES_BY_REGION.default
-  const lastNames = LAST_NAMES_BY_REGION[region] || LAST_NAMES_BY_REGION.default
-
-  const firstName = firstNames[Math.floor(Math.random() * firstNames.length)]
-  const lastName = lastNames[Math.floor(Math.random() * lastNames.length)]
-  const gender = Math.random() > 0.5 ? 'Male' : 'Female'
-
-  // Generate alias
-  const aliasPrefix = ['Shadow', 'Silver', 'Iron', 'Ghost', 'Storm', 'Night', 'Red', 'Blue', 'Gold', 'Dark']
-  const aliasSuffix = ['Wolf', 'Hawk', 'Phoenix', 'Tiger', 'Dragon', 'Knight', 'Rider', 'Hunter', 'Guardian', 'Warrior']
-  const alias = `${aliasPrefix[Math.floor(Math.random() * aliasPrefix.length)]} ${aliasSuffix[Math.floor(Math.random() * aliasSuffix.length)]}`
-
-  // Generate stats based on threat level (index determines tier)
-  const threatTier = index === 0 ? 3 : index < 3 ? 2 : 1
-  const baseStats = threatTier === 3 ? 50 : threatTier === 2 ? 40 : 30
-  const variance = 15
-
-  const generateStat = () => Math.min(100, Math.max(10, baseStats + Math.floor(Math.random() * variance * 2) - variance))
-
-  const stats = {
-    MEL: generateStat(),
-    AGL: generateStat(),
-    STR: generateStat(),
-    STA: generateStat(),
-    INT: generateStat(),
-    INS: generateStat(),
-    CON: generateStat()
-  }
-
-  // Generate powers (more powers for higher threat)
-  const numPowers = threatTier === 3 ? 3 : threatTier === 2 ? 2 : 1
-  const shuffledPowers = [...POWERS].sort(() => Math.random() - 0.5)
-  const selectedPowers = shuffledPowers.slice(0, numPowers)
-
-  // Calculate weekly pay based on threat level
-  const basePay = threatTier === 3 ? 3000 : threatTier === 2 ? 2000 : 1000
-  const weeklyPay = basePay + Math.floor(Math.random() * 500)
-
-  // Career and education
-  const career = CAREERS[Math.floor(Math.random() * CAREERS.length)]
-  const careerRank = Math.ceil(Math.random() * 5)
-  const educationLevels = ['None', 'Primary', 'Secondary', 'Trade', 'University', 'Advanced', 'Elite']
-  const education = educationLevels[Math.min(educationLevels.length - 1, Math.floor(Math.random() * (threatTier + 3)))]
-
-  const maxHealth = 50 + stats.STA
-
-  return {
-    id: `char-${Date.now()}-${index}`,
-    name: `${firstName} ${lastName}`,
-    alias,
-    age: 20 + Math.floor(Math.random() * 25),
-    gender,
-    identity: ['Secret', 'Public', 'Unknown'][Math.floor(Math.random() * 3)] as 'Secret' | 'Public' | 'Unknown',
-    stats,
-    threatLevel: `THREAT_${threatTier}`,
-    origin: ORIGINS[Math.floor(Math.random() * ORIGINS.length)],
-    powers: selectedPowers,
-    career,
-    careerRank,
-    education,
-    weeklyPay,
-    birthplace: country,
-    health: { current: maxHealth, maximum: maxHealth }
-  }
-}
+import { RECRUITABLE_CHARACTERS, RecruitableCharacter } from '../data/recruitableCharacters'
+import { generateCharacter, generateCharacterFromCountry } from '../data/characterGeneration'
+import { GameCharacter, ORIGIN_NAMES } from '../types'
 
 export default function RecruitingPage() {
   const { selectedCountry, selectedCity, setGamePhase, setCurrentView } = useGameStore()
   const [selectedRecruits, setSelectedRecruits] = useState<Set<string>>(new Set())
   const [viewMode, setViewMode] = useState<'numbers' | 'stars'>('numbers')
-  const [powerMode, setPowerMode] = useState<'text' | 'emoji'>('text')
+  const [powerMode, setPowerMode] = useState<'text' | 'emoji'>('emoji')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [threatFilter, setThreatFilter] = useState<'ALL' | 'THREAT_1' | 'THREAT_2' | 'THREAT_3'>('ALL')
+  const [generatedRecruits, setGeneratedRecruits] = useState<GameCharacter[]>([])
+  const [showGenerated, setShowGenerated] = useState(false)
+
+  // Generate random recruits
+  const handleGenerateRandom = (count: number = 6, fromCountry: boolean = false) => {
+    const newRecruits: GameCharacter[] = []
+    for (let i = 0; i < count; i++) {
+      const char = fromCountry
+        ? generateCharacterFromCountry(selectedCountry)
+        : generateCharacter()
+      newRecruits.push(char)
+    }
+    setGeneratedRecruits(newRecruits)
+    setShowGenerated(true)
+  }
 
   const country = getCountryByName(selectedCountry)
 
-  // Generate 5 recruits
-  const recruits = useMemo(() => {
-    return Array.from({ length: 5 }, (_, i) => generateCharacter(selectedCountry, i))
-  }, [selectedCountry])
+  // Filter all available characters
+  const availableRecruits = useMemo(() => {
+    return RECRUITABLE_CHARACTERS.filter(char => {
+      const matchesSearch = char.alias.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        char.name.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesThreat = threatFilter === 'ALL' || char.threatLevel === threatFilter
+      return matchesSearch && matchesThreat
+    })
+  }, [searchTerm, threatFilter])
 
   const toggleRecruit = (id: string) => {
     const newSelected = new Set(selectedRecruits)
@@ -177,22 +55,29 @@ export default function RecruitingPage() {
   const handleConfirmTeam = () => {
     if (selectedRecruits.size >= 2) {
       // Add selected recruits to game store
-      const selectedChars = recruits.filter(r => selectedRecruits.has(r.id)).map(r => ({
-        id: r.id,
-        name: r.alias,
-        realName: r.name,
-        stats: r.stats,
-        threatLevel: r.threatLevel,
-        origin: r.origin,
-        powers: r.powers.map(p => p.name),
-        equipment: [],
-        health: r.health,
-        status: 'ready' as const,
-        location: { country: selectedCountry, city: selectedCity },
-        injuries: [],
-        medicalHistory: [],
-        recoveryTime: 0
-      }))
+      const selectedChars = availableRecruits.filter(r => selectedRecruits.has(r.alias)).map(r => {
+        const maxHealth = 50 + r.stats.STA
+        return {
+          id: `${r.alias}-${Date.now()}`,
+          name: r.alias,
+          realName: r.name,
+          stats: r.stats,
+          threatLevel: r.threatLevel,
+          origin: r.origin,
+          powers: r.powers,
+          equipment: [],
+          health: { current: maxHealth, maximum: maxHealth },
+          shield: r.shield || 0,
+          maxShield: r.maxShield || 0,
+          shieldRegen: r.shieldRegen || 0,
+          dr: r.dr || 0,
+          status: 'ready' as const,
+          location: { country: selectedCountry, city: selectedCity },
+          injuries: [],
+          medicalHistory: [],
+          recoveryTime: 0
+        }
+      })
 
       // Update store with new characters
       useGameStore.setState({
@@ -226,7 +111,7 @@ export default function RecruitingPage() {
             Recruit Your Team
           </h1>
           <p className="text-gray-400 mt-1">
-            Select 2-4 operatives for {selectedCity}, {selectedCountry}
+            {availableRecruits.length} heroes available • Select 2-4 for {selectedCity}
           </p>
         </div>
 
@@ -238,9 +123,40 @@ export default function RecruitingPage() {
         </div>
       </div>
 
-      {/* View Mode Toggles */}
-      <div className="flex justify-center gap-4 mb-4">
-        <div className="flex items-center gap-2 bg-gray-800 rounded-lg p-1">
+      {/* Search and Filters */}
+      <div className="flex flex-wrap justify-center gap-3 mb-4">
+        {/* Search */}
+        <div className="relative flex-1 min-w-[250px] max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
+          <input
+            type="text"
+            placeholder="Search heroes..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-blue-500 outline-none"
+          />
+        </div>
+
+        {/* Threat Level Filter */}
+        <div className="flex items-center gap-2 bg-gray-800 rounded-lg p-1 border border-gray-700">
+          {(['ALL', 'THREAT_3', 'THREAT_2', 'THREAT_1'] as const).map(threat => (
+            <button
+              key={threat}
+              className={`px-3 py-1 rounded text-sm font-semibold transition-colors ${threatFilter === threat
+                  ? threat === 'THREAT_3' ? 'bg-red-600' :
+                    threat === 'THREAT_2' ? 'bg-orange-600' :
+                      threat === 'THREAT_1' ? 'bg-blue-600' : 'bg-purple-600'
+                  : 'hover:bg-gray-700 text-gray-400'
+                }`}
+              onClick={() => setThreatFilter(threat)}
+            >
+              {threat === 'ALL' ? '🌟 ALL' : threat.replace('_', ' ')}
+            </button>
+          ))}
+        </div>
+
+        {/* View Toggles */}
+        <div className="flex items-center gap-2 bg-gray-800 rounded-lg p-1 border border-gray-700">
           <button
             className={`px-3 py-1 rounded ${viewMode === 'numbers' ? 'bg-blue-600' : 'hover:bg-gray-700'}`}
             onClick={() => setViewMode('numbers')}
@@ -254,41 +170,159 @@ export default function RecruitingPage() {
             ★★★
           </button>
         </div>
-        <div className="flex items-center gap-2 bg-gray-800 rounded-lg p-1">
+
+        {/* Generate Random Buttons */}
+        <div className="flex items-center gap-2 bg-gray-800 rounded-lg p-1 border border-gray-700">
           <button
-            className={`px-3 py-1 rounded ${powerMode === 'text' ? 'bg-purple-600' : 'hover:bg-gray-700'}`}
-            onClick={() => setPowerMode('text')}
+            className="px-3 py-1 rounded bg-green-600 hover:bg-green-500 flex items-center gap-1 text-sm font-bold"
+            onClick={() => handleGenerateRandom(6, true)}
+            title="Generate from selected country"
           >
-            Text
+            <Globe size={14} /> Local
           </button>
           <button
-            className={`px-3 py-1 rounded ${powerMode === 'emoji' ? 'bg-purple-600' : 'hover:bg-gray-700'}`}
-            onClick={() => setPowerMode('emoji')}
+            className="px-3 py-1 rounded bg-purple-600 hover:bg-purple-500 flex items-center gap-1 text-sm font-bold"
+            onClick={() => handleGenerateRandom(6, false)}
+            title="Generate from anywhere"
           >
-            🔥
+            <Shuffle size={14} /> Random
           </button>
         </div>
       </div>
 
+      {/* Generated Recruits Section */}
+      {showGenerated && generatedRecruits.length > 0 && (
+        <div className="mb-4 bg-gradient-to-r from-purple-900/50 to-green-900/50 rounded-xl border border-purple-500/50 p-4">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-lg font-bold text-purple-300 flex items-center gap-2">
+              <Shuffle size={20} /> Generated Recruits ({generatedRecruits.length})
+            </h2>
+            <button
+              onClick={() => setShowGenerated(false)}
+              className="text-gray-400 hover:text-white text-sm"
+            >
+              Hide
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+            {generatedRecruits.map((char) => (
+              <div
+                key={char.id}
+                className="bg-gray-800/80 rounded-lg border border-purple-500/30 p-3 hover:border-purple-400 transition-all"
+              >
+                {/* Header */}
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="font-bold text-white">{char.name}</p>
+                    <p className="text-xs text-gray-400">{char.realName}</p>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                    char.threatLevel === 'THREAT_3' ? 'bg-red-600' :
+                    char.threatLevel === 'THREAT_2' ? 'bg-orange-600' :
+                    char.threatLevel === 'THREAT_1' ? 'bg-blue-600' : 'bg-gray-600'
+                  }`}>
+                    {char.threatLevel}
+                  </span>
+                </div>
+
+                {/* Origin & Location */}
+                <div className="mb-2 space-y-1 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500">Origin:</span>
+                    <span className="text-cyan-300">{ORIGIN_NAMES[char.origin]}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin size={12} className="text-gray-500" />
+                    <span className="text-yellow-300">{char.birthCity.split('_')[0]}</span>
+                    <span className="text-gray-500">({char.nationality})</span>
+                  </div>
+                </div>
+
+                {/* Stats Row */}
+                <div className="grid grid-cols-7 gap-1 mb-2 text-[10px]">
+                  {Object.entries(char.stats).map(([stat, value]) => (
+                    <div key={stat} className="text-center">
+                      <div className="text-gray-500">{stat}</div>
+                      <div className={`font-mono font-bold ${
+                        value >= 60 ? 'text-green-400' :
+                        value >= 40 ? 'text-yellow-400' : 'text-gray-400'
+                      }`}>
+                        {value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* City Familiarity */}
+                <div className="border-t border-gray-700 pt-2">
+                  <p className="text-[10px] text-gray-500 mb-1">Cities Known ({char.cityFamiliarities.length}):</p>
+                  <div className="flex flex-wrap gap-1">
+                    {char.cityFamiliarities.slice(0, 5).map((f, i) => (
+                      <span
+                        key={i}
+                        className={`px-1.5 py-0.5 rounded text-[10px] ${
+                          f.familiarity >= 80 ? 'bg-green-600/50 text-green-200' :
+                          f.familiarity >= 50 ? 'bg-yellow-600/50 text-yellow-200' :
+                          'bg-gray-600/50 text-gray-300'
+                        }`}
+                        title={`${f.familiarity}% familiarity`}
+                      >
+                        {f.cityName} ({f.familiarity}%)
+                      </span>
+                    ))}
+                    {char.cityFamiliarities.length > 5 && (
+                      <span className="text-gray-500 text-[10px]">+{char.cityFamiliarities.length - 5} more</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Secondary Stats */}
+                <div className="flex justify-between mt-2 text-[10px] border-t border-gray-700 pt-2">
+                  <span className="text-gray-400">Fame: <span className="text-yellow-300">{char.fame}</span></span>
+                  <span className="text-gray-400">Wealth: <span className="text-green-300">${char.wealth}</span></span>
+                  <span className="text-gray-400">Age: <span className="text-white">{char.age}</span></span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Regenerate Button */}
+          <div className="mt-3 flex justify-center gap-3">
+            <button
+              onClick={() => handleGenerateRandom(6, true)}
+              className="px-4 py-2 bg-green-600/50 hover:bg-green-600 rounded text-sm font-bold flex items-center gap-2"
+            >
+              <Globe size={16} /> Generate 6 from {selectedCountry}
+            </button>
+            <button
+              onClick={() => handleGenerateRandom(6, false)}
+              className="px-4 py-2 bg-purple-600/50 hover:bg-purple-600 rounded text-sm font-bold flex items-center gap-2"
+            >
+              <Shuffle size={16} /> Generate 6 Random
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Recruits Grid */}
       <div className="flex-1 overflow-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-          {recruits.map((recruit, index) => (
+          {availableRecruits.map((recruit, index) => (
             <motion.div
               key={recruit.id}
-              className={`bg-gray-800/80 rounded-xl border-2 transition-all cursor-pointer ${
-                selectedRecruits.has(recruit.id)
-                  ? 'border-yellow-400 shadow-lg shadow-yellow-400/20'
-                  : 'border-gray-700 hover:border-gray-500'
-              }`}
-              onClick={() => toggleRecruit(recruit.id)}
+              className={`bg-gray-800/80 rounded-xl border-2 transition-all cursor-pointer ${selectedRecruits.has(recruit.id)
+                ? 'border-yellow-400 shadow-lg shadow-yellow-400/20'
+                : 'border-gray-700 hover:border-gray-500'
+                }`}
+              onClick={() => toggleRecruit(recruit.alias)}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: Math.min(index * 0.05, 1) }}
               whileHover={{ scale: 1.02 }}
             >
               {/* Selection Badge */}
-              {selectedRecruits.has(recruit.id) && (
+              {selectedRecruits.has(recruit.alias) && (
                 <div className="absolute top-2 right-2 bg-yellow-400 rounded-full p-1">
                   <Check size={16} className="text-gray-900" />
                 </div>
@@ -297,11 +331,10 @@ export default function RecruitingPage() {
               <div className="p-4">
                 {/* Header */}
                 <div className="text-center mb-3">
-                  <div className={`inline-block px-2 py-0.5 rounded text-xs font-bold mb-1 ${
-                    recruit.threatLevel === 'THREAT_3' ? 'bg-red-600' :
+                  <div className={`inline-block px-2 py-0.5 rounded text-xs font-bold mb-1 ${recruit.threatLevel === 'THREAT_3' ? 'bg-red-600' :
                     recruit.threatLevel === 'THREAT_2' ? 'bg-orange-600' :
-                    'bg-blue-600'
-                  }`}>
+                      'bg-blue-600'
+                    }`}>
                     {recruit.threatLevel.replace('_', ' ')}
                   </div>
                   <h3 className="font-bold text-lg text-white">{recruit.alias}</h3>
@@ -330,8 +363,8 @@ export default function RecruitingPage() {
                   <div className="text-xs text-gray-400 mb-1">Powers:</div>
                   <div className="flex flex-wrap gap-1">
                     {recruit.powers.map(power => (
-                      <span key={power.name} className="px-2 py-0.5 bg-purple-600/30 rounded text-xs text-purple-300">
-                        {powerMode === 'emoji' ? power.emoji : power.name}
+                      <span key={power} className="px-2 py-0.5 bg-purple-600/30 rounded text-xs text-purple-300">
+                        {power}
                       </span>
                     ))}
                   </div>
@@ -340,7 +373,7 @@ export default function RecruitingPage() {
                 {/* Info */}
                 <div className="space-y-1 text-xs text-gray-400">
                   <div className="flex items-center gap-1">
-                    <MapPin size={12} /> {recruit.birthplace}
+                    <MapPin size={12} /> {recruit.nationality}
                   </div>
                   <div className="flex items-center gap-1">
                     <GraduationCap size={12} /> {recruit.education}
@@ -370,7 +403,7 @@ export default function RecruitingPage() {
         <div>
           <div className="text-sm text-gray-400">Team Budget (Weekly):</div>
           <div className="text-xl font-bold text-yellow-400">
-            ${recruits.filter(r => selectedRecruits.has(r.id)).reduce((sum, r) => sum + r.weeklyPay, 0).toLocaleString()}
+            ${availableRecruits.filter(r => selectedRecruits.has(r.alias)).reduce((sum, r) => sum + r.weeklyPay, 0).toLocaleString()}
           </div>
         </div>
 
@@ -382,11 +415,10 @@ export default function RecruitingPage() {
             {selectedRecruits.size === 4 && 'Maximum team selected!'}
           </div>
           <motion.button
-            className={`px-6 py-3 rounded-lg font-bold flex items-center gap-2 ${
-              selectedRecruits.size >= 2
-                ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black'
-                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-            }`}
+            className={`px-6 py-3 rounded-lg font-bold flex items-center gap-2 ${selectedRecruits.size >= 2
+              ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black'
+              : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+              }`}
             onClick={handleConfirmTeam}
             disabled={selectedRecruits.size < 2}
             whileHover={selectedRecruits.size >= 2 ? { scale: 1.05 } : {}}

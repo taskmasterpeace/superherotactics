@@ -1,0 +1,220 @@
+================================================================================
+SUPERHERO TACTICS - MAP LAYOUTS VISUAL REFERENCE
+================================================================================
+
+Legend:
+  . = GRASS (walkable, no cover)
+  # = WALL (blocks movement and sight)
+  = = CONCRETE (walkable floor)
+  _ = FLOOR (interior floor)
+  + = LOW_WALL (cover, walkable with penalty)
+  D = DOOR_OPEN (walkable)
+  X = DOOR_CLOSED (blocks until opened)
+  ~ = WATER (blocks movement)
+
+  B = Blue team spawn area
+  R = Red team spawn area
+
+================================================================================
+MAP 1: URBAN WAREHOUSE
+================================================================================
+
+Size: 30x30
+Theme: Industrial warehouse with grass exterior
+Tactical Features: Central building, office room, loading dock, drainage
+
+  0         1         2         3
+  0123456789012345678901234567890
+0 ..............................
+1 ..............................
+2 ..............................
+3 ..............................
+4 ..............................
+5 ...............~~~............
+6 ...B...........~~~........R...
+7 ...............~~~............
+8 .....++.......................
+9 ..............................
+10........####X################..
+11........#___+___#_____######..
+12........#___+_D_+_____######..
+13........#___+___#__#__#__#==..
+14........#___+___#_____######..
+15..B++...########D######===R+..
+16........#_________#__#__#===..
+17........#_________#_____#===..
+18........#_________#__#__#===..
+19........#_________________##..
+20........####X#######X#######..
+21..............................
+22......................++......
+23..............................
+24..............................
+25..............................
+26..............................
+27..............................
+28..............................
+29..............................
+
+Key Features:
+- Large central warehouse (8,10 to 22,20)
+- Office room in northwest corner of warehouse
+- Three doors (top center, east side, south side)
+- Four interior pillars for cover
+- Loading dock area (east side)
+- Water drainage running north (15,5-7)
+- External cover positions on west and east
+- Grass surrounds entire structure
+
+================================================================================
+MAP 2: MILITARY COMPOUND
+================================================================================
+
+Size: 30x30
+Theme: Fortified military base with perimeter wall
+Tactical Features: Perimeter wall, two buildings, guard towers, courtyard
+
+  0         1         2         3
+  0123456789012345678901234567890
+0 ==============================
+1 ==============================
+2 ==============================
+3 ===####D####################==
+4 ===#========================#=
+5 ===#==W===============W=====##
+6 ===#========================##
+7 ===#==++================++==##
+8 ===#========####====##======##
+9 ===#====++==============++==##
+10===#========================##
+11===#========================##
+12===#====####################==#
+13===#====##====....====##=====#
+14===#====##====....====##=====#
+15===D====##====....====##=====#
+16===#====##====....====##=====#
+17===#====####################==#
+18===#====###_______#==========#
+19===#====###_______#==========#
+20===#====###___X___#==========#
+21===#========####==============#
+22===#====================++====#
+23===#====================++====#
+24===#====W===============W=====#
+25===#==========================#
+26===########D##################
+27==============================
+28==============================
+29==============================
+
+Key Features:
+- Outer perimeter wall (3,3 to 26,26)
+- Three gates (north, south, west)
+- Main building northeast (17,5 to 24,12)
+- Barracks southwest (5,17 to 12,24)
+- Central grass courtyard (13,13 to 16,16)
+- Four guard towers at corners (W markers)
+- Defensive sandbag positions (++ markers)
+- Corridor system connecting areas
+
+================================================================================
+MAP 3: CITY STREETS
+================================================================================
+
+Size: 30x30
+Theme: Urban intersection with four buildings
+Tactical Features: Street grid, multiple buildings, fountain intersection
+
+  0         1         2         3
+  0123456789012345678901234567890
+0 ..............................
+1 ..............................
+2 ..............++..............
+3 ...########...==...########...
+4 ...#______#...==...#______#...
+5 ...#______#...==...#______#...
+6 ...#______#...==...#______#...
+7 ...#__+++D#...==...#______#...
+8 ...#______#...==...#______#...
+9 ...#______#...==...#______#...
+10...#______#...==...#______#...
+11B..####D####...==...####X####..R
+12..++........==..==..........++..
+13===========.====.===========
+14=+===========~~=~===========+=
+15=+===========~~=~===========+=
+16===========.====.===========
+17..++........==..==..........++..
+18...####X####...==...####D####...
+19...#______#...==...#___+__#...
+20...#______#...==...#___+__#...
+21...#______#...==...#___+__#...
+22...#______#...==...#___D__#...
+23...#______#...==...#___+__#...
+24...#______#...==...#___+__#...
+25...#______#...==...#___+__#...
+26...########...==...########...
+27..............++................
+28..............................
+29..............................
+
+Key Features:
+- Main street (horizontal, y=13-16)
+- Cross street (vertical, x=13-16)
+- Four buildings (one per quadrant)
+- Building 4 (SE) has interior dividers
+- Water fountain at intersection center
+- Street barriers at cardinal directions
+- Alleyway cover positions
+- Multiple door entry points
+- Mix of open and closed doors
+
+================================================================================
+TACTICAL COMPARISON
+================================================================================
+
+URBAN WAREHOUSE:
++ Best for: Close-quarters building assault
++ Cover density: Medium (pillars and external positions)
++ Sight lines: Long on exterior, restricted in building
++ Mobility: High outside, restricted inside
++ Choke points: 3 doors
++ Team separation: ~10 tiles
+
+MILITARY COMPOUND:
++ Best for: Defensive holdouts and building-to-building combat
++ Cover density: High (buildings, walls, sandbags)
++ Sight lines: Restricted by perimeter wall and buildings
++ Mobility: Good in courtyard, restricted in buildings
++ Choke points: 3 gates, multiple doors
++ Team separation: ~20 tiles (across compound)
+
+CITY STREETS:
++ Best for: Urban warfare, building clearing
++ Cover density: Medium (street barriers, building interiors)
++ Sight lines: Long on streets, blocked by buildings
++ Mobility: High on streets, restricted in buildings
++ Choke points: 4+ building doors, intersection
++ Team separation: ~14 tiles (across intersection)
+
+================================================================================
+SPAWN POSITION RECOMMENDATIONS
+================================================================================
+
+With 30x30 maps, use these spawn positions for better tactical spacing:
+
+BLUE TEAM (West):          RED TEAM (East):
+  Alpha:      (2, 10)        Hostile1:   (27, 10)
+  Sniper:     (2, 20)        Heavy:      (28, 15)
+  Tech:       (1, 15)        Rocket:     (27, 20)
+  Teleporter: (3, 12)        Pyro:       (26, 12)
+  Gatekeeper: (1, 18)        Controller: (26, 18)
+  Medic:      (1, 22)
+
+This creates:
+- ~25 tiles horizontal separation
+- Vertical spread of 12 tiles per team
+- Forces movement and positioning before engagement
+- Allows snipers to find positions before combat starts
+
+================================================================================

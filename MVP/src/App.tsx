@@ -2,32 +2,49 @@ import React, { useEffect, useState } from 'react'
 import { useGameStore } from './stores/enhancedGameStore'
 import { Toaster } from 'react-hot-toast'
 
+// Notification System
+import NotificationBar from './components/NotificationBar'
+
 // Main Game Components
 import FactionSelection from './components/FactionSelection'
 import CountrySelection from './components/CountrySelection'
 import CitySelection from './components/FixedCitySelection'
 import GameHUD from './components/GameHUD'
-import WorldMap from './components/SHTWorldMap'
+// SHTWorldMap is deprecated - using WorldMapGrid as the primary world map
+// import WorldMap from './components/SHTWorldMap'
 import TacticalCombat from './components/CompleteTacticalCombat'
 import CharacterScreen from './components/CharacterScreen'
 import InvestigationCenter from './components/WorkingInvestigationCenter'
 import MobileInterface from './components/MobileInterface'
 import CombatLab from './components/CombatLab'
-import HexWorldMap from './components/HexWorldMap'
+// import HexWorldMap from './components/HexWorldMap'  // Unused - keeping for reference
 import RecruitingPage from './components/RecruitingPage'
 import Encyclopedia from './components/Encyclopedia'
+import WorldAlmanac from './components/WorldAlmanac'
 import BalanceAnalyzer from './components/BalanceAnalyzer'
 import WorldMapGrid from './components/WorldMap/WorldMapGrid'
+import LoadoutEditor from './components/LoadoutEditor'
+import MobilePhone from './components/MobilePhone'
+import SquadRoster from './components/SquadRoster'
+import QuickCombatSimulator from './components/QuickCombatSimulator'
 
 // Tools
 import { AssetManager } from './tools/AssetManager'
 import DatabaseAdmin from './components/DatabaseAdmin'
+import DataViewer from './components/DataViewer'
+import SoundConfigUI from './components/SoundConfigUI'
+import SectorEditor from './tools/SectorEditor'
+import WorldDataEditor from './tools/WorldDataEditor'
 
 function App() {
   const { gamePhase, currentView, setCurrentView, setGamePhase } = useGameStore()
   const [devMode, setDevMode] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const [assetManagerOpen, setAssetManagerOpen] = useState(false)
+  const [quickCombatOpen, setQuickCombatOpen] = useState(false)
+
+  // Get the idle check function from the store
+  const checkIdleCharacters = useGameStore(state => state.checkIdleCharacters)
 
   useEffect(() => {
     console.log('🎮 SuperHero Tactics MVP initialized')
@@ -49,11 +66,17 @@ function App() {
     }
     window.addEventListener('keydown', handleKeyDown)
 
+    // Idle character check interval (every 5 seconds)
+    const idleCheckInterval = setInterval(() => {
+      checkIdleCharacters()
+    }, 5000)
+
     return () => {
       window.removeEventListener('resize', handleResize)
       window.removeEventListener('keydown', handleKeyDown)
+      clearInterval(idleCheckInterval)
     }
-  }, [])
+  }, [checkIdleCharacters])
 
   // Mobile Interface
   if (isMobile) {
@@ -68,6 +91,9 @@ function App() {
   // Desktop Interface
   return (
     <div className="h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 relative overflow-hidden">
+      {/* Notification Bar - Always visible at top */}
+      <NotificationBar />
+
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/5 to-yellow-500/10 animate-pulse pointer-events-none"></div>
 
@@ -105,17 +131,83 @@ function App() {
             <button onClick={() => { setGamePhase('playing'); setCurrentView('characters'); }} className="text-left hover:text-cyan-400 px-2 py-1 hover:bg-gray-800 rounded">
               → Characters
             </button>
+            <button onClick={() => { setGamePhase('playing'); setCurrentView('almanac'); }} className="text-left hover:text-amber-400 px-2 py-1 hover:bg-gray-800 rounded font-bold border-l-2 border-amber-500 pl-2">
+              📚 World Almanac
+            </button>
             <button onClick={() => { setGamePhase('playing'); setCurrentView('encyclopedia'); }} className="text-left hover:text-amber-400 px-2 py-1 hover:bg-gray-800 rounded">
-              → Encyclopedia
+              → Equipment Encyclopedia
             </button>
             <button onClick={() => { setGamePhase('playing'); setCurrentView('balance'); }} className="text-left hover:text-pink-400 px-2 py-1 hover:bg-gray-800 rounded">
               → Balance Analyzer
             </button>
-            <button onClick={() => { setGamePhase('playing'); setCurrentView('world-map-grid'); }} className="text-left hover:text-emerald-400 px-2 py-1 hover:bg-gray-800 rounded">
-              → World Map Grid
-            </button>
+            {/* World Map Grid now is the main world-map view */}
             <button onClick={() => { setGamePhase('playing'); setCurrentView('database'); }} className="text-left hover:text-cyan-400 px-2 py-1 hover:bg-gray-800 rounded">
-              → Database Admin
+              → Database Admin (Legacy)
+            </button>
+            <button onClick={() => { setGamePhase('playing'); setCurrentView('data-viewer'); }} className="text-left hover:text-blue-400 px-2 py-1 hover:bg-gray-800 rounded font-bold border-l-2 border-blue-500 pl-2">
+              → System Data Viewer
+            </button>
+            <button onClick={() => { setGamePhase('playing'); setCurrentView('sound-config'); }} className="text-left hover:text-purple-400 px-2 py-1 hover:bg-gray-800 rounded font-bold border-l-2 border-purple-500 pl-2">
+              🔊 Sound Config Studio
+            </button>
+            <button onClick={() => { setGamePhase('playing'); setCurrentView('loadout-editor'); }} className="text-left hover:text-orange-400 px-2 py-1 hover:bg-gray-800 rounded font-bold border-l-2 border-orange-500 pl-2">
+              ⚔️ Equipment Loadout Editor
+            </button>
+            <button onClick={() => { setGamePhase('playing'); setCurrentView('sector-editor'); }} className="text-left hover:text-emerald-400 px-2 py-1 hover:bg-gray-800 rounded font-bold border-l-2 border-emerald-500 pl-2">
+              🗺️ Sector Editor
+            </button>
+            <button onClick={() => { setGamePhase('playing'); setCurrentView('world-data'); }} className="text-left hover:text-yellow-400 px-2 py-1 hover:bg-gray-800 rounded font-bold border-l-2 border-yellow-500 pl-2">
+              🌍 World Data Editor
+            </button>
+            <button onClick={() => { setQuickCombatOpen(true); setDevMode(false); }} className="text-left hover:text-red-400 px-2 py-1 hover:bg-gray-800 rounded font-bold border-l-2 border-red-500 pl-2">
+              ⚔️ Quick Combat Simulator
+            </button>
+            <div className="border-t border-gray-700 my-2"></div>
+            <div className="text-xs text-gray-400 mb-2">Notification Tests:</div>
+            <button
+              onClick={() => {
+                const { addNotification, setCharacterStatus, characters } = useGameStore.getState()
+                // Simulate character arriving - set statusStartTime to trigger idle detection
+                const char = characters[0]
+                if (char) {
+                  setCharacterStatus(char.id, 'ready', { sector: 'K5' })
+                  addNotification({
+                    type: 'arrival',
+                    priority: 'medium',
+                    title: `${char.name} Arrived`,
+                    message: `Has arrived at Sector K5 and is awaiting orders. (Idle escalation will trigger in 10s, 20s, 30s)`,
+                    characterId: char.id,
+                    characterName: char.name,
+                    location: 'Sector K5',
+                    timestamp: Date.now(),
+                  })
+                }
+              }}
+              className="text-left hover:text-green-400 px-2 py-1 hover:bg-gray-800 rounded border-l-2 border-green-500 pl-2"
+            >
+              Test: Arrival + Idle Flow
+            </button>
+            <button
+              onClick={() => {
+                useGameStore.getState().addNotification({
+                  type: 'call_incoming',
+                  priority: 'urgent',
+                  title: 'Incoming Call: Handler',
+                  message: '"We have a situation. Check your email ASAP."',
+                  timestamp: Date.now(),
+                })
+              }}
+              className="text-left hover:text-red-400 px-2 py-1 hover:bg-gray-800 rounded"
+            >
+              Test: Urgent Call
+            </button>
+            <button
+              onClick={() => {
+                useGameStore.getState().clearAllNotifications()
+              }}
+              className="text-left hover:text-gray-400 px-2 py-1 hover:bg-gray-800 rounded"
+            >
+              Clear All Notifications
             </button>
           </div>
           <div className="text-xs text-gray-500 mt-3">Phase: {gamePhase} | View: {currentView}</div>
@@ -134,6 +226,15 @@ function App() {
       {/* Asset Manager Drawer */}
       <AssetManager isOpen={assetManagerOpen} onClose={() => setAssetManagerOpen(false)} />
 
+      {/* Quick Combat Simulator Modal */}
+      {quickCombatOpen && <QuickCombatSimulator onClose={() => setQuickCombatOpen(false)} />}
+
+      {/* Mobile Phone - Shows texts and calls */}
+      <MobilePhone />
+
+      {/* Squad Roster - Shows characters (only in playing phase on world map) */}
+      {gamePhase === 'playing' && currentView === 'world-map' && <SquadRoster />}
+
       {/* Game Setup Phase */}
       {gamePhase === 'faction-selection' && <FactionSelection />}
       {gamePhase === 'country-selection' && <CountrySelection />}
@@ -143,18 +244,24 @@ function App() {
       {/* Main Game Phase */}
       {gamePhase === 'playing' && (
         <>
-          {/* Only show HUD for non-fullscreen views */}
-          {currentView !== 'combat-lab' && <GameHUD />}
-          <div className={currentView !== 'combat-lab' ? 'pt-16' : ''}> {/* Account for HUD */}
-            {currentView === 'world-map' && <WorldMap />}
+          {/* Only show HUD for non-fullscreen views (world-map and combat-lab have their own UI) */}
+          {currentView !== 'combat-lab' && currentView !== 'world-map' && <GameHUD />}
+          <div className={currentView !== 'combat-lab' && currentView !== 'world-map' ? 'pt-16' : ''}> {/* Account for HUD */}
+            {currentView === 'world-map' && <WorldMapGrid />}
             {currentView === 'investigation' && <InvestigationCenter />}
             {currentView === 'tactical-combat' && <TacticalCombat />}
             {currentView === 'characters' && <CharacterScreen />}
             {currentView === 'combat-lab' && <CombatLab />}
             {currentView === 'encyclopedia' && <Encyclopedia />}
+            {currentView === 'almanac' && <WorldAlmanac onClose={() => setCurrentView('world-map')} />}
             {currentView === 'balance' && <BalanceAnalyzer />}
-            {currentView === 'world-map-grid' && <WorldMapGrid />}
+            {/* world-map-grid is now aliased to world-map - WorldMapGrid is the main map */}
             {currentView === 'database' && <DatabaseAdmin />}
+            {currentView === 'data-viewer' && <DataViewer onClose={() => setCurrentView('world-map')} />}
+            {currentView === 'sound-config' && <SoundConfigUI />}
+            {currentView === 'loadout-editor' && <LoadoutEditor />}
+            {currentView === 'sector-editor' && <SectorEditor onClose={() => setCurrentView('world-map')} />}
+            {currentView === 'world-data' && <WorldDataEditor onClose={() => setCurrentView('world-map')} />}
           </div>
         </>
       )}

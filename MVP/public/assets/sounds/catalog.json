@@ -1,0 +1,4228 @@
+{
+  "combat.explosion_small": {
+    "category": "combat",
+    "key": "explosion_small",
+    "files": [
+      "sounds/combat/explosion_small_01.wav",
+      "sounds/combat/explosion_small_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 310,
+    "prompt": "small explosion, grenade blast, sharp crack with debris, military, clean game sound effect",
+    "primary": "sounds/combat/explosion_small_01.wav"
+  },
+  "_metadata": {
+    "generated": "2025-12-07T20:52:46.001463",
+    "total_sounds": 381,
+    "total_files": 411
+  },
+  "combat.explosion_medium": {
+    "category": "combat",
+    "key": "explosion_medium",
+    "files": [
+      "sounds/combat/explosion_medium_01.wav",
+      "sounds/combat/explosion_medium_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 580,
+    "prompt": "medium explosion with debris falling, fire crackle aftermath, military combat, game sound effect",
+    "primary": "sounds/combat/explosion_medium_01.wav"
+  },
+  "combat.explosion_large": {
+    "category": "combat",
+    "key": "explosion_large",
+    "files": [
+      "sounds/combat/explosion_large_01.wav",
+      "sounds/combat/explosion_large_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 1930,
+    "prompt": "large powerful explosion, building destruction, massive blast with shockwave, game sound effect",
+    "primary": "sounds/combat/explosion_large_01.wav"
+  },
+  "combat.gunshot_pistol": {
+    "category": "combat",
+    "key": "gunshot_pistol",
+    "files": [
+      "sounds/combat/gunshot_pistol_01.wav",
+      "sounds/combat/gunshot_pistol_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 390,
+    "prompt": "single pistol gunshot, 9mm handgun, sharp crack, no echo, clean game sound effect",
+    "primary": "sounds/combat/gunshot_pistol_01.wav"
+  },
+  "combat.gunshot_rifle": {
+    "category": "combat",
+    "key": "gunshot_rifle",
+    "files": [
+      "sounds/combat/gunshot_rifle_01.wav",
+      "sounds/combat/gunshot_rifle_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 350,
+    "prompt": "single rifle shot, assault rifle, sharp military gunfire, no reverb, game sound effect",
+    "primary": "sounds/combat/gunshot_rifle_01.wav"
+  },
+  "combat.gunshot_auto": {
+    "category": "combat",
+    "key": "gunshot_auto",
+    "files": [
+      "sounds/combat/gunshot_auto_01.wav",
+      "sounds/combat/gunshot_auto_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 850,
+    "prompt": "automatic gunfire burst, 4-5 rapid shots, machine gun, military, game sound effect",
+    "primary": "sounds/combat/gunshot_auto_01.wav"
+  },
+  "combat.gunshot_shotgun": {
+    "category": "combat",
+    "key": "gunshot_shotgun",
+    "files": [
+      "sounds/combat/gunshot_shotgun_01.wav",
+      "sounds/combat/gunshot_shotgun_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 460,
+    "prompt": "shotgun blast, pump action, powerful boom, game sound effect",
+    "primary": "sounds/combat/gunshot_shotgun_01.wav"
+  },
+  "combat.impact_punch": {
+    "category": "combat",
+    "key": "impact_punch",
+    "files": [
+      "sounds/combat/impact_punch_01.wav",
+      "sounds/combat/impact_punch_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 210,
+    "prompt": "fist punch impact, boxing hit, flesh impact, melee combat, game sound effect",
+    "primary": "sounds/combat/impact_punch_01.wav"
+  },
+  "combat.impact_kick": {
+    "category": "combat",
+    "key": "impact_kick",
+    "files": [
+      "sounds/combat/impact_kick_01.wav",
+      "sounds/combat/impact_kick_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 220,
+    "prompt": "heavy kick impact, martial arts, powerful body hit, game sound effect",
+    "primary": "sounds/combat/impact_kick_01.wav"
+  },
+  "ui.notification_alert": {
+    "category": "ui",
+    "key": "notification_alert",
+    "files": [
+      "sounds/ui/notification_alert_01.wav",
+      "sounds/ui/notification_alert_02.wav",
+      "sounds/ui/notification_alert_03.wav"
+    ],
+    "variants": 3,
+    "duration_ms": 320,
+    "prompt": "alert notification, email received, important message ping, attention sound, game UI",
+    "primary": "sounds/ui/notification_alert_01.wav"
+  },
+  "character.grunt_pain": {
+    "category": "character",
+    "key": "grunt_pain",
+    "files": [
+      "sounds/character/grunt_pain_01.wav",
+      "sounds/character/grunt_pain_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 260,
+    "prompt": "pain grunt, taking damage, hurt sound, male combat injury, game sound effect",
+    "primary": "sounds/character/grunt_pain_01.wav"
+  },
+  "character.grunt_pain_female": {
+    "category": "character",
+    "key": "grunt_pain_female",
+    "files": [
+      "sounds/character/grunt_pain_female_01.wav",
+      "sounds/character/grunt_pain_female_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 350,
+    "prompt": "female pain grunt, taking damage, hurt sound, combat injury, game sound effect",
+    "primary": "sounds/character/grunt_pain_female_01.wav"
+  },
+  "character.death_male": {
+    "category": "character",
+    "key": "death_male",
+    "files": [
+      "sounds/character/death_male_01.wav",
+      "sounds/character/death_male_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 650,
+    "prompt": "male death sound, final breath, dying groan, combat death, game sound effect",
+    "primary": "sounds/character/death_male_01.wav"
+  },
+  "character.death_female": {
+    "category": "character",
+    "key": "death_female",
+    "files": [
+      "sounds/character/death_female_01.wav",
+      "sounds/character/death_female_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 700,
+    "prompt": "female death sound, final breath, dying sound, combat death, game sound effect",
+    "primary": "sounds/character/death_female_01.wav"
+  },
+  "powers.teleport_away": {
+    "category": "powers",
+    "key": "teleport_away",
+    "files": [
+      "sounds/powers/teleport_away_01.wav",
+      "sounds/powers/teleport_away_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 890,
+    "prompt": "sci-fi teleport departure, whoosh vanish, energy displacement, superhero power, game sound effect",
+    "primary": "sounds/powers/teleport_away_01.wav"
+  },
+  "powers.teleport_arrive": {
+    "category": "powers",
+    "key": "teleport_arrive",
+    "files": [
+      "sounds/powers/teleport_arrive_01.wav",
+      "sounds/powers/teleport_arrive_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 700,
+    "prompt": "sci-fi teleport arrival, whoosh appear, energy materialization, superhero power, game sound effect",
+    "primary": "sounds/powers/teleport_arrive_01.wav"
+  },
+  "ui.button_click": {
+    "category": "ui",
+    "key": "button_click",
+    "files": [
+      "sounds/ui/button_click_01.wav",
+      "sounds/ui/button_click_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 170,
+    "prompt": "UI button click, soft click, interface tap, subtle, game UI sound",
+    "primary": "sounds/ui/button_click_01.wav"
+  },
+  "ui.menu_open": {
+    "category": "ui",
+    "key": "menu_open",
+    "files": [
+      "sounds/ui/menu_open_01.wav",
+      "sounds/ui/menu_open_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 360,
+    "prompt": "menu panel opening, UI swoosh, interface appear, smooth transition, game UI",
+    "primary": "sounds/ui/menu_open_01.wav"
+  },
+  "ui.menu_close": {
+    "category": "ui",
+    "key": "menu_close",
+    "files": [
+      "sounds/ui/menu_close_01.wav",
+      "sounds/ui/menu_close_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 330,
+    "prompt": "menu panel closing, UI close, interface disappear, smooth, game UI",
+    "primary": "sounds/ui/menu_close_01.wav"
+  },
+  "ui.item_pickup": {
+    "category": "ui",
+    "key": "item_pickup",
+    "files": [
+      "sounds/ui/item_pickup_01.wav",
+      "sounds/ui/item_pickup_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 240,
+    "prompt": "item pickup, loot collected, reward sound, positive blip, game UI",
+    "primary": "sounds/ui/item_pickup_01.wav"
+  },
+  "combat.gunshot_sniper": {
+    "category": "combat",
+    "key": "gunshot_sniper",
+    "files": [
+      "sounds/combat/gunshot_sniper_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 640,
+    "prompt": "sniper rifle shot, high caliber, distant crack, precise, game sound effect",
+    "primary": "sounds/combat/gunshot_sniper_01.wav"
+  },
+  "combat.impact_weapon_metal": {
+    "category": "combat",
+    "key": "impact_weapon_metal",
+    "files": [
+      "sounds/combat/impact_weapon_metal_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 250,
+    "prompt": "metal weapon impact, sword clash, steel on steel, sharp metallic hit, game sound effect",
+    "primary": "sounds/combat/impact_weapon_metal_01.wav"
+  },
+  "combat.impact_body_fall": {
+    "category": "combat",
+    "key": "impact_body_fall",
+    "files": [
+      "sounds/combat/impact_body_fall_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 360,
+    "prompt": "body falling to ground, heavy thud, person collapsing, game sound effect",
+    "primary": "sounds/combat/impact_body_fall_01.wav"
+  },
+  "combat.laser_fire": {
+    "category": "combat",
+    "key": "laser_fire",
+    "files": [
+      "sounds/combat/laser_fire_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 430,
+    "prompt": "sci-fi laser gun firing, energy weapon, futuristic pew, clean game sound effect",
+    "primary": "sounds/combat/laser_fire_01.wav"
+  },
+  "combat.energy_blast": {
+    "category": "combat",
+    "key": "energy_blast",
+    "files": [
+      "sounds/combat/energy_blast_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 440,
+    "prompt": "superpower energy blast, plasma discharge, powerful superhero attack, game sound effect",
+    "primary": "sounds/combat/energy_blast_01.wav"
+  },
+  "combat.bullet_impact": {
+    "category": "combat",
+    "key": "bullet_impact",
+    "files": [
+      "sounds/combat/bullet_impact_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 190,
+    "prompt": "bullet hitting surface, ricochet, metal ping, game sound effect",
+    "primary": "sounds/combat/bullet_impact_01.wav"
+  },
+  "combat.reload_pistol": {
+    "category": "combat",
+    "key": "reload_pistol",
+    "files": [
+      "sounds/combat/reload_pistol_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 950,
+    "prompt": "pistol magazine reload, clip insertion, slide rack, gun reload, game sound effect",
+    "primary": "sounds/combat/reload_pistol_01.wav"
+  },
+  "combat.reload_rifle": {
+    "category": "combat",
+    "key": "reload_rifle",
+    "files": [
+      "sounds/combat/reload_rifle_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1210,
+    "prompt": "rifle magazine reload, assault rifle, military weapon reload, game sound effect",
+    "primary": "sounds/combat/reload_rifle_01.wav"
+  },
+  "ui.button_hover": {
+    "category": "ui",
+    "key": "button_hover",
+    "files": [
+      "sounds/ui/button_hover_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 280,
+    "prompt": "UI hover sound, soft whoosh, subtle interface feedback, game UI",
+    "primary": "sounds/ui/button_hover_01.wav"
+  },
+  "ui.notification_success": {
+    "category": "ui",
+    "key": "notification_success",
+    "files": [
+      "sounds/ui/notification_success_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 60,
+    "prompt": "success notification, positive chime, task complete, achievement, game UI",
+    "primary": "sounds/ui/notification_success_01.wav"
+  },
+  "ui.notification_error": {
+    "category": "ui",
+    "key": "notification_error",
+    "files": [
+      "sounds/ui/notification_error_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 430,
+    "prompt": "error notification, negative buzz, action failed, warning, game UI",
+    "primary": "sounds/ui/notification_error_01.wav"
+  },
+  "ui.notification_warning": {
+    "category": "ui",
+    "key": "notification_warning",
+    "files": [
+      "sounds/ui/notification_warning_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 30,
+    "prompt": "warning notification, caution alert, attention needed, game UI",
+    "primary": "sounds/ui/notification_warning_01.wav"
+  },
+  "ui.inventory_open": {
+    "category": "ui",
+    "key": "inventory_open",
+    "files": [
+      "sounds/ui/inventory_open_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 420,
+    "prompt": "inventory opening, bag unzip, equipment panel, game UI",
+    "primary": "sounds/ui/inventory_open_01.wav"
+  },
+  "ui.item_equip": {
+    "category": "ui",
+    "key": "item_equip",
+    "files": [
+      "sounds/ui/item_equip_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 330,
+    "prompt": "equipment equip, gear slot, item equipped, game UI",
+    "primary": "sounds/ui/item_equip_01.wav"
+  },
+  "character.footstep_walk": {
+    "category": "character",
+    "key": "footstep_walk",
+    "files": [
+      "sounds/character/footstep_walk_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 200,
+    "prompt": "single footstep, walking on concrete, boot step, game sound effect",
+    "primary": "sounds/character/footstep_walk_01.wav"
+  },
+  "character.footstep_run": {
+    "category": "character",
+    "key": "footstep_run",
+    "files": [
+      "sounds/character/footstep_run_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 310,
+    "prompt": "running footstep, fast movement, combat boots, game sound effect",
+    "primary": "sounds/character/footstep_run_01.wav"
+  },
+  "character.grunt_effort": {
+    "category": "character",
+    "key": "grunt_effort",
+    "files": [
+      "sounds/character/grunt_effort_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 270,
+    "prompt": "male effort grunt, physical exertion, combat strain, game sound effect",
+    "primary": "sounds/character/grunt_effort_01.wav"
+  },
+  "character.jump_land": {
+    "category": "character",
+    "key": "jump_land",
+    "files": [
+      "sounds/character/jump_land_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 120,
+    "prompt": "landing from jump, feet hitting ground, impact landing, game sound effect",
+    "primary": "sounds/character/jump_land_01.wav"
+  },
+  "environment.door_open_metal": {
+    "category": "environment",
+    "key": "door_open_metal",
+    "files": [
+      "sounds/environment/door_open_metal_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 450,
+    "prompt": "metal door opening, heavy door swing, industrial, game sound effect",
+    "primary": "sounds/environment/door_open_metal_01.wav"
+  },
+  "environment.door_close_metal": {
+    "category": "environment",
+    "key": "door_close_metal",
+    "files": [
+      "sounds/environment/door_close_metal_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 620,
+    "prompt": "metal door closing, heavy door slam, industrial, game sound effect",
+    "primary": "sounds/environment/door_close_metal_01.wav"
+  },
+  "environment.glass_break": {
+    "category": "environment",
+    "key": "glass_break",
+    "files": [
+      "sounds/environment/glass_break_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 530,
+    "prompt": "glass shattering, window breaking, glass shards, game sound effect",
+    "primary": "sounds/environment/glass_break_01.wav"
+  },
+  "environment.electricity_spark": {
+    "category": "environment",
+    "key": "electricity_spark",
+    "files": [
+      "sounds/environment/electricity_spark_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 460,
+    "prompt": "electrical spark, power surge, zap crackle, game sound effect",
+    "primary": "sounds/environment/electricity_spark_01.wav"
+  },
+  "environment.fire_burning": {
+    "category": "environment",
+    "key": "fire_burning",
+    "files": [
+      "sounds/environment/fire_burning_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 2890,
+    "prompt": "fire burning, flames crackling, fire ambience, game sound effect",
+    "primary": "sounds/environment/fire_burning_01.wav"
+  },
+  "powers.shield_activate": {
+    "category": "powers",
+    "key": "shield_activate",
+    "files": [
+      "sounds/powers/shield_activate_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 760,
+    "prompt": "energy shield activation, force field up, protective barrier, superhero power, game sound effect",
+    "primary": "sounds/powers/shield_activate_01.wav"
+  },
+  "powers.shield_hit": {
+    "category": "powers",
+    "key": "shield_hit",
+    "files": [
+      "sounds/powers/shield_hit_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 480,
+    "prompt": "energy shield impact, force field hit, barrier block, game sound effect",
+    "primary": "sounds/powers/shield_hit_01.wav"
+  },
+  "powers.shield_deactivate": {
+    "category": "powers",
+    "key": "shield_deactivate",
+    "files": [
+      "sounds/powers/shield_deactivate_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 420,
+    "prompt": "energy shield down, force field off, barrier drop, game sound effect",
+    "primary": "sounds/powers/shield_deactivate_01.wav"
+  },
+  "powers.flight_takeoff": {
+    "category": "powers",
+    "key": "flight_takeoff",
+    "files": [
+      "sounds/powers/flight_takeoff_01.wav",
+      "sounds/powers/flight_takeoff_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 790,
+    "prompt": "superhero flight takeoff, whoosh up, flying launch, powerful liftoff, game sound effect",
+    "primary": "sounds/powers/flight_takeoff_01.wav"
+  },
+  "powers.super_strength_hit": {
+    "category": "powers",
+    "key": "super_strength_hit",
+    "files": [
+      "sounds/powers/super_strength_hit_01.wav",
+      "sounds/powers/super_strength_hit_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 340,
+    "prompt": "superhuman punch impact, devastating blow, powerful superhero hit, game sound effect",
+    "primary": "sounds/powers/super_strength_hit_01.wav"
+  },
+  "powers.super_speed_whoosh": {
+    "category": "powers",
+    "key": "super_speed_whoosh",
+    "files": [
+      "sounds/powers/super_speed_whoosh_01.wav",
+      "sounds/powers/super_speed_whoosh_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 290,
+    "prompt": "super speed movement, fast whoosh, speedster blur, game sound effect",
+    "primary": "sounds/powers/super_speed_whoosh_01.wav"
+  },
+  "powers.power_charge": {
+    "category": "powers",
+    "key": "power_charge",
+    "files": [
+      "sounds/powers/power_charge_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1400,
+    "prompt": "power charging up, energy building, superhero ability charge, game sound effect",
+    "primary": "sounds/powers/power_charge_01.wav"
+  },
+  "powers.power_release": {
+    "category": "powers",
+    "key": "power_release",
+    "files": [
+      "sounds/powers/power_release_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 560,
+    "prompt": "power release, energy discharge, superhero ability unleash, game sound effect",
+    "primary": "sounds/powers/power_release_01.wav"
+  },
+  "ui.tab_switch": {
+    "category": "ui",
+    "key": "tab_switch",
+    "files": [
+      "sounds/ui/tab_switch_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 20,
+    "prompt": "tab switch click, interface navigation, subtle click, game UI",
+    "primary": "sounds/ui/tab_switch_01.wav"
+  },
+  "character.footstep_grass": {
+    "category": "character",
+    "key": "footstep_grass",
+    "files": [
+      "sounds/character/footstep_grass_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 130,
+    "prompt": "footstep on grass, outdoor walking, soft ground, game sound effect",
+    "primary": "sounds/character/footstep_grass_01.wav"
+  },
+  "character.breathing_heavy": {
+    "category": "character",
+    "key": "breathing_heavy",
+    "files": [
+      "sounds/character/breathing_heavy_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 2060,
+    "prompt": "heavy breathing, exhausted, post combat, tired breathing, game sound effect",
+    "primary": "sounds/character/breathing_heavy_01.wav"
+  },
+  "environment.door_open_wood": {
+    "category": "environment",
+    "key": "door_open_wood",
+    "files": [
+      "sounds/environment/door_open_wood_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 670,
+    "prompt": "wooden door opening, creaky door, interior, game sound effect",
+    "primary": "sounds/environment/door_open_wood_01.wav"
+  },
+  "environment.vehicle_engine_start": {
+    "category": "environment",
+    "key": "vehicle_engine_start",
+    "files": [
+      "sounds/environment/vehicle_engine_start_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1940,
+    "prompt": "car engine starting, vehicle ignition, motor revving, game sound effect",
+    "primary": "sounds/environment/vehicle_engine_start_01.wav"
+  },
+  "environment.vehicle_engine_idle": {
+    "category": "environment",
+    "key": "vehicle_engine_idle",
+    "files": [
+      "sounds/environment/vehicle_engine_idle_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 3000,
+    "prompt": "car engine idling, vehicle running, motor hum, game sound effect",
+    "primary": "sounds/environment/vehicle_engine_idle_01.wav"
+  },
+  "environment.alarm_security": {
+    "category": "environment",
+    "key": "alarm_security",
+    "files": [
+      "sounds/environment/alarm_security_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 3000,
+    "prompt": "security alarm, building alarm, warning siren, alert sound, game sound effect",
+    "primary": "sounds/environment/alarm_security_01.wav"
+  },
+  "powers.flight_loop": {
+    "category": "powers",
+    "key": "flight_loop",
+    "files": [
+      "sounds/powers/flight_loop_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 3000,
+    "prompt": "flying wind loop, superhero flight, air rushing, sustained flight, game sound effect",
+    "primary": "sounds/powers/flight_loop_01.wav"
+  },
+  "ambient.city_traffic_us": {
+    "category": "ambient",
+    "key": "city_traffic_us",
+    "files": [
+      "sounds/ambient/city_traffic_us_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 9230,
+    "prompt": "American city traffic ambience, cars passing, urban environment, New York street sounds",
+    "primary": "sounds/ambient/city_traffic_us_01.wav"
+  },
+  "ambient.city_market_nigeria": {
+    "category": "ambient",
+    "key": "city_market_nigeria",
+    "files": [
+      "sounds/ambient/city_market_nigeria_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 9700,
+    "prompt": "Lagos Nigeria street market, African city ambience, vendors, busy market sounds",
+    "primary": "sounds/ambient/city_market_nigeria_01.wav"
+  },
+  "ambient.city_urban_india": {
+    "category": "ambient",
+    "key": "city_urban_india",
+    "files": [
+      "sounds/ambient/city_urban_india_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 9660,
+    "prompt": "Mumbai India street sounds, South Asian city ambience, traffic, urban India",
+    "primary": "sounds/ambient/city_urban_india_01.wav"
+  },
+  "ambient.city_modern_china": {
+    "category": "ambient",
+    "key": "city_modern_china",
+    "files": [
+      "sounds/ambient/city_modern_china_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 9810,
+    "prompt": "Beijing China urban ambience, modern Chinese city, traffic, urban sounds",
+    "primary": "sounds/ambient/city_modern_china_01.wav"
+  },
+  "ambient.office_interior": {
+    "category": "ambient",
+    "key": "office_interior",
+    "files": [
+      "sounds/ambient/office_interior_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 7920,
+    "prompt": "office interior ambience, quiet workplace, AC hum, keyboard typing distant",
+    "primary": "sounds/ambient/office_interior_01.wav"
+  },
+  "ambient.military_base": {
+    "category": "ambient",
+    "key": "military_base",
+    "files": [
+      "sounds/ambient/military_base_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 9810,
+    "prompt": "military base ambience, distant vehicles, soldiers activity, army camp sounds",
+    "primary": "sounds/ambient/military_base_01.wav"
+  },
+  "ambient.rain_light": {
+    "category": "ambient",
+    "key": "rain_light",
+    "files": [
+      "sounds/ambient/rain_light_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 10000,
+    "prompt": "light rain ambience, gentle rainfall, outdoor rain sounds",
+    "primary": "sounds/ambient/rain_light_01.wav"
+  },
+  "ambient.wind_outdoor": {
+    "category": "ambient",
+    "key": "wind_outdoor",
+    "files": [
+      "sounds/ambient/wind_outdoor_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 7620,
+    "prompt": "outdoor wind ambience, gentle breeze, natural wind sounds",
+    "primary": "sounds/ambient/wind_outdoor_01.wav"
+  },
+  "animals.dog_bark": {
+    "category": "animals",
+    "key": "dog_bark",
+    "files": [
+      "sounds/animals/dog_bark_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 640,
+    "prompt": "dog barking, alert bark, guard dog, game sound effect",
+    "primary": "sounds/animals/dog_bark_01.wav"
+  },
+  "animals.dog_growl": {
+    "category": "animals",
+    "key": "dog_growl",
+    "files": [
+      "sounds/animals/dog_growl_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1340,
+    "prompt": "dog growling, aggressive warning, threatening growl, game sound effect",
+    "primary": "sounds/animals/dog_growl_01.wav"
+  },
+  "animals.dog_attack": {
+    "category": "animals",
+    "key": "dog_attack",
+    "files": [
+      "sounds/animals/dog_attack_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 590,
+    "prompt": "dog attack, biting, aggressive dog bite, game sound effect",
+    "primary": "sounds/animals/dog_attack_01.wav"
+  },
+  "robots.robot_servo": {
+    "category": "robots",
+    "key": "robot_servo",
+    "files": [
+      "sounds/robots/robot_servo_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 590,
+    "prompt": "robot servo motor, mechanical joint movement, robotic arm, game sound effect",
+    "primary": "sounds/robots/robot_servo_01.wav"
+  },
+  "robots.robot_hydraulic": {
+    "category": "robots",
+    "key": "robot_hydraulic",
+    "files": [
+      "sounds/robots/robot_hydraulic_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 620,
+    "prompt": "hydraulic actuation, pneumatic hiss, mechanical movement, game sound effect",
+    "primary": "sounds/robots/robot_hydraulic_01.wav"
+  },
+  "robots.robot_footstep": {
+    "category": "robots",
+    "key": "robot_footstep",
+    "files": [
+      "sounds/robots/robot_footstep_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 480,
+    "prompt": "robot footstep, heavy mechanical step, metal on ground, game sound effect",
+    "primary": "sounds/robots/robot_footstep_01.wav"
+  },
+  "robots.robot_power_up": {
+    "category": "robots",
+    "key": "robot_power_up",
+    "files": [
+      "sounds/robots/robot_power_up_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1660,
+    "prompt": "robot powering on, systems boot up, mechanical awakening, game sound effect",
+    "primary": "sounds/robots/robot_power_up_01.wav"
+  },
+  "robots.robot_power_down": {
+    "category": "robots",
+    "key": "robot_power_down",
+    "files": [
+      "sounds/robots/robot_power_down_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1270,
+    "prompt": "robot shutting down, systems off, mechanical shutdown, game sound effect",
+    "primary": "sounds/robots/robot_power_down_01.wav"
+  },
+  "robots.robot_damage": {
+    "category": "robots",
+    "key": "robot_damage",
+    "files": [
+      "sounds/robots/robot_damage_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 710,
+    "prompt": "robot taking damage, metal impact, electronic sparks, game sound effect",
+    "primary": "sounds/robots/robot_damage_01.wav"
+  },
+  "robots.robot_death": {
+    "category": "robots",
+    "key": "robot_death",
+    "files": [
+      "sounds/robots/robot_death_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1190,
+    "prompt": "robot destruction, mechanical collapse, sparking death, game sound effect",
+    "primary": "sounds/robots/robot_death_01.wav"
+  },
+  "robots.emp_pulse": {
+    "category": "robots",
+    "key": "emp_pulse",
+    "files": [
+      "sounds/robots/emp_pulse_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 850,
+    "prompt": "EMP pulse discharge, electromagnetic burst, electronics disabled, game sound effect",
+    "primary": "sounds/robots/emp_pulse_01.wav"
+  },
+  "melee.sword_slash": {
+    "category": "melee",
+    "key": "sword_slash",
+    "files": [
+      "sounds/melee/sword_slash_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 360,
+    "prompt": "sword slash through air, blade swing, katana cut, game sound effect",
+    "primary": "sounds/melee/sword_slash_01.wav"
+  },
+  "melee.sword_hit_flesh": {
+    "category": "melee",
+    "key": "sword_hit_flesh",
+    "files": [
+      "sounds/melee/sword_hit_flesh_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 210,
+    "prompt": "sword cutting flesh, blade on body, slashing wound, game sound effect",
+    "primary": "sounds/melee/sword_hit_flesh_01.wav"
+  },
+  "melee.sword_hit_metal": {
+    "category": "melee",
+    "key": "sword_hit_metal",
+    "files": [
+      "sounds/melee/sword_hit_metal_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 170,
+    "prompt": "sword hitting metal, blade on armor, steel clash, game sound effect",
+    "primary": "sounds/melee/sword_hit_metal_01.wav"
+  },
+  "melee.knife_stab": {
+    "category": "melee",
+    "key": "knife_stab",
+    "files": [
+      "sounds/melee/knife_stab_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 220,
+    "prompt": "knife stabbing, blade piercing, stabbing impact, game sound effect",
+    "primary": "sounds/melee/knife_stab_01.wav"
+  },
+  "melee.knife_slash": {
+    "category": "melee",
+    "key": "knife_slash",
+    "files": [
+      "sounds/melee/knife_slash_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 270,
+    "prompt": "knife slashing, quick blade cut, combat knife, game sound effect",
+    "primary": "sounds/melee/knife_slash_01.wav"
+  },
+  "melee.axe_swing": {
+    "category": "melee",
+    "key": "axe_swing",
+    "files": [
+      "sounds/melee/axe_swing_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 370,
+    "prompt": "axe swinging, heavy blade through air, chopping motion, game sound effect",
+    "primary": "sounds/melee/axe_swing_01.wav"
+  },
+  "melee.axe_hit_flesh": {
+    "category": "melee",
+    "key": "axe_hit_flesh",
+    "files": [
+      "sounds/melee/axe_hit_flesh_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 250,
+    "prompt": "axe hitting flesh, chopping impact, brutal wound, game sound effect",
+    "primary": "sounds/melee/axe_hit_flesh_01.wav"
+  },
+  "melee.hammer_swing": {
+    "category": "melee",
+    "key": "hammer_swing",
+    "files": [
+      "sounds/melee/hammer_swing_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 550,
+    "prompt": "hammer swinging, heavy blunt weapon, crushing motion, game sound effect",
+    "primary": "sounds/melee/hammer_swing_01.wav"
+  },
+  "melee.hammer_hit": {
+    "category": "melee",
+    "key": "hammer_hit",
+    "files": [
+      "sounds/melee/hammer_hit_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 220,
+    "prompt": "hammer impact, crushing blow, blunt force trauma, game sound effect",
+    "primary": "sounds/melee/hammer_hit_01.wav"
+  },
+  "impacts.bullet_hit_metal": {
+    "category": "impacts",
+    "key": "bullet_hit_metal",
+    "files": [
+      "sounds/impacts/bullet_hit_metal_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 80,
+    "prompt": "bullet hitting metal, ricochet, metallic impact, game sound effect",
+    "primary": "sounds/impacts/bullet_hit_metal_01.wav"
+  },
+  "impacts.bullet_hit_flesh": {
+    "category": "impacts",
+    "key": "bullet_hit_flesh",
+    "files": [
+      "sounds/impacts/bullet_hit_flesh_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 250,
+    "prompt": "bullet hitting body, flesh impact, gunshot wound, game sound effect",
+    "primary": "sounds/impacts/bullet_hit_flesh_01.wav"
+  },
+  "impacts.body_hit_wall": {
+    "category": "impacts",
+    "key": "body_hit_wall",
+    "files": [
+      "sounds/impacts/body_hit_wall_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 370,
+    "prompt": "body hitting wall, person slamming into surface, impact, game sound effect",
+    "primary": "sounds/impacts/body_hit_wall_01.wav"
+  },
+  "impacts.body_hit_ground": {
+    "category": "impacts",
+    "key": "body_hit_ground",
+    "files": [
+      "sounds/impacts/body_hit_ground_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 350,
+    "prompt": "body hitting ground, person falling down, heavy landing, game sound effect",
+    "primary": "sounds/impacts/body_hit_ground_01.wav"
+  },
+  "impacts.knockback_impact": {
+    "category": "impacts",
+    "key": "knockback_impact",
+    "files": [
+      "sounds/impacts/knockback_impact_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 470,
+    "prompt": "knockback wall impact, superhero thrown into wall, massive impact, game sound effect",
+    "primary": "sounds/impacts/knockback_impact_01.wav"
+  },
+  "impacts.armor_hit": {
+    "category": "impacts",
+    "key": "armor_hit",
+    "files": [
+      "sounds/impacts/armor_hit_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 130,
+    "prompt": "armor being hit, bullet on armor, protective gear impact, game sound effect",
+    "primary": "sounds/impacts/armor_hit_01.wav"
+  },
+  "impacts.armor_break": {
+    "category": "impacts",
+    "key": "armor_break",
+    "files": [
+      "sounds/impacts/armor_break_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 330,
+    "prompt": "armor breaking, gear shattering, protection failing, game sound effect",
+    "primary": "sounds/impacts/armor_break_01.wav"
+  },
+  "impacts.shield_block": {
+    "category": "impacts",
+    "key": "shield_block",
+    "files": [
+      "sounds/impacts/shield_block_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 200,
+    "prompt": "shield blocking attack, metal shield impact, defensive block, game sound effect",
+    "primary": "sounds/impacts/shield_block_01.wav"
+  },
+  "elemental.fire_ignite": {
+    "category": "elemental",
+    "key": "fire_ignite",
+    "files": [
+      "sounds/elemental/fire_ignite_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 600,
+    "prompt": "fire igniting, flames starting, whoosh of fire, game sound effect",
+    "primary": "sounds/elemental/fire_ignite_01.wav"
+  },
+  "elemental.fire_blast": {
+    "category": "elemental",
+    "key": "fire_blast",
+    "files": [
+      "sounds/elemental/fire_blast_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 550,
+    "prompt": "fire blast, fireball explosion, flame burst, game sound effect",
+    "primary": "sounds/elemental/fire_blast_01.wav"
+  },
+  "elemental.person_on_fire": {
+    "category": "elemental",
+    "key": "person_on_fire",
+    "files": [
+      "sounds/elemental/person_on_fire_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1640,
+    "prompt": "person burning, body on fire, painful burning screams muffled, game sound effect",
+    "primary": "sounds/elemental/person_on_fire_01.wav"
+  },
+  "elemental.ice_freeze": {
+    "category": "elemental",
+    "key": "ice_freeze",
+    "files": [
+      "sounds/elemental/ice_freeze_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 700,
+    "prompt": "ice freezing, frost forming, cryo freeze effect, game sound effect",
+    "primary": "sounds/elemental/ice_freeze_01.wav"
+  },
+  "elemental.ice_crack": {
+    "category": "elemental",
+    "key": "ice_crack",
+    "files": [
+      "sounds/elemental/ice_crack_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 380,
+    "prompt": "ice cracking, frozen surface breaking, frost shatter, game sound effect",
+    "primary": "sounds/elemental/ice_crack_01.wav"
+  },
+  "elemental.ice_shatter": {
+    "category": "elemental",
+    "key": "ice_shatter",
+    "files": [
+      "sounds/elemental/ice_shatter_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 500,
+    "prompt": "ice shattering, frozen object breaking, crystal shatter, game sound effect",
+    "primary": "sounds/elemental/ice_shatter_01.wav"
+  },
+  "elemental.ice_blast": {
+    "category": "elemental",
+    "key": "ice_blast",
+    "files": [
+      "sounds/elemental/ice_blast_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 480,
+    "prompt": "ice blast, cryo attack, freezing projectile, game sound effect",
+    "primary": "sounds/elemental/ice_blast_01.wav"
+  },
+  "elemental.person_frozen": {
+    "category": "elemental",
+    "key": "person_frozen",
+    "files": [
+      "sounds/elemental/person_frozen_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1180,
+    "prompt": "person freezing, body turning to ice, crystallization, game sound effect",
+    "primary": "sounds/elemental/person_frozen_01.wav"
+  },
+  "elemental.electric_shock": {
+    "category": "elemental",
+    "key": "electric_shock",
+    "files": [
+      "sounds/elemental/electric_shock_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 670,
+    "prompt": "electric shock, electrocution zap, shocking impact, game sound effect",
+    "primary": "sounds/elemental/electric_shock_01.wav"
+  },
+  "elemental.electric_arc": {
+    "category": "elemental",
+    "key": "electric_arc",
+    "files": [
+      "sounds/elemental/electric_arc_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 510,
+    "prompt": "electric arc, lightning bolt, electricity crackling, game sound effect",
+    "primary": "sounds/elemental/electric_arc_01.wav"
+  },
+  "elemental.electric_discharge": {
+    "category": "elemental",
+    "key": "electric_discharge",
+    "files": [
+      "sounds/elemental/electric_discharge_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 570,
+    "prompt": "electric discharge, power release, shocking blast, game sound effect",
+    "primary": "sounds/elemental/electric_discharge_01.wav"
+  },
+  "elemental.person_electrocuted": {
+    "category": "elemental",
+    "key": "person_electrocuted",
+    "files": [
+      "sounds/elemental/person_electrocuted_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1460,
+    "prompt": "person being electrocuted, shocking pain, electric convulsions, game sound effect",
+    "primary": "sounds/elemental/person_electrocuted_01.wav"
+  },
+  "elemental.acid_splash": {
+    "category": "elemental",
+    "key": "acid_splash",
+    "files": [
+      "sounds/elemental/acid_splash_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 350,
+    "prompt": "acid splash, corrosive liquid, burning chemical, game sound effect",
+    "primary": "sounds/elemental/acid_splash_01.wav"
+  },
+  "elemental.acid_burn": {
+    "category": "elemental",
+    "key": "acid_burn",
+    "files": [
+      "sounds/elemental/acid_burn_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 810,
+    "prompt": "acid burning, corrosive damage, melting sizzle, game sound effect",
+    "primary": "sounds/elemental/acid_burn_01.wav"
+  },
+  "elemental.poison_inject": {
+    "category": "elemental",
+    "key": "poison_inject",
+    "files": [
+      "sounds/elemental/poison_inject_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 360,
+    "prompt": "poison injection, venom entering, toxic delivery, game sound effect",
+    "primary": "sounds/elemental/poison_inject_01.wav"
+  },
+  "elemental.plasma_fire": {
+    "category": "elemental",
+    "key": "plasma_fire",
+    "files": [
+      "sounds/elemental/plasma_fire_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 600,
+    "prompt": "plasma weapon fire, superheated projectile, energy weapon, game sound effect",
+    "primary": "sounds/elemental/plasma_fire_01.wav"
+  },
+  "elemental.plasma_hit": {
+    "category": "elemental",
+    "key": "plasma_hit",
+    "files": [
+      "sounds/elemental/plasma_hit_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 380,
+    "prompt": "plasma impact, superheated damage, energy burn, game sound effect",
+    "primary": "sounds/elemental/plasma_hit_01.wav"
+  },
+  "injuries.bone_break": {
+    "category": "injuries",
+    "key": "bone_break",
+    "files": [
+      "sounds/injuries/bone_break_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 490,
+    "prompt": "bone breaking, bone crack, fracture sound, game sound effect",
+    "primary": "sounds/injuries/bone_break_01.wav"
+  },
+  "injuries.bone_snap": {
+    "category": "injuries",
+    "key": "bone_snap",
+    "files": [
+      "sounds/injuries/bone_snap_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 280,
+    "prompt": "bone snapping, limb break, brutal fracture, game sound effect",
+    "primary": "sounds/injuries/bone_snap_01.wav"
+  },
+  "injuries.flesh_tear": {
+    "category": "injuries",
+    "key": "flesh_tear",
+    "files": [
+      "sounds/injuries/flesh_tear_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 570,
+    "prompt": "flesh tearing, wound opening, ripping tissue, game sound effect",
+    "primary": "sounds/injuries/flesh_tear_01.wav"
+  },
+  "injuries.critical_hit": {
+    "category": "injuries",
+    "key": "critical_hit",
+    "files": [
+      "sounds/injuries/critical_hit_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 610,
+    "prompt": "critical hit impact, devastating blow, massive damage, game sound effect",
+    "primary": "sounds/injuries/critical_hit_01.wav"
+  },
+  "injuries.knockout": {
+    "category": "injuries",
+    "key": "knockout",
+    "files": [
+      "sounds/injuries/knockout_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 470,
+    "prompt": "knockout hit, unconscious impact, lights out, game sound effect",
+    "primary": "sounds/injuries/knockout_01.wav"
+  },
+  "injuries.stun_impact": {
+    "category": "injuries",
+    "key": "stun_impact",
+    "files": [
+      "sounds/injuries/stun_impact_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 240,
+    "prompt": "stunning impact, dazed hit, disorienting blow, game sound effect",
+    "primary": "sounds/injuries/stun_impact_01.wav"
+  },
+  "injuries.limb_sever": {
+    "category": "injuries",
+    "key": "limb_sever",
+    "files": [
+      "sounds/injuries/limb_sever_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 700,
+    "prompt": "limb severing, amputation cut, brutal dismemberment, game sound effect",
+    "primary": "sounds/injuries/limb_sever_01.wav"
+  },
+  "injuries.decapitation": {
+    "category": "injuries",
+    "key": "decapitation",
+    "files": [
+      "sounds/injuries/decapitation_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 360,
+    "prompt": "decapitation, head severing, fatal cut, game sound effect",
+    "primary": "sounds/injuries/decapitation_01.wav"
+  },
+  "injuries.heartbeat_critical": {
+    "category": "injuries",
+    "key": "heartbeat_critical",
+    "files": [
+      "sounds/injuries/heartbeat_critical_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 2710,
+    "prompt": "heartbeat critical health, slow heavy heartbeat, near death, game sound effect",
+    "primary": "sounds/injuries/heartbeat_critical_01.wav"
+  },
+  "injuries.choking": {
+    "category": "injuries",
+    "key": "choking",
+    "files": [
+      "sounds/injuries/choking_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1490,
+    "prompt": "choking gasping, throat grabbed, strangling, game sound effect",
+    "primary": "sounds/injuries/choking_01.wav"
+  },
+  "destruction.wall_break_wood": {
+    "category": "destruction",
+    "key": "wall_break_wood",
+    "files": [
+      "sounds/destruction/wall_break_wood_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 670,
+    "prompt": "wooden wall breaking, smashing through, debris, game sound effect",
+    "primary": "sounds/destruction/wall_break_wood_01.wav"
+  },
+  "destruction.wall_break_brick": {
+    "category": "destruction",
+    "key": "wall_break_brick",
+    "files": [
+      "sounds/destruction/wall_break_brick_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 760,
+    "prompt": "brick wall breaking, masonry smashing, heavy debris, game sound effect",
+    "primary": "sounds/destruction/wall_break_brick_01.wav"
+  },
+  "destruction.wall_break_concrete": {
+    "category": "destruction",
+    "key": "wall_break_concrete",
+    "files": [
+      "sounds/destruction/wall_break_concrete_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 860,
+    "prompt": "concrete wall breaking, cement crumbling, massive destruction, game sound effect",
+    "primary": "sounds/destruction/wall_break_concrete_01.wav"
+  },
+  "destruction.ceiling_collapse": {
+    "category": "destruction",
+    "key": "ceiling_collapse",
+    "files": [
+      "sounds/destruction/ceiling_collapse_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1060,
+    "prompt": "ceiling collapsing, roof falling, overhead debris, game sound effect",
+    "primary": "sounds/destruction/ceiling_collapse_01.wav"
+  },
+  "destruction.car_crash": {
+    "category": "destruction",
+    "key": "car_crash",
+    "files": [
+      "sounds/destruction/car_crash_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 910,
+    "prompt": "car crashing, vehicle collision, metal crumpling, game sound effect",
+    "primary": "sounds/destruction/car_crash_01.wav"
+  },
+  "destruction.car_throw": {
+    "category": "destruction",
+    "key": "car_throw",
+    "files": [
+      "sounds/destruction/car_throw_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1000,
+    "prompt": "car being thrown, vehicle flying through air, superhero strength, game sound effect",
+    "primary": "sounds/destruction/car_throw_01.wav"
+  },
+  "destruction.car_explosion": {
+    "category": "destruction",
+    "key": "car_explosion",
+    "files": [
+      "sounds/destruction/car_explosion_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1410,
+    "prompt": "car exploding, vehicle explosion, fuel tank blast, game sound effect",
+    "primary": "sounds/destruction/car_explosion_01.wav"
+  },
+  "destruction.car_land": {
+    "category": "destruction",
+    "key": "car_land",
+    "files": [
+      "sounds/destruction/car_land_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 540,
+    "prompt": "car landing, thrown vehicle impact, crashing down, game sound effect",
+    "primary": "sounds/destruction/car_land_01.wav"
+  },
+  "destruction.window_smash": {
+    "category": "destruction",
+    "key": "window_smash",
+    "files": [
+      "sounds/destruction/window_smash_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 580,
+    "prompt": "window smashing, glass shattering, breaking through, game sound effect",
+    "primary": "sounds/destruction/window_smash_01.wav"
+  },
+  "destruction.door_break": {
+    "category": "destruction",
+    "key": "door_break",
+    "files": [
+      "sounds/destruction/door_break_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 550,
+    "prompt": "door breaking down, kicked in door, forced entry, game sound effect",
+    "primary": "sounds/destruction/door_break_01.wav"
+  },
+  "psychic.mind_blast": {
+    "category": "psychic",
+    "key": "mind_blast",
+    "files": [
+      "sounds/psychic/mind_blast_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 750,
+    "prompt": "psychic mind blast, mental attack, brain assault, game sound effect",
+    "primary": "sounds/psychic/mind_blast_01.wav"
+  },
+  "psychic.mind_control": {
+    "category": "psychic",
+    "key": "mind_control",
+    "files": [
+      "sounds/psychic/mind_control_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1180,
+    "prompt": "mind control activation, mental domination, psychic takeover, game sound effect",
+    "primary": "sounds/psychic/mind_control_01.wav"
+  },
+  "psychic.mental_pain": {
+    "category": "psychic",
+    "key": "mental_pain",
+    "files": [
+      "sounds/psychic/mental_pain_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 710,
+    "prompt": "mental anguish, psychic pain, mind torture, game sound effect",
+    "primary": "sounds/psychic/mental_pain_01.wav"
+  },
+  "energy_weapons.laser_rifle": {
+    "category": "energy_weapons",
+    "key": "laser_rifle",
+    "files": [
+      "sounds/energy_weapons/laser_rifle_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 550,
+    "prompt": "laser rifle fire, focused light beam, sci-fi weapon, game sound effect",
+    "primary": "sounds/energy_weapons/laser_rifle_01.wav"
+  },
+  "energy_weapons.plasma_rifle": {
+    "category": "energy_weapons",
+    "key": "plasma_rifle",
+    "files": [
+      "sounds/energy_weapons/plasma_rifle_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 590,
+    "prompt": "plasma rifle fire, superheated energy, futuristic weapon, game sound effect",
+    "primary": "sounds/energy_weapons/plasma_rifle_01.wav"
+  },
+  "energy_weapons.ice_rifle": {
+    "category": "energy_weapons",
+    "key": "ice_rifle",
+    "files": [
+      "sounds/energy_weapons/ice_rifle_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 360,
+    "prompt": "ice rifle fire, cryo weapon, freezing beam, game sound effect",
+    "primary": "sounds/energy_weapons/ice_rifle_01.wav"
+  },
+  "energy_weapons.thermal_rifle": {
+    "category": "energy_weapons",
+    "key": "thermal_rifle",
+    "files": [
+      "sounds/energy_weapons/thermal_rifle_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 420,
+    "prompt": "thermal rifle fire, heat weapon, burning beam, game sound effect",
+    "primary": "sounds/energy_weapons/thermal_rifle_01.wav"
+  },
+  "energy_weapons.electric_rifle": {
+    "category": "energy_weapons",
+    "key": "electric_rifle",
+    "files": [
+      "sounds/energy_weapons/electric_rifle_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 370,
+    "prompt": "electric rifle fire, lightning gun, shocking weapon, game sound effect",
+    "primary": "sounds/energy_weapons/electric_rifle_01.wav"
+  },
+  "energy_weapons.sonic_rifle": {
+    "category": "energy_weapons",
+    "key": "sonic_rifle",
+    "files": [
+      "sounds/energy_weapons/sonic_rifle_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 620,
+    "prompt": "sonic rifle fire, sound wave weapon, audio blast, game sound effect",
+    "primary": "sounds/energy_weapons/sonic_rifle_01.wav"
+  },
+  "grenades.grenade_pin": {
+    "category": "grenades",
+    "key": "grenade_pin",
+    "files": [
+      "sounds/grenades/grenade_pin_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 70,
+    "prompt": "grenade pin pull, safety release, preparing throw, game sound effect",
+    "primary": "sounds/grenades/grenade_pin_01.wav"
+  },
+  "grenades.grenade_throw": {
+    "category": "grenades",
+    "key": "grenade_throw",
+    "files": [
+      "sounds/grenades/grenade_throw_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 430,
+    "prompt": "grenade throw, object flying through air, game sound effect",
+    "primary": "sounds/grenades/grenade_throw_01.wav"
+  },
+  "grenades.flash_grenade": {
+    "category": "grenades",
+    "key": "flash_grenade",
+    "files": [
+      "sounds/grenades/flash_grenade_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 440,
+    "prompt": "flashbang explosion, blinding flash, stun grenade, game sound effect",
+    "primary": "sounds/grenades/flash_grenade_01.wav"
+  },
+  "grenades.stun_grenade": {
+    "category": "grenades",
+    "key": "stun_grenade",
+    "files": [
+      "sounds/grenades/stun_grenade_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 480,
+    "prompt": "stun grenade effect, disorienting blast, concussion, game sound effect",
+    "primary": "sounds/grenades/stun_grenade_01.wav"
+  },
+  "grenades.emp_grenade": {
+    "category": "grenades",
+    "key": "emp_grenade",
+    "files": [
+      "sounds/grenades/emp_grenade_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 810,
+    "prompt": "EMP grenade detonation, electronics disabled, electromagnetic pulse, game sound effect",
+    "primary": "sounds/grenades/emp_grenade_01.wav"
+  },
+  "grenades.incendiary_grenade": {
+    "category": "grenades",
+    "key": "incendiary_grenade",
+    "files": [
+      "sounds/grenades/incendiary_grenade_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 920,
+    "prompt": "incendiary grenade explosion, fire spreading, burning blast, game sound effect",
+    "primary": "sounds/grenades/incendiary_grenade_01.wav"
+  },
+  "grenades.cryo_grenade": {
+    "category": "grenades",
+    "key": "cryo_grenade",
+    "files": [
+      "sounds/grenades/cryo_grenade_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 610,
+    "prompt": "cryo grenade detonation, freezing explosion, ice blast, game sound effect",
+    "primary": "sounds/grenades/cryo_grenade_01.wav"
+  },
+  "combat_ui.turn_start": {
+    "category": "combat_ui",
+    "key": "turn_start",
+    "files": [
+      "sounds/combat_ui/turn_start_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 380,
+    "prompt": "turn starting, combat round begin, action ready chime, game UI",
+    "primary": "sounds/combat_ui/turn_start_01.wav"
+  },
+  "combat_ui.turn_end": {
+    "category": "combat_ui",
+    "key": "turn_end",
+    "files": [
+      "sounds/combat_ui/turn_end_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 430,
+    "prompt": "turn ending, combat round complete, next player, game UI",
+    "primary": "sounds/combat_ui/turn_end_01.wav"
+  },
+  "combat_ui.critical_warning": {
+    "category": "combat_ui",
+    "key": "critical_warning",
+    "files": [
+      "sounds/combat_ui/critical_warning_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 460,
+    "prompt": "critical health warning, danger alert, low HP alarm, game UI",
+    "primary": "sounds/combat_ui/critical_warning_01.wav"
+  },
+  "combat_ui.death_alert": {
+    "category": "combat_ui",
+    "key": "death_alert",
+    "files": [
+      "sounds/combat_ui/death_alert_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 710,
+    "prompt": "death notification, character died, fatal alert, game UI",
+    "primary": "sounds/combat_ui/death_alert_01.wav"
+  },
+  "combat_ui.combat_start": {
+    "category": "combat_ui",
+    "key": "combat_start",
+    "files": [
+      "sounds/combat_ui/combat_start_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 250,
+    "prompt": "combat initiating, battle beginning, engagement alert, game UI",
+    "primary": "sounds/combat_ui/combat_start_01.wav"
+  },
+  "combat_ui.combat_end_victory": {
+    "category": "combat_ui",
+    "key": "combat_end_victory",
+    "files": [
+      "sounds/combat_ui/combat_end_victory_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1730,
+    "prompt": "combat victory, battle won, triumph fanfare, game UI",
+    "primary": "sounds/combat_ui/combat_end_victory_01.wav"
+  },
+  "combat_ui.combat_end_defeat": {
+    "category": "combat_ui",
+    "key": "combat_end_defeat",
+    "files": [
+      "sounds/combat_ui/combat_end_defeat_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1210,
+    "prompt": "combat defeat, battle lost, failure sound, game UI",
+    "primary": "sounds/combat_ui/combat_end_defeat_01.wav"
+  },
+  "powers.heat_vision": {
+    "category": "powers",
+    "key": "heat_vision",
+    "files": [
+      "sounds/powers/heat_vision_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 810,
+    "prompt": "superhero heat vision, laser eyes, burning beam from eyes, game sound effect",
+    "primary": "sounds/powers/heat_vision_01.wav"
+  },
+  "arrows.arrow_draw": {
+    "category": "arrows",
+    "key": "arrow_draw",
+    "files": [
+      "sounds/arrows/arrow_draw_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 240,
+    "prompt": "drawing arrow from quiver, nocking arrow, bow preparation, game sound effect",
+    "primary": "sounds/arrows/arrow_draw_01.wav"
+  },
+  "materials.impact_steel": {
+    "category": "materials",
+    "key": "impact_steel",
+    "files": [
+      "sounds/materials/impact_steel_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 230,
+    "prompt": "bullet hitting steel, metallic impact with sparks, steel ricochet, game sound effect",
+    "primary": "sounds/materials/impact_steel_01.wav"
+  },
+  "damage_types.damage_edged": {
+    "category": "damage_types",
+    "key": "damage_edged",
+    "files": [
+      "sounds/damage_types/damage_edged_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 250,
+    "prompt": "edged weapon cutting, slashing blade, cutting wound, game sound effect",
+    "primary": "sounds/damage_types/damage_edged_01.wav"
+  },
+  "status_effects.status_bleeding_apply": {
+    "category": "status_effects",
+    "key": "status_bleeding_apply",
+    "files": [
+      "sounds/status_effects/status_bleeding_apply_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 360,
+    "prompt": "wound opening, blood starting to flow, bleeding begins, game sound effect",
+    "primary": "sounds/status_effects/status_bleeding_apply_01.wav"
+  },
+  "powers.heat_vision_charge": {
+    "category": "powers",
+    "key": "heat_vision_charge",
+    "files": [
+      "sounds/powers/heat_vision_charge_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 790,
+    "prompt": "heat vision charging up, eyes glowing, power building, game sound effect",
+    "primary": "sounds/powers/heat_vision_charge_01.wav"
+  },
+  "arrows.arrow_release": {
+    "category": "arrows",
+    "key": "arrow_release",
+    "files": [
+      "sounds/arrows/arrow_release_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 480,
+    "prompt": "bow string release, arrow firing, archery shot, game sound effect",
+    "primary": "sounds/arrows/arrow_release_01.wav"
+  },
+  "materials.impact_adamantium": {
+    "category": "materials",
+    "key": "impact_adamantium",
+    "files": [
+      "sounds/materials/impact_adamantium_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 180,
+    "prompt": "hitting adamantium, indestructible metal, blue sparks, Wolverine metal, game sound effect",
+    "primary": "sounds/materials/impact_adamantium_01.wav"
+  },
+  "damage_types.damage_smashing": {
+    "category": "damage_types",
+    "key": "damage_smashing",
+    "files": [
+      "sounds/damage_types/damage_smashing_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 140,
+    "prompt": "blunt impact, crushing blow, smashing hit, game sound effect",
+    "primary": "sounds/damage_types/damage_smashing_01.wav"
+  },
+  "status_effects.status_poison_apply": {
+    "category": "status_effects",
+    "key": "status_poison_apply",
+    "files": [
+      "sounds/status_effects/status_poison_apply_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 220,
+    "prompt": "poison entering system, toxic injection, venom spreading, game sound effect",
+    "primary": "sounds/status_effects/status_poison_apply_01.wav"
+  },
+  "arrows.arrow_hit_body": {
+    "category": "arrows",
+    "key": "arrow_hit_body",
+    "files": [
+      "sounds/arrows/arrow_hit_body_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 200,
+    "prompt": "arrow hitting flesh, arrow impact on body, piercing wound, game sound effect",
+    "primary": "sounds/arrows/arrow_hit_body_01.wav"
+  },
+  "powers.lightning_control": {
+    "category": "powers",
+    "key": "lightning_control",
+    "files": [
+      "sounds/powers/lightning_control_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 820,
+    "prompt": "lightning bolt attack, electrical storm strike, thunder power, game sound effect",
+    "primary": "sounds/powers/lightning_control_01.wav"
+  },
+  "materials.impact_vibranium": {
+    "category": "materials",
+    "key": "impact_vibranium",
+    "files": [
+      "sounds/materials/impact_vibranium_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 530,
+    "prompt": "hitting vibranium, energy absorbing metal, ripple effect, Black Panther metal, game sound effect",
+    "primary": "sounds/materials/impact_vibranium_01.wav"
+  },
+  "status_effects.status_burning_apply": {
+    "category": "status_effects",
+    "key": "status_burning_apply",
+    "files": [
+      "sounds/status_effects/status_burning_apply_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 580,
+    "prompt": "catching on fire, igniting, flames starting, game sound effect",
+    "primary": "sounds/status_effects/status_burning_apply_01.wav"
+  },
+  "damage_types.damage_piercing": {
+    "category": "damage_types",
+    "key": "damage_piercing",
+    "files": [
+      "sounds/damage_types/damage_piercing_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 290,
+    "prompt": "piercing weapon stab, penetrating attack, puncture wound, game sound effect",
+    "primary": "sounds/damage_types/damage_piercing_01.wav"
+  },
+  "arrows.arrow_broadhead": {
+    "category": "arrows",
+    "key": "arrow_broadhead",
+    "files": [
+      "sounds/arrows/arrow_broadhead_01.wav",
+      "sounds/arrows/arrow_broadhead_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 190,
+    "prompt": "broadhead arrow hit, serrated arrow causing bleeding, deep wound, game sound effect",
+    "primary": "sounds/arrows/arrow_broadhead_01.wav"
+  },
+  "powers.lightning_arc": {
+    "category": "powers",
+    "key": "lightning_arc",
+    "files": [
+      "sounds/powers/lightning_arc_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 720,
+    "prompt": "lightning arc between targets, electrical chain, crackling energy, game sound effect",
+    "primary": "sounds/powers/lightning_arc_01.wav"
+  },
+  "materials.impact_wood": {
+    "category": "materials",
+    "key": "impact_wood",
+    "files": [
+      "sounds/materials/impact_wood_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 270,
+    "prompt": "bullet hitting wood, wood splintering, wooden surface impact, game sound effect",
+    "primary": "sounds/materials/impact_wood_01.wav"
+  },
+  "status_effects.status_frozen_apply": {
+    "category": "status_effects",
+    "key": "status_frozen_apply",
+    "files": [
+      "sounds/status_effects/status_frozen_apply_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 780,
+    "prompt": "body freezing solid, turning to ice, cryo freeze, game sound effect",
+    "primary": "sounds/status_effects/status_frozen_apply_01.wav"
+  },
+  "damage_types.damage_gunfire": {
+    "category": "damage_types",
+    "key": "damage_gunfire",
+    "files": [
+      "sounds/damage_types/damage_gunfire_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 280,
+    "prompt": "gunshot wound, bullet hitting body, blood spray, game sound effect",
+    "primary": "sounds/damage_types/damage_gunfire_01.wav"
+  },
+  "arrows.arrow_bodkin": {
+    "category": "arrows",
+    "key": "arrow_bodkin",
+    "files": [
+      "sounds/arrows/arrow_bodkin_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 230,
+    "prompt": "bodkin arrow piercing armor, armor penetrating arrow, sparks on impact, game sound effect",
+    "primary": "sounds/arrows/arrow_bodkin_01.wav"
+  },
+  "powers.energy_blast": {
+    "category": "powers",
+    "key": "energy_blast",
+    "files": [
+      "sounds/powers/energy_blast_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 570,
+    "prompt": "superhero energy blast, generic power discharge, heroic attack, game sound effect",
+    "primary": "sounds/powers/energy_blast_01.wav"
+  },
+  "materials.impact_glass": {
+    "category": "materials",
+    "key": "impact_glass",
+    "files": [
+      "sounds/materials/impact_glass_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 570,
+    "prompt": "glass shattering, window breaking, glass shards flying, game sound effect",
+    "primary": "sounds/materials/impact_glass_01.wav"
+  },
+  "status_effects.status_frozen_break": {
+    "category": "status_effects",
+    "key": "status_frozen_break",
+    "files": [
+      "sounds/status_effects/status_frozen_break_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 350,
+    "prompt": "breaking out of ice, ice shattering, thawing free, game sound effect",
+    "primary": "sounds/status_effects/status_frozen_break_01.wav"
+  },
+  "damage_types.damage_buckshot": {
+    "category": "damage_types",
+    "key": "damage_buckshot",
+    "files": [
+      "sounds/damage_types/damage_buckshot_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 270,
+    "prompt": "shotgun spread hitting body, multiple impacts, buckshot wound, game sound effect",
+    "primary": "sounds/damage_types/damage_buckshot_01.wav"
+  },
+  "arrows.arrow_explosive": {
+    "category": "arrows",
+    "key": "arrow_explosive",
+    "files": [
+      "sounds/arrows/arrow_explosive_01.wav",
+      "sounds/arrows/arrow_explosive_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 660,
+    "prompt": "explosive arrow detonation, arrow explosion, blast arrow, game sound effect",
+    "primary": "sounds/arrows/arrow_explosive_01.wav"
+  },
+  "materials.impact_organic": {
+    "category": "materials",
+    "key": "impact_organic",
+    "files": [
+      "sounds/materials/impact_organic_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 230,
+    "prompt": "bullet hitting flesh, body impact, blood splatter, organic hit, game sound effect",
+    "primary": "sounds/materials/impact_organic_01.wav"
+  },
+  "powers.repulsor_blast": {
+    "category": "powers",
+    "key": "repulsor_blast",
+    "files": [
+      "sounds/powers/repulsor_blast_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 280,
+    "prompt": "Iron Man style repulsor blast, tech energy weapon, palm blast, game sound effect",
+    "primary": "sounds/powers/repulsor_blast_01.wav"
+  },
+  "status_effects.status_stunned": {
+    "category": "status_effects",
+    "key": "status_stunned",
+    "files": [
+      "sounds/status_effects/status_stunned_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 510,
+    "prompt": "stunning impact, dazed hit, stars circling head, game sound effect",
+    "primary": "sounds/status_effects/status_stunned_01.wav"
+  },
+  "damage_types.damage_laser": {
+    "category": "damage_types",
+    "key": "damage_laser",
+    "files": [
+      "sounds/damage_types/damage_laser_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 400,
+    "prompt": "laser burning flesh, energy beam damage, scorch wound, game sound effect",
+    "primary": "sounds/damage_types/damage_laser_01.wav"
+  },
+  "arrows.arrow_acid": {
+    "category": "arrows",
+    "key": "arrow_acid",
+    "files": [
+      "sounds/arrows/arrow_acid_01.wav",
+      "sounds/arrows/arrow_acid_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 500,
+    "prompt": "acid arrow dissolving, corrosive arrow burning, green acid splash, game sound effect",
+    "primary": "sounds/arrows/arrow_acid_01.wav"
+  },
+  "materials.impact_kevlar": {
+    "category": "materials",
+    "key": "impact_kevlar",
+    "files": [
+      "sounds/materials/impact_kevlar_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 240,
+    "prompt": "bullet hitting kevlar, body armor impact, stopped bullet, fibers catching, game sound effect",
+    "primary": "sounds/materials/impact_kevlar_01.wav"
+  },
+  "status_effects.status_blinded": {
+    "category": "status_effects",
+    "key": "status_blinded",
+    "files": [
+      "sounds/status_effects/status_blinded_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 370,
+    "prompt": "flash blindness, vision impaired, eyes damaged, game sound effect",
+    "primary": "sounds/status_effects/status_blinded_01.wav"
+  },
+  "powers.micro_missiles": {
+    "category": "powers",
+    "key": "micro_missiles",
+    "files": [
+      "sounds/powers/micro_missiles_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1070,
+    "prompt": "micro missiles launching, multiple small rockets, tech weapon barrage, game sound effect",
+    "primary": "sounds/powers/micro_missiles_01.wav"
+  },
+  "damage_types.damage_plasma": {
+    "category": "damage_types",
+    "key": "damage_plasma",
+    "files": [
+      "sounds/damage_types/damage_plasma_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 500,
+    "prompt": "plasma burning, superheated energy damage, plasma wound, game sound effect",
+    "primary": "sounds/damage_types/damage_plasma_01.wav"
+  },
+  "arrows.arrow_emp": {
+    "category": "arrows",
+    "key": "arrow_emp",
+    "files": [
+      "sounds/arrows/arrow_emp_01.wav",
+      "sounds/arrows/arrow_emp_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 330,
+    "prompt": "EMP arrow disabling electronics, electromagnetic pulse arrow, tech disrupt, game sound effect",
+    "primary": "sounds/arrows/arrow_emp_01.wav"
+  },
+  "status_effects.status_mind_controlled": {
+    "category": "status_effects",
+    "key": "status_mind_controlled",
+    "files": [
+      "sounds/status_effects/status_mind_controlled_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 710,
+    "prompt": "mind taken over, psychic domination, puppet state, game sound effect",
+    "primary": "sounds/status_effects/status_mind_controlled_01.wav"
+  },
+  "damage_types.damage_electric": {
+    "category": "damage_types",
+    "key": "damage_electric",
+    "files": [
+      "sounds/damage_types/damage_electric_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 720,
+    "prompt": "electric shock damage, electrocution, shocking injury, game sound effect",
+    "primary": "sounds/damage_types/damage_electric_01.wav"
+  },
+  "arrows.arrow_cryo": {
+    "category": "arrows",
+    "key": "arrow_cryo",
+    "files": [
+      "sounds/arrows/arrow_cryo_01.wav",
+      "sounds/arrows/arrow_cryo_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 130,
+    "prompt": "cryo arrow freezing, ice arrow impact, freezing on contact, game sound effect",
+    "primary": "sounds/arrows/arrow_cryo_01.wav"
+  },
+  "status_effects.status_mind_controlled_break": {
+    "category": "status_effects",
+    "key": "status_mind_controlled_break",
+    "files": [
+      "sounds/status_effects/status_mind_controlled_break_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 650,
+    "prompt": "breaking free of mind control, mental liberation, game sound effect",
+    "primary": "sounds/status_effects/status_mind_controlled_break_01.wav"
+  },
+  "powers.claws_slash": {
+    "category": "powers",
+    "key": "claws_slash",
+    "files": [
+      "sounds/powers/claws_slash_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 260,
+    "prompt": "adamantium claws slashing, Wolverine style metal claws, cutting attack, game sound effect",
+    "primary": "sounds/powers/claws_slash_01.wav"
+  },
+  "damage_types.damage_fire": {
+    "category": "damage_types",
+    "key": "damage_fire",
+    "files": [
+      "sounds/damage_types/damage_fire_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 280,
+    "prompt": "fire burning flesh, incendiary damage, burn wound, game sound effect",
+    "primary": "sounds/damage_types/damage_fire_01.wav"
+  },
+  "arrows.arrow_fire": {
+    "category": "arrows",
+    "key": "arrow_fire",
+    "files": [
+      "sounds/arrows/arrow_fire_01.wav",
+      "sounds/arrows/arrow_fire_02.wav"
+    ],
+    "variants": 2,
+    "duration_ms": 280,
+    "prompt": "fire arrow igniting, flaming arrow impact, burning arrow, game sound effect",
+    "primary": "sounds/arrows/arrow_fire_01.wav"
+  },
+  "status_effects.status_disarmed": {
+    "category": "status_effects",
+    "key": "status_disarmed",
+    "files": [
+      "sounds/status_effects/status_disarmed_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 340,
+    "prompt": "weapon knocked away, disarming strike, losing weapon, game sound effect",
+    "primary": "sounds/status_effects/status_disarmed_01.wav"
+  },
+  "powers.claws_extend": {
+    "category": "powers",
+    "key": "claws_extend",
+    "files": [
+      "sounds/powers/claws_extend_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 290,
+    "prompt": "adamantium claws extending, metal claws coming out, snikt sound, game sound effect",
+    "primary": "sounds/powers/claws_extend_01.wav"
+  },
+  "damage_types.damage_cryo": {
+    "category": "damage_types",
+    "key": "damage_cryo",
+    "files": [
+      "sounds/damage_types/damage_cryo_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 550,
+    "prompt": "freezing damage, cold burning, frostbite injury, game sound effect",
+    "primary": "sounds/damage_types/damage_cryo_01.wav"
+  },
+  "arrows.arrow_poison": {
+    "category": "arrows",
+    "key": "arrow_poison",
+    "files": [
+      "sounds/arrows/arrow_poison_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 170,
+    "prompt": "poison arrow injection, toxic arrow hit, venom delivery, game sound effect",
+    "primary": "sounds/arrows/arrow_poison_01.wav"
+  },
+  "damage_types.damage_acid": {
+    "category": "damage_types",
+    "key": "damage_acid",
+    "files": [
+      "sounds/damage_types/damage_acid_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 580,
+    "prompt": "acid burning flesh, corrosive damage, dissolving, game sound effect",
+    "primary": "sounds/damage_types/damage_acid_01.wav"
+  },
+  "arrows.arrow_flashbang": {
+    "category": "arrows",
+    "key": "arrow_flashbang",
+    "files": [
+      "sounds/arrows/arrow_flashbang_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 590,
+    "prompt": "flashbang arrow detonating, blinding flash, stun arrow, game sound effect",
+    "primary": "sounds/arrows/arrow_flashbang_01.wav"
+  },
+  "powers.super_speed_attack": {
+    "category": "powers",
+    "key": "super_speed_attack",
+    "files": [
+      "sounds/powers/super_speed_attack_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 320,
+    "prompt": "super speed punches, rapid speedster attacks, fast combo, game sound effect",
+    "primary": "sounds/powers/super_speed_attack_01.wav"
+  },
+  "damage_types.damage_explosive": {
+    "category": "damage_types",
+    "key": "damage_explosive",
+    "files": [
+      "sounds/damage_types/damage_explosive_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 680,
+    "prompt": "explosion damage, blast injury, debris wounds, game sound effect",
+    "primary": "sounds/damage_types/damage_explosive_01.wav"
+  },
+  "arrows.arrow_sonic": {
+    "category": "arrows",
+    "key": "arrow_sonic",
+    "files": [
+      "sounds/arrows/arrow_sonic_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 350,
+    "prompt": "sonic arrow impact, sound wave burst, disorienting arrow, game sound effect",
+    "primary": "sounds/arrows/arrow_sonic_01.wav"
+  },
+  "powers.magnetism_activate": {
+    "category": "powers",
+    "key": "magnetism_activate",
+    "files": [
+      "sounds/powers/magnetism_activate_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 760,
+    "prompt": "magnetism power activation, magnetic field, Magneto style power, game sound effect",
+    "primary": "sounds/powers/magnetism_activate_01.wav"
+  },
+  "powers.magnetism_throw": {
+    "category": "powers",
+    "key": "magnetism_throw",
+    "files": [
+      "sounds/powers/magnetism_throw_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 290,
+    "prompt": "magnetically throwing metal, launching object, magnetic force, game sound effect",
+    "primary": "sounds/powers/magnetism_throw_01.wav"
+  },
+  "powers.mind_control": {
+    "category": "powers",
+    "key": "mind_control",
+    "files": [
+      "sounds/powers/mind_control_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1450,
+    "prompt": "psychic mind control, mental domination, Xavier style power, game sound effect",
+    "primary": "sounds/powers/mind_control_01.wav"
+  },
+  "powers.time_manipulation": {
+    "category": "powers",
+    "key": "time_manipulation",
+    "files": [
+      "sounds/powers/time_manipulation_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1950,
+    "prompt": "time slowing down, temporal manipulation, time stop effect, game sound effect",
+    "primary": "sounds/powers/time_manipulation_01.wav"
+  },
+  "powers.invulnerability_hit": {
+    "category": "powers",
+    "key": "invulnerability_hit",
+    "files": [
+      "sounds/powers/invulnerability_hit_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 180,
+    "prompt": "bullet bouncing off invulnerable skin, Superman style deflection, game sound effect",
+    "primary": "sounds/powers/invulnerability_hit_01.wav"
+  },
+  "powers.force_field_activate": {
+    "category": "powers",
+    "key": "force_field_activate",
+    "files": [
+      "sounds/powers/force_field_activate_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 720,
+    "prompt": "force field activating, energy barrier up, protective shield, game sound effect",
+    "primary": "sounds/powers/force_field_activate_01.wav"
+  },
+  "powers.force_field_hit": {
+    "category": "powers",
+    "key": "force_field_hit",
+    "files": [
+      "sounds/powers/force_field_hit_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 310,
+    "prompt": "attack hitting force field, energy barrier impact, blocked attack, game sound effect",
+    "primary": "sounds/powers/force_field_hit_01.wav"
+  },
+  "powers.power_armor_hit": {
+    "category": "powers",
+    "key": "power_armor_hit",
+    "files": [
+      "sounds/powers/power_armor_hit_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 240,
+    "prompt": "bullet hitting power armor, Iron Man suit impact, armored deflection, game sound effect",
+    "primary": "sounds/powers/power_armor_hit_01.wav"
+  },
+  "powers.danger_sense": {
+    "category": "powers",
+    "key": "danger_sense",
+    "files": [
+      "sounds/powers/danger_sense_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 340,
+    "prompt": "Spider-sense tingling, danger warning, precognition alert, game sound effect",
+    "primary": "sounds/powers/danger_sense_01.wav"
+  },
+  "ma_striking.ma_jab": {
+    "category": "ma_striking",
+    "key": "ma_jab",
+    "files": [
+      "sounds/ma_striking/ma_jab_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 270,
+    "prompt": "quick jab punch, fast air whoosh, boxing jab, game sound effect",
+    "primary": "sounds/ma_striking/ma_jab_01.wav"
+  },
+  "ma_striking.ma_cross": {
+    "category": "ma_striking",
+    "key": "ma_cross",
+    "files": [
+      "sounds/ma_striking/ma_cross_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 360,
+    "prompt": "cross punch impact, harder punch hitting body, boxing cross, game sound effect",
+    "primary": "sounds/ma_striking/ma_cross_01.wav"
+  },
+  "ma_striking.ma_hook": {
+    "category": "ma_striking",
+    "key": "ma_hook",
+    "files": [
+      "sounds/ma_striking/ma_hook_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 250,
+    "prompt": "hook punch impact, curved punch with body thud, boxing hook, game sound effect",
+    "primary": "sounds/ma_striking/ma_hook_01.wav"
+  },
+  "ma_striking.ma_uppercut": {
+    "category": "ma_striking",
+    "key": "ma_uppercut",
+    "files": [
+      "sounds/ma_striking/ma_uppercut_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 200,
+    "prompt": "uppercut punch, rising punch with jaw crack, boxing uppercut, game sound effect",
+    "primary": "sounds/ma_striking/ma_uppercut_01.wav"
+  },
+  "ma_striking.ma_elbow": {
+    "category": "ma_striking",
+    "key": "ma_elbow",
+    "files": [
+      "sounds/ma_striking/ma_elbow_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 30,
+    "prompt": "elbow strike impact, sharp elbow hitting body, Muay Thai elbow, game sound effect",
+    "primary": "sounds/ma_striking/ma_elbow_01.wav"
+  },
+  "ma_striking.ma_knee": {
+    "category": "ma_striking",
+    "key": "ma_knee",
+    "files": [
+      "sounds/ma_striking/ma_knee_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 100,
+    "prompt": "knee strike impact, heavy knee to body thud, Muay Thai knee, game sound effect",
+    "primary": "sounds/ma_striking/ma_knee_01.wav"
+  },
+  "ma_grappling.ma_clinch": {
+    "category": "ma_grappling",
+    "key": "ma_clinch",
+    "files": [
+      "sounds/ma_grappling/ma_clinch_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 280,
+    "prompt": "clinch grab, bodies colliding, cloth rustle, wrestling clinch, game sound effect",
+    "primary": "sounds/ma_grappling/ma_clinch_01.wav"
+  },
+  "ma_grappling.ma_takedown": {
+    "category": "ma_grappling",
+    "key": "ma_takedown",
+    "files": [
+      "sounds/ma_grappling/ma_takedown_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 330,
+    "prompt": "takedown, body hitting ground hard, wrestling takedown, game sound effect",
+    "primary": "sounds/ma_grappling/ma_takedown_01.wav"
+  },
+  "ma_grappling.ma_throw": {
+    "category": "ma_grappling",
+    "key": "ma_throw",
+    "files": [
+      "sounds/ma_grappling/ma_throw_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 160,
+    "prompt": "hip throw, whoosh plus ground slam, judo throw, game sound effect",
+    "primary": "sounds/ma_grappling/ma_throw_01.wav"
+  },
+  "ma_grappling.ma_slam": {
+    "category": "ma_grappling",
+    "key": "ma_slam",
+    "files": [
+      "sounds/ma_grappling/ma_slam_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 430,
+    "prompt": "body slam, devastating ground impact, wrestling slam, game sound effect",
+    "primary": "sounds/ma_grappling/ma_slam_01.wav"
+  },
+  "ma_grappling.ma_piledriver": {
+    "category": "ma_grappling",
+    "key": "ma_piledriver",
+    "files": [
+      "sounds/ma_grappling/ma_piledriver_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 740,
+    "prompt": "piledriver impact, critical bone crunch, devastating finisher, game sound effect",
+    "primary": "sounds/ma_grappling/ma_piledriver_01.wav"
+  },
+  "ma_submission.ma_armbar": {
+    "category": "ma_submission",
+    "key": "ma_armbar",
+    "files": [
+      "sounds/ma_submission/ma_armbar_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 260,
+    "prompt": "armbar submission, joint stress, arm struggle, BJJ armbar, game sound effect",
+    "primary": "sounds/ma_submission/ma_armbar_01.wav"
+  },
+  "ma_submission.ma_triangle": {
+    "category": "ma_submission",
+    "key": "ma_triangle",
+    "files": [
+      "sounds/ma_submission/ma_triangle_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 440,
+    "prompt": "triangle choke, choking gasping sounds, BJJ submission, game sound effect",
+    "primary": "sounds/ma_submission/ma_triangle_01.wav"
+  },
+  "ma_submission.ma_kimura": {
+    "category": "ma_submission",
+    "key": "ma_kimura",
+    "files": [
+      "sounds/ma_submission/ma_kimura_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 520,
+    "prompt": "kimura lock, shoulder stress, pain grunt, BJJ kimura, game sound effect",
+    "primary": "sounds/ma_submission/ma_kimura_01.wav"
+  },
+  "ma_submission.ma_rearnaked": {
+    "category": "ma_submission",
+    "key": "ma_rearnaked",
+    "files": [
+      "sounds/ma_submission/ma_rearnaked_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1200,
+    "prompt": "rear naked choke, gasping for air, fade to silence, BJJ choke, game sound effect",
+    "primary": "sounds/ma_submission/ma_rearnaked_01.wav"
+  },
+  "ma_submission.ma_heelhook": {
+    "category": "ma_submission",
+    "key": "ma_heelhook",
+    "files": [
+      "sounds/ma_submission/ma_heelhook_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 390,
+    "prompt": "heel hook, leg twist, pain cry, BJJ leg lock, game sound effect",
+    "primary": "sounds/ma_submission/ma_heelhook_01.wav"
+  },
+  "ma_submission.ma_bloodchoke": {
+    "category": "ma_submission",
+    "key": "ma_bloodchoke",
+    "files": [
+      "sounds/ma_submission/ma_bloodchoke_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 290,
+    "prompt": "blood choke, rapid consciousness fade, passing out, game sound effect",
+    "primary": "sounds/ma_submission/ma_bloodchoke_01.wav"
+  },
+  "ma_counter.ma_intercept": {
+    "category": "ma_counter",
+    "key": "ma_intercept",
+    "files": [
+      "sounds/ma_counter/ma_intercept_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 240,
+    "prompt": "intercepting attack, quick block plus counter hit, game sound effect",
+    "primary": "sounds/ma_counter/ma_intercept_01.wav"
+  },
+  "ma_counter.ma_parry": {
+    "category": "ma_counter",
+    "key": "ma_parry",
+    "files": [
+      "sounds/ma_counter/ma_parry_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 350,
+    "prompt": "parry riposte, deflection plus quick strike, fencing style, game sound effect",
+    "primary": "sounds/ma_counter/ma_parry_01.wav"
+  },
+  "ma_counter.ma_eyejab": {
+    "category": "ma_counter",
+    "key": "ma_eyejab",
+    "files": [
+      "sounds/ma_counter/ma_eyejab_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 210,
+    "prompt": "eye jab, quick jab plus pain reaction, dirty fighting, game sound effect",
+    "primary": "sounds/ma_counter/ma_eyejab_01.wav"
+  },
+  "ma_counter.ma_lowkick": {
+    "category": "ma_counter",
+    "key": "ma_lowkick",
+    "files": [
+      "sounds/ma_counter/ma_lowkick_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 480,
+    "prompt": "low kick, leg sweep thud, checking kick, game sound effect",
+    "primary": "sounds/ma_counter/ma_lowkick_01.wav"
+  },
+  "ma_counter.ma_disarm": {
+    "category": "ma_counter",
+    "key": "ma_disarm",
+    "files": [
+      "sounds/ma_counter/ma_disarm_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 190,
+    "prompt": "disarming strike, weapon clattering to ground, game sound effect",
+    "primary": "sounds/ma_counter/ma_disarm_01.wav"
+  },
+  "ma_counter.ma_throat": {
+    "category": "ma_counter",
+    "key": "ma_throat",
+    "files": [
+      "sounds/ma_counter/ma_throat_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 490,
+    "prompt": "throat strike, choking gasp, vulnerable hit, game sound effect",
+    "primary": "sounds/ma_counter/ma_throat_01.wav"
+  },
+  "ma_internal.ma_push": {
+    "category": "ma_internal",
+    "key": "ma_push",
+    "files": [
+      "sounds/ma_internal/ma_push_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 390,
+    "prompt": "chi force push, internal energy release, tai chi push, game sound effect",
+    "primary": "sounds/ma_internal/ma_push_01.wav"
+  },
+  "ma_internal.ma_jointlock": {
+    "category": "ma_internal",
+    "key": "ma_jointlock",
+    "files": [
+      "sounds/ma_internal/ma_jointlock_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 320,
+    "prompt": "joint lock, joint stress and freeze, aikido lock, game sound effect",
+    "primary": "sounds/ma_internal/ma_jointlock_01.wav"
+  },
+  "ma_internal.ma_ironbody": {
+    "category": "ma_internal",
+    "key": "ma_ironbody",
+    "files": [
+      "sounds/ma_internal/ma_ironbody_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 240,
+    "prompt": "iron body hit, metal-like body impact, iron shirt kung fu, game sound effect",
+    "primary": "sounds/ma_internal/ma_ironbody_01.wav"
+  },
+  "ma_internal.ma_dimmak": {
+    "category": "ma_internal",
+    "key": "ma_dimmak",
+    "files": [
+      "sounds/ma_internal/ma_dimmak_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 330,
+    "prompt": "dim mak strike, ominous chi pressure point strike, death touch, game sound effect",
+    "primary": "sounds/ma_internal/ma_dimmak_01.wav"
+  },
+  "melee.melee_punch": {
+    "category": "melee",
+    "key": "melee_punch",
+    "files": [
+      "sounds/melee/melee_punch_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 250,
+    "prompt": "fist punch impact, flesh on flesh, melee combat, game sound effect",
+    "primary": "sounds/melee/melee_punch_01.wav"
+  },
+  "melee.melee_knife_slash": {
+    "category": "melee",
+    "key": "melee_knife_slash",
+    "files": [
+      "sounds/melee/melee_knife_slash_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 320,
+    "prompt": "knife slashing, blade cutting through air and flesh, game sound effect",
+    "primary": "sounds/melee/melee_knife_slash_01.wav"
+  },
+  "melee.melee_knife_stab": {
+    "category": "melee",
+    "key": "melee_knife_stab",
+    "files": [
+      "sounds/melee/melee_knife_stab_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 180,
+    "prompt": "knife stabbing, blade piercing flesh, stabbing sound, game sound effect",
+    "primary": "sounds/melee/melee_knife_stab_01.wav"
+  },
+  "melee.melee_sword_swing": {
+    "category": "melee",
+    "key": "melee_sword_swing",
+    "files": [
+      "sounds/melee/melee_sword_swing_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 270,
+    "prompt": "sword swing through air, metal blade whoosh, game sound effect",
+    "primary": "sounds/melee/melee_sword_swing_01.wav"
+  },
+  "melee.melee_sword_hit": {
+    "category": "melee",
+    "key": "melee_sword_hit",
+    "files": [
+      "sounds/melee/melee_sword_hit_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 250,
+    "prompt": "sword hitting flesh, blade cutting body, slashing wound, game sound effect",
+    "primary": "sounds/melee/melee_sword_hit_01.wav"
+  },
+  "melee.melee_sword_block": {
+    "category": "melee",
+    "key": "melee_sword_block",
+    "files": [
+      "sounds/melee/melee_sword_block_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 250,
+    "prompt": "sword blocking sword, metal clang, blade parry, game sound effect",
+    "primary": "sounds/melee/melee_sword_block_01.wav"
+  },
+  "melee.melee_blunt_swing": {
+    "category": "melee",
+    "key": "melee_blunt_swing",
+    "files": [
+      "sounds/melee/melee_blunt_swing_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 110,
+    "prompt": "blunt weapon swing, heavy object whoosh, bat or pipe swing, game sound effect",
+    "primary": "sounds/melee/melee_blunt_swing_01.wav"
+  },
+  "melee.melee_blunt_hit": {
+    "category": "melee",
+    "key": "melee_blunt_hit",
+    "files": [
+      "sounds/melee/melee_blunt_hit_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 70,
+    "prompt": "blunt weapon impact, crushing thud, bat hitting body, game sound effect",
+    "primary": "sounds/melee/melee_blunt_hit_01.wav"
+  },
+  "melee.melee_claws_out": {
+    "category": "melee",
+    "key": "melee_claws_out",
+    "files": [
+      "sounds/melee/melee_claws_out_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 110,
+    "prompt": "metal claws extending, Wolverine claws unsheathing, snikt sound, game sound effect",
+    "primary": "sounds/melee/melee_claws_out_01.wav"
+  },
+  "melee.melee_claws_slash": {
+    "category": "melee",
+    "key": "melee_claws_slash",
+    "files": [
+      "sounds/melee/melee_claws_slash_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 310,
+    "prompt": "metal claws slashing, adamantium tearing through flesh, game sound effect",
+    "primary": "sounds/melee/melee_claws_slash_01.wav"
+  },
+  "firearms.gun_pistol": {
+    "category": "firearms",
+    "key": "gun_pistol",
+    "files": [
+      "sounds/firearms/gun_pistol_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 320,
+    "prompt": "pistol gunshot, 9mm handgun fire, single shot, game sound effect",
+    "primary": "sounds/firearms/gun_pistol_01.wav"
+  },
+  "firearms.gun_pistol_silenced": {
+    "category": "firearms",
+    "key": "gun_pistol_silenced",
+    "files": [
+      "sounds/firearms/gun_pistol_silenced_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 480,
+    "prompt": "silenced pistol shot, suppressed handgun, quiet gunshot, game sound effect",
+    "primary": "sounds/firearms/gun_pistol_silenced_01.wav"
+  },
+  "firearms.gun_rifle": {
+    "category": "firearms",
+    "key": "gun_rifle",
+    "files": [
+      "sounds/firearms/gun_rifle_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 400,
+    "prompt": "assault rifle burst, automatic rifle fire, military weapon, game sound effect",
+    "primary": "sounds/firearms/gun_rifle_01.wav"
+  },
+  "firearms.gun_shotgun": {
+    "category": "firearms",
+    "key": "gun_shotgun",
+    "files": [
+      "sounds/firearms/gun_shotgun_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 310,
+    "prompt": "shotgun blast, powerful buckshot fire, pump action, game sound effect",
+    "primary": "sounds/firearms/gun_shotgun_01.wav"
+  },
+  "firearms.gun_sniper": {
+    "category": "firearms",
+    "key": "gun_sniper",
+    "files": [
+      "sounds/firearms/gun_sniper_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 310,
+    "prompt": "sniper rifle shot, high caliber rifle, long range precision, game sound effect",
+    "primary": "sounds/firearms/gun_sniper_01.wav"
+  },
+  "firearms.gun_smg": {
+    "category": "firearms",
+    "key": "gun_smg",
+    "files": [
+      "sounds/firearms/gun_smg_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 260,
+    "prompt": "submachine gun burst, rapid SMG fire, close quarters, game sound effect",
+    "primary": "sounds/firearms/gun_smg_01.wav"
+  },
+  "firearms.gun_reload_pistol": {
+    "category": "firearms",
+    "key": "gun_reload_pistol",
+    "files": [
+      "sounds/firearms/gun_reload_pistol_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 510,
+    "prompt": "pistol reload, magazine click, slide rack, game sound effect",
+    "primary": "sounds/firearms/gun_reload_pistol_01.wav"
+  },
+  "firearms.gun_reload_rifle": {
+    "category": "firearms",
+    "key": "gun_reload_rifle",
+    "files": [
+      "sounds/firearms/gun_reload_rifle_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 620,
+    "prompt": "rifle reload, magazine change, bolt pull, game sound effect",
+    "primary": "sounds/firearms/gun_reload_rifle_01.wav"
+  },
+  "firearms.gun_empty": {
+    "category": "firearms",
+    "key": "gun_empty",
+    "files": [
+      "sounds/firearms/gun_empty_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 270,
+    "prompt": "empty gun click, trigger pull no ammo, out of bullets, game sound effect",
+    "primary": "sounds/firearms/gun_empty_01.wav"
+  },
+  "firearms.bullet_flesh": {
+    "category": "firearms",
+    "key": "bullet_flesh",
+    "files": [
+      "sounds/firearms/bullet_flesh_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 290,
+    "prompt": "bullet hitting flesh, meaty impact, gunshot wound, game sound effect",
+    "primary": "sounds/firearms/bullet_flesh_01.wav"
+  },
+  "firearms.bullet_metal": {
+    "category": "firearms",
+    "key": "bullet_metal",
+    "files": [
+      "sounds/firearms/bullet_metal_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 480,
+    "prompt": "bullet hitting metal, metallic ping, ricochet spark, game sound effect",
+    "primary": "sounds/firearms/bullet_metal_01.wav"
+  },
+  "arrows.arrow_standard": {
+    "category": "arrows",
+    "key": "arrow_standard",
+    "files": [
+      "sounds/arrows/arrow_standard_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 70,
+    "prompt": "bow release and arrow flight plus thud impact, archery shot, game sound effect",
+    "primary": "sounds/arrows/arrow_standard_01.wav"
+  },
+  "arrows.arrow_flash": {
+    "category": "arrows",
+    "key": "arrow_flash",
+    "files": [
+      "sounds/arrows/arrow_flash_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 260,
+    "prompt": "flashbang arrow detonation, blinding flash bang, stun effect, game sound effect",
+    "primary": "sounds/arrows/arrow_flash_01.wav"
+  },
+  "powers_energy.power_heatvision": {
+    "category": "powers_energy",
+    "key": "power_heatvision",
+    "files": [
+      "sounds/powers_energy/power_heatvision_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 820,
+    "prompt": "Superman heat vision, intense laser beams from eyes, burning energy, game sound effect",
+    "primary": "sounds/powers_energy/power_heatvision_01.wav"
+  },
+  "powers_energy.power_lightning": {
+    "category": "powers_energy",
+    "key": "power_lightning",
+    "files": [
+      "sounds/powers_energy/power_lightning_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 800,
+    "prompt": "Thor lightning attack, thunder crack with electric arcs, storm power, game sound effect",
+    "primary": "sounds/powers_energy/power_lightning_01.wav"
+  },
+  "powers_energy.power_energyblast": {
+    "category": "powers_energy",
+    "key": "power_energyblast",
+    "files": [
+      "sounds/powers_energy/power_energyblast_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 620,
+    "prompt": "generic energy blast, power discharge, superhero attack, game sound effect",
+    "primary": "sounds/powers_energy/power_energyblast_01.wav"
+  },
+  "powers_energy.power_repulsor": {
+    "category": "powers_energy",
+    "key": "power_repulsor",
+    "files": [
+      "sounds/powers_energy/power_repulsor_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 390,
+    "prompt": "Iron Man repulsor blast, tech energy pulse from palm, game sound effect",
+    "primary": "sounds/powers_energy/power_repulsor_01.wav"
+  },
+  "powers_energy.power_missiles": {
+    "category": "powers_energy",
+    "key": "power_missiles",
+    "files": [
+      "sounds/powers_energy/power_missiles_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 870,
+    "prompt": "micro missiles launching, multiple small rockets, tech barrage, game sound effect",
+    "primary": "sounds/powers_energy/power_missiles_01.wav"
+  },
+  "powers_energy.power_forcefield_on": {
+    "category": "powers_energy",
+    "key": "power_forcefield_on",
+    "files": [
+      "sounds/powers_energy/power_forcefield_on_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 730,
+    "prompt": "force field activating, energy barrier humming on, protective shield, game sound effect",
+    "primary": "sounds/powers_energy/power_forcefield_on_01.wav"
+  },
+  "powers_energy.power_forcefield_break": {
+    "category": "powers_energy",
+    "key": "power_forcefield_break",
+    "files": [
+      "sounds/powers_energy/power_forcefield_break_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 410,
+    "prompt": "force field shattering, energy barrier breaking, shield failure, game sound effect",
+    "primary": "sounds/powers_energy/power_forcefield_break_01.wav"
+  },
+  "powers_energy.power_plasma": {
+    "category": "powers_energy",
+    "key": "power_plasma",
+    "files": [
+      "sounds/powers_energy/power_plasma_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 380,
+    "prompt": "plasma energy discharge, hot energy burst, superheated attack, game sound effect",
+    "primary": "sounds/powers_energy/power_plasma_01.wav"
+  },
+  "powers_physical.power_superstrength": {
+    "category": "powers_physical",
+    "key": "power_superstrength",
+    "files": [
+      "sounds/powers_physical/power_superstrength_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 480,
+    "prompt": "superhuman punch impact, devastating super strength blow, powerful hit, game sound effect",
+    "primary": "sounds/powers_physical/power_superstrength_01.wav"
+  },
+  "powers_physical.power_superspeed_move": {
+    "category": "powers_physical",
+    "key": "power_superspeed_move",
+    "files": [
+      "sounds/powers_physical/power_superspeed_move_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 310,
+    "prompt": "super speed movement, Flash speedster whoosh, air displacement, game sound effect",
+    "primary": "sounds/powers_physical/power_superspeed_move_01.wav"
+  },
+  "powers_physical.power_superspeed_attack": {
+    "category": "powers_physical",
+    "key": "power_superspeed_attack",
+    "files": [
+      "sounds/powers_physical/power_superspeed_attack_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 560,
+    "prompt": "super speed attack combo, rapid multi-hit speedster assault, game sound effect",
+    "primary": "sounds/powers_physical/power_superspeed_attack_01.wav"
+  },
+  "powers_physical.power_invulnerable": {
+    "category": "powers_physical",
+    "key": "power_invulnerable",
+    "files": [
+      "sounds/powers_physical/power_invulnerable_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 240,
+    "prompt": "bullet bouncing off invulnerable skin, Superman deflection, no damage, game sound effect",
+    "primary": "sounds/powers_physical/power_invulnerable_01.wav"
+  },
+  "powers_mental.power_mindcontrol": {
+    "category": "powers_mental",
+    "key": "power_mindcontrol",
+    "files": [
+      "sounds/powers_mental/power_mindcontrol_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 710,
+    "prompt": "mind control domination, psychic takeover pulse, mental subjugation, game sound effect",
+    "primary": "sounds/powers_mental/power_mindcontrol_01.wav"
+  },
+  "powers_mental.power_mental": {
+    "category": "powers_mental",
+    "key": "power_mental",
+    "files": [
+      "sounds/powers_mental/power_mental_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 800,
+    "prompt": "psychic attack wave, mental blast, brain assault, game sound effect",
+    "primary": "sounds/powers_mental/power_mental_01.wav"
+  },
+  "powers_mobility.power_flight_takeoff": {
+    "category": "powers_mobility",
+    "key": "power_flight_takeoff",
+    "files": [
+      "sounds/powers_mobility/power_flight_takeoff_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 530,
+    "prompt": "superhero flight takeoff, whoosh launching upward, liftoff, game sound effect",
+    "primary": "sounds/powers_mobility/power_flight_takeoff_01.wav"
+  },
+  "powers_mobility.power_time": {
+    "category": "powers_mobility",
+    "key": "power_time",
+    "files": [
+      "sounds/powers_mobility/power_time_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 850,
+    "prompt": "time manipulation, reality warping effect, temporal distortion, game sound effect",
+    "primary": "sounds/powers_mobility/power_time_01.wav"
+  },
+  "powers_control.power_magnetism": {
+    "category": "powers_control",
+    "key": "power_magnetism",
+    "files": [
+      "sounds/powers_control/power_magnetism_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 930,
+    "prompt": "Magneto magnetism activation, magnetic field humming, metal control, game sound effect",
+    "primary": "sounds/powers_control/power_magnetism_01.wav"
+  },
+  "powers_control.power_magnetism_disarm": {
+    "category": "powers_control",
+    "key": "power_magnetism_disarm",
+    "files": [
+      "sounds/powers_control/power_magnetism_disarm_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 310,
+    "prompt": "magnetically yanking weapons away, forced disarm, metal pulled, game sound effect",
+    "primary": "sounds/powers_control/power_magnetism_disarm_01.wav"
+  },
+  "powers_control.power_magnetism_crush": {
+    "category": "powers_control",
+    "key": "power_magnetism_crush",
+    "files": [
+      "sounds/powers_control/power_magnetism_crush_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 670,
+    "prompt": "magnetically crushing metal, compression sound, metal warping, game sound effect",
+    "primary": "sounds/powers_control/power_magnetism_crush_01.wav"
+  },
+  "status_dot.status_bleed": {
+    "category": "status_dot",
+    "key": "status_bleed",
+    "files": [
+      "sounds/status_dot/status_bleed_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 70,
+    "prompt": "bleeding wound dripping, blood loss tick, injury bleeding, game sound effect",
+    "primary": "sounds/status_dot/status_bleed_01.wav"
+  },
+  "status_dot.status_poison": {
+    "category": "status_dot",
+    "key": "status_poison",
+    "files": [
+      "sounds/status_dot/status_poison_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 330,
+    "prompt": "poison damage tick, sick gurgling, toxic effect, game sound effect",
+    "primary": "sounds/status_dot/status_poison_01.wav"
+  },
+  "status_dot.status_burn": {
+    "category": "status_dot",
+    "key": "status_burn",
+    "files": [
+      "sounds/status_dot/status_burn_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 530,
+    "prompt": "burning damage tick, crackling flames on body, fire damage, game sound effect",
+    "primary": "sounds/status_dot/status_burn_01.wav"
+  },
+  "status_dot.status_burn_apply": {
+    "category": "status_dot",
+    "key": "status_burn_apply",
+    "files": [
+      "sounds/status_dot/status_burn_apply_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 430,
+    "prompt": "catching fire, ignition whoosh, setting ablaze, game sound effect",
+    "primary": "sounds/status_dot/status_burn_apply_01.wav"
+  },
+  "status_dot.status_acid": {
+    "category": "status_dot",
+    "key": "status_acid",
+    "files": [
+      "sounds/status_dot/status_acid_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 510,
+    "prompt": "acid damage tick, sizzling dissolve, corrosive burn, game sound effect",
+    "primary": "sounds/status_dot/status_acid_01.wav"
+  },
+  "status_control.status_stunned": {
+    "category": "status_control",
+    "key": "status_stunned",
+    "files": [
+      "sounds/status_control/status_stunned_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 600,
+    "prompt": "stunned daze effect, stars circling, disoriented, game sound effect",
+    "primary": "sounds/status_control/status_stunned_01.wav"
+  },
+  "status_control.status_blinded": {
+    "category": "status_control",
+    "key": "status_blinded",
+    "files": [
+      "sounds/status_control/status_blinded_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 400,
+    "prompt": "blinded effect, vision failure, flash blindness, game sound effect",
+    "primary": "sounds/status_control/status_blinded_01.wav"
+  },
+  "status_control.status_frozen": {
+    "category": "status_control",
+    "key": "status_frozen",
+    "files": [
+      "sounds/status_control/status_frozen_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 630,
+    "prompt": "frozen in ice, body crystallizing, cryo freeze, game sound effect",
+    "primary": "sounds/status_control/status_frozen_01.wav"
+  },
+  "status_control.status_frozen_break": {
+    "category": "status_control",
+    "key": "status_frozen_break",
+    "files": [
+      "sounds/status_control/status_frozen_break_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 270,
+    "prompt": "breaking free from ice, ice shattering, escaping freeze, game sound effect",
+    "primary": "sounds/status_control/status_frozen_break_01.wav"
+  },
+  "status_control.status_disarmed": {
+    "category": "status_control",
+    "key": "status_disarmed",
+    "files": [
+      "sounds/status_control/status_disarmed_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 220,
+    "prompt": "weapon dropped clatter, disarmed effect, losing weapon, game sound effect",
+    "primary": "sounds/status_control/status_disarmed_01.wav"
+  },
+  "status_control.status_mindcontrol": {
+    "category": "status_control",
+    "key": "status_mindcontrol",
+    "files": [
+      "sounds/status_control/status_mindcontrol_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 880,
+    "prompt": "mind controlled state, mental takeover effect, puppet, game sound effect",
+    "primary": "sounds/status_control/status_mindcontrol_01.wav"
+  },
+  "combat_ui_turn.ui_turn_start": {
+    "category": "combat_ui_turn",
+    "key": "ui_turn_start",
+    "files": [
+      "sounds/combat_ui_turn/ui_turn_start_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 320,
+    "prompt": "turn starting notification chime, your turn begins, game UI",
+    "primary": "sounds/combat_ui_turn/ui_turn_start_01.wav"
+  },
+  "combat_ui_turn.ui_turn_end": {
+    "category": "combat_ui_turn",
+    "key": "ui_turn_end",
+    "files": [
+      "sounds/combat_ui_turn/ui_turn_end_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 230,
+    "prompt": "turn ending confirmation click, turn complete, game UI",
+    "primary": "sounds/combat_ui_turn/ui_turn_end_01.wav"
+  },
+  "combat_ui_turn.ui_round_start": {
+    "category": "combat_ui_turn",
+    "key": "ui_round_start",
+    "files": [
+      "sounds/combat_ui_turn/ui_round_start_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 470,
+    "prompt": "new round fanfare, combat round beginning, game UI",
+    "primary": "sounds/combat_ui_turn/ui_round_start_01.wav"
+  },
+  "combat_ui_turn.ui_your_turn": {
+    "category": "combat_ui_turn",
+    "key": "ui_your_turn",
+    "files": [
+      "sounds/combat_ui_turn/ui_your_turn_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 190,
+    "prompt": "your turn attention sound, player turn notification, game UI",
+    "primary": "sounds/combat_ui_turn/ui_your_turn_01.wav"
+  },
+  "combat_ui_turn.ui_enemy_turn": {
+    "category": "combat_ui_turn",
+    "key": "ui_enemy_turn",
+    "files": [
+      "sounds/combat_ui_turn/ui_enemy_turn_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 350,
+    "prompt": "enemy turn warning tone, opponent acting, game UI",
+    "primary": "sounds/combat_ui_turn/ui_enemy_turn_01.wav"
+  },
+  "combat_ui_results.combat_hit": {
+    "category": "combat_ui_results",
+    "key": "combat_hit",
+    "files": [
+      "sounds/combat_ui_results/combat_hit_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 160,
+    "prompt": "hit confirmed sound, satisfying impact feedback, game UI",
+    "primary": "sounds/combat_ui_results/combat_hit_01.wav"
+  },
+  "combat_ui_results.combat_crit": {
+    "category": "combat_ui_results",
+    "key": "combat_crit",
+    "files": [
+      "sounds/combat_ui_results/combat_crit_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 470,
+    "prompt": "critical hit sound, extra powerful impact, devastating blow, game UI",
+    "primary": "sounds/combat_ui_results/combat_crit_01.wav"
+  },
+  "combat_ui_results.combat_miss": {
+    "category": "combat_ui_results",
+    "key": "combat_miss",
+    "files": [
+      "sounds/combat_ui_results/combat_miss_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 230,
+    "prompt": "attack missed, whoosh past, evasion, game UI",
+    "primary": "sounds/combat_ui_results/combat_miss_01.wav"
+  },
+  "combat_ui_results.combat_dodge": {
+    "category": "combat_ui_results",
+    "key": "combat_dodge",
+    "files": [
+      "sounds/combat_ui_results/combat_dodge_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 370,
+    "prompt": "successful dodge, evasive movement, game UI",
+    "primary": "sounds/combat_ui_results/combat_dodge_01.wav"
+  },
+  "combat_ui_results.combat_block": {
+    "category": "combat_ui_results",
+    "key": "combat_block",
+    "files": [
+      "sounds/combat_ui_results/combat_block_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 200,
+    "prompt": "successful block, defense sound, attack stopped, game UI",
+    "primary": "sounds/combat_ui_results/combat_block_01.wav"
+  },
+  "combat_ui_unit.ui_select": {
+    "category": "combat_ui_unit",
+    "key": "ui_select",
+    "files": [
+      "sounds/combat_ui_unit/ui_select_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 220,
+    "prompt": "unit selected click, character selection confirmation, game UI",
+    "primary": "sounds/combat_ui_unit/ui_select_01.wav"
+  },
+  "combat_ui_unit.combat_death": {
+    "category": "combat_ui_unit",
+    "key": "combat_death",
+    "files": [
+      "sounds/combat_ui_unit/combat_death_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 600,
+    "prompt": "death sound with body fall, unit killed, game sound effect",
+    "primary": "sounds/combat_ui_unit/combat_death_01.wav"
+  },
+  "combat_ui_unit.combat_ko": {
+    "category": "combat_ui_unit",
+    "key": "combat_ko",
+    "files": [
+      "sounds/combat_ui_unit/combat_ko_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 460,
+    "prompt": "knockout thud, unit unconscious, game sound effect",
+    "primary": "sounds/combat_ui_unit/combat_ko_01.wav"
+  },
+  "combat_ui_unit.ui_lowhealth": {
+    "category": "combat_ui_unit",
+    "key": "ui_lowhealth",
+    "files": [
+      "sounds/combat_ui_unit/ui_lowhealth_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 600,
+    "prompt": "low health warning alert ping, danger state, game UI",
+    "primary": "sounds/combat_ui_unit/ui_lowhealth_01.wav"
+  },
+  "env_destruction.destruct_wall": {
+    "category": "env_destruction",
+    "key": "destruct_wall",
+    "files": [
+      "sounds/env_destruction/destruct_wall_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 650,
+    "prompt": "wall breaking, concrete crumbling, structural destruction, game sound effect",
+    "primary": "sounds/env_destruction/destruct_wall_01.wav"
+  },
+  "env_destruction.destruct_glass": {
+    "category": "env_destruction",
+    "key": "destruct_glass",
+    "files": [
+      "sounds/env_destruction/destruct_glass_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 500,
+    "prompt": "glass shattering, window breaking, glass destruction, game sound effect",
+    "primary": "sounds/env_destruction/destruct_glass_01.wav"
+  },
+  "env_destruction.destruct_car": {
+    "category": "env_destruction",
+    "key": "destruct_car",
+    "files": [
+      "sounds/env_destruction/destruct_car_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1050,
+    "prompt": "car explosion, vehicle destruction, fiery explosion, game sound effect",
+    "primary": "sounds/env_destruction/destruct_car_01.wav"
+  },
+  "env_destruction.destruct_door": {
+    "category": "env_destruction",
+    "key": "destruct_door",
+    "files": [
+      "sounds/env_destruction/destruct_door_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 470,
+    "prompt": "door kicked in, forced entry, door slam open, game sound effect",
+    "primary": "sounds/env_destruction/destruct_door_01.wav"
+  },
+  "env_cover.cover_enter": {
+    "category": "env_cover",
+    "key": "cover_enter",
+    "files": [
+      "sounds/env_cover/cover_enter_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 430,
+    "prompt": "sliding into cover, taking position, tactical move, game sound effect",
+    "primary": "sounds/env_cover/cover_enter_01.wav"
+  },
+  "env_cover.cover_leave": {
+    "category": "env_cover",
+    "key": "cover_leave",
+    "files": [
+      "sounds/env_cover/cover_leave_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 140,
+    "prompt": "leaving cover, moving out, exposed position, game sound effect",
+    "primary": "sounds/env_cover/cover_leave_01.wav"
+  },
+  "env_cover.cover_destroyed": {
+    "category": "env_cover",
+    "key": "cover_destroyed",
+    "files": [
+      "sounds/env_cover/cover_destroyed_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 550,
+    "prompt": "cover breaking, protection destroyed, exposed, game sound effect",
+    "primary": "sounds/env_cover/cover_destroyed_01.wav"
+  },
+  "env_cover.cover_hit": {
+    "category": "env_cover",
+    "key": "cover_hit",
+    "files": [
+      "sounds/env_cover/cover_hit_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 190,
+    "prompt": "bullet hitting cover, impact absorption, protected, game sound effect",
+    "primary": "sounds/env_cover/cover_hit_01.wav"
+  },
+  "ui_nav.ui_click": {
+    "category": "ui_nav",
+    "key": "ui_click",
+    "files": [
+      "sounds/ui_nav/ui_click_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 130,
+    "prompt": "UI button click, standard interface click, menu tap, game UI",
+    "primary": "sounds/ui_nav/ui_click_01.wav"
+  },
+  "ui_nav.ui_menu_open": {
+    "category": "ui_nav",
+    "key": "ui_menu_open",
+    "files": [
+      "sounds/ui_nav/ui_menu_open_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 220,
+    "prompt": "menu panel sliding open, interface appear, game UI",
+    "primary": "sounds/ui_nav/ui_menu_open_01.wav"
+  },
+  "ui_nav.ui_menu_close": {
+    "category": "ui_nav",
+    "key": "ui_menu_close",
+    "files": [
+      "sounds/ui_nav/ui_menu_close_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 480,
+    "prompt": "menu panel closing, interface disappear, game UI",
+    "primary": "sounds/ui_nav/ui_menu_close_01.wav"
+  },
+  "ui_notify.ui_alert": {
+    "category": "ui_notify",
+    "key": "ui_alert",
+    "files": [
+      "sounds/ui_notify/ui_alert_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 410,
+    "prompt": "alert notification, attention needed, important ping, game UI",
+    "primary": "sounds/ui_notify/ui_alert_01.wav"
+  },
+  "ui_notify.ui_success": {
+    "category": "ui_notify",
+    "key": "ui_success",
+    "files": [
+      "sounds/ui_notify/ui_success_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 260,
+    "prompt": "success notification, action completed, positive chime, game UI",
+    "primary": "sounds/ui_notify/ui_success_01.wav"
+  },
+  "ui_notify.ui_error": {
+    "category": "ui_notify",
+    "key": "ui_error",
+    "files": [
+      "sounds/ui_notify/ui_error_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 410,
+    "prompt": "error notification, action failed, negative buzz, game UI",
+    "primary": "sounds/ui_notify/ui_error_01.wav"
+  },
+  "ui_notify.ui_message": {
+    "category": "ui_notify",
+    "key": "ui_message",
+    "files": [
+      "sounds/ui_notify/ui_message_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 480,
+    "prompt": "new message received, inbox ping, communication alert, game UI",
+    "primary": "sounds/ui_notify/ui_message_01.wav"
+  },
+  "ui_notify.ui_levelup": {
+    "category": "ui_notify",
+    "key": "ui_levelup",
+    "files": [
+      "sounds/ui_notify/ui_levelup_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 520,
+    "prompt": "level up fanfare, achievement celebration, skill gained, game UI",
+    "primary": "sounds/ui_notify/ui_levelup_01.wav"
+  },
+  "results.result_victory": {
+    "category": "results",
+    "key": "result_victory",
+    "files": [
+      "sounds/results/result_victory_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 930,
+    "prompt": "battle victory triumphant fanfare, winning celebration, game UI",
+    "primary": "sounds/results/result_victory_01.wav"
+  },
+  "results.result_defeat": {
+    "category": "results",
+    "key": "result_defeat",
+    "files": [
+      "sounds/results/result_defeat_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1390,
+    "prompt": "battle defeat somber failure, losing sound, game UI",
+    "primary": "sounds/results/result_defeat_01.wav"
+  },
+  "ma_striking.ma_spinning": {
+    "category": "ma_striking",
+    "key": "ma_spinning",
+    "files": [
+      "sounds/ma_striking/ma_spinning_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 310,
+    "prompt": "spinning back fist, whoosh rotation plus heavy impact, game sound effect",
+    "primary": "sounds/ma_striking/ma_spinning_01.wav"
+  },
+  "ma_striking.ma_superman": {
+    "category": "ma_striking",
+    "key": "ma_superman",
+    "files": [
+      "sounds/ma_striking/ma_superman_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 220,
+    "prompt": "superman punch, jumping punch with devastating impact, MMA, game sound effect",
+    "primary": "sounds/ma_striking/ma_superman_01.wav"
+  },
+  "ma_grappling.ma_suplex": {
+    "category": "ma_grappling",
+    "key": "ma_suplex",
+    "files": [
+      "sounds/ma_grappling/ma_suplex_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 630,
+    "prompt": "suplex lift and slam, straining grunt plus heavy slam, wrestling suplex, game sound effect",
+    "primary": "sounds/ma_grappling/ma_suplex_01.wav"
+  },
+  "ma_grappling.ma_pin": {
+    "category": "ma_grappling",
+    "key": "ma_pin",
+    "files": [
+      "sounds/ma_grappling/ma_pin_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 880,
+    "prompt": "wrestling pin, struggle sounds, cloth friction, ground control, game sound effect",
+    "primary": "sounds/ma_grappling/ma_pin_01.wav"
+  },
+  "ma_grappling.ma_lift": {
+    "category": "ma_grappling",
+    "key": "ma_lift",
+    "files": [
+      "sounds/ma_grappling/ma_lift_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 640,
+    "prompt": "lifting opponent, straining grunt, power lift, game sound effect",
+    "primary": "sounds/ma_grappling/ma_lift_01.wav"
+  },
+  "ma_submission.ma_guardpull": {
+    "category": "ma_submission",
+    "key": "ma_guardpull",
+    "files": [
+      "sounds/ma_submission/ma_guardpull_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 380,
+    "prompt": "guard pull, body drop to ground, scramble position, BJJ, game sound effect",
+    "primary": "sounds/ma_submission/ma_guardpull_01.wav"
+  },
+  "ma_submission.ma_neckcrank": {
+    "category": "ma_submission",
+    "key": "ma_neckcrank",
+    "files": [
+      "sounds/ma_submission/ma_neckcrank_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 720,
+    "prompt": "neck crank, spine stress, pain grunt, dangerous submission, game sound effect",
+    "primary": "sounds/ma_submission/ma_neckcrank_01.wav"
+  },
+  "ma_counter.ma_breakguard": {
+    "category": "ma_counter",
+    "key": "ma_breakguard",
+    "files": [
+      "sounds/ma_counter/ma_breakguard_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 300,
+    "prompt": "breaking guard, guard collapse, defensive failure, game sound effect",
+    "primary": "sounds/ma_counter/ma_breakguard_01.wav"
+  },
+  "ma_counter.ma_simultaneous": {
+    "category": "ma_counter",
+    "key": "ma_simultaneous",
+    "files": [
+      "sounds/ma_counter/ma_simultaneous_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 150,
+    "prompt": "simultaneous attack, double impact, both fighters hit, game sound effect",
+    "primary": "sounds/ma_counter/ma_simultaneous_01.wav"
+  },
+  "ma_internal.ma_deflect": {
+    "category": "ma_internal",
+    "key": "ma_deflect",
+    "files": [
+      "sounds/ma_internal/ma_deflect_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 230,
+    "prompt": "soft deflection, energy redirect whoosh, tai chi deflect, game sound effect",
+    "primary": "sounds/ma_internal/ma_deflect_01.wav"
+  },
+  "ma_internal.ma_redirect": {
+    "category": "ma_internal",
+    "key": "ma_redirect",
+    "files": [
+      "sounds/ma_internal/ma_redirect_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 540,
+    "prompt": "energy redirect, force transfer hum, aikido redirect, game sound effect",
+    "primary": "sounds/ma_internal/ma_redirect_01.wav"
+  },
+  "ma_internal.ma_energysteal": {
+    "category": "ma_internal",
+    "key": "ma_energysteal",
+    "files": [
+      "sounds/ma_internal/ma_energysteal_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 670,
+    "prompt": "energy drain, life force draining sound, chi steal, game sound effect",
+    "primary": "sounds/ma_internal/ma_energysteal_01.wav"
+  },
+  "ma_internal.ma_circlewalk": {
+    "category": "ma_internal",
+    "key": "ma_circlewalk",
+    "files": [
+      "sounds/ma_internal/ma_circlewalk_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 390,
+    "prompt": "circle walking, silent footsteps, bagua movement, game sound effect",
+    "primary": "sounds/ma_internal/ma_circlewalk_01.wav"
+  },
+  "melee.melee_staff_swing": {
+    "category": "melee",
+    "key": "melee_staff_swing",
+    "files": [
+      "sounds/melee/melee_staff_swing_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 160,
+    "prompt": "staff swing through air, wooden pole whoosh, bo staff, game sound effect",
+    "primary": "sounds/melee/melee_staff_swing_01.wav"
+  },
+  "melee.melee_staff_hit": {
+    "category": "melee",
+    "key": "melee_staff_hit",
+    "files": [
+      "sounds/melee/melee_staff_hit_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 140,
+    "prompt": "staff impact, wooden crack on body, game sound effect",
+    "primary": "sounds/melee/melee_staff_hit_01.wav"
+  },
+  "firearms.gun_machinegun": {
+    "category": "firearms",
+    "key": "gun_machinegun",
+    "files": [
+      "sounds/firearms/gun_machinegun_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 980,
+    "prompt": "machine gun sustained fire, heavy automatic weapon, suppressive fire, game sound effect",
+    "primary": "sounds/firearms/gun_machinegun_01.wav"
+  },
+  "firearms.bullet_wall": {
+    "category": "firearms",
+    "key": "bullet_wall",
+    "files": [
+      "sounds/firearms/bullet_wall_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 290,
+    "prompt": "bullet hitting wall, concrete chip, debris, game sound effect",
+    "primary": "sounds/firearms/bullet_wall_01.wav"
+  },
+  "firearms.bullet_ricochet": {
+    "category": "firearms",
+    "key": "bullet_ricochet",
+    "files": [
+      "sounds/firearms/bullet_ricochet_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 210,
+    "prompt": "bullet ricochet, whizzing deflection, bouncing shot, game sound effect",
+    "primary": "sounds/firearms/bullet_ricochet_01.wav"
+  },
+  "arrows.arrow_net": {
+    "category": "arrows",
+    "key": "arrow_net",
+    "files": [
+      "sounds/arrows/arrow_net_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 350,
+    "prompt": "net arrow deployment, net snapping open and tangling, capture, game sound effect",
+    "primary": "sounds/arrows/arrow_net_01.wav"
+  },
+  "arrows.arrow_smoke": {
+    "category": "arrows",
+    "key": "arrow_smoke",
+    "files": [
+      "sounds/arrows/arrow_smoke_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 530,
+    "prompt": "smoke arrow gas release, hissing smoke spreading, concealment, game sound effect",
+    "primary": "sounds/arrows/arrow_smoke_01.wav"
+  },
+  "arrows.arrow_grapple": {
+    "category": "arrows",
+    "key": "arrow_grapple",
+    "files": [
+      "sounds/arrows/arrow_grapple_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 500,
+    "prompt": "grapple arrow cable deployment, rope shooting out, zipline ready, game sound effect",
+    "primary": "sounds/arrows/arrow_grapple_01.wav"
+  },
+  "powers_physical.power_regen": {
+    "category": "powers_physical",
+    "key": "power_regen",
+    "files": [
+      "sounds/powers_physical/power_regen_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 450,
+    "prompt": "regeneration healing, Wolverine healing factor, flesh mending, game sound effect",
+    "primary": "sounds/powers_physical/power_regen_01.wav"
+  },
+  "powers_mental.power_telepathy": {
+    "category": "powers_mental",
+    "key": "power_telepathy",
+    "files": [
+      "sounds/powers_mental/power_telepathy_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 330,
+    "prompt": "telepathic probe, Professor X mind reading, mental whoosh, game sound effect",
+    "primary": "sounds/powers_mental/power_telepathy_01.wav"
+  },
+  "powers_mobility.power_flight_hover": {
+    "category": "powers_mobility",
+    "key": "power_flight_hover",
+    "files": [
+      "sounds/powers_mobility/power_flight_hover_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1950,
+    "prompt": "flight hovering, steady humming, sustained flight, game sound effect",
+    "primary": "sounds/powers_mobility/power_flight_hover_01.wav"
+  },
+  "powers_mobility.power_flight_land": {
+    "category": "powers_mobility",
+    "key": "power_flight_land",
+    "files": [
+      "sounds/powers_mobility/power_flight_land_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 520,
+    "prompt": "superhero landing, touchdown impact, heroic landing, game sound effect",
+    "primary": "sounds/powers_mobility/power_flight_land_01.wav"
+  },
+  "powers_mobility.power_wallcrawl": {
+    "category": "powers_mobility",
+    "key": "power_wallcrawl",
+    "files": [
+      "sounds/powers_mobility/power_wallcrawl_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 370,
+    "prompt": "Spider-Man wall crawling, sticky adhesion sounds, climbing, game sound effect",
+    "primary": "sounds/powers_mobility/power_wallcrawl_01.wav"
+  },
+  "powers_mobility.power_agility": {
+    "category": "powers_mobility",
+    "key": "power_agility",
+    "files": [
+      "sounds/powers_mobility/power_agility_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 320,
+    "prompt": "super agility acrobatics, athletic whoosh, nimble movement, game sound effect",
+    "primary": "sounds/powers_mobility/power_agility_01.wav"
+  },
+  "status_control.status_immobile": {
+    "category": "status_control",
+    "key": "status_immobile",
+    "files": [
+      "sounds/status_control/status_immobile_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 260,
+    "prompt": "movement locked, unable to move, immobilized, game sound effect",
+    "primary": "sounds/status_control/status_immobile_01.wav"
+  },
+  "combat_ui_results.combat_graze": {
+    "category": "combat_ui_results",
+    "key": "combat_graze",
+    "files": [
+      "sounds/combat_ui_results/combat_graze_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 280,
+    "prompt": "glancing blow, partial hit, graze sound, game UI",
+    "primary": "sounds/combat_ui_results/combat_graze_01.wav"
+  },
+  "combat_ui_unit.ui_move": {
+    "category": "combat_ui_unit",
+    "key": "ui_move",
+    "files": [
+      "sounds/combat_ui_unit/ui_move_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 440,
+    "prompt": "movement confirmed, unit moving, game UI",
+    "primary": "sounds/combat_ui_unit/ui_move_01.wav"
+  },
+  "combat_ui_unit.combat_revive": {
+    "category": "combat_ui_unit",
+    "key": "combat_revive",
+    "files": [
+      "sounds/combat_ui_unit/combat_revive_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 420,
+    "prompt": "revived recovery sound, unit restored, game sound effect",
+    "primary": "sounds/combat_ui_unit/combat_revive_01.wav"
+  },
+  "env_footsteps.step_concrete": {
+    "category": "env_footsteps",
+    "key": "step_concrete",
+    "files": [
+      "sounds/env_footsteps/step_concrete_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 290,
+    "prompt": "footstep on concrete, hard surface step, urban, game sound effect",
+    "primary": "sounds/env_footsteps/step_concrete_01.wav"
+  },
+  "env_footsteps.step_metal": {
+    "category": "env_footsteps",
+    "key": "step_metal",
+    "files": [
+      "sounds/env_footsteps/step_metal_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 140,
+    "prompt": "footstep on metal, metallic ring step, industrial, game sound effect",
+    "primary": "sounds/env_footsteps/step_metal_01.wav"
+  },
+  "env_footsteps.step_grass": {
+    "category": "env_footsteps",
+    "key": "step_grass",
+    "files": [
+      "sounds/env_footsteps/step_grass_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 60,
+    "prompt": "footstep on grass, soft rustle, outdoor, game sound effect",
+    "primary": "sounds/env_footsteps/step_grass_01.wav"
+  },
+  "env_footsteps.step_water": {
+    "category": "env_footsteps",
+    "key": "step_water",
+    "files": [
+      "sounds/env_footsteps/step_water_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 190,
+    "prompt": "footstep in water, splash step, wet surface, game sound effect",
+    "primary": "sounds/env_footsteps/step_water_01.wav"
+  },
+  "env_footsteps.step_wood": {
+    "category": "env_footsteps",
+    "key": "step_wood",
+    "files": [
+      "sounds/env_footsteps/step_wood_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 150,
+    "prompt": "footstep on wood, creaking board step, interior, game sound effect",
+    "primary": "sounds/env_footsteps/step_wood_01.wav"
+  },
+  "env_footsteps.step_gravel": {
+    "category": "env_footsteps",
+    "key": "step_gravel",
+    "files": [
+      "sounds/env_footsteps/step_gravel_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 200,
+    "prompt": "footstep on gravel, crunching stones, outdoor, game sound effect",
+    "primary": "sounds/env_footsteps/step_gravel_01.wav"
+  },
+  "env_footsteps.step_sand": {
+    "category": "env_footsteps",
+    "key": "step_sand",
+    "files": [
+      "sounds/env_footsteps/step_sand_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 270,
+    "prompt": "footstep on sand, soft displacement, desert beach, game sound effect",
+    "primary": "sounds/env_footsteps/step_sand_01.wav"
+  },
+  "env_footsteps.step_glass": {
+    "category": "env_footsteps",
+    "key": "step_glass",
+    "files": [
+      "sounds/env_footsteps/step_glass_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 290,
+    "prompt": "footstep on broken glass, crunching shards, game sound effect",
+    "primary": "sounds/env_footsteps/step_glass_01.wav"
+  },
+  "env_destruction.destruct_wood": {
+    "category": "env_destruction",
+    "key": "destruct_wood",
+    "files": [
+      "sounds/env_destruction/destruct_wood_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 600,
+    "prompt": "wood breaking, splintering destruction, furniture break, game sound effect",
+    "primary": "sounds/env_destruction/destruct_wood_01.wav"
+  },
+  "env_destruction.destruct_metal": {
+    "category": "env_destruction",
+    "key": "destruct_metal",
+    "files": [
+      "sounds/env_destruction/destruct_metal_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 450,
+    "prompt": "metal bending, warping steel, metal destruction, game sound effect",
+    "primary": "sounds/env_destruction/destruct_metal_01.wav"
+  },
+  "ambient_combat.ambient_urban": {
+    "category": "ambient_combat",
+    "key": "ambient_urban",
+    "files": [
+      "sounds/ambient_combat/ambient_urban_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 6150,
+    "prompt": "urban city combat ambience, street background, city sounds, game ambient",
+    "primary": "sounds/ambient_combat/ambient_urban_01.wav"
+  },
+  "ambient_combat.ambient_forest": {
+    "category": "ambient_combat",
+    "key": "ambient_forest",
+    "files": [
+      "sounds/ambient_combat/ambient_forest_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 6910,
+    "prompt": "forest combat ambience, nature sounds, outdoor trees, game ambient",
+    "primary": "sounds/ambient_combat/ambient_forest_01.wav"
+  },
+  "ambient_combat.ambient_indoor": {
+    "category": "ambient_combat",
+    "key": "ambient_indoor",
+    "files": [
+      "sounds/ambient_combat/ambient_indoor_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 6700,
+    "prompt": "indoor combat ambience, building echo, interior space, game ambient",
+    "primary": "sounds/ambient_combat/ambient_indoor_01.wav"
+  },
+  "ambient_combat.ambient_rain": {
+    "category": "ambient_combat",
+    "key": "ambient_rain",
+    "files": [
+      "sounds/ambient_combat/ambient_rain_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 7970,
+    "prompt": "rainy combat ambience, rainfall sounds, wet weather, game ambient",
+    "primary": "sounds/ambient_combat/ambient_rain_01.wav"
+  },
+  "ambient_combat.ambient_night": {
+    "category": "ambient_combat",
+    "key": "ambient_night",
+    "files": [
+      "sounds/ambient_combat/ambient_night_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 7980,
+    "prompt": "night combat ambience, crickets, silence tension, game ambient",
+    "primary": "sounds/ambient_combat/ambient_night_01.wav"
+  },
+  "ui_nav.ui_hover": {
+    "category": "ui_nav",
+    "key": "ui_hover",
+    "files": [
+      "sounds/ui_nav/ui_hover_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 230,
+    "prompt": "UI hover highlight, subtle mouse over, game UI",
+    "primary": "sounds/ui_nav/ui_hover_01.wav"
+  },
+  "ui_nav.ui_tab": {
+    "category": "ui_nav",
+    "key": "ui_tab",
+    "files": [
+      "sounds/ui_nav/ui_tab_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 60,
+    "prompt": "tab switch sound, navigation change, game UI",
+    "primary": "sounds/ui_nav/ui_tab_01.wav"
+  },
+  "ui_nav.ui_scroll": {
+    "category": "ui_nav",
+    "key": "ui_scroll",
+    "files": [
+      "sounds/ui_nav/ui_scroll_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 480,
+    "prompt": "list scrolling sound, content scroll, game UI",
+    "primary": "sounds/ui_nav/ui_scroll_01.wav"
+  },
+  "ui_notify.ui_warning": {
+    "category": "ui_notify",
+    "key": "ui_warning",
+    "files": [
+      "sounds/ui_notify/ui_warning_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 130,
+    "prompt": "warning notification, caution alert, game UI",
+    "primary": "sounds/ui_notify/ui_warning_01.wav"
+  },
+  "results.result_mvp": {
+    "category": "results",
+    "key": "result_mvp",
+    "files": [
+      "sounds/results/result_mvp_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 750,
+    "prompt": "MVP announcement spotlight, hero recognition, special achievement, game UI",
+    "primary": "sounds/results/result_mvp_01.wav"
+  },
+  "results.result_firstblood": {
+    "category": "results",
+    "key": "result_firstblood",
+    "files": [
+      "sounds/results/result_firstblood_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 400,
+    "prompt": "first blood achievement sound, first kill, game UI",
+    "primary": "sounds/results/result_firstblood_01.wav"
+  },
+  "results.result_flawless": {
+    "category": "results",
+    "key": "result_flawless",
+    "files": [
+      "sounds/results/result_flawless_01.wav"
+    ],
+    "variants": 1,
+    "duration_ms": 1100,
+    "prompt": "flawless victory fanfare, perfect victory, no damage taken, game UI",
+    "primary": "sounds/results/result_flawless_01.wav"
+  }
+}

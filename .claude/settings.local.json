@@ -7,7 +7,17 @@
       "Bash(pip install:*)",
       "WebSearch",
       "WebFetch(domain:classicmarvelforever.com)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "WebFetch(domain:skywork.ai)",
+      "Bash(cat:*)",
+      "Bash(wc:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(git clone:*)",
+      "Bash(npm run build:*)",
+      "Bash(git checkout:*)",
+      "Bash(python clean_mock_data.py:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

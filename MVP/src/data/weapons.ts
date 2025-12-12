@@ -10,7 +10,64 @@
  * - Grenades
  */
 
-import { Weapon, WeaponCategory, COST_VALUES, CostLevel } from './equipmentTypes';
+import { Weapon, WeaponCategory, COST_VALUES, CostLevel, DamageMode } from './equipmentTypes';
+
+// Helper to determine stun capability based on weapon properties
+function getStunProperties(category: string, damageSubType: string, name: string): {
+  stunCapable: boolean;
+  defaultMode: DamageMode;
+  alwaysLethal?: boolean;
+  alwaysNonLethal?: boolean;
+} {
+  // Edged weapons are always lethal
+  if (damageSubType === 'EDGED_MELEE' || damageSubType === 'PIERCING_MELEE') {
+    return { stunCapable: false, defaultMode: 'kill', alwaysLethal: true };
+  }
+
+  // Firearms are always lethal
+  if (damageSubType === 'GUNFIRE' || damageSubType === 'BUCKSHOT' || damageSubType === 'SLUG') {
+    return { stunCapable: false, defaultMode: 'kill', alwaysLethal: true };
+  }
+
+  // Explosions are always lethal
+  if (damageSubType === 'EXPLOSION' || damageSubType === 'SHRAPNEL' || damageSubType === 'DISINTEGRATION') {
+    return { stunCapable: false, defaultMode: 'kill', alwaysLethal: true };
+  }
+
+  // Non-lethal weapons
+  if (damageSubType === 'STUN' || damageSubType === 'FLASH' || damageSubType === 'ENTANGLE' ||
+      damageSubType === 'SMOKE' || damageSubType === 'EMP') {
+    return { stunCapable: false, defaultMode: 'stun', alwaysNonLethal: true };
+  }
+
+  // Taser/Net gun
+  if (name.toLowerCase().includes('taser') || name.toLowerCase().includes('net')) {
+    return { stunCapable: false, defaultMode: 'stun', alwaysNonLethal: true };
+  }
+
+  // Blunt melee weapons can toggle (default stun)
+  if (damageSubType === 'SMASHING_MELEE') {
+    return { stunCapable: true, defaultMode: 'stun' };
+  }
+
+  // Energy weapons can toggle (default kill)
+  if (category === 'Energy_Weapons') {
+    return { stunCapable: true, defaultMode: 'kill' };
+  }
+
+  // Concussive damage can toggle
+  if (damageSubType === 'CONCUSSIVE') {
+    return { stunCapable: true, defaultMode: 'stun' };
+  }
+
+  // Gas grenades can toggle
+  if (damageSubType === 'GAS') {
+    return { stunCapable: true, defaultMode: 'stun' };
+  }
+
+  // Default: lethal, no toggle
+  return { stunCapable: false, defaultMode: 'kill', alwaysLethal: true };
+}
 
 // Helper to parse accuracy CS from string like "+1CS" or "-2CS"
 function parseAccuracyCS(str: string): number {
@@ -301,6 +358,7 @@ export const MELEE_WEAPONS: Weapon[] = [
     penetrationMult: 0.5,
     skillRequired: 'Martial_Arts',
     strRequired: 0,
+    disarmBonus: 25,  // Good for disarming
     specialEffects: ['Fast attacks', 'Can disarm'],
     costLevel: 'Medium',
     costValue: getCostValue('Medium'),
@@ -428,6 +486,140 @@ export const MELEE_WEAPONS: Weapon[] = [
     notes: 'Devastating but slow',
     emoji: '🔨',
   },
+  // NEW MARTIAL ARTS WEAPONS
+  {
+    id: 'MEL_016',
+    name: 'Whip',
+    category: 'Melee_Skill',
+    baseDamage: 5,
+    damageType: 'PHYSICAL',
+    damageSubType: 'SMASHING_MELEE',
+    attackSpeed: 1.5,
+    range: 3,                   // Long reach!
+    accuracyCS: -1,
+    penetrationMult: 0.1,
+    skillRequired: 'Martial_Arts',
+    strRequired: 5,
+    disarmBonus: 30,            // Excellent for disarming
+    entangleCapable: true,      // Can grapple from range
+    ...getStunProperties('Melee_Skill', 'SMASHING_MELEE', 'Whip'),
+    specialEffects: ['Can disarm at range', 'Can pull enemies', 'Entangle'],
+    costLevel: 'Medium',
+    costValue: getCostValue('Medium'),
+    availability: 'Specialized',
+    notes: 'Low damage but excellent control',
+    emoji: '🪢',
+  },
+  {
+    id: 'MEL_017',
+    name: 'Sai',
+    category: 'Melee_Skill',
+    baseDamage: 8,
+    damageType: 'PHYSICAL',
+    damageSubType: 'PIERCING_MELEE',
+    attackSpeed: 0.9,
+    range: 1,
+    accuracyCS: 0,
+    penetrationMult: 0.8,
+    skillRequired: 'Martial_Arts',
+    strRequired: 0,
+    disarmBonus: 35,            // Designed for trapping/disarming
+    ...getStunProperties('Melee_Skill', 'PIERCING_MELEE', 'Sai'),
+    specialEffects: ['Sword catcher', '+2CS to parry'],
+    costLevel: 'Medium',
+    costValue: getCostValue('Medium'),
+    availability: 'Specialized',
+    notes: 'Okinawan weapon, excellent for disarms',
+    emoji: '🔱',
+  },
+  {
+    id: 'MEL_018',
+    name: 'Kama',
+    category: 'Melee_Skill',
+    baseDamage: 10,
+    damageType: 'PHYSICAL',
+    damageSubType: 'EDGED_MELEE',
+    attackSpeed: 1.0,
+    range: 1,
+    accuracyCS: 0,
+    penetrationMult: 0.7,
+    skillRequired: 'Martial_Arts',
+    strRequired: 0,
+    disarmBonus: 20,            // Hook can catch weapons
+    ...getStunProperties('Melee_Skill', 'EDGED_MELEE', 'Kama'),
+    specialEffects: ['Hook can catch weapons', 'Often used in pairs'],
+    costLevel: 'Medium',
+    costValue: getCostValue('Medium'),
+    availability: 'Specialized',
+    notes: 'Okinawan farming tool turned weapon',
+    emoji: '🌙',
+  },
+  {
+    id: 'MEL_019',
+    name: 'Escrima Sticks',
+    category: 'Melee_Skill',
+    baseDamage: 7,
+    damageType: 'PHYSICAL',
+    damageSubType: 'SMASHING_MELEE',
+    attackSpeed: 0.7,           // Very fast
+    range: 1,
+    accuracyCS: 1,
+    penetrationMult: 0.3,
+    skillRequired: 'Martial_Arts',
+    strRequired: 0,
+    disarmBonus: 30,            // Eskrima focuses on disarms
+    ...getStunProperties('Melee_Skill', 'SMASHING_MELEE', 'Escrima Sticks'),
+    specialEffects: ['Fast dual-wield', 'Excellent for disarms', '+1CS with Eskrima style'],
+    costLevel: 'Low',
+    costValue: getCostValue('Low'),
+    availability: 'Common',
+    notes: 'Filipino martial arts weapon',
+    emoji: '🥢',
+  },
+  {
+    id: 'MEL_020',
+    name: 'Chain',
+    category: 'Melee_Skill',
+    baseDamage: 6,
+    damageType: 'PHYSICAL',
+    damageSubType: 'SMASHING_MELEE',
+    attackSpeed: 1.3,
+    range: 2,
+    accuracyCS: -1,
+    penetrationMult: 0.2,
+    skillRequired: 'Martial_Arts',
+    strRequired: 5,
+    disarmBonus: 20,
+    entangleCapable: true,      // Can wrap around limbs
+    ...getStunProperties('Melee_Skill', 'SMASHING_MELEE', 'Chain'),
+    specialEffects: ['Can entangle', 'Improvised'],
+    costLevel: 'Free',
+    costValue: 0,
+    availability: 'Common',
+    notes: 'Improvised but effective',
+    emoji: '⛓️',
+  },
+  {
+    id: 'MEL_021',
+    name: 'Balisong',
+    category: 'Melee_Skill',
+    baseDamage: 8,
+    damageType: 'PHYSICAL',
+    damageSubType: 'EDGED_MELEE',
+    attackSpeed: 0.8,
+    range: 1,
+    accuracyCS: 1,
+    penetrationMult: 0.5,
+    skillRequired: 'Martial_Arts',
+    strRequired: 0,
+    ...getStunProperties('Melee_Skill', 'EDGED_MELEE', 'Balisong'),
+    specialEffects: ['Concealed', 'Fast draw', 'Intimidation +1CS'],
+    costLevel: 'Medium',
+    costValue: getCostValue('Medium'),
+    availability: 'Restricted',
+    notes: 'Filipino butterfly knife',
+    emoji: '🦋',
+  },
 ];
 
 // ==================== RANGED WEAPONS - FIREARMS ====================
@@ -532,10 +724,10 @@ export const RANGED_WEAPONS: Weapon[] = [
     baseDamage: 20,
     damageType: 'BLEED_PHYSICAL',
     damageSubType: 'GUNFIRE',
-    attackSpeed: 0.8,
+    attackSpeed: 1.0,  // Burst fire (was 0.8 - too fast), balanced by -3CS accuracy
     range: 20,
-    accuracyCS: -3,
-    penetrationMult: 1.0,
+    accuracyCS: -3,    // Heavy penalty for spray-and-pray
+    penetrationMult: 0.6,  // 9mm doesn't penetrate well
     skillRequired: 'None',
     strRequired: 0,
     reloadTime: 3,
@@ -624,7 +816,7 @@ export const RANGED_WEAPONS: Weapon[] = [
     baseDamage: 30,
     damageType: 'BLEED_PHYSICAL',
     damageSubType: 'GUNFIRE',
-    attackSpeed: 0.5,
+    attackSpeed: 1.5,  // Aimed semi-auto fire (was 0.5 - too fast)
     range: 60,
     accuracyCS: -1,
     penetrationMult: 1.0,
@@ -638,7 +830,7 @@ export const RANGED_WEAPONS: Weapon[] = [
     costValue: getCostValue('High'),
     availability: 'Military',
     investigationBonus: '+1CS military',
-    notes: 'Standard military rifle',
+    notes: 'Standard military rifle (5.56mm)',
     emoji: '🎯',
   },
   {
@@ -1019,6 +1211,52 @@ export const SPECIAL_WEAPONS: Weapon[] = [
     availability: 'Specialized',
     notes: 'Non-lethal capture',
     emoji: '🕸️',
+  },
+  {
+    id: 'SPC_008',
+    name: 'Pepper Spray',
+    category: 'Special_Ranged',
+    baseDamage: 2,
+    damageType: 'SPECIAL',
+    damageSubType: 'GAS',
+    attackSpeed: 1.0,
+    range: 2,
+    accuracyCS: 1,
+    penetrationMult: 0,
+    skillRequired: 'None',
+    strRequired: 0,
+    reloadTime: 0,
+    magazineSize: 10,
+    ...getStunProperties('Special_Ranged', 'GAS', 'Pepper Spray'),
+    specialEffects: ['Blinds target 1d4 turns', '-3CS accuracy while blinded', 'Non-lethal', 'Ignores armor'],
+    costLevel: 'Low',
+    costValue: getCostValue('Low'),
+    availability: 'Common',
+    notes: 'OC spray - causes temporary blindness and pain',
+    emoji: '🌶️',
+  },
+  {
+    id: 'SPC_009',
+    name: 'Mace Spray',
+    category: 'Special_Ranged',
+    baseDamage: 3,
+    damageType: 'SPECIAL',
+    damageSubType: 'GAS',
+    attackSpeed: 1.0,
+    range: 3,
+    accuracyCS: 1,
+    penetrationMult: 0,
+    skillRequired: 'None',
+    strRequired: 0,
+    reloadTime: 0,
+    magazineSize: 15,
+    ...getStunProperties('Special_Ranged', 'GAS', 'Mace Spray'),
+    specialEffects: ['Blinds target 1d6 turns', '-3CS accuracy while blinded', 'Causes coughing', 'Non-lethal', 'Ignores armor'],
+    costLevel: 'Low',
+    costValue: getCostValue('Low'),
+    availability: 'Law_Enforcement',
+    notes: 'CN/CS tear gas spray - stronger than pepper spray',
+    emoji: '💨',
   },
 ];
 
@@ -1449,8 +1687,20 @@ export const GRENADES: Weapon[] = [
   },
 ];
 
+// ==================== STUN PROPERTIES APPLICATION ====================
+
+// Apply stun properties to a weapon based on its type
+function applyStunProperties(weapon: Omit<Weapon, 'stunCapable' | 'defaultMode' | 'alwaysLethal' | 'alwaysNonLethal'>): Weapon {
+  const stunProps = getStunProperties(weapon.category, weapon.damageSubType, weapon.name);
+  return {
+    ...weapon,
+    ...stunProps,
+  } as Weapon;
+}
+
 // ==================== COMBINED WEAPON LIST ====================
 
+// Apply stun properties to all weapons
 export const ALL_WEAPONS: Weapon[] = [
   ...MELEE_WEAPONS,
   ...RANGED_WEAPONS,
@@ -1458,7 +1708,7 @@ export const ALL_WEAPONS: Weapon[] = [
   ...SPECIAL_WEAPONS,
   ...ENERGY_WEAPONS,
   ...GRENADES,
-];
+].map(w => applyStunProperties(w as Omit<Weapon, 'stunCapable' | 'defaultMode' | 'alwaysLethal' | 'alwaysNonLethal'>));
 
 // ==================== UTILITY FUNCTIONS ====================
 

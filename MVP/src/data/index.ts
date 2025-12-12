@@ -52,6 +52,17 @@ export {
 } from './armor';
 export type { ArmorMaterial } from './armor';
 
+// Shield Items (Combat-ready shield/armor equipment)
+export {
+  SHIELD_ITEMS,
+  getShieldItemById,
+  getShieldItemByName,
+  getShieldItems,
+  getArmorItems,
+  calculateTotalProtection,
+} from './shieldItems';
+export type { ShieldItem } from './shieldItems';
+
 // Gadgets
 export {
   GROUND_VEHICLES,

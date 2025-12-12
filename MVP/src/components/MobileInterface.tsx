@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '../stores/enhancedGameStore'
 import { Phone, MessageSquare, Map, Users, Settings, AlertTriangle } from 'lucide-react'
 import toast from 'react-hot-toast'
+import WorldMapGrid from './WorldMap/WorldMapGrid'
 
 export default function MobileInterface() {
   const { 
@@ -149,14 +150,13 @@ function MessagesTab({ notifications }: { notifications: any[] }) {
 
 function MapTab() {
   return (
-    <motion.div 
-      className="p-4 h-full"
+    <motion.div
+      className="h-full overflow-hidden"
       initial={{ x: 300, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: -300, opacity: 0 }}
     >
-      <h2 className="text-xl font-bold text-sht-primary-400 mb-4">🗺️ World Status</h2>
-      {/* Map content */}
+      <WorldMapGrid />
     </motion.div>
   )
 }

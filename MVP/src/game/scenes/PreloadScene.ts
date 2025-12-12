@@ -77,6 +77,16 @@ export class PreloadScene extends Phaser.Scene {
       const id = i.toString().padStart(2, '0');
       this.load.image(`soldier_${id}`, `assets/character_token/sprite_${id}.png`);
     }
+
+    // Load grenade sprites
+    this.loadGrenadeSprites();
+  }
+
+  private loadGrenadeSprites(): void {
+    const grenades = ['frag', 'plasma', 'nervegas', 'flashbang', 'smoke', 'incendiary', 'emp', 'cryo'];
+    for (const grenade of grenades) {
+      this.load.image(`grenade_${grenade}`, `assets/items/grenades/grenade_${grenade}.png`);
+    }
   }
 
   private generatePlaceholderAssets(): void {

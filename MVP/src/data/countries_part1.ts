@@ -1,47 +1,5 @@
-export interface Country {
-  id: number;
-  code: string;
-  name: string;
-  president: string;
-  population: number;
-  populationRating: number;
-  motto: string;
-  nationality: string;
-  governmentType: string;
-  governmentPerception: string;
-  governmentCorruption: number; // INVERTED: 100 - original
-  presidentialTerm: number;
-  leaderTitle: string;
-  militaryServices: number;
-  militaryBudget: number;
-  intelligenceServices: number;
-  intelligenceBudget: number;
-  capitalPunishment: string;
-  mediaFreedom: number;
-  lawEnforcement: number;
-  lawEnforcementBudget: number;
-  gdpNational: number;
-  gdpPerCapita: number;
-  healthcare: number;
-  higherEducation: number;
-  socialDevelopment: number;
-  lifestyle: number;
-  terrorismActivity: string;
-  cyberCapabilities: number;
-  digitalDevelopment: number;
-  science: number;
-  cloning: string;
-  lswActivity: number;
-  lswRegulations: string;
-  vigilantism: string;
-  leaderGender: string;
-  cultureCode: number; // 1-14 regional code from cities
-  cultureGroup: 'A' | 'B' | 'C' | 'D' | 'E' | 'F'; // Name generation region
-}
+import type { Country } from '../types';
 
-// Culture Group Mapping:
-// A = cultureCode 2 (Sub-Saharan/Central Africa)
-// B = cultureCode 4,5,6 (Central Asia, South Asia, East+SE Asia)
 // C = cultureCode 7,8,12 (Caribbean, Central America, South America)
 // D = cultureCode 13,14 (North America, Middle East/Other)
 // E = cultureCode 9,10,11 (West Europe, East Europe, Oceania)

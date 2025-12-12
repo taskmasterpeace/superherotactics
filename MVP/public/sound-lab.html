@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Lab - Consequences of Failure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f3460;
+            --accent: #e94560;
+            --accent-hover: #ff6b6b;
+            --text-primary: #eaeaea;
+            --text-secondary: #a0a0a0;
+            --success: #4ade80;
+            --border: #2d2d44;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        header h1 span {
+            color: var(--text-primary);
+            font-weight: 300;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 20px 0;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .categories {
+            display: grid;
+            gap: 20px;
+        }
+
+        .category {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--bg-tertiary);
+            cursor: pointer;
+        }
+
+        .category-header h2 {
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-header .count {
+            background: var(--accent);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .category-header .toggle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            transition: transform 0.2s;
+        }
+
+        .category.collapsed .toggle {
+            transform: rotate(-90deg);
+        }
+
+        .category.collapsed .sound-grid {
+            display: none;
+        }
+
+        .sound-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .sound-card {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .sound-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .sound-card.playing {
+            border-color: var(--success);
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.3);
+        }
+
+        .sound-name {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .sound-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .sound-meta span {
+            background: var(--bg-secondary);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .sound-variants {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .variant-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border: none;
+            border-radius: 6px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .variant-btn:hover {
+            background: var(--accent);
+        }
+
+        .variant-btn.playing {
+            background: var(--success);
+            color: #000;
+        }
+
+        .variant-btn .icon {
+            font-size: 1rem;
+        }
+
+        .no-sounds {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+        }
+
+        .loading .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Now Playing Bar */
+        .now-playing {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 2px solid var(--accent);
+            padding: 15px 30px;
+            display: none;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .now-playing.active {
+            display: flex;
+        }
+
+        .now-playing .info {
+            flex: 1;
+        }
+
+        .now-playing .info h4 {
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .now-playing .info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .now-playing .controls-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .now-playing button {
+            padding: 10px 20px;
+            background: var(--accent);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .now-playing button:hover {
+            background: var(--accent-hover);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sound Lab <span>// Consequences of Failure</span></h1>
+            <p>Preview and manage all game sound effects</p>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-value" id="total-sounds">-</div>
+                <div class="stat-label">Total Sounds</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="total-files">-</div>
+                <div class="stat-label">Total Files</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="total-categories">-</div>
+                <div class="stat-label">Categories</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="search" placeholder="Search sounds... (e.g., explosion, gunshot, ui)">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="combat">Combat</button>
+                <button class="filter-btn" data-filter="ui">UI</button>
+                <button class="filter-btn" data-filter="character">Character</button>
+                <button class="filter-btn" data-filter="environment">Environment</button>
+                <button class="filter-btn" data-filter="powers">Powers</button>
+                <button class="filter-btn" data-filter="ambient">Ambient</button>
+            </div>
+        </div>
+
+        <div id="categories" class="categories">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading sound catalog...</p>
+            </div>
+        </div>
+
+        <footer>
+            SuperHero Tactics: Consequences of Failure | Sound Lab v1.0
+        </footer>
+    </div>
+
+    <!-- Now Playing Bar -->
+    <div class="now-playing" id="now-playing">
+        <div class="info">
+            <h4 id="np-name">-</h4>
+            <p id="np-file">-</p>
+        </div>
+        <div class="controls-bar">
+            <button id="np-stop">Stop</button>
+            <button id="np-replay">Replay</button>
+        </div>
+    </div>
+
+    <audio id="audio-player"></audio>
+
+    <script>
+        // State
+        let catalog = {};
+        let currentFilter = 'all';
+        let searchQuery = '';
+        let currentAudio = null;
+        let currentSound = null;
+
+        // DOM Elements
+        const categoriesContainer = document.getElementById('categories');
+        const searchInput = document.getElementById('search');
+        const audioPlayer = document.getElementById('audio-player');
+        const nowPlaying = document.getElementById('now-playing');
+        const npName = document.getElementById('np-name');
+        const npFile = document.getElementById('np-file');
+
+        // Load catalog
+        async function loadCatalog() {
+            // Try multiple paths (works from server or file://)
+            const paths = [
+                './assets/sounds/catalog.json',
+                '/assets/sounds/catalog.json',
+                'assets/sounds/catalog.json'
+            ];
+
+            let loaded = false;
+            for (const path of paths) {
+                try {
+                    const response = await fetch(path);
+                    if (response.ok) {
+                        catalog = await response.json();
+                        updateStats();
+                        renderCategories();
+                        loaded = true;
+                        break;
+                    }
+                } catch (e) {
+                    continue;
+                }
+            }
+
+            if (!loaded) {
+                // Check if opened as file://
+                const isFileProtocol = window.location.protocol === 'file:';
+                categoriesContainer.innerHTML = `
+                    <div class="no-sounds">
+                        <h3>No sounds found</h3>
+                        ${isFileProtocol ? `
+                            <p style="color: #e94560; margin: 15px 0;">You're opening this file directly. Please start a web server:</p>
+                            <pre style="background: #0f3460; padding: 15px; border-radius: 8px; text-align: left; margin: 15px auto; max-width: 500px;">
+cd C:\\git\\sht\\MVP\\public
+npx serve .
+# Then open http://localhost:3000/sound-lab.html</pre>
+                            <p style="margin-top: 15px;">Or use Python:</p>
+                            <pre style="background: #0f3460; padding: 15px; border-radius: 8px; text-align: left; margin: 15px auto; max-width: 500px;">
+cd C:\\git\\sht\\MVP\\public
+python -m http.server 8080
+# Then open http://localhost:8080/sound-lab.html</pre>
+                        ` : `
+                            <p>The sound catalog hasn't been generated yet.</p>
+                            <p>Run: python generate_all_sounds.py --all</p>
+                        `}
+                    </div>
+                `;
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const sounds = Object.entries(catalog).filter(([k]) => !k.startsWith('_'));
+            const totalFiles = sounds.reduce((sum, [, v]) => sum + (v.files?.length || 0), 0);
+            const categories = new Set(sounds.map(([, v]) => v.category));
+
+            document.getElementById('total-sounds').textContent = sounds.length;
+            document.getElementById('total-files').textContent = totalFiles;
+            document.getElementById('total-categories').textContent = categories.size;
+        }
+
+        // Render categories and sounds
+        function renderCategories() {
+            const sounds = Object.entries(catalog)
+                .filter(([k]) => !k.startsWith('_'))
+                .map(([key, value]) => ({ ...value, fullKey: key }));
+
+            // Group by category
+            const grouped = {};
+            sounds.forEach(sound => {
+                if (!grouped[sound.category]) grouped[sound.category] = [];
+                grouped[sound.category].push(sound);
+            });
+
+            // Filter
+            let categoriesToShow = Object.keys(grouped);
+            if (currentFilter !== 'all') {
+                categoriesToShow = categoriesToShow.filter(c => c === currentFilter);
+            }
+
+            // Search
+            if (searchQuery) {
+                categoriesToShow = categoriesToShow.filter(cat => {
+                    grouped[cat] = grouped[cat].filter(s =>
+                        s.key.includes(searchQuery) ||
+                        s.prompt?.toLowerCase().includes(searchQuery)
+                    );
+                    return grouped[cat].length > 0;
+                });
+            }
+
+            // Render
+            if (categoriesToShow.length === 0) {
+                categoriesContainer.innerHTML = `
+                    <div class="no-sounds">
+                        <p>No sounds match your search.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            categoriesContainer.innerHTML = categoriesToShow.map(category => `
+                <div class="category" data-category="${category}">
+                    <div class="category-header" onclick="toggleCategory('${category}')">
+                        <h2>
+                            ${getCategoryIcon(category)} ${category}
+                            <span class="count">${grouped[category].length}</span>
+                        </h2>
+                        <span class="toggle">▼</span>
+                    </div>
+                    <div class="sound-grid">
+                        ${grouped[category].map(sound => renderSoundCard(sound)).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render a single sound card
+        function renderSoundCard(sound) {
+            const variants = sound.files || [];
+            return `
+                <div class="sound-card" data-key="${sound.fullKey}">
+                    <div class="sound-name">${sound.key.replace(/_/g, ' ')}</div>
+                    <div class="sound-meta">
+                        <span>${sound.duration_ms ? Math.round(sound.duration_ms) + 'ms' : '-'}</span>
+                        <span>${variants.length} variant${variants.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    <div class="sound-variants">
+                        ${variants.map((file, i) => `
+                            <button class="variant-btn" onclick="playSound('${file}', '${sound.key}')">
+                                <span class="icon">▶</span>
+                                ${String(i + 1).padStart(2, '0')}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Get category icon
+        function getCategoryIcon(category) {
+            const icons = {
+                combat: '💥',
+                ui: '🖱️',
+                character: '🧍',
+                environment: '🏢',
+                powers: '⚡',
+                ambient: '🌆'
+            };
+            return icons[category] || '🔊';
+        }
+
+        // Toggle category collapse
+        function toggleCategory(category) {
+            const el = document.querySelector(`.category[data-category="${category}"]`);
+            el.classList.toggle('collapsed');
+        }
+
+        // Play a sound
+        function playSound(file, name) {
+            // Stop current
+            if (currentAudio) {
+                audioPlayer.pause();
+                document.querySelectorAll('.variant-btn.playing').forEach(b => b.classList.remove('playing'));
+                document.querySelectorAll('.sound-card.playing').forEach(c => c.classList.remove('playing'));
+            }
+
+            // Play new
+            audioPlayer.src = '/assets/' + file;
+            audioPlayer.play();
+
+            currentSound = { file, name };
+
+            // Update UI
+            npName.textContent = name.replace(/_/g, ' ');
+            npFile.textContent = file;
+            nowPlaying.classList.add('active');
+
+            // Highlight playing button
+            const btn = document.querySelector(`button[onclick*="${file}"]`);
+            if (btn) {
+                btn.classList.add('playing');
+                btn.closest('.sound-card').classList.add('playing');
+            }
+        }
+
+        // Audio events
+        audioPlayer.addEventListener('ended', () => {
+            document.querySelectorAll('.variant-btn.playing').forEach(b => b.classList.remove('playing'));
+            document.querySelectorAll('.sound-card.playing').forEach(c => c.classList.remove('playing'));
+            nowPlaying.classList.remove('active');
+        });
+
+        // Controls
+        document.getElementById('np-stop').addEventListener('click', () => {
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            nowPlaying.classList.remove('active');
+            document.querySelectorAll('.variant-btn.playing').forEach(b => b.classList.remove('playing'));
+            document.querySelectorAll('.sound-card.playing').forEach(c => c.classList.remove('playing'));
+        });
+
+        document.getElementById('np-replay').addEventListener('click', () => {
+            if (currentSound) {
+                audioPlayer.currentTime = 0;
+                audioPlayer.play();
+            }
+        });
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderCategories();
+            });
+        });
+
+        // Search
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase();
+            renderCategories();
+        });
+
+        // Initialize
+        loadCatalog();
+    </script>
+</body>
+</html>

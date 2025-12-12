@@ -4,20 +4,11 @@
  * Government corruption values INVERTED: higher = MORE corrupt
  */
 
-import { COUNTRIES_PART1 } from './countries_part1';
-import { COUNTRIES_PART2 } from './countries_part2';
-import { COUNTRIES_PART3 } from './countries_part3';
+import { ALL_COUNTRIES as COUNTRIES_FROM_FILE, Country } from './allCountries';
 
-// Re-export the interface
-export { Country } from './countries_part1';
-import type { Country } from './countries_part1';
-
-// Combine all country parts
-export const ALL_COUNTRIES: Country[] = [
-  ...COUNTRIES_PART1,
-  ...COUNTRIES_PART2,
-  ...COUNTRIES_PART3,
-];
+// Re-export the interface and data
+export type { Country };
+export const ALL_COUNTRIES: Country[] = COUNTRIES_FROM_FILE;
 
 // Government perception ratings
 export const GOVERNMENT_PERCEPTION = {

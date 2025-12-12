@@ -11,9 +11,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { PhaserGame, useCombatState, useCombatActions } from './PhaserGame';
-import { EventBridge, LogEntry, CombatCharacter, CombatStatsEvent, CombatAwards, CombatStats, UnitCombatStats, KillEntry } from '../game/EventBridge';
+import { EventBridge, LogEntry, CombatCharacter, CombatStatsEvent, CombatAwards, CombatStats, UnitCombatStats, KillEntry, GrappleInteraction, GrappleState, CharacterMartialArts } from '../game/EventBridge';
 import { useGameStore } from '../stores/enhancedGameStore';
 import { PowersPanel } from './PowersPanel';
+import { GrapplePanel } from './GrapplePanel';
+import QuickInventory from './QuickInventory';
 
 // Icons from lucide-react
 import {
@@ -79,6 +81,10 @@ function generateRandomEnemy(index: number): CombatCharacter {
       CON: randomStat(),
     },
     health: { current: 60, maximum: 60 },
+    shield: Math.random() > 0.7 ? Math.floor(Math.random() * 20) + 10 : 0, // 30% chance of shield
+    maxShield: Math.random() > 0.7 ? 30 : 0,
+    shieldRegen: Math.random() > 0.7 ? 3 : 0,
+    dr: Math.floor(Math.random() * 8) + 2, // 2-10 armor
     powers,
     equipment,
     threatLevel: 'THREAT_1',
@@ -97,6 +103,14 @@ const WEAPONS: Record<string, { name: string; emoji: string; damage: number; ran
   psychic: { name: 'Psychic Blast', emoji: '🧠', damage: 35, range: 7 },
 };
 
+interface StatusEffectData {
+  name: string;
+  emoji: string;
+  duration: number;
+  stacks: number;
+  description: string;
+}
+
 interface CombatUnit {
   id: string;
   name: string;
@@ -106,12 +120,23 @@ interface CombatUnit {
   maxHp: number;
   ap: number;
   maxAp: number;
+  // Shield system - absorbs damage before HP
+  shield: number;
+  maxShield: number;
+  shieldRegen: number;
+  // Armor (DR) - reduces incoming damage
+  dr: number;
   weapon: string;
   weaponEmoji: string;
   personality: string;
   acted: boolean;
-  statusEffects: string[];
+  statusEffects: string[] | StatusEffectData[];
   visible: boolean; // Fog of war
+  // Kill/Stun system
+  damageMode?: 'kill' | 'stun';
+  weaponStunCapable?: boolean;
+  weaponAlwaysLethal?: boolean;
+  weaponAlwaysNonLethal?: boolean;
 }
 
 export const CombatLab: React.FC = () => {
@@ -124,17 +149,33 @@ export const CombatLab: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [combatSummary, setCombatSummary] = useState<CombatStatsEvent | null>(null);
   const [aiVsAi, setAiVsAi] = useState(false);
+
+  // Handlers for gadget and inventory
+  const onGadgetClick = () => {
+    setShowGadgetPanel(!showGadgetPanel);
+  };
+
+  const onInventoryClick = () => {
+    setShowInventory(!showInventory);
+  };
   const [allUnits, setAllUnits] = useState<CombatUnit[]>([]);
   const [combatLoaded, setCombatLoaded] = useState(false);
+  const [activeGrapple, setActiveGrapple] = useState<GrappleInteraction | null>(null);
+  const [showGrenadeMenu, setShowGrenadeMenu] = useState(false);
 
   // Get characters and setCurrentView from game store
   const gameCharacters = useGameStore(state => state.characters);
   const setCurrentView = useGameStore(state => state.setCurrentView);
+  const updateCharacterInjuries = useGameStore(state => state.updateCharacterInjuries);
+  const updateCharacter = useGameStore(state => state.updateCharacter);
 
   // Convert game store characters to combat format
   const convertToBlueTeam = (): CombatCharacter[] => {
-    return gameCharacters
-      .filter(c => c.status === 'ready' || c.status === 'injured') // Only ready/injured characters
+    console.log('[CombatLab] Raw gameCharacters from store:', gameCharacters);
+    const filtered = gameCharacters.filter(c => c.status === 'ready' || c.status === 'injured');
+    console.log('[CombatLab] Filtered ready/injured:', filtered.map(c => ({ name: c.name, status: c.status })));
+
+    return filtered
       .slice(0, 4) // Max 4 characters
       .map(char => ({
         id: char.id,
@@ -143,6 +184,10 @@ export const CombatLab: React.FC = () => {
         team: 'blue' as const,
         stats: char.stats,
         health: char.health,
+        shield: char.shield || 0,
+        maxShield: char.maxShield || 0,
+        shieldRegen: char.shieldRegen || 0,
+        dr: char.dr || 0,
         powers: char.powers || [],
         equipment: char.equipment || [],
         threatLevel: char.threatLevel,
@@ -182,25 +227,73 @@ export const CombatLab: React.FC = () => {
     // Listen for combat stats when combat ends
     const unsubStats = EventBridge.on('combat-stats', (data: CombatStatsEvent) => {
       console.log('[COMBAT LAB] Combat stats received:', data);
+
+      // Apply injuries to blue team characters (player characters)
+      if (data.stats.injuries && data.stats.injuries.length > 0) {
+        const blueTeamInjuries = data.stats.injuries.filter(injury => injury.team === 'blue');
+        blueTeamInjuries.forEach(injury => {
+          updateCharacterInjuries(injury.characterId, {
+            type: injury.type,
+            severity: injury.severity,
+            description: injury.description,
+            permanent: injury.permanent,
+            turnInflicted: injury.turnInflicted,
+          });
+        });
+      }
+
       setCombatSummary(data);
       setShowSummary(true);
+    });
+
+    // Listen for grapple events
+    const unsubGrappleStart = EventBridge.on('grapple-started', (data: GrappleInteraction) => {
+      console.log('[COMBAT LAB] Grapple started:', data);
+      setActiveGrapple(data);
+    });
+
+    const unsubGrappleChange = EventBridge.on('grapple-changed', (data: GrappleInteraction) => {
+      console.log('[COMBAT LAB] Grapple changed:', data);
+      setActiveGrapple(data);
+    });
+
+    const unsubGrappleEnd = EventBridge.on('grapple-ended', (data: { winnerId: string; loserId: string; reason: string }) => {
+      console.log('[COMBAT LAB] Grapple ended:', data);
+      setActiveGrapple(null);
+    });
+
+    // Listen for grenade consumption
+    const unsubConsumeGrenade = EventBridge.on('consume-grenade', (data: { unitId: string; grenadeName: string }) => {
+      console.log('[COMBAT LAB] Consuming grenade:', data);
+      const character = gameCharacters.find(c => c.id === data.unitId);
+      if (character && character.equipment) {
+        // Remove one instance of the grenade from equipment
+        const grenadeIndex = character.equipment.findIndex((item: string) => item === data.grenadeName);
+        if (grenadeIndex !== -1) {
+          const newEquipment = [...character.equipment];
+          newEquipment.splice(grenadeIndex, 1);
+          updateCharacter(character.id, { equipment: newEquipment });
+          console.log(`[COMBAT LAB] Removed ${data.grenadeName} from ${character.name}'s equipment`);
+        }
+      }
     });
 
     return () => {
       unsubscribe();
       unsubAi();
       unsubStats();
+      unsubGrappleStart();
+      unsubGrappleChange();
+      unsubGrappleEnd();
+      unsubConsumeGrenade();
     };
-  }, []);
+  }, [gameCharacters]);
 
   // Load combat once Phaser is ready
   useEffect(() => {
     if (isLoaded && !combatLoaded) {
-      // Small delay to ensure Phaser is fully initialized
-      const timer = setTimeout(() => {
-        loadCombat();
-      }, 500);
-      return () => clearTimeout(timer);
+      // Load immediately - no delay to prevent flash
+      loadCombat();
     }
   }, [isLoaded, combatLoaded]);
 
@@ -212,8 +305,8 @@ export const CombatLab: React.FC = () => {
     currentTeam === 'blue'
       ? 'text-blue-400'
       : currentTeam === 'red'
-      ? 'text-red-400'
-      : 'text-green-400';
+        ? 'text-red-400'
+        : 'text-green-400';
 
   // Get selected unit's weapon info
   const selectedWeapon = selectedUnit && allUnits.find(u => u.id === selectedUnit.id);
@@ -229,6 +322,9 @@ export const CombatLab: React.FC = () => {
         aiVsAi={aiVsAi}
         onToggleAi={toggleAiVsAi}
         onRestartCombat={() => {
+          setShowSummary(false);
+          setCombatSummary(null);
+          setAllUnits([]); // Clear old units to prevent flash
           setCombatLoaded(false);
           setTimeout(() => loadCombat(), 100);
         }}
@@ -242,8 +338,8 @@ export const CombatLab: React.FC = () => {
         <div className="flex-1 relative">
           <PhaserGame className="w-full h-full" />
 
-          {/* Loading overlay */}
-          {!isLoaded && (
+          {/* Loading overlay - Show until combat AND units are loaded */}
+          {(!isLoaded || !combatLoaded || allUnits.length === 0) && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75">
               <div className="text-xl">Loading Combat Lab...</div>
             </div>
@@ -251,25 +347,35 @@ export const CombatLab: React.FC = () => {
         </div>
 
         {/* SIDE PANEL */}
-        <SidePanel logEntries={logEntries} selectedUnit={selectedUnit} />
+        <SidePanel
+          logEntries={logEntries}
+          selectedUnit={selectedUnit}
+          characterEquipment={gameCharacters.find(c => c.id === selectedUnit?.id)?.equipment || []}
+        />
       </div>
 
-      {/* UNIT CARDS BAR */}
-      <UnitCardsBar
-        units={allUnits}
-        selectedUnitId={selectedUnit?.id}
-        currentTeam={currentTeam}
-      />
+      {/* UNIT CARDS BAR - Only show when combat is loaded and has units */}
+      {combatLoaded && allUnits.length > 0 && (
+        <UnitCardsBar
+          units={allUnits}
+          selectedUnitId={selectedUnit?.id}
+          currentTeam={currentTeam}
+        />
+      )}
 
-      {/* BOTTOM BAR */}
-      <BottomBar
-        selectedUnit={selectedUnit}
-        weaponInfo={weaponInfo}
-        unitData={selectedWeapon}
-        actions={actions}
-        onGadgetClick={() => setShowGadgetPanel(true)}
-        onInventoryClick={() => setShowInventory(true)}
-      />
+      {/* BOTTOM BAR - Only show when units are loaded */}
+      {allUnits.length > 0 && (
+        <BottomBar
+          selectedUnit={selectedUnit}
+          weaponInfo={weaponInfo}
+          unitData={selectedWeapon}
+          actions={actions}
+          onGadgetClick={() => setShowGadgetPanel(true)}
+          onInventoryClick={() => setShowInventory(true)}
+          showGadgetPanel={showGadgetPanel}
+          setShowGrenadeMenu={setShowGrenadeMenu}
+        />
+      )}
 
       {/* MODALS */}
       {showGadgetPanel && (
@@ -314,6 +420,56 @@ export const CombatLab: React.FC = () => {
       {/* Settings Modal */}
       {showSettings && (
         <SettingsModal onClose={() => setShowSettings(false)} />
+      )}
+
+      {/* Grapple Panel - Shows when selected unit is in a grapple */}
+      {activeGrapple && selectedUnit && (
+        activeGrapple.attackerId === selectedUnit.id || activeGrapple.defenderId === selectedUnit.id
+      ) && (() => {
+        const selectedChar = gameCharacters.find(c => c.id === selectedUnit.id);
+        const unitFromList = allUnits.find(u => u.id === selectedUnit.id);
+        const isAttacker = activeGrapple.attackerId === selectedUnit.id;
+
+        // Get martial arts from character (assuming first style if multiple)
+        const martialArts: CharacterMartialArts | null = selectedChar?.martialArts?.[0]
+          ? { styleId: selectedChar.martialArts[0].style as any, beltLevel: selectedChar.martialArts[0].belt }
+          : null;
+
+        return (
+          <div className="fixed top-20 right-4 z-50 w-72">
+            <GrapplePanel
+              unitId={selectedUnit.id}
+              unitName={selectedUnit.name}
+              grappleState={activeGrapple}
+              martialArts={martialArts}
+              currentAp={unitFromList?.ap || 4}
+              isAttacker={isAttacker}
+              stats={{
+                STR: selectedChar?.stats?.STR || 50,
+                MEL: selectedChar?.stats?.MEL || 50,
+                AGL: selectedChar?.stats?.AGL || 50,
+                INS: selectedChar?.stats?.INS || 50,
+              }}
+            />
+          </div>
+        );
+      })()}
+
+      {/* Quick Inventory - Shows grenades/gadgets as small icons next to character info */}
+      {selectedUnit && (
+        <div className="fixed bottom-28 left-4 z-50">
+          <QuickInventory
+            equipment={gameCharacters.find(c => c.id === selectedUnit.id)?.equipment || []}
+            onItemClick={(itemName, itemType) => {
+              console.log(`🎯 Using ${itemType}: ${itemName}`);
+              if (itemType === 'grenade') {
+                // Start grenade throw mode
+                const grenadeId = itemName.split(' ')[0].toUpperCase();
+                EventBridge.emit('start-grenade-throw', { grenadeId, grenadeName: itemName });
+              }
+            }}
+          />
+        </div>
       )}
     </div>
   );
@@ -366,11 +522,10 @@ const TopBar: React.FC<TopBarProps> = ({
       </button>
       <button
         onClick={onToggleAi}
-        className={`flex items-center gap-2 px-4 py-2 rounded font-bold transition-all ${
-          aiVsAi
-            ? 'bg-green-600 hover:bg-green-500 animate-pulse'
-            : 'bg-purple-700 hover:bg-purple-600'
-        }`}
+        className={`flex items-center gap-2 px-4 py-2 rounded font-bold transition-all ${aiVsAi
+          ? 'bg-green-600 hover:bg-green-500 animate-pulse'
+          : 'bg-purple-700 hover:bg-purple-600'
+          }`}
       >
         <Bot className="w-5 h-5" />
         {aiVsAi ? 'AI vs AI ON' : 'AI vs AI'}
@@ -447,6 +602,133 @@ const UnitCardsBar: React.FC<UnitCardsBarProps> = ({ units, selectedUnitId, curr
   );
 };
 
+// STATUS EFFECT BADGE COMPONENT
+interface StatusEffectBadgeProps {
+  effect: string | StatusEffectData;
+}
+
+// Status effect configuration with colors, emojis, and tooltips
+const STATUS_EFFECT_CONFIG: Record<string, {
+  color: string;
+  emoji: string;
+  description: string;
+}> = {
+  bleeding: {
+    color: 'bg-red-600 border-red-400',
+    emoji: '🩸',
+    description: '3 damage per turn'
+  },
+  burning: {
+    color: 'bg-orange-500 border-orange-300',
+    emoji: '🔥',
+    description: '5 damage per turn'
+  },
+  frozen: {
+    color: 'bg-cyan-400 border-cyan-200',
+    emoji: '🧊',
+    description: '-2 AP penalty'
+  },
+  stunned: {
+    color: 'bg-yellow-400 border-yellow-200',
+    emoji: '💫',
+    description: 'Skips turn'
+  },
+  poisoned: {
+    color: 'bg-green-600 border-green-400',
+    emoji: '☠️',
+    description: '2 damage per turn'
+  },
+  emp: {
+    color: 'bg-purple-600 border-purple-400',
+    emoji: '⚡',
+    description: '-3 AP penalty'
+  },
+  suppressed: {
+    color: 'bg-gray-600 border-gray-400',
+    emoji: '📍',
+    description: '-20% accuracy'
+  },
+  inspired: {
+    color: 'bg-yellow-500 border-yellow-300',
+    emoji: '✨',
+    description: '+10% accuracy'
+  },
+  shielded: {
+    color: 'bg-blue-600 border-blue-400',
+    emoji: '🛡️',
+    description: '+5 DR bonus'
+  },
+  incapacitated: {
+    color: 'bg-gray-700 border-gray-500',
+    emoji: '😵',
+    description: 'Cannot act'
+  },
+  grappled: {
+    color: 'bg-orange-700 border-orange-500',
+    emoji: '🤼',
+    description: 'Movement restricted'
+  },
+};
+
+const StatusEffectBadge: React.FC<StatusEffectBadgeProps> = ({ effect }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  // Handle both string and StatusEffectData types
+  const isStatusData = typeof effect !== 'string';
+  const effectName = isStatusData ? effect.name : effect;
+  const effectLower = effectName.toLowerCase();
+
+  // For StatusEffectData, use provided data; otherwise fall back to config
+  const config = STATUS_EFFECT_CONFIG[effectLower] || {
+    color: 'bg-red-800 border-red-600',
+    emoji: '❓',
+    description: effectName,
+  };
+
+  // If we have StatusEffectData, use its emoji and description
+  const displayEmoji = isStatusData && effect.emoji ? effect.emoji : config.emoji;
+  const displayDescription = isStatusData && effect.description ? effect.description : config.description;
+  const duration = isStatusData ? effect.duration : null;
+  const stacks = isStatusData ? effect.stacks : null;
+
+  return (
+    <div
+      className="relative inline-block"
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <span
+        className={`text-xs ${config.color} border px-1.5 py-0.5 rounded flex items-center gap-0.5 cursor-help transition-all hover:scale-110`}
+      >
+        <span className="text-xs">{displayEmoji}</span>
+        {stacks && stacks > 1 && <span className="text-white font-bold">x{stacks}</span>}
+        {duration !== null && duration > 0 && <span className="text-gray-200 text-[10px]">({duration})</span>}
+      </span>
+
+      {/* Tooltip */}
+      {showTooltip && (
+        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 z-50 whitespace-nowrap">
+          <div className="bg-gray-900 text-white text-xs px-2 py-1 rounded border border-gray-700 shadow-lg">
+            <div className="font-bold text-cyan-400 flex items-center gap-1">
+              <span>{displayEmoji}</span>
+              <span>{effectName}</span>
+              {stacks && stacks > 1 && <span className="text-orange-400">x{stacks}</span>}
+            </div>
+            <div className="text-gray-300">{displayDescription}</div>
+            {duration !== null && duration > 0 && (
+              <div className="text-yellow-400 text-[10px] mt-0.5">⏱️ {duration} turn{duration !== 1 ? 's' : ''} remaining</div>
+            )}
+          </div>
+          {/* Arrow */}
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
+            <div className="border-4 border-transparent border-t-gray-700"></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // UNIT CARD
 interface UnitCardProps {
   unit: CombatUnit;
@@ -459,28 +741,58 @@ const UnitCard: React.FC<UnitCardProps> = ({ unit, isSelected, isCurrentTeam }) 
   const healthColor = healthPercent < 25 ? 'bg-red-500' : healthPercent < 50 ? 'bg-yellow-500' : 'bg-green-500';
   const teamColor = unit.team === 'blue' ? 'border-blue-500' : 'border-red-500';
 
+  // Shield calculations
+  const hasShield = unit.maxShield > 0;
+  const shieldPercent = hasShield ? (unit.shield / unit.maxShield) * 100 : 0;
+  const shieldColor = shieldPercent > 50 ? 'bg-cyan-400' : 'bg-cyan-600';
+
   const handleClick = () => {
     EventBridge.emit('select-unit', { unitId: unit.id });
   };
 
+  // Normalize status effects to handle both string[] and StatusEffectData[]
+  const normalizedEffects = unit.statusEffects.map(effect => {
+    if (typeof effect === 'string') {
+      return effect;
+    }
+    return effect as StatusEffectData;
+  });
+
   return (
     <div
       onClick={handleClick}
-      className={`w-28 p-2 rounded-lg cursor-pointer transition-all ${
-        isSelected
-          ? 'bg-yellow-600 bg-opacity-30 border-2 border-yellow-400 shadow-lg shadow-yellow-400/20'
-          : unit.acted
+      className={`w-32 p-2 rounded-lg cursor-pointer transition-all ${isSelected
+        ? 'bg-yellow-600 bg-opacity-30 border-2 border-yellow-400 shadow-lg shadow-yellow-400/20'
+        : unit.acted
           ? 'bg-gray-800 opacity-50 border border-gray-600'
           : `bg-gray-800 border ${teamColor} hover:bg-gray-700`
-      }`}
+        }`}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
         <span className={`font-bold text-xs truncate ${unit.team === 'blue' ? 'text-blue-300' : 'text-red-300'}`}>
           {unit.name}
         </span>
-        <span className="text-sm">{unit.weaponEmoji}</span>
+        <div className="flex items-center gap-1">
+          {/* Armor indicator */}
+          {unit.dr > 0 && (
+            <span className="text-xs text-cyan-300 bg-cyan-900/50 px-1 rounded" title={`Armor: ${unit.dr} DR`}>
+              🛡️{unit.dr}
+            </span>
+          )}
+          <span className="text-sm">{unit.weaponEmoji}</span>
+        </div>
       </div>
+
+      {/* Shield Bar (if has shields) */}
+      {hasShield && (
+        <div className="h-1.5 bg-gray-700 rounded overflow-hidden mb-0.5" title={`Shield: ${unit.shield}/${unit.maxShield}`}>
+          <div
+            className={`h-full ${shieldColor} transition-all`}
+            style={{ width: `${shieldPercent}%` }}
+          />
+        </div>
+      )}
 
       {/* HP Bar */}
       <div className="h-2 bg-gray-700 rounded overflow-hidden mb-1">
@@ -492,6 +804,9 @@ const UnitCard: React.FC<UnitCardProps> = ({ unit, isSelected, isCurrentTeam }) 
 
       {/* Stats */}
       <div className="flex justify-between text-xs text-gray-400">
+        {hasShield ? (
+          <span className="text-cyan-300">⚡{unit.shield}</span>
+        ) : null}
         <span>HP: {unit.hp}/{unit.maxHp}</span>
         <span>AP: {unit.ap}</span>
       </div>
@@ -501,20 +816,17 @@ const UnitCard: React.FC<UnitCardProps> = ({ unit, isSelected, isCurrentTeam }) 
         {Array(unit.maxAp).fill(0).map((_, i) => (
           <div
             key={i}
-            className={`w-2 h-2 rounded-full ${
-              i < unit.ap ? 'bg-blue-400' : 'bg-gray-600'
-            }`}
+            className={`w-2 h-2 rounded-full ${i < unit.ap ? 'bg-blue-400' : 'bg-gray-600'
+              }`}
           />
         ))}
       </div>
 
       {/* Status Effects */}
-      {unit.statusEffects.length > 0 && (
+      {normalizedEffects.length > 0 && (
         <div className="flex gap-1 mt-1 flex-wrap">
-          {unit.statusEffects.map((effect, i) => (
-            <span key={i} className="text-xs bg-red-800 px-1 rounded">
-              {effect}
-            </span>
+          {normalizedEffects.map((effect, i) => (
+            <StatusEffectBadge key={i} effect={effect} />
           ))}
         </div>
       )}
@@ -526,9 +838,10 @@ const UnitCard: React.FC<UnitCardProps> = ({ unit, isSelected, isCurrentTeam }) 
 interface SidePanelProps {
   logEntries: LogEntry[];
   selectedUnit: any;
+  characterEquipment: string[];
 }
 
-const SidePanel: React.FC<SidePanelProps> = ({ logEntries, selectedUnit }) => (
+const SidePanel: React.FC<SidePanelProps> = ({ logEntries, selectedUnit, characterEquipment }) => (
   <div className="w-80 bg-gray-800 border-l border-gray-700 flex flex-col">
     {/* Combat Log */}
     <div className="flex-1 overflow-hidden flex flex-col">
@@ -547,6 +860,23 @@ const SidePanel: React.FC<SidePanelProps> = ({ logEntries, selectedUnit }) => (
       <div className="border-t border-cyan-500 p-3 bg-gray-900">
         <div className="font-semibold mb-2 text-cyan-400">SELECTED: {selectedUnit.name}</div>
         <div className="space-y-2 text-sm">
+          {/* Shield Bar (if has shields) */}
+          {selectedUnit.maxShield > 0 && (
+            <div className="flex items-center justify-between">
+              <span className="text-cyan-400">⚡ Shield:</span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-cyan-300">
+                  {selectedUnit.shield}/{selectedUnit.maxShield}
+                </span>
+                <ShieldBar
+                  current={selectedUnit.shield}
+                  max={selectedUnit.maxShield}
+                  width={80}
+                />
+              </div>
+            </div>
+          )}
+          {/* HP */}
           <div className="flex items-center justify-between">
             <span className="text-gray-400">HP:</span>
             <div className="flex items-center gap-2">
@@ -560,6 +890,7 @@ const SidePanel: React.FC<SidePanelProps> = ({ logEntries, selectedUnit }) => (
               />
             </div>
           </div>
+          {/* AP */}
           <div className="flex items-center justify-between">
             <span className="text-gray-400">AP:</span>
             <div className="flex items-center gap-2">
@@ -573,17 +904,77 @@ const SidePanel: React.FC<SidePanelProps> = ({ logEntries, selectedUnit }) => (
               />
             </div>
           </div>
+          {/* Armor (DR) */}
+          {selectedUnit.dr > 0 && (
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400">🛡️ Armor:</span>
+              <span className="font-mono text-cyan-300">
+                {selectedUnit.dr} DR
+              </span>
+            </div>
+          )}
+          {/* Kill/Stun Mode Toggle */}
+          <div className="flex items-center justify-between">
+            <span className="text-gray-400">Mode:</span>
+            <button
+              onClick={() => {
+                if (selectedUnit.weaponStunCapable) {
+                  EventBridge.emit('toggle-damage-mode', { unitId: selectedUnit.id });
+                }
+              }}
+              disabled={selectedUnit.weaponAlwaysLethal || selectedUnit.weaponAlwaysNonLethal || !selectedUnit.weaponStunCapable}
+              className={`
+                px-2 py-1 rounded text-xs font-bold transition-all flex items-center gap-1
+                ${selectedUnit.damageMode === 'stun'
+                  ? 'bg-cyan-900 border border-cyan-500 text-cyan-200 hover:bg-cyan-800'
+                  : 'bg-red-900 border border-red-500 text-red-200 hover:bg-red-800'
+                }
+                ${(selectedUnit.weaponAlwaysLethal || selectedUnit.weaponAlwaysNonLethal || !selectedUnit.weaponStunCapable)
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'cursor-pointer'
+                }
+              `}
+              title={
+                selectedUnit.weaponAlwaysLethal ? 'This weapon is always lethal' :
+                  selectedUnit.weaponAlwaysNonLethal ? 'This weapon is always non-lethal' :
+                    !selectedUnit.weaponStunCapable ? 'This weapon cannot switch modes' :
+                      `Click to switch to ${selectedUnit.damageMode === 'kill' ? 'STUN' : 'KILL'} mode`
+              }
+            >
+              {selectedUnit.damageMode === 'stun' ? '💤 STUN' : '💀 KILL'}
+            </button>
+          </div>
+          {/* Position */}
           <div className="flex items-center justify-between">
             <span className="text-gray-400">Position:</span>
             <span className="font-mono">
               ({selectedUnit.position.x}, {selectedUnit.position.y})
             </span>
           </div>
+          {/* Cover */}
           <div className="flex items-center justify-between">
             <span className="text-gray-400">Cover:</span>
             <span className={selectedUnit.isInCover === 'none' ? 'text-gray-500' : 'text-green-400'}>
               {selectedUnit.isInCover}
             </span>
+          </div>
+          {/* Equipment Section */}
+          <div className="mt-3 pt-3 border-t border-gray-700">
+            <div className="text-gray-400 text-xs mb-2">🎒 EQUIPMENT:</div>
+            <div className="space-y-1 max-h-24 overflow-y-auto">
+              {characterEquipment.length > 0 ? (
+                characterEquipment.map((item, i) => (
+                  <div key={i} className="text-xs flex items-center gap-1">
+                    <span className="text-gray-500">•</span>
+                    <span className={`${item.toLowerCase().includes('grenade') ? 'text-orange-300' : item.toLowerCase().includes('pistol') || item.toLowerCase().includes('rifle') ? 'text-red-300' : 'text-gray-300'}`}>
+                      {item}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="text-gray-500 text-xs italic">No equipment</div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -597,8 +988,8 @@ const LogEntryItem: React.FC<{ entry: LogEntry }> = ({ entry }) => {
   const teamBorderColor = entry.actorTeam === 'blue'
     ? 'border-blue-500'
     : entry.actorTeam === 'red'
-    ? 'border-red-500'
-    : 'border-gray-500';
+      ? 'border-red-500'
+      : 'border-gray-500';
 
   // Type-based text colors
   const typeTextStyles: Record<string, string> = {
@@ -624,7 +1015,7 @@ const LogEntryItem: React.FC<{ entry: LogEntry }> = ({ entry }) => {
 
   return (
     <div className={`border-l-3 pl-2 py-0.5 ${teamBorderColor} ${typeTextStyles[entry.type] || 'text-gray-300'}`}
-         style={{ borderLeftWidth: '3px' }}>
+      style={{ borderLeftWidth: '3px' }}>
       <div className="text-xs flex items-center gap-1">
         <span>{typeIcons[entry.type] || '•'}</span>
         <span>{entry.message}</span>
@@ -649,8 +1040,30 @@ const HealthBar: React.FC<{ current: number; max: number; width: number }> = ({
     percent < 25
       ? 'bg-red-500'
       : percent < 50
-      ? 'bg-yellow-500'
-      : 'bg-green-500';
+        ? 'bg-yellow-500'
+        : 'bg-green-500';
+
+  return (
+    <div
+      className="h-3 bg-gray-700 rounded overflow-hidden"
+      style={{ width }}
+    >
+      <div
+        className={`h-full ${color} transition-all`}
+        style={{ width: `${percent}%` }}
+      />
+    </div>
+  );
+};
+
+// SHIELD BAR COMPONENT
+const ShieldBar: React.FC<{ current: number; max: number; width: number }> = ({
+  current,
+  max,
+  width,
+}) => {
+  const percent = (current / max) * 100;
+  const color = percent > 50 ? 'bg-cyan-400' : percent > 0 ? 'bg-cyan-600' : 'bg-gray-600';
 
   return (
     <div
@@ -694,6 +1107,8 @@ interface BottomBarProps {
   actions: ReturnType<typeof useCombatActions>;
   onGadgetClick: () => void;
   onInventoryClick: () => void;
+  showGadgetPanel: boolean;
+  setShowGrenadeMenu: (show: boolean) => void;
 }
 
 const BottomBar: React.FC<BottomBarProps> = ({
@@ -703,6 +1118,8 @@ const BottomBar: React.FC<BottomBarProps> = ({
   actions,
   onGadgetClick,
   onInventoryClick,
+  showGadgetPanel,
+  setShowGrenadeMenu,
 }) => {
   if (!selectedUnit) {
     return (
@@ -716,19 +1133,37 @@ const BottomBar: React.FC<BottomBarProps> = ({
     <div className="bg-gray-800 border-t border-gray-700">
       {/* Character Info Row */}
       <div className="flex items-center gap-4 px-4 py-2 border-b border-gray-700">
-        <div className={`w-12 h-12 rounded flex items-center justify-center text-xl ${
-          selectedUnit.team === 'blue' ? 'bg-blue-800' : 'bg-red-800'
-        }`}>
+        <div className={`w-12 h-12 rounded flex items-center justify-center text-xl ${selectedUnit.team === 'blue' ? 'bg-blue-800' : 'bg-red-800'
+          }`}>
           {unitData?.weaponEmoji || '👤'}
         </div>
         <div className="flex-1">
           <div className="font-bold text-lg">{selectedUnit.name}</div>
           <div className="flex items-center gap-4 text-sm text-gray-400">
+            {/* Shield display */}
+            {unitData && unitData.maxShield > 0 && (
+              <span className="text-cyan-300">⚡{unitData.shield}/{unitData.maxShield}</span>
+            )}
             <span>HP: {selectedUnit.hp}/{selectedUnit.maxHp}</span>
             <span>AP: {selectedUnit.ap}/{selectedUnit.maxAp}</span>
+            {/* Armor display */}
+            {unitData && unitData.dr > 0 && (
+              <span className="text-cyan-300">🛡️{unitData.dr} DR</span>
+            )}
             {unitData && <span className="text-cyan-400">{unitData.personality}</span>}
           </div>
         </div>
+
+        {/* Kill/Stun Toggle */}
+        {unitData && (
+          <KillStunToggle
+            unitId={selectedUnit.id}
+            damageMode={unitData.damageMode || 'kill'}
+            stunCapable={unitData.weaponStunCapable || false}
+            alwaysLethal={unitData.weaponAlwaysLethal || false}
+            alwaysNonLethal={unitData.weaponAlwaysNonLethal || false}
+          />
+        )}
 
         {/* Weapon Display */}
         {weaponInfo && (
@@ -756,16 +1191,18 @@ const BottomBar: React.FC<BottomBarProps> = ({
         </div>
       )}
 
-      {/* Action Buttons Row */}
+      {/* Equipment & Actions - Show what unit actually has */}
       <div className="flex items-center gap-2 px-4 py-2">
+        {/* Primary Weapon - Show actual weapon */}
         <ActionButton
-          icon={<Crosshair className="w-5 h-5" />}
-          label="ATTACK"
+          icon={<span className="text-xl">{selectedUnit.weaponEmoji}</span>}
+          label={weaponInfo.name.toUpperCase()}
           hotkey="A"
           onClick={actions.startAttackMode}
-          disabled={selectedUnit.ap < 1}
+          disabled={selectedUnit.ap < (weaponInfo.ap || 2)}
           color="red"
         />
+        {/* Movement */}
         <ActionButton
           icon={<Footprints className="w-5 h-5" />}
           label="MOVE"
@@ -774,20 +1211,18 @@ const BottomBar: React.FC<BottomBarProps> = ({
           disabled={selectedUnit.ap < 1}
           color="blue"
         />
-        <ActionButton
-          icon={<Target className="w-5 h-5" />}
-          label="THROW"
-          hotkey="T"
-          onClick={actions.startThrowMode}
-          color="orange"
-        />
-        <ActionButton
-          icon={<Settings className="w-5 h-5" />}
-          label="GADGET"
-          hotkey="G"
-          onClick={onGadgetClick}
-          color="purple"
-        />
+        {/* Gadget button removed - grenades/gadgets now in quick inventory below */}
+        {/* Gadget - Only if has gadgets */}
+        {showGadgetPanel && (
+          <ActionButton
+            icon={<Settings className="w-5 h-5" />}
+            label="GADGET"
+            hotkey="T"
+            onClick={onGadgetClick}
+            color="purple"
+          />
+        )}
+        {/* Inventory */}
         <ActionButton
           icon={<Package className="w-5 h-5" />}
           label="ITEM"
@@ -795,15 +1230,17 @@ const BottomBar: React.FC<BottomBarProps> = ({
           onClick={onInventoryClick}
           color="green"
         />
+        {/* Overwatch */}
         <ActionButton
           icon={<Eye className="w-5 h-5" />}
           label="OVERWATCH"
           hotkey="O"
-          onClick={() => {}}
+          onClick={() => { }}
           disabled={selectedUnit.ap < 3}
           color="cyan"
         />
         <div className="flex-1" />
+        {/* End Turn */}
         <ActionButton
           icon={<Check className="w-5 h-5" />}
           label="END TURN"
@@ -812,6 +1249,80 @@ const BottomBar: React.FC<BottomBarProps> = ({
           variant="primary"
         />
       </div>
+    </div>
+  );
+};
+
+// KILL/STUN TOGGLE COMPONENT
+interface KillStunToggleProps {
+  unitId: string;
+  damageMode: 'kill' | 'stun';
+  stunCapable: boolean;
+  alwaysLethal: boolean;
+  alwaysNonLethal: boolean;
+}
+
+const KillStunToggle: React.FC<KillStunToggleProps> = ({
+  unitId,
+  damageMode,
+  stunCapable,
+  alwaysLethal,
+  alwaysNonLethal,
+}) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const canToggle = stunCapable && !alwaysLethal && !alwaysNonLethal;
+  const isKillMode = damageMode === 'kill';
+
+  const handleToggle = () => {
+    if (canToggle) {
+      EventBridge.emit('toggle-damage-mode', { unitId });
+    }
+  };
+
+  // Determine tooltip message
+  let tooltipMessage = '';
+  if (alwaysLethal) {
+    tooltipMessage = 'This weapon is always lethal';
+  } else if (alwaysNonLethal) {
+    tooltipMessage = 'This weapon is always non-lethal';
+  } else if (!stunCapable) {
+    tooltipMessage = 'This weapon cannot switch modes';
+  } else {
+    tooltipMessage = `Click to switch to ${isKillMode ? 'STUN' : 'KILL'} mode`;
+  }
+
+  return (
+    <div
+      className="relative inline-block"
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <button
+        onClick={handleToggle}
+        disabled={!canToggle}
+        className={`flex items-center gap-2 px-3 py-2 rounded border-2 font-bold text-sm transition-all ${canToggle ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+          } ${isKillMode
+            ? 'bg-red-900 border-red-500 text-red-200 hover:bg-red-800'
+            : 'bg-cyan-900 border-cyan-500 text-cyan-200 hover:bg-cyan-800'
+          }`}
+      >
+        <span className="text-xl">{isKillMode ? '💀' : '💤'}</span>
+        <span>{isKillMode ? 'KILL' : 'STUN'}</span>
+      </button>
+
+      {/* Tooltip */}
+      {showTooltip && (
+        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50 whitespace-nowrap">
+          <div className="bg-gray-900 text-white text-xs px-3 py-2 rounded border border-gray-700 shadow-lg">
+            {tooltipMessage}
+          </div>
+          {/* Arrow */}
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
+            <div className="border-4 border-transparent border-t-gray-700"></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -1330,6 +1841,55 @@ const PostBattleSummary: React.FC<PostBattleSummaryProps> = ({ data, onClose, on
             </div>
           )}
 
+          {/* Injuries */}
+          {stats.injuries && stats.injuries.length > 0 && (
+            <div className="bg-gray-800 rounded-lg p-3">
+              <h3 className="text-gray-300 font-bold mb-2 flex items-center gap-2">
+                🏥 INJURIES
+              </h3>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {stats.injuries.map((injury, i) => {
+                  const severityColor =
+                    injury.severity === 'FATAL' ? 'text-red-500 border-red-500' :
+                      injury.severity === 'PERMANENT' ? 'text-orange-500 border-orange-500' :
+                        injury.severity === 'SEVERE' ? 'text-red-400 border-red-400' :
+                          injury.severity === 'MODERATE' ? 'text-orange-400 border-orange-400' :
+                            injury.severity === 'LIGHT' ? 'text-yellow-400 border-yellow-400' :
+                              'text-gray-400 border-gray-400';
+
+                  const severityEmoji =
+                    injury.severity === 'FATAL' ? '💀' :
+                      injury.severity === 'PERMANENT' ? '🦴' :
+                        injury.severity === 'SEVERE' ? '🤕' :
+                          injury.severity === 'MODERATE' ? '🩸' :
+                            injury.severity === 'LIGHT' ? '🟣' :
+                              '🍀';
+
+                  return (
+                    <div key={i} className={`flex items-start gap-2 text-sm bg-gray-700/50 p-2 rounded border-l-4 ${severityColor}`}>
+                      <span className="text-lg">{severityEmoji}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-white font-medium">{injury.characterName}</span>
+                          <span className={`text-xs font-bold ${severityColor} px-2 py-0.5 rounded border`}>
+                            {injury.severity}
+                          </span>
+                        </div>
+                        <div className="text-gray-300 text-xs">{injury.description}</div>
+                        <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                          <span>Round {injury.turnInflicted}</span>
+                          {injury.permanent && (
+                            <span className="text-orange-400 font-bold">PERMANENT</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Survivors */}
           {survivors.length > 0 && (
             <div className="bg-gray-800 rounded-lg p-3">
@@ -1338,9 +1898,8 @@ const PostBattleSummary: React.FC<PostBattleSummaryProps> = ({ data, onClose, on
                 {survivors.map((s, i) => (
                   <div
                     key={i}
-                    className={`px-3 py-1 rounded text-sm ${
-                      s.team === 'blue' ? 'bg-blue-800/50 border border-blue-600' : 'bg-red-800/50 border border-red-600'
-                    }`}
+                    className={`px-3 py-1 rounded text-sm ${s.team === 'blue' ? 'bg-blue-800/50 border border-blue-600' : 'bg-red-800/50 border border-red-600'
+                      }`}
                   >
                     {s.name} <span className="text-gray-400">({s.hp} HP)</span>
                   </div>
@@ -1542,14 +2101,12 @@ const ToggleSetting: React.FC<ToggleSettingProps> = ({ label, description, value
     </div>
     <button
       onClick={() => onChange(!value)}
-      className={`w-12 h-6 rounded-full transition-colors ${
-        value ? 'bg-cyan-600' : 'bg-gray-600'
-      }`}
+      className={`w-12 h-6 rounded-full transition-colors ${value ? 'bg-cyan-600' : 'bg-gray-600'
+        }`}
     >
       <div
-        className={`w-5 h-5 bg-white rounded-full transition-transform ${
-          value ? 'translate-x-6' : 'translate-x-0.5'
-        }`}
+        className={`w-5 h-5 bg-white rounded-full transition-transform ${value ? 'translate-x-6' : 'translate-x-0.5'
+          }`}
       />
     </button>
   </div>

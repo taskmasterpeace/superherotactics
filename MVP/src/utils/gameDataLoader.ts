@@ -108,7 +108,7 @@ function generateSampleEquipment() {
   return [
     {
       id: 'EQ_001',
-      name: 'Vibranium Shield',
+      name: 'Kinetic Shield',
       category: 'Defense',
       description: 'Alien metal shield with energy absorption',
       stats: 'DR: Special, Throwable weapon',
@@ -246,7 +246,7 @@ function generateSampleCharacters() {
       threatLevel: 'THREAT_2' as const,
       origin: 'Altered Human',
       powers: ['Enhanced Physiology', 'Super Durability'],
-      equipment: ['Vibranium Shield', 'Tactical Armor'],
+      equipment: ['Kinetic Shield', 'Tactical Armor'],
       skills: ['Leadership', 'Shield Combat'],
       health: { current: 70, maximum: 70 },
       status: 'ready' as const,

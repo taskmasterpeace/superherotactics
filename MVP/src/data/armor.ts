@@ -19,6 +19,7 @@ import {
   CostLevel,
   Availability,
   CoverageType,
+  CaliberClass,
   COST_VALUES,
 } from './equipmentTypes';
 
@@ -35,6 +36,8 @@ export const LIGHT_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Torso',
     conditionMax: 20,
+    stoppingPower: 0,           // No ballistic protection
+    caliberRating: 'none',
     weight: 3,
     strRequired: 0,
     movementPenalty: 0,
@@ -56,6 +59,8 @@ export const LIGHT_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Torso',
     conditionMax: 40,
+    stoppingPower: 28,          // Stops .38 (25), 9mm (28) completely
+    caliberRating: 'pistol',
     weight: 4,
     strRequired: 0,
     movementPenalty: 0,
@@ -77,6 +82,8 @@ export const LIGHT_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Torso',
     conditionMax: 30,
+    stoppingPower: 5,           // Only stops light melee, not ballistic
+    caliberRating: 'none',
     weight: 3,
     strRequired: 0,
     movementPenalty: 0,
@@ -98,6 +105,8 @@ export const LIGHT_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Torso',
     conditionMax: 35,
+    stoppingPower: 20,          // Stops .22, .25 ACP, maybe small 9mm
+    caliberRating: 'light_pistol',
     weight: 2,
     strRequired: 0,
     movementPenalty: 0,
@@ -119,6 +128,8 @@ export const LIGHT_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 25,
+    stoppingPower: 0,           // Impact protection, not ballistic
+    caliberRating: 'none',
     weight: 8,
     strRequired: 0,
     movementPenalty: 0,
@@ -140,6 +151,8 @@ export const LIGHT_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Limbs',
     conditionMax: 15,
+    stoppingPower: 0,           // No ballistic protection
+    caliberRating: 'none',
     weight: 4,
     strRequired: 0,
     movementPenalty: 0,
@@ -161,6 +174,8 @@ export const LIGHT_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Head_Partial',
     conditionMax: 10,
+    stoppingPower: 5,           // Stops shrapnel only
+    caliberRating: 'none',
     weight: 0.5,
     strRequired: 0,
     movementPenalty: 0,
@@ -182,6 +197,8 @@ export const LIGHT_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Hands',
     conditionMax: 10,
+    stoppingPower: 0,           // No ballistic protection
+    caliberRating: 'none',
     weight: 0.5,
     strRequired: 0,
     movementPenalty: 0,
@@ -208,6 +225,8 @@ export const MEDIUM_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Torso',
     conditionMax: 60,
+    stoppingPower: 32,          // Stops pistol rounds, marginal on .45
+    caliberRating: 'pistol',
     weight: 8,
     strRequired: 10,
     movementPenalty: 0,
@@ -229,6 +248,8 @@ export const MEDIUM_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 80,
+    stoppingPower: 38,          // Stops heavy pistol rounds
+    caliberRating: 'heavy_pistol',
     weight: 15,
     strRequired: 15,
     movementPenalty: -1,
@@ -250,6 +271,8 @@ export const MEDIUM_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 100,
+    stoppingPower: 45,          // With plates, stops intermediate rifle
+    caliberRating: 'rifle',
     weight: 20,
     strRequired: 20,
     movementPenalty: -1,
@@ -271,6 +294,8 @@ export const MEDIUM_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 90,
+    stoppingPower: 45,          // Rifle rated tactical armor
+    caliberRating: 'rifle',
     weight: 18,
     strRequired: 15,
     movementPenalty: -1,
@@ -292,6 +317,8 @@ export const MEDIUM_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 50,
+    stoppingPower: 0,           // Not ballistic protection
+    caliberRating: 'none',
     weight: 12,
     strRequired: 10,
     movementPenalty: -2,
@@ -313,6 +340,8 @@ export const MEDIUM_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 60,
+    stoppingPower: 0,           // Not ballistic protection
+    caliberRating: 'none',
     weight: 15,
     strRequired: 15,
     movementPenalty: -2,
@@ -334,6 +363,8 @@ export const MEDIUM_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 70,
+    stoppingPower: 25,          // Light pistol protection
+    caliberRating: 'light_pistol',
     weight: 25,
     strRequired: 20,
     movementPenalty: -2,
@@ -355,6 +386,8 @@ export const MEDIUM_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Torso',
     conditionMax: 50,
+    stoppingPower: 28,          // Stops standard pistol rounds
+    caliberRating: 'pistol',
     weight: 10,
     strRequired: 10,
     movementPenalty: 0,
@@ -381,6 +414,8 @@ export const HEAVY_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 150,
+    stoppingPower: 55,          // Stops most rifle rounds
+    caliberRating: 'heavy_rifle',
     weight: 30,
     strRequired: 25,
     movementPenalty: -2,
@@ -402,6 +437,8 @@ export const HEAVY_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 200,
+    stoppingPower: 80,          // Maximum ballistic protection
+    caliberRating: 'anti_materiel',
     weight: 80,
     strRequired: 35,
     movementPenalty: -4,
@@ -423,6 +460,8 @@ export const HEAVY_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 180,
+    stoppingPower: 65,          // Stops heavy rifle rounds
+    caliberRating: 'anti_materiel',
     weight: 50,
     strRequired: 30,
     movementPenalty: -3,
@@ -444,6 +483,8 @@ export const HEAVY_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 120,
+    stoppingPower: 45,          // Moderate rifle protection
+    caliberRating: 'rifle',
     weight: 60,
     strRequired: 15,
     movementPenalty: -1,
@@ -465,6 +506,8 @@ export const HEAVY_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 100,
+    stoppingPower: 15,          // Good vs melee, NOT vs bullets
+    caliberRating: 'none',
     weight: 45,
     strRequired: 30,
     movementPenalty: -3,
@@ -486,6 +529,8 @@ export const HEAVY_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 160,
+    stoppingPower: 50,          // Stops intermediate rifle
+    caliberRating: 'heavy_rifle',
     weight: 40,
     strRequired: 25,
     movementPenalty: -2,
@@ -512,6 +557,8 @@ export const POWER_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 200,
+    stoppingPower: 55,          // Heavy rifle protection
+    caliberRating: 'heavy_rifle',
     weight: 150,
     strRequired: 0,
     movementPenalty: 0,
@@ -533,6 +580,8 @@ export const POWER_ARMOR: Armor[] = [
     drMental: 5,
     coverage: 'Full',
     conditionMax: 250,
+    stoppingPower: 70,          // Near anti-materiel protection
+    caliberRating: 'anti_materiel',
     weight: 120,
     strRequired: 0,
     movementPenalty: 1,
@@ -554,6 +603,8 @@ export const POWER_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 100,
+    stoppingPower: 38,          // Heavy pistol, light ballistic
+    caliberRating: 'heavy_pistol',
     weight: 30,
     strRequired: 0,
     movementPenalty: 2,
@@ -575,6 +626,8 @@ export const POWER_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 120,
+    stoppingPower: 45,          // Rifle protection
+    caliberRating: 'rifle',
     weight: 40,
     strRequired: 0,
     movementPenalty: 0, // Flight 50mph
@@ -596,6 +649,8 @@ export const POWER_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 150,
+    stoppingPower: 50,          // Heavy rifle protection underwater
+    caliberRating: 'heavy_rifle',
     weight: 60,
     strRequired: 0,
     movementPenalty: 0, // Swim 30mph
@@ -617,6 +672,8 @@ export const POWER_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 300,
+    stoppingPower: 100,         // Stops almost anything
+    caliberRating: 'anti_materiel',
     weight: 200,
     strRequired: 0,
     movementPenalty: -1,
@@ -638,6 +695,8 @@ export const POWER_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 100,
+    stoppingPower: 45,          // Rifle protection
+    caliberRating: 'rifle',
     weight: 50,
     strRequired: 0,
     movementPenalty: 0,
@@ -659,6 +718,8 @@ export const POWER_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: 150,
+    stoppingPower: 50,          // Heavy rifle protection
+    caliberRating: 'heavy_rifle',
     weight: 80,
     strRequired: 0,
     movementPenalty: 0,
@@ -685,6 +746,8 @@ export const SHIELDS: Armor[] = [
     drMental: 0,
     coverage: 'Directional',
     conditionMax: 80,
+    stoppingPower: 35,          // Stops pistols when blocking
+    caliberRating: 'heavy_pistol',
     weight: 8,
     strRequired: 15,
     movementPenalty: 0,
@@ -706,6 +769,8 @@ export const SHIELDS: Armor[] = [
     drMental: 0,
     coverage: 'Directional',
     conditionMax: 120,
+    stoppingPower: 50,          // Stops rifle rounds when blocking
+    caliberRating: 'heavy_rifle',
     weight: 15,
     strRequired: 20,
     movementPenalty: -1,
@@ -727,6 +792,8 @@ export const SHIELDS: Armor[] = [
     drMental: 0,
     coverage: 'Directional',
     conditionMax: 100,
+    stoppingPower: 45,          // Good rifle protection
+    caliberRating: 'rifle',
     weight: 25,
     strRequired: 25,
     movementPenalty: -2,
@@ -748,6 +815,8 @@ export const SHIELDS: Armor[] = [
     drMental: 10,
     coverage: 'Directional',
     conditionMax: 60,
+    stoppingPower: 30,          // Less effective vs ballistics
+    caliberRating: 'pistol',
     weight: 5,
     strRequired: 0,
     movementPenalty: 0,
@@ -769,6 +838,8 @@ export const SHIELDS: Armor[] = [
     drMental: 0,
     coverage: 'Directional',
     conditionMax: 40,
+    stoppingPower: 15,          // Only blocks melee
+    caliberRating: 'none',
     weight: 3,
     strRequired: 10,
     movementPenalty: 0,
@@ -790,6 +861,8 @@ export const SHIELDS: Armor[] = [
     drMental: 15,
     coverage: 'Bubble',
     conditionMax: 100,
+    stoppingPower: 60,          // Strong vs everything
+    caliberRating: 'heavy_rifle',
     weight: 10,
     strRequired: 0,
     movementPenalty: 0,
@@ -816,6 +889,8 @@ export const NATURAL_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: Infinity,
+    stoppingPower: 35,          // Stops pistol rounds
+    caliberRating: 'heavy_pistol',
     weight: 0,
     strRequired: 0,
     movementPenalty: 0,
@@ -837,6 +912,8 @@ export const NATURAL_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: Infinity,
+    stoppingPower: 70,          // Stops most weapons
+    caliberRating: 'anti_materiel',
     weight: 0,
     strRequired: 0,
     movementPenalty: 0,
@@ -858,6 +935,8 @@ export const NATURAL_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: Infinity,
+    stoppingPower: 50,          // Rock stops most rounds
+    caliberRating: 'heavy_rifle',
     weight: 0,
     strRequired: 0,
     movementPenalty: -1,
@@ -879,6 +958,8 @@ export const NATURAL_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: Infinity,
+    stoppingPower: 80,          // Metal stops almost everything
+    caliberRating: 'anti_materiel',
     weight: 0,
     strRequired: 0,
     movementPenalty: -1,
@@ -900,6 +981,8 @@ export const NATURAL_ARMOR: Armor[] = [
     drMental: 10,
     coverage: 'Full',
     conditionMax: Infinity,
+    stoppingPower: 55,          // Force field stops heavy rounds
+    caliberRating: 'heavy_rifle',
     weight: 0,
     strRequired: 0,
     movementPenalty: 0,
@@ -921,6 +1004,8 @@ export const NATURAL_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: Infinity,
+    stoppingPower: 45,          // Adapts over time
+    caliberRating: 'rifle',
     weight: 0,
     strRequired: 0,
     movementPenalty: 0,
@@ -942,6 +1027,8 @@ export const NATURAL_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: Infinity,
+    stoppingPower: 25,          // Low stopping but heals fast
+    caliberRating: 'light_pistol',
     weight: 0,
     strRequired: 0,
     movementPenalty: 0,
@@ -963,6 +1050,8 @@ export const NATURAL_ARMOR: Armor[] = [
     drMental: 0,
     coverage: 'Full',
     conditionMax: Infinity,
+    stoppingPower: 40,          // Bullets pass through harmlessly
+    caliberRating: 'rifle',
     weight: 0,
     strRequired: 0,
     movementPenalty: 0,
@@ -1299,7 +1388,7 @@ export const ARMOR_MATERIALS: ArmorMaterial[] = [
   },
   {
     id: 'MAT_008',
-    name: 'Vibranium Alloy',
+    name: 'Absorbium Alloy',
     drPhysicalMult: 2.0,
     drEnergyMult: 1.5,
     weightMult: 0.6,
@@ -1311,7 +1400,7 @@ export const ARMOR_MATERIALS: ArmorMaterial[] = [
   },
   {
     id: 'MAT_009',
-    name: 'Adamantium',
+    name: 'Indestructium',
     drPhysicalMult: 2.5,
     drEnergyMult: 1.0,
     weightMult: 1.5,

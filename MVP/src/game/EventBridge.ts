@@ -84,6 +84,15 @@ export interface CombatCharacter {
   equipment: string[];
   threatLevel?: string;
   origin?: string;
+  // Shield system - absorbs damage before HP
+  shield?: number;
+  maxShield?: number;
+  shieldRegen?: number;
+  // Armor (DR) - reduces incoming damage
+  dr?: number;
+  // Equipped armor info
+  equippedArmor?: string;
+  equippedShield?: string;
 }
 
 // Event type definitions for TypeScript
@@ -211,6 +220,17 @@ export interface KillEntry {
   overkill: number;
 }
 
+export interface InjuryRecord {
+  characterId: string;
+  characterName: string;
+  team: 'blue' | 'red';
+  type: string;
+  severity: string;
+  description: string;
+  permanent: boolean;
+  turnInflicted: number;
+}
+
 export interface CombatStats {
   totalDamageDealt: { blue: number; red: number };
   totalKills: { blue: number; red: number };
@@ -227,6 +247,7 @@ export interface CombatStats {
   currentStreaks: Record<string, number>;
   mostDamageTaken: { unit: string | null; damage: number };
   turnCount: number;
+  injuries: InjuryRecord[];
 }
 
 export interface CombatAwards {
@@ -244,6 +265,103 @@ export interface CombatStatsEvent {
   winner: string;
   rounds: number;
   survivors: { team: string; unitId: string; hp: number; name: string }[];
+}
+
+// ============== MARTIAL ARTS SYSTEM ==============
+
+/**
+ * Grapple states for the grappling state machine
+ */
+export enum GrappleState {
+  NONE = 'none',           // Not in any grapple
+  STANDING = 'standing',   // Both characters standing, in clinch
+  GROUND = 'ground',       // Both on ground, not restrained
+  PINNED = 'pinned',       // Target is pinned, attacker in control
+  RESTRAINED = 'restrained', // Target fully restrained
+  CARRIED = 'carried',     // Target being carried
+  SUBMISSION = 'submission' // In a submission hold
+}
+
+/**
+ * Five martial arts styles with unique tactical roles
+ */
+export type MartialArtsStyleId = 'grappling' | 'submission' | 'internal' | 'counter' | 'striking';
+
+/**
+ * Belt ranks with progression bonuses
+ */
+export interface BeltRank {
+  belt: 'white' | 'yellow' | 'orange' | 'green' | 'blue' | 'purple' | 'brown' | 'red' | 'black1' | 'black2';
+  rank: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+  bonus: number;  // MEL bonus for this style's techniques
+}
+
+/**
+ * Individual martial arts technique
+ */
+export interface MartialArtsTechnique {
+  id: string;
+  name: string;
+  styleId: MartialArtsStyleId;
+  beltRequired: number;       // 1-10
+  apCost: number;
+  damage?: number;            // Optional - some techniques don't deal damage
+  effect: string;             // Description of effect
+  statusApplied?: string[];   // Status effects applied
+  requiresGrapple?: boolean;  // Must be in grapple state
+  requiresStanding?: boolean; // Must be standing (default true)
+  requiresProne?: boolean;    // Must be on ground
+  requiresRestrained?: boolean; // Target must be restrained
+  setsGrappleState?: GrappleState; // Changes grapple state to this
+  isReaction?: boolean;       // Can be used as reaction (0 AP when triggered)
+  isPassive?: boolean;        // Always active, no activation
+}
+
+/**
+ * Martial arts style definition
+ */
+export interface MartialArtsStyle {
+  id: MartialArtsStyleId;
+  name: string;
+  description: string;
+  role: 'control' | 'finisher' | 'defense' | 'reactive' | 'damage';
+  primaryStat: 'STR' | 'MEL' | 'AGL' | 'INS';
+  secondaryStat?: 'STR' | 'MEL' | 'AGL' | 'INS';
+  techniques: MartialArtsTechnique[];
+}
+
+/**
+ * Character's martial arts training
+ */
+export interface CharacterMartialArts {
+  styleId: MartialArtsStyleId;
+  beltLevel: number;  // 1-10
+}
+
+/**
+ * Grapple interaction between two units
+ */
+export interface GrappleInteraction {
+  attackerId: string;
+  defenderId: string;
+  state: GrappleState;
+  turnStarted: number;
+  attackerPosition: 'top' | 'bottom' | 'back' | 'side';
+  submissionProgress?: number; // Turns until unconscious for chokes
+}
+
+// Add martial arts events to combat
+export interface MartialArtsEvents {
+  // React → Phaser
+  'use-technique': { unitId: string; techniqueId: string; targetId?: string };
+  'attempt-escape': { unitId: string };
+  'attempt-reversal': { unitId: string };
+
+  // Phaser → React
+  'grapple-started': GrappleInteraction;
+  'grapple-changed': GrappleInteraction;
+  'grapple-ended': { winnerId: string; loserId: string; reason: 'escape' | 'knockout' | 'submission' | 'slam' };
+  'technique-used': { unitId: string; techniqueId: string; targetId: string; success: boolean; damage?: number };
 }
 
 export default EventBridge;
