@@ -23,6 +23,38 @@ import {
   WeaponRangeBrackets,
   DEFAULT_RANGE_BRACKETS,
 } from '../../data/equipmentTypes';
+import { lookupWeaponInDatabase, getDamageSystemType } from './weaponIntegration';
+import {
+  getFlankingResult,
+  getFlankingBonus,
+  FlankingResult,
+} from '../../combat';
+import {
+  getDamageType,
+  DamageSubType,
+  DamageDefinition,
+  DamageCategory,
+  OriginModifiers,
+  calculateOriginDamage,
+  calculateArmoredDamage,
+  canCauseKnockback,
+  canCauseBleeding,
+  canCauseBurning,
+  canCauseFreeze,
+  canCausePoison,
+  canCauseStun,
+  DAMAGE_TYPES,
+} from '../../data/damageSystem';
+import {
+  calculateKnockback,
+  applyKnockback,
+  getKnockbackDirection,
+  getForceValue,
+  EXPLOSION_FORCES,
+  MELEE_FORCES,
+  PROJECTILE_FORCES,
+  KnockbackResult,
+} from '../../data/knockbackSystem';
 
 // Combat statistics tracking interface
 interface UnitStats {
@@ -163,6 +195,40 @@ const WEAPONS = {
 
 type WeaponType = keyof typeof WEAPONS;
 
+// Combat weapon type (matches internal WEAPONS structure)
+type CombatWeapon = {
+  name: string;
+  emoji: string;
+  damage: number;
+  range: number;
+  accuracy: number;
+  ap: number;
+  visual: { type: string; color: number; spread?: number };
+  sound: { decibels: number; baseRange: number };
+  rangeBrackets: WeaponRangeBrackets;
+  knockback?: number;
+  blastRadius?: number;
+};
+
+/**
+ * Get weapon data - tries database first, falls back to internal WEAPONS
+ * This enables using the 70+ weapon database while maintaining backward compatibility
+ */
+function getWeaponData(weaponKey: string): CombatWeapon {
+  // Try database lookup first (weapons.ts via weaponIntegration.ts)
+  const dbWeapon = lookupWeaponInDatabase(weaponKey);
+  if (dbWeapon) return dbWeapon as CombatWeapon;
+
+  // Fallback to internal WEAPONS dictionary
+  if (WEAPONS[weaponKey as WeaponType]) {
+    return WEAPONS[weaponKey as WeaponType] as CombatWeapon;
+  }
+
+  // Ultimate fallback - rifle
+  console.warn(`Unknown weapon key: ${weaponKey}, falling back to rifle`);
+  return WEAPONS.rifle as CombatWeapon;
+}
+
 // Damage type categories for combat verbs
 type DamageType = 'GUNFIRE' | 'BUCKSHOT' | 'BEAM' | 'SMASHING' | 'PSYCHIC';
 
@@ -177,6 +243,24 @@ const WEAPON_DAMAGE_TYPES: Record<WeaponType, DamageType> = {
   psychic: 'PSYCHIC',
   plasma_rifle: 'BEAM',
   super_punch: 'SMASHING',
+};
+
+
+// Map weapons to damage system types (for status effects)
+const WEAPON_TO_DAMAGE_SYSTEM: Record<WeaponType, string> = {
+  pistol: 'GUNFIRE_BULLET',
+  rifle: 'GUNFIRE_BULLET',
+  sniper_rifle: 'GUNFIRE_BULLET',
+  shotgun: 'GUNFIRE_BUCKSHOT',
+  smg: 'GUNFIRE_BULLET',
+  rpg: 'EXPLOSION_SHRAPNEL',
+  beam: 'ELECTROMAGNETIC_LASER',
+  beam_wide: 'ELECTROMAGNETIC_LASER',
+  fist: 'SMASHING_MELEE',
+  psychic: 'MENTAL_BLAST',
+  plasma_rifle: 'ENERGY_PLASMA',
+  super_punch: 'SMASHING_MELEE',
+  machine_gun: 'GUNFIRE_BULLET',
 };
 
 // Weapon-specific combat verbs for detailed combat text
@@ -213,6 +297,7 @@ type PersonalityType = keyof typeof PERSONALITIES;
 
 // ============ STATUS EFFECTS ============
 const STATUS_EFFECTS = {
+  // Combat effects
   bleeding: { id: 'bleeding', name: 'Bleeding', emoji: '🩸', damagePerTurn: 3, duration: 3, stackable: true, color: 0xff0000 },
   burning: { id: 'burning', name: 'Burning', emoji: '🔥', damagePerTurn: 5, duration: 2, stackable: false, color: 0xff6600 },
   frozen: { id: 'frozen', name: 'Frozen', emoji: '🧊', apPenalty: 2, duration: 1, stackable: false, color: 0x88ddff },
@@ -224,6 +309,19 @@ const STATUS_EFFECTS = {
   shielded: { id: 'shielded', name: 'Shielded', emoji: '🛡️', drBonus: 5, duration: 2, stackable: false, color: 0x4488ff },
   incapacitated: { id: 'incapacitated', name: 'Incapacitated', emoji: '😵', skipTurn: true, duration: -1, stackable: false, color: 0x666666 },
   grappled: { id: 'grappled', name: 'Grappled', emoji: '🤼', skipTurn: false, duration: -1, stackable: false, color: 0xdd8800 },
+
+  // Martial arts effects
+  prone: { id: 'prone', name: 'Prone', emoji: '🔽', evasionPenalty: 20, duration: -1, stackable: false, color: 0x996633, standCost: 1 },
+  choked: { id: 'choked', name: 'Choked', emoji: '😰', apPenalty: 1, duration: -1, stackable: false, color: 0x8844aa, turnsToKO: 3 },
+  arm_injured: { id: 'arm_injured', name: 'Arm Injured', emoji: '💪', melPenalty: 2, duration: -1, stackable: false, color: 0xcc4444 },
+  immobilized: { id: 'immobilized', name: 'Immobilized', emoji: '🔒', cannotMove: true, duration: 2, stackable: false, color: 0x444488 },
+  disarmed: { id: 'disarmed', name: 'Disarmed', emoji: '🙌', noWeapon: true, duration: -1, stackable: false, color: 0x886644 },
+  blinded: { id: 'blinded', name: 'Blinded', emoji: '😵', accuracyPenalty: 50, duration: 1, stackable: false, color: 0x222222 },
+  slowed: { id: 'slowed', name: 'Slowed', emoji: '🐌', movePenalty: 2, duration: 2, stackable: false, color: 0x6688aa },
+  silenced: { id: 'silenced', name: 'Silenced', emoji: '🤐', noPowers: true, duration: 1, stackable: false, color: 0x666699 },
+  exposed: { id: 'exposed', name: 'Exposed', emoji: '🎯', evasionPenalty: 30, duration: 1, stackable: false, color: 0xff8844 },
+  staggered: { id: 'staggered', name: 'Staggered', emoji: '😵‍💫', apPenalty: 1, accuracyPenalty: 10, duration: 1, stackable: false, color: 0xaaaa44 },
+  dim_mak: { id: 'dim_mak', name: 'Death Touch', emoji: '☠️💀', delayedDamage: true, duration: 1, stackable: false, color: 0x000000 },
 };
 
 type StatusEffectType = keyof typeof STATUS_EFFECTS;
@@ -269,6 +367,69 @@ const INJURY_TABLE = [
   // 91-100: Lucky
   { range: [91, 100], severity: 'LUCKY', effects: [], description: 'Lucky escape - no lasting injury', emoji: '🍀' },
 ];
+
+// ============ ORIGIN IMMUNITIES ============
+// Origin types (from types.ts): 1=Human, 2=Altered, 3=Tech, 4=Mutated, 5=Spiritual, 6=Robotic, 7=Symbiotic, 8=Alien, 9=Unknown
+const ORIGIN_IMMUNITIES: Record<number, string[]> = {
+  1: [], // Skilled Human - no immunities
+  2: [], // Altered Human - minor power, no immunities
+  3: ['emp'], // Tech Enhancement - immune to biological effects, weak to EMP
+  4: ['poisoned'], // Mutated Human - immune to poison due to altered physiology
+  5: ['bleeding', 'poisoned', 'burning', 'frozen'], // Spiritual - incorporeal, immune to physical status
+  6: ['bleeding', 'poisoned', 'choked', 'burning', 'frozen', 'stunned', 'arm_injured', 'dim_mak'], // Robotic - machine, no biology
+  7: ['bleeding'], // Symbiotic - symbiote stops bleeding rapidly
+  8: [], // Alien - varies by race, handled separately
+  9: [], // Unknown - unpredictable
+};
+
+// Origin weaknesses (take extra effect or duration)
+const ORIGIN_WEAKNESSES: Record<number, string[]> = {
+  1: [], // Human - no weaknesses
+  2: [], // Altered - no specific weaknesses
+  3: ['emp'], // Tech - EMP is devastating
+  4: [], // Mutated - no specific weaknesses
+  5: ['possessed', 'psychic'], // Spiritual - weak to mental/possession
+  6: ['emp'], // Robotic - EMP disables
+  7: ['burning', 'sonic'], // Symbiotic - fire and sonic hurt symbiotes
+  8: [], // Alien - varies
+  9: [], // Unknown - unpredictable
+};
+
+// Map numeric origin (1-9) to damageSystem.ts origin type string
+// Origin types: 1=Human, 2=Altered, 3=Tech, 4=Mutated, 5=Spiritual, 6=Robotic, 7=Symbiotic, 8=Alien, 9=Unknown
+type DamageOriginType = keyof OriginModifiers;
+
+function getOriginType(numericOrigin: number | undefined): DamageOriginType {
+  switch (numericOrigin) {
+    case 1: return 'biological';  // Skilled Human
+    case 2: return 'biological';  // Altered Human
+    case 3: return 'construct';   // Tech Enhancement (cyborg)
+    case 4: return 'biological';  // Mutated Human
+    case 5: return 'energy';      // Spiritual
+    case 6: return 'robotic';     // Robotic
+    case 7: return 'biological';  // Symbiotic (host is biological)
+    case 8: return 'biological';  // Alien (treat as biological by default)
+    case 9: return 'biological';  // Unknown (default to biological)
+    default: return 'biological';
+  }
+}
+
+// Map weapon key to knockback force source ID
+function getWeaponForceSourceId(weaponKey: string): string {
+  const key = weaponKey.toLowerCase();
+  if (key.includes('punch') || key === 'fist') return 'PUNCH';
+  if (key.includes('super_punch')) return 'SUPER_PUNCH';
+  if (key.includes('kick')) return 'KICK';
+  if (key.includes('club') || key.includes('bat')) return 'CLUB';
+  if (key.includes('shotgun')) return 'BUCKSHOT';
+  if (key.includes('sniper')) return 'SNIPER';
+  if (key.includes('rifle')) return 'BULLET_RIFLE';
+  if (key.includes('pistol')) return 'BULLET_PISTOL';
+  if (key.includes('rpg') || key.includes('rocket')) return 'ROCKET';
+  if (key.includes('grenade') || key.includes('frag')) return 'GRENADE_FRAG';
+  if (key.includes('missile')) return 'MISSILE';
+  return 'BULLET_RIFLE'; // Default
+}
 
 // ============ COVER TYPES ============
 const COVER_BONUSES = {
@@ -619,7 +780,11 @@ interface Unit {
   str: number;
   agl: number;
   evasion: number; // Base evasion
-  dr: number; // Damage reduction (armor)
+  dr: number; // Damage reduction (armor) - reduces penetrating damage
+  stoppingPower: number; // Armor stopping power - blocks damage completely if damage <= SP
+  shieldHp: number; // Shield HP - absorbs damage before health
+  shieldMaxHp: number;
+  shieldRegenRate: number; // HP per turn
   acted: boolean;
   visible: boolean;
   stance: StanceType;
@@ -640,6 +805,41 @@ interface Unit {
   effectsContainer?: Phaser.GameObjects.Container;
   statusIconsText?: Phaser.GameObjects.Text; // Emoji status icons
   stanceText?: Phaser.GameObjects.Text; // Stance indicator
+  // Injury penalties (from injury table rolls)
+  movementPenalty?: number; // Multiplier for movement cost (0.5 = half speed)
+  accuracyPenalty?: number; // Flat accuracy modifier (negative = worse)
+  apPenalty?: number; // AP reduction per turn
+  origin?: number; // Origin type for immunity checks (1-9)
+  // Martial arts training
+  martialArts?: {
+    styleId: string;
+    beltLevel: number; // 1-10
+  }[];
+  // Choke tracking for submission holds
+  chokeState?: {
+    turnsInChoke: number;
+    chokeType: 'blood' | 'air'; // Blood = 2 turns to KO, Air = 3 turns
+    attackerId: string;
+  };
+  // Grapple override for super strength
+  mel?: number; // Melee stat for martial arts calculations
+  ins?: number; // Insight stat for internal arts
+  // Vision cone for flanking calculations
+  vision?: {
+    facing: number;   // Direction in degrees (0=right, 90=up, 180=left, 270=down)
+    angle: number;    // Field of view degrees (120 for human, 360 for superhuman)
+    range: number;    // Vision range in tiles
+  };
+}
+
+// Environmental effect types for tiles
+type TileEnvironment = 'none' | 'burning' | 'frozen' | 'acid' | 'electrified';
+
+interface TileEnvironmentState {
+  type: TileEnvironment;
+  duration: number; // Turns remaining
+  intensity: number; // Damage per turn or effect strength
+  visual?: Phaser.GameObjects.Graphics;
 }
 
 interface MapTile {
@@ -648,6 +848,7 @@ interface MapTile {
   terrain: TerrainType;
   sprite?: Phaser.GameObjects.Rectangle;
   occupant?: string;
+  environment?: TileEnvironmentState; // Environmental effects (fire, ice, acid)
 }
 
 type ActionMode = 'idle' | 'move' | 'attack' | 'throw' | 'overwatch' | 'deploy' | 'teleport' | 'grapple';
@@ -1176,6 +1377,48 @@ export class CombatScene extends Phaser.Scene {
         type: 'system',
         actor: unit.name,
         message: `💣 ${unit.name} prepares ${data.grenadeName}! Click target...`,
+      });
+    });
+
+    // Handle spawning test units from Combat Lab Balance Test panel
+    EventBridge.on('spawn-test-unit', (character: CombatCharacter) => {
+      console.log('[COMBAT] Spawning test unit:', character);
+
+      // Find an empty spawn location
+      const team = character.team;
+      const existingTeamUnits = Array.from(this.units.values()).filter(u => u.team === team);
+      const baseX = team === 'blue' ? 2 : this.mapWidth - 3;
+      const baseY = Math.min(existingTeamUnits.length + 1, this.mapHeight - 2);
+
+      // Use the first equipment item as weapon name (for database lookup)
+      const weaponName = character.equipment?.[0] || 'rifle';
+
+      // Create the unit with the weapon from equipment
+      this.createUnit({
+        id: character.id,
+        name: character.name,
+        team: character.team,
+        health: character.health,
+        shield: character.shield || 0,
+        maxShield: character.maxShield || 0,
+        shieldRegen: character.shieldRegen || 0,
+        dr: character.dr || 0,
+        stats: character.stats,
+        powers: character.powers || [],
+        equipment: character.equipment || [],
+        threatLevel: character.threatLevel || 'THREAT_1',
+        origin: character.origin || 'Test',
+      }, { x: baseX, y: baseY }, weaponName as any);
+
+      // Update UI
+      this.updateAllUnitsUI();
+
+      EventBridge.emit('log-entry', {
+        id: `spawn_${Date.now()}`,
+        timestamp: Date.now(),
+        type: 'system',
+        actor: 'System',
+        message: `⚖️ Test unit spawned: ${character.name} with ${weaponName}`,
       });
     });
   }
@@ -1738,6 +1981,10 @@ export class CombatScene extends Phaser.Scene {
       agl: unitData.agl ?? 50,
       evasion: unitData.evasion ?? 30,
       dr: unitData.dr ?? 0,
+      stoppingPower: unitData.stoppingPower ?? 0, // Default no armor
+      shieldHp: unitData.shieldHp ?? 0, // Default no shield
+      shieldMaxHp: unitData.shieldMaxHp ?? 0,
+      shieldRegenRate: unitData.shieldRegenRate ?? 0,
       acted: unitData.acted ?? false,
       visible: unitData.visible ?? true,
       stance: unitData.stance ?? 'normal',
@@ -1746,6 +1993,12 @@ export class CombatScene extends Phaser.Scene {
       powerCooldowns: unitData.powerCooldowns ?? {},
       overwatching: unitData.overwatching ?? false,
       spriteId: unitData.spriteId,
+      // Vision cone for flanking calculations (default: human 120° FOV)
+      vision: unitData.vision ?? {
+        facing: unitData.facing ?? 90,
+        angle: 120,   // Human field of view
+        range: 15,    // Human vision range in tiles
+      },
     };
     // Convert grid position to isometric screen position
     const screenPos = gridToScreen(unit.position.x, unit.position.y, this.offsetX, this.offsetY);
@@ -1925,6 +2178,15 @@ export class CombatScene extends Phaser.Scene {
     const effectDef = STATUS_EFFECTS[effectType];
     if (!effectDef) return;
 
+    // Check origin immunity - some origins are immune to certain effects
+    if (unit.origin && ORIGIN_IMMUNITIES[unit.origin]?.includes(effectType)) {
+      this.emitToUI('combat-log', {
+        message: `${unit.name} is immune to ${effectDef.name}!`,
+        type: 'status'
+      });
+      return;
+    }
+
     // Check if already has this effect
     const existingIdx = unit.statusEffects.findIndex(e => e.type === effectType);
 
@@ -1975,12 +2237,40 @@ export class CombatScene extends Phaser.Scene {
         messages.push(`${effectDef.emoji} ${unit.name} is ${effectDef.name} and cannot act!`);
       }
 
+      // Process choke - increment turn counter and check for KO
+      if (effect.type === 'choked' && unit.chokeState) {
+        unit.chokeState.turnsInChoke++;
+        const turnsToKO = unit.chokeState.chokeType === 'blood' ? 2 : 3;
+        const turnsRemaining = turnsToKO - unit.chokeState.turnsInChoke;
+
+        if (turnsRemaining <= 0) {
+          // KO from choke!
+          messages.push(`😰 ${unit.name} goes UNCONSCIOUS from the choke!`);
+          this.incapacitateUnit(unit);
+          skipTurn = true;
+        } else {
+          const urgency = turnsRemaining === 1 ? '⚠️ ' : '';
+          messages.push(`${urgency}😰 ${unit.name} is being choked! (${turnsRemaining} turns to unconscious)`);
+        }
+      }
+
+      // Process dim mak (death touch) - delayed damage triggers
+      if (effect.type === 'dim_mak') {
+        const dimMakDamage = 50; // Devastating delayed damage
+        totalDamage += dimMakDamage;
+        messages.push(`☠️💀 ${unit.name} feels the Death Touch activate! ${dimMakDamage} damage!`);
+      }
+
       // Reduce duration (if not permanent)
       if (effect.duration > 0) {
         effect.duration--;
         if (effect.duration <= 0) {
           messages.push(`${effectDef.emoji} ${unit.name}'s ${effectDef.name} wears off.`);
           unit.statusEffects.splice(i, 1);
+          // Clear choke state when choked effect ends
+          if (effect.type === 'choked') {
+            unit.chokeState = undefined;
+          }
         }
       }
     }
@@ -1988,6 +2278,192 @@ export class CombatScene extends Phaser.Scene {
     this.updateStatusIcons(unit);
     return { damage: totalDamage, skipTurn, messages };
   }
+
+  /**
+   * Apply status effects based on damage type
+   */
+  private applyDamageTypeEffects(target: Unit, damageTypeId: string, damage: number, isCrit: boolean): void {
+    const damageTypeDef = getDamageType(damageTypeId);
+    if (!damageTypeDef) return;
+
+    // Apply bleeding effect
+    if (damageTypeDef.bleeding?.enabled) {
+      const bleedEffect = damageTypeDef.bleeding;
+      const existingBleed = target.statusEffects.find(e => e.type === 'bleeding');
+
+      if (existingBleed && bleedEffect.stackable && existingBleed.stacks! < bleedEffect.maxStacks) {
+        existingBleed.stacks = (existingBleed.stacks || 1) + 1;
+        existingBleed.duration = Math.max(existingBleed.duration, bleedEffect.duration);
+        this.emitToUI('combat-log', {
+          message: `🩸 ${target.name} is bleeding more! (${existingBleed.stacks} stacks)`,
+          type: 'status'
+        });
+      } else if (!existingBleed) {
+        this.applyStatusEffect(target, 'bleeding', bleedEffect.duration);
+        this.emitToUI('combat-log', {
+          message: `🩸 ${target.name} is bleeding!`,
+          type: 'status'
+        });
+      }
+    }
+
+    // Apply burning effect
+    if (damageTypeDef.burning?.enabled) {
+      const burnEffect = damageTypeDef.burning;
+      const existingBurn = target.statusEffects.find(e => e.type === 'burning');
+
+      if (!existingBurn) {
+        this.applyStatusEffect(target, 'burning', burnEffect.duration);
+        this.emitToUI('combat-log', {
+          message: `🔥 ${target.name} is burning!`,
+          type: 'status'
+        });
+
+        // If environmental effect enabled, set tile on fire
+        if (damageTypeDef.specialMechanics?.environmental && burnEffect.spreadChance > 0) {
+          this.setTileEnvironment(
+            target.position.x,
+            target.position.y,
+            'burning',
+            burnEffect.duration + 1,
+            burnEffect.initialDamage
+          );
+        }
+      }
+    }
+
+    // Apply freeze effect
+    if (damageTypeDef.freeze?.enabled) {
+      const freezeEffect = damageTypeDef.freeze;
+      const existingFreeze = target.statusEffects.find(e => e.type === 'frozen');
+
+      if (!existingFreeze) {
+        this.applyStatusEffect(target, 'frozen', freezeEffect.duration);
+        this.emitToUI('combat-log', {
+          message: `❄️ ${target.name} is frozen!`,
+          type: 'status'
+        });
+
+        // If environmental effect enabled, freeze the tile
+        if (damageTypeDef.specialMechanics?.environmental) {
+          this.setTileEnvironment(
+            target.position.x,
+            target.position.y,
+            'frozen',
+            freezeEffect.duration + 2,
+            freezeEffect.shatterDamage || 20
+          );
+        }
+      }
+    }
+
+    // Apply poison effect
+    if (damageTypeDef.poison?.enabled) {
+      const poisonEffect = damageTypeDef.poison;
+      const existingPoison = target.statusEffects.find(e => e.type === 'poisoned');
+
+      if (existingPoison && poisonEffect.affectsBiological) {
+        existingPoison.stacks = (existingPoison.stacks || 1) + 1;
+        existingPoison.duration = Math.max(existingPoison.duration, poisonEffect.duration);
+        this.emitToUI('combat-log', {
+          message: `☠️ ${target.name} is more poisoned! (${existingPoison.stacks} stacks)`,
+          type: 'status'
+        });
+      } else if (!existingPoison && poisonEffect.affectsBiological) {
+        this.applyStatusEffect(target, 'poisoned', poisonEffect.duration);
+        this.emitToUI('combat-log', {
+          message: `☠️ ${target.name} is poisoned!`,
+          type: 'status'
+        });
+      }
+    }
+
+    // Apply stun effect
+    if (damageTypeDef.stun?.enabled) {
+      const stunEffect = damageTypeDef.stun;
+
+      // Check for saving throw based on CON
+      if (stunEffect.savingThrow) {
+        const conMod = (target.con - 50) * 0.5; // CON 50 is baseline
+        const stunRoll = Math.random() * 100 + conMod;
+
+        if (stunRoll < 50) {
+          if (stunEffect.skipTurn) {
+            this.applyStatusEffect(target, 'stunned', stunEffect.duration);
+            this.emitToUI('combat-log', {
+              message: `💫 ${target.name} is stunned!`,
+              type: 'status'
+            });
+          }
+        } else {
+          this.emitToUI('combat-log', {
+            message: `${target.name} resists the stun! (${Math.floor(stunRoll)})`,
+            type: 'status'
+          });
+        }
+      } else {
+        if (stunEffect.skipTurn) {
+          this.applyStatusEffect(target, 'stunned', stunEffect.duration);
+          this.emitToUI('combat-log', {
+            message: `💫 ${target.name} is stunned!`,
+            type: 'status'
+          });
+        }
+      }
+    }
+
+    // === SPECIAL MECHANICS ===
+    const specialMechanics = damageTypeDef.specialMechanics;
+
+    // Can Impale: Piercing weapons can pin targets on crit
+    if (specialMechanics?.canImpale && isCrit) {
+      // 40% chance to impale on crit
+      if (Math.random() < 0.4) {
+        this.applyStatusEffect(target, 'immobilized', 2);
+        this.emitToUI('combat-log', {
+          message: `🗡️ ${target.name} is IMPALED! (Immobilized for 2 turns)`,
+          type: 'status'
+        });
+      }
+    }
+
+    // Can Break Bones: Smashing attacks on high damage can fracture
+    if (specialMechanics?.canBreakBones && damage > 20) {
+      // Chance based on damage dealt
+      const fractureChance = Math.min(0.5, (damage - 20) / 60); // 0% at 20 damage, 50% at 50 damage
+      if (Math.random() < fractureChance) {
+        // Roll which body part
+        const bodyParts = ['arm', 'leg', 'ribs'];
+        const part = bodyParts[Math.floor(Math.random() * bodyParts.length)];
+
+        if (part === 'arm') {
+          this.applyStatusEffect(target, 'arm_injured');
+          this.emitToUI('combat-log', {
+            message: `🦴 ${target.name}'s ARM is BROKEN! (MEL penalty)`,
+            type: 'status'
+          });
+        } else if (part === 'leg') {
+          this.applyStatusEffect(target, 'slowed', 5);
+          target.movementPenalty = (target.movementPenalty || 1) * 0.5;
+          this.emitToUI('combat-log', {
+            message: `🦴 ${target.name}'s LEG is BROKEN! (Movement halved)`,
+            type: 'status'
+          });
+        } else {
+          // Ribs - AP penalty
+          target.apPenalty = (target.apPenalty || 0) + 1;
+          this.emitToUI('combat-log', {
+            message: `🦴 ${target.name}'s RIBS are CRACKED! (-1 AP per turn)`,
+            type: 'status'
+          });
+        }
+      }
+    }
+
+    // Can Block/Parry: Already handled by hit calculation (affects accuracy)
+    // These are defensive mechanics checked during attack resolution
+  }
+
 
   /**
    * Process status effects for all units on a team at the start of their turn
@@ -2038,6 +2514,175 @@ export class CombatScene extends Phaser.Scene {
         }
       }
     }
+  }
+
+  /**
+   * Process environmental effects on tiles each round
+   * - Fire spreads to adjacent tiles (30% chance)
+   * - Frozen tiles slow movement
+   * - Acid damages units standing in it
+   * - All effects tick down duration
+   */
+  private processEnvironmentalEffects(): void {
+    const tilesToSpreadFire: { x: number; y: number }[] = [];
+
+    // Process all tiles with environmental effects
+    for (let y = 0; y < this.mapHeight; y++) {
+      for (let x = 0; x < this.mapWidth; x++) {
+        const tile = this.tiles[y]?.[x];
+        if (!tile?.environment || tile.environment.type === 'none') continue;
+
+        const env = tile.environment;
+
+        // Apply damage to occupant
+        if (tile.occupant) {
+          const unit = this.units.get(tile.occupant);
+          if (unit && unit.hp > 0) {
+            let damage = 0;
+            let effectName = '';
+
+            switch (env.type) {
+              case 'burning':
+                damage = env.intensity; // Fire damage
+                effectName = '🔥 Fire';
+                // Check if unit is immune (robotic = no burning damage)
+                if (getOriginType(unit.origin) === 'robotic') {
+                  damage = 0;
+                }
+                break;
+              case 'acid':
+                damage = env.intensity;
+                effectName = '🧪 Acid';
+                break;
+              case 'electrified':
+                damage = env.intensity;
+                effectName = '⚡ Electricity';
+                // Robotic takes 2x damage from electricity
+                if (getOriginType(unit.origin) === 'robotic') {
+                  damage = Math.floor(damage * 2);
+                }
+                break;
+              case 'frozen':
+                // Frozen tiles don't damage, but slow and can shatter
+                damage = 0;
+                effectName = '❄️ Frozen Ground';
+                // Apply frozen status if not already frozen
+                if (!unit.statusEffects.find(e => e.type === 'frozen')) {
+                  this.applyStatusEffect(unit, 'slowed', 1);
+                  this.emitToUI('combat-log', {
+                    message: `❄️ ${unit.name} slips on frozen ground! (Slowed)`,
+                    type: 'status'
+                  });
+                }
+                break;
+            }
+
+            if (damage > 0) {
+              unit.hp = Math.max(0, unit.hp - damage);
+              this.updateHealthBar(unit);
+
+              // Show floating damage
+              const screenPos = gridToScreen(x, y, this.offsetX, this.offsetY);
+              this.showFloatingDamage(screenPos.x, screenPos.y, damage, env.type === 'burning' ? 0xff6600 : 0x00ff00);
+
+              this.emitToUI('combat-log', {
+                message: `${effectName} deals ${damage} damage to ${unit.name}!`,
+                type: 'status'
+              });
+
+              if (unit.hp <= 0) {
+                this.killUnit(unit, 'Environmental');
+              }
+            }
+          }
+        }
+
+        // Fire spread logic (30% chance per adjacent tile)
+        if (env.type === 'burning') {
+          const spreadChance = 0.30;
+          const adjacent = [
+            { x: x - 1, y }, { x: x + 1, y },
+            { x, y: y - 1 }, { x, y: y + 1 }
+          ];
+
+          for (const adj of adjacent) {
+            if (adj.x < 0 || adj.x >= this.mapWidth || adj.y < 0 || adj.y >= this.mapHeight) continue;
+            const adjTile = this.tiles[adj.y]?.[adj.x];
+            if (!adjTile) continue;
+
+            // Can't spread to non-walkable tiles or tiles already on fire
+            if (!TERRAIN_TYPES[adjTile.terrain].walkable) continue;
+            if (adjTile.environment?.type === 'burning') continue;
+
+            // 30% chance to spread
+            if (Math.random() < spreadChance) {
+              tilesToSpreadFire.push(adj);
+            }
+          }
+        }
+
+        // Tick down duration
+        env.duration--;
+        if (env.duration <= 0) {
+          // Remove environmental effect
+          this.clearTileEnvironment(x, y);
+        }
+      }
+    }
+
+    // Apply fire spread (after iteration to avoid modifying during loop)
+    for (const pos of tilesToSpreadFire) {
+      this.setTileEnvironment(pos.x, pos.y, 'burning', 2, 5);
+      this.emitToUI('combat-log', {
+        message: `🔥 Fire spreads to (${pos.x}, ${pos.y})!`,
+        type: 'status'
+      });
+    }
+  }
+
+  /**
+   * Set an environmental effect on a tile
+   */
+  private setTileEnvironment(x: number, y: number, type: TileEnvironment, duration: number, intensity: number): void {
+    const tile = this.tiles[y]?.[x];
+    if (!tile) return;
+
+    // Clear existing environment visual
+    if (tile.environment?.visual) {
+      tile.environment.visual.destroy();
+    }
+
+    // Create visual indicator
+    const screenPos = gridToScreen(x, y, this.offsetX, this.offsetY);
+    const visual = this.add.graphics();
+    visual.setDepth(50);
+
+    const colors: Record<TileEnvironment, number> = {
+      none: 0x000000,
+      burning: 0xff4400,
+      frozen: 0x88ccff,
+      acid: 0x00ff00,
+      electrified: 0xffff00,
+    };
+
+    visual.fillStyle(colors[type], 0.4);
+    visual.fillEllipse(screenPos.x, screenPos.y + TILE_HEIGHT / 4, TILE_WIDTH * 0.8, TILE_HEIGHT * 0.4);
+    this.effectsLayer?.add(visual);
+
+    tile.environment = { type, duration, intensity, visual };
+  }
+
+  /**
+   * Clear environmental effect from a tile
+   */
+  private clearTileEnvironment(x: number, y: number): void {
+    const tile = this.tiles[y]?.[x];
+    if (!tile?.environment) return;
+
+    if (tile.environment.visual) {
+      tile.environment.visual.destroy();
+    }
+    tile.environment = undefined;
   }
 
   /**
@@ -2113,14 +2758,31 @@ export class CombatScene extends Phaser.Scene {
     return { willKill, expectedDamage, confidence, unconsciousThreshold };
   }
 
-  private rollInjury(unit: Unit, damage: number, isCritical: boolean): InjuryInstance | null {
-    // Only roll injury on critical hits or massive overkill damage
-    if (!isCritical && damage < unit.maxHp * 0.5) return null;
+  private rollInjury(unit: Unit, damage: number, isCritical: boolean, armorDR: number = 0): InjuryInstance | null {
+    // Every hit rolls on the injury table - this is what makes combat deadly
+    // Roll d100: lower = worse injury, higher = luckier
+    let roll = Math.floor(Math.random() * 100) + 1;
 
-    const roll = Math.floor(Math.random() * 100) + 1;
+    // Armor provides protection - adds +20-40 to roll based on DR (shifts toward less severe)
+    const armorBonus = Math.min(40, Math.floor(armorDR * 2));
+    roll += armorBonus;
+
+    // Critical hits are devastating - subtract 20 from roll (shifts toward more severe)
+    if (isCritical) {
+      roll -= 20;
+    }
+
+    // Clamp roll to 1-100
+    roll = Math.max(1, Math.min(100, roll));
+
     const injury = INJURY_TABLE.find(i => roll >= i.range[0] && roll <= i.range[1]);
 
     if (!injury) return null;
+
+    // LUCKY roll (91-100) = no injury, just HP damage
+    if (injury.severity === 'LUCKY') {
+      return null;
+    }
 
     const injuryInstance: InjuryInstance = {
       type: injury.effects[0] || 'none',
@@ -2129,16 +2791,45 @@ export class CombatScene extends Phaser.Scene {
       permanent: injury.severity === 'PERMANENT',
     };
 
-    // Apply injury effects
+    // Apply injury effects based on type
     if (injury.effects.includes('instant_death')) {
       unit.hp = 0;
       this.emitToUI('combat-log', { message: `💀 ${unit.name} suffers FATAL INJURY!`, type: 'injury' });
+    } else if (injury.effects.includes('crippled_leg')) {
+      unit.movementPenalty = (unit.movementPenalty || 0) + 0.5; // -50% movement
+      this.emitToUI('combat-log', { message: `🦿 ${unit.name}'s leg is crippled! Movement halved permanently.`, type: 'injury' });
+    } else if (injury.effects.includes('crippled_arm')) {
+      unit.accuracyPenalty = (unit.accuracyPenalty || 0) - 20; // -20 accuracy
+      this.emitToUI('combat-log', { message: `🦾 ${unit.name}'s arm is crippled! -20 accuracy permanently.`, type: 'injury' });
+    } else if (injury.effects.includes('broken_bone')) {
+      unit.apPenalty = (unit.apPenalty || 0) + 2; // -2 AP per turn until healed
+      unit.accuracyPenalty = (unit.accuracyPenalty || 0) - 15;
+      this.emitToUI('combat-log', { message: `🦴 ${unit.name} has a broken bone! -2 AP, -15 accuracy.`, type: 'injury' });
+    } else if (injury.effects.includes('concussion')) {
+      unit.accuracyPenalty = (unit.accuracyPenalty || 0) - 25;
+      this.applyStatusEffect(unit, 'dazed');
+      this.emitToUI('combat-log', { message: `🤕 ${unit.name} is concussed! -25 accuracy, dazed.`, type: 'injury' });
     } else if (injury.effects.includes('bleeding')) {
       this.applyStatusEffect(unit, 'bleeding');
+    } else if (injury.effects.includes('winded')) {
+      unit.apPenalty = (unit.apPenalty || 0) + 1; // -1 AP this turn
+      this.emitToUI('combat-log', { message: `💨 ${unit.name} is winded! -1 AP.`, type: 'injury' });
+    } else if (injury.effects.includes('dazed')) {
+      unit.accuracyPenalty = (unit.accuracyPenalty || 0) - 10;
+      this.emitToUI('combat-log', { message: `💫 ${unit.name} is dazed! -10 accuracy.`, type: 'injury' });
+    } else if (injury.effects.includes('bruised')) {
+      unit.accuracyPenalty = (unit.accuracyPenalty || 0) - 5;
+      this.emitToUI('combat-log', { message: `🟣 ${unit.name} is bruised. -5 accuracy.`, type: 'injury' });
+    } else if (injury.effects.includes('grazed')) {
+      // Minimal effect - just cosmetic
+      this.emitToUI('combat-log', { message: `😤 ${unit.name} was grazed.`, type: 'injury' });
     }
 
     unit.injuries.push(injuryInstance);
-    this.emitToUI('combat-log', { message: `${injury.emoji} ${unit.name}: ${injury.description}`, type: 'injury' });
+    // Only log general injury message for non-specific effects
+    if (!['instant_death', 'crippled_leg', 'crippled_arm', 'broken_bone', 'concussion', 'bleeding', 'winded', 'dazed', 'bruised', 'grazed'].some(e => injury.effects.includes(e))) {
+      this.emitToUI('combat-log', { message: `${injury.emoji} ${unit.name}: ${injury.description}`, type: 'injury' });
+    }
 
     return injuryInstance;
   }
@@ -2275,6 +2966,15 @@ export class CombatScene extends Phaser.Scene {
     return TERRAIN_TYPES[tile.terrain].cover as 'none' | 'half' | 'full';
   }
 
+  /**
+   * Check if a tile is walkable (not a wall or other blocking terrain)
+   */
+  private isTileWalkable(x: number, y: number): boolean {
+    const tile = this.tiles[y]?.[x];
+    if (!tile) return false;
+    return TERRAIN_TYPES[tile.terrain].walkable;
+  }
+
   private setActionMode(mode: ActionMode): void {
     this.actionMode = mode;
     this.clearRangeOverlay();
@@ -2347,7 +3047,7 @@ export class CombatScene extends Phaser.Scene {
   }
 
   private showAttackRange(unit: Unit): void {
-    const weapon = WEAPONS[unit.weapon];
+    const weapon = getWeaponData(unit.weapon);
     const maxRange = weapon.range;
 
     // Show range indicator at unit position
@@ -2780,19 +3480,41 @@ export class CombatScene extends Phaser.Scene {
     attacker.ap -= 2;
 
     if (attackerRoll >= targetRoll) {
-      // Success - enter clinch
-      attacker.grappleState = { position: 'clinch', targetId: target.id };
-      target.grappleState = { position: 'clinch', targetId: attacker.id };
-      this.applyStatusEffect(attacker, 'grappled');
-      this.applyStatusEffect(target, 'grappled');
+      // Check for super strength override: if STR > target STR + 20, skip to CARRIED
+      const isSuperStrength = attacker.str > target.str + 20;
 
-      this.emitToUI('combat-log', {
-        message: `🤼 ${attacker.name} GRAPPLES ${target.name}! (${attackerRoll} vs ${targetRoll})`,
-        type: 'attack'
-      });
+      if (isSuperStrength) {
+        // Super strength: skip ground, go straight to carried!
+        attacker.grappleState = { position: 'ground', targetId: target.id };
+        target.grappleState = { position: 'ground', targetId: attacker.id };
+        this.applyStatusEffect(attacker, 'grappled');
+        this.applyStatusEffect(target, 'grappled');
+        this.applyStatusEffect(target, 'prone');
 
-      // Deal some grapple damage
-      const damage = Math.floor(attacker.str / 10) + 5;
+        this.emitToUI('combat-log', {
+          message: `💪🤼 ${attacker.name} OVERWHELMS ${target.name} with SUPER STRENGTH! (${attackerRoll} vs ${targetRoll})`,
+          type: 'attack'
+        });
+        this.emitToUI('combat-log', {
+          message: `🔽 ${target.name} is immediately taken to the ground!`,
+          type: 'status'
+        });
+      } else {
+        // Normal grapple - enter clinch
+        attacker.grappleState = { position: 'clinch', targetId: target.id };
+        target.grappleState = { position: 'clinch', targetId: attacker.id };
+        this.applyStatusEffect(attacker, 'grappled');
+        this.applyStatusEffect(target, 'grappled');
+
+        this.emitToUI('combat-log', {
+          message: `🤼 ${attacker.name} GRAPPLES ${target.name}! (${attackerRoll} vs ${targetRoll})`,
+          type: 'attack'
+        });
+      }
+
+      // Deal grapple damage (more for super strength)
+      const baseDamage = Math.floor(attacker.str / 10) + 5;
+      const damage = isSuperStrength ? baseDamage * 2 : baseDamage;
       target.hp -= damage;
       this.updateHealthBar(target);
       this.emitToUI('combat-log', {
@@ -2812,6 +3534,211 @@ export class CombatScene extends Phaser.Scene {
 
     this.setActionMode('idle');
     this.emitAllUnitsData();
+  }
+
+  /**
+   * Execute a martial arts technique
+   * This is the main entry point for martial arts in combat
+   */
+  private executeMartialArtsTechnique(
+    attackerId: string,
+    targetId: string,
+    techniqueId: string,
+    styleId: string
+  ): void {
+    const attacker = this.units.get(attackerId);
+    const target = this.units.get(targetId);
+    if (!attacker || !target) return;
+
+    // Find the technique from martial arts data
+    const technique = this.getMartialArtsTechnique(styleId, techniqueId);
+    if (!technique) {
+      this.emitToUI('combat-log', { message: `❌ Unknown technique: ${techniqueId}`, type: 'system' });
+      return;
+    }
+
+    // Check AP cost
+    if (attacker.ap < (technique.apCost || 1)) {
+      this.emitToUI('combat-log', {
+        message: `❌ Not enough AP! (need ${technique.apCost})`,
+        type: 'system'
+      });
+      return;
+    }
+
+    // Get belt bonus
+    const training = attacker.martialArts?.find(m => m.styleId === styleId);
+    const beltLevel = training?.beltLevel || 1;
+    const beltBonus = beltLevel; // Belt bonus = belt level
+
+    // Calculate hit chance
+    const attackerMEL = attacker.mel || 50;
+    const defenderAGL = target.agl || 50;
+    const baseHitChance = attackerMEL + beltBonus + (attacker.str / 4) - (defenderAGL / 3) + 30;
+    const hitChance = Math.max(5, Math.min(95, baseHitChance));
+
+    // Roll to hit
+    const hitRoll = Math.floor(Math.random() * 100);
+    const hit = hitRoll < hitChance;
+
+    attacker.ap -= technique.apCost || 1;
+
+    if (!hit) {
+      this.emitToUI('combat-log', {
+        message: `🥋 ${attacker.name}'s ${technique.name} MISSES! (${hitRoll} vs ${hitChance}%)`,
+        type: 'miss'
+      });
+      this.emitAllUnitsData();
+      return;
+    }
+
+    // Calculate damage
+    let damage = 0;
+    if (technique.damage) {
+      // Slam technique uses STR directly
+      if (techniqueId === 'tech_slam') {
+        damage = Math.floor(attacker.str * 0.5);
+      } else {
+        damage = technique.damage + Math.floor(attacker.str / 20) + Math.floor(beltLevel / 3);
+      }
+    }
+
+    // Apply damage
+    if (damage > 0) {
+      target.hp -= damage;
+      this.updateHealthBar(target);
+      this.emitToUI('combat-log', {
+        message: `🥋 ${attacker.name}'s ${technique.name} HITS ${target.name} for ${damage} damage!`,
+        type: 'damage'
+      });
+
+      // Show floating damage
+      const screenPos = gridToScreen(target.position.x, target.position.y, this.offsetX, this.offsetY);
+      this.showFloatingDamage(screenPos.x, screenPos.y, damage, 0xffaa00);
+    } else {
+      this.emitToUI('combat-log', {
+        message: `🥋 ${attacker.name} executes ${technique.name} on ${target.name}!`,
+        type: 'attack'
+      });
+    }
+
+    // Apply status effects from technique
+    if (technique.statusApplied && technique.statusApplied.length > 0) {
+      for (const statusId of technique.statusApplied) {
+        // Special handling for choke - determine blood vs air based on technique
+        if (statusId === 'choked') {
+          const isBloodChoke = ['tech_blood_choke', 'tech_rear_naked', 'tech_triangle'].includes(techniqueId);
+          target.chokeState = {
+            turnsInChoke: 0,
+            chokeType: isBloodChoke ? 'blood' : 'air',
+            attackerId: attacker.id
+          };
+          const turnsToKO = isBloodChoke ? 2 : 3;
+          this.emitToUI('combat-log', {
+            message: `😰 ${target.name} is in a ${isBloodChoke ? 'BLOOD' : 'AIR'} choke! (${turnsToKO} turns to unconscious)`,
+            type: 'status'
+          });
+        }
+
+        // Apply the status effect (type assertion for dynamic status)
+        if (statusId in STATUS_EFFECTS) {
+          this.applyStatusEffect(target, statusId as StatusEffectType);
+        }
+      }
+    }
+
+    // Update grapple state if technique sets it
+    if (technique.setsGrappleState) {
+      const newState = technique.setsGrappleState as GrapplePosition;
+      attacker.grappleState = { position: newState, targetId: target.id };
+      target.grappleState = { position: newState, targetId: attacker.id };
+
+      if (newState === 'ground' || newState === 'pinned') {
+        // Apply prone to target when taken to ground
+        if (!target.statusEffects.find(e => e.type === 'prone')) {
+          this.applyStatusEffect(target, 'prone');
+        }
+      }
+
+      this.emitToUI('combat-log', {
+        message: `🤼 Grapple position: ${newState.toUpperCase()}`,
+        type: 'status'
+      });
+    }
+
+    // Check for death
+    if (target.hp <= 0) {
+      this.incapacitateUnit(target);
+    }
+
+    this.emitAllUnitsData();
+  }
+
+  /**
+   * Get a martial arts technique by style and technique ID
+   */
+  private getMartialArtsTechnique(styleId: string, techniqueId: string): {
+    id: string;
+    name: string;
+    apCost?: number;
+    damage?: number;
+    effect?: string;
+    statusApplied?: string[];
+    setsGrappleState?: string;
+    requiresGrapple?: boolean;
+    requiresProne?: boolean;
+    requiresStanding?: boolean;
+    isReaction?: boolean;
+  } | null {
+    // Import martial arts data (this would normally be imported at top of file)
+    // For now, return a hardcoded lookup based on common techniques
+    const TECHNIQUE_DATA: Record<string, Record<string, any>> = {
+      grappling: {
+        tech_clinch: { id: 'tech_clinch', name: 'Clinch', apCost: 1, setsGrappleState: 'standing' },
+        tech_takedown: { id: 'tech_takedown', name: 'Takedown', apCost: 2, damage: 5, statusApplied: ['prone'], setsGrappleState: 'ground' },
+        tech_hip_throw: { id: 'tech_hip_throw', name: 'Hip Throw', apCost: 2, damage: 8, statusApplied: ['prone'], setsGrappleState: 'ground' },
+        tech_suplex: { id: 'tech_suplex', name: 'Suplex', apCost: 3, damage: 15, statusApplied: ['prone', 'stunned'], setsGrappleState: 'ground' },
+        tech_slam: { id: 'tech_slam', name: 'Slam', apCost: 3, damage: 0, setsGrappleState: 'ground' },
+        tech_pin: { id: 'tech_pin', name: 'Pin', apCost: 2, setsGrappleState: 'pinned' },
+        tech_pile_driver: { id: 'tech_pile_driver', name: 'Pile Driver', apCost: 4, damage: 30, statusApplied: ['stunned', 'prone'], setsGrappleState: 'ground' },
+      },
+      submission: {
+        tech_guard_pull: { id: 'tech_guard_pull', name: 'Guard Pull', apCost: 1, statusApplied: ['prone'], setsGrappleState: 'ground' },
+        tech_armbar: { id: 'tech_armbar', name: 'Armbar', apCost: 2, damage: 10, statusApplied: ['arm_injured'], setsGrappleState: 'submission' },
+        tech_triangle: { id: 'tech_triangle', name: 'Triangle Choke', apCost: 2, statusApplied: ['choked'], setsGrappleState: 'submission' },
+        tech_kimura: { id: 'tech_kimura', name: 'Kimura', apCost: 2, damage: 15, statusApplied: ['disarmed'], setsGrappleState: 'submission' },
+        tech_rear_naked: { id: 'tech_rear_naked', name: 'Rear Naked Choke', apCost: 3, statusApplied: ['choked'], setsGrappleState: 'submission' },
+        tech_heel_hook: { id: 'tech_heel_hook', name: 'Heel Hook', apCost: 2, damage: 20, statusApplied: ['immobilized'], setsGrappleState: 'submission' },
+        tech_neck_crank: { id: 'tech_neck_crank', name: 'Neck Crank', apCost: 3, damage: 25, setsGrappleState: 'submission' },
+        tech_blood_choke: { id: 'tech_blood_choke', name: 'Blood Choke', apCost: 3, statusApplied: ['choked'], setsGrappleState: 'submission' },
+      },
+      internal: {
+        tech_push: { id: 'tech_push', name: 'Push', apCost: 1, damage: 0, requiresStanding: true },
+        tech_joint_lock: { id: 'tech_joint_lock', name: 'Joint Lock', apCost: 2, damage: 5, statusApplied: ['immobilized'], requiresStanding: true },
+        tech_energy_steal: { id: 'tech_energy_steal', name: 'Energy Steal', apCost: 2, requiresGrapple: true },
+        tech_dim_mak: { id: 'tech_dim_mak', name: 'Dim Mak', apCost: 4, damage: 0, statusApplied: ['dim_mak'], requiresStanding: true },
+      },
+      counter: {
+        tech_eye_jab: { id: 'tech_eye_jab', name: 'Eye Jab', apCost: 1, damage: 5, statusApplied: ['blinded'], requiresStanding: true },
+        tech_low_kick: { id: 'tech_low_kick', name: 'Low Kick', apCost: 1, damage: 10, statusApplied: ['slowed'], requiresStanding: true },
+        tech_disarm: { id: 'tech_disarm', name: 'Disarm', apCost: 2, statusApplied: ['disarmed'], requiresStanding: true },
+        tech_throat_strike: { id: 'tech_throat_strike', name: 'Throat Strike', apCost: 2, damage: 15, statusApplied: ['silenced'], requiresStanding: true },
+        tech_break_guard: { id: 'tech_break_guard', name: 'Break Guard', apCost: 2, statusApplied: ['exposed'], requiresStanding: true },
+        tech_simultaneous: { id: 'tech_simultaneous', name: 'Simultaneous Attack', apCost: 3, damage: 20, requiresStanding: true },
+      },
+      striking: {
+        tech_jab: { id: 'tech_jab', name: 'Jab', apCost: 1, damage: 5, requiresStanding: true },
+        tech_cross: { id: 'tech_cross', name: 'Cross', apCost: 1, damage: 10, requiresStanding: true },
+        tech_hook: { id: 'tech_hook', name: 'Hook', apCost: 1, damage: 12, requiresStanding: true },
+        tech_uppercut: { id: 'tech_uppercut', name: 'Uppercut', apCost: 2, damage: 15, statusApplied: ['staggered'], requiresStanding: true },
+        tech_elbow: { id: 'tech_elbow', name: 'Elbow Strike', apCost: 1, damage: 12, statusApplied: ['bleeding'], requiresStanding: true },
+        tech_knee: { id: 'tech_knee', name: 'Knee Strike', apCost: 2, damage: 18, requiresGrapple: true, setsGrappleState: 'standing' },
+        tech_spinning_back: { id: 'tech_spinning_back', name: 'Spinning Back Fist', apCost: 2, damage: 20, requiresStanding: true },
+        tech_superman_punch: { id: 'tech_superman_punch', name: 'Superman Punch', apCost: 3, damage: 25, requiresStanding: true },
+      },
+    };
+
+    return TECHNIQUE_DATA[styleId]?.[techniqueId] || null;
   }
 
   private onTileHover(x: number, y: number): void {
@@ -2867,7 +3794,7 @@ export class CombatScene extends Phaser.Scene {
         if (hasLOS) {
           // Calculate and show hit chance
           const hitChance = this.calculateHitChance(unit, target);
-          const weapon = WEAPONS[unit.weapon];
+          const weapon = getWeaponData(unit.weapon);
           const rangeBracket = this.getRangeBracketName(unit, target);
           const screenPos = gridToScreen(x, y, this.offsetX, this.offsetY);
 
@@ -2938,7 +3865,7 @@ export class CombatScene extends Phaser.Scene {
   }
 
   private calculateHitChance(attacker: Unit, target: Unit): number {
-    const weapon = WEAPONS[attacker.weapon];
+    const weapon = getWeaponData(attacker.weapon);
     const distance = Math.sqrt(
       Math.pow(target.position.x - attacker.position.x, 2) +
       Math.pow(target.position.y - attacker.position.y, 2)
@@ -2975,16 +3902,39 @@ export class CombatScene extends Phaser.Scene {
       }
     }
 
-    // Cover modifier
+    // === STANCE MODIFIERS (Now wired!) ===
+    // Attacker stance affects accuracy
+    if (attacker.stance && STANCES[attacker.stance]) {
+      hitChance += STANCES[attacker.stance].accuracyMod;
+    }
+    // Target stance affects evasion (subtract their bonus from hit chance)
+    if (target.stance && STANCES[target.stance]) {
+      hitChance -= STANCES[target.stance].evasionMod;
+    }
+
+    // === COVER MODIFIER (Using COVER_BONUSES constant) ===
     const targetTile = this.tiles[target.position.y]?.[target.position.x];
     if (targetTile) {
-      const cover = TERRAIN_TYPES[targetTile.terrain].cover;
-      if (cover === 'half') hitChance -= 20;
-      else if (cover === 'full') hitChance -= 40;
+      const coverType = TERRAIN_TYPES[targetTile.terrain].cover as CoverType;
+      const coverBonus = COVER_BONUSES[coverType];
+      if (coverBonus) {
+        hitChance -= coverBonus.evasionBonus; // e.g., -25 for half cover, -50 for full
+      }
     }
 
     // AGL bonus for attacker (every 10 AGL above 50 = +2%)
     hitChance += Math.floor((attacker.agl - 50) / 5);
+
+    // Injury penalty (from crippled arm, concussion, etc.)
+    if (attacker.accuracyPenalty) {
+      hitChance += attacker.accuracyPenalty; // Usually negative
+    }
+
+    // === FLANKING BONUS ===
+    // Attack angle relative to target's facing direction
+    // Front: +0%, Side: +10%, Rear: +25%, Blindspot: +40%
+    const flankingBonus = this.getFlankingBonusForUnits(attacker, target);
+    hitChance += flankingBonus;
 
     return Math.max(5, Math.min(95, hitChance));
   }
@@ -2993,7 +3943,7 @@ export class CombatScene extends Phaser.Scene {
    * Get the range bracket name for display in UI
    */
   private getRangeBracketName(attacker: Unit, target: Unit): string {
-    const weapon = WEAPONS[attacker.weapon];
+    const weapon = getWeaponData(attacker.weapon);
     const distance = Math.sqrt(
       Math.pow(target.position.x - attacker.position.x, 2) +
       Math.pow(target.position.y - attacker.position.y, 2)
@@ -3008,6 +3958,161 @@ export class CombatScene extends Phaser.Scene {
     if (distance <= brackets.optimal) return 'OPTIMAL';
     if (distance <= brackets.long) return 'LONG';
     return 'EXTREME';
+  }
+
+  // ==================== FLANKING SYSTEM ====================
+
+  /**
+   * Calculate flanking accuracy bonus based on attack angle
+   * Front: +0%, Side: +10%, Rear: +25%, Blindspot: +40%
+   */
+  private getFlankingBonusForUnits(attacker: Unit, target: Unit): number {
+    // Build minimal SimUnit-like objects for the portable combat engine
+    const simAttacker = {
+      position: { x: attacker.position.x, y: attacker.position.y },
+    };
+
+    // Use target's vision or default to human (120° FOV, 15 tile range)
+    const vision = target.vision ?? {
+      facing: target.facing,
+      angle: 120,  // Human field of view
+      range: 15,   // Human vision range
+    };
+
+    const simTarget = {
+      position: { x: target.position.x, y: target.position.y },
+      vision: vision,
+    };
+
+    // Use portable combat engine function
+    return getFlankingBonus(simAttacker as any, simTarget as any);
+  }
+
+  /**
+   * Get flanking result for display/logging
+   * Returns: 'front' | 'side' | 'rear' | 'blindspot'
+   */
+  private getFlankingResultForUnits(attacker: Unit, target: Unit): FlankingResult {
+    const simAttacker = {
+      position: { x: attacker.position.x, y: attacker.position.y },
+    };
+
+    const vision = target.vision ?? {
+      facing: target.facing,
+      angle: 120,
+      range: 15,
+    };
+
+    const simTarget = {
+      position: { x: target.position.x, y: target.position.y },
+      vision: vision,
+    };
+
+    return getFlankingResult(simAttacker as any, simTarget as any);
+  }
+
+  /**
+   * Check if a position is within a unit's vision cone
+   */
+  private isInUnitVisionCone(watcher: Unit, targetX: number, targetY: number): boolean {
+    const vision = watcher.vision ?? {
+      facing: watcher.facing,
+      angle: 120,
+      range: 15,
+    };
+
+    // 360-degree vision sees everything in range
+    if (vision.angle >= 360) {
+      const dx = targetX - watcher.position.x;
+      const dy = targetY - watcher.position.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      return distance <= vision.range;
+    }
+
+    // Calculate distance
+    const dx = targetX - watcher.position.x;
+    const dy = targetY - watcher.position.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Beyond vision range
+    if (distance > vision.range) return false;
+
+    // Calculate angle to target (0=right, increases counter-clockwise)
+    const angleToTarget = Math.atan2(-dy, dx) * (180 / Math.PI);
+    const normalizedAngle = ((angleToTarget % 360) + 360) % 360;
+
+    // Calculate angle difference from facing
+    let angleDiff = Math.abs(normalizedAngle - vision.facing);
+    if (angleDiff > 180) angleDiff = 360 - angleDiff;
+
+    // Check if within half the vision angle on each side
+    return angleDiff <= vision.angle / 2;
+  }
+
+  /**
+   * Check for overwatch reactions when a unit moves
+   * Enemies on overwatch who can see the movement may take a reaction shot
+   */
+  private checkOverwatchReactions(movingUnit: Unit, destX: number, destY: number): void {
+    // Get all enemies on overwatch
+    const overwatchingEnemies = Array.from(this.units.values()).filter(u =>
+      u.team !== movingUnit.team &&
+      u.hp > 0 &&
+      u.overwatching &&
+      u.ap >= 2  // Need at least 2 AP for a reaction shot
+    );
+
+    for (const watcher of overwatchingEnemies) {
+      // Check if watcher can see the moving unit (vision cone check)
+      if (!this.isInUnitVisionCone(watcher, destX, destY)) {
+        continue; // Can't see = no reaction (blindspot!)
+      }
+
+      // Check line of sight
+      if (!this.hasLineOfSight(watcher.position.x, watcher.position.y, destX, destY)) {
+        continue;
+      }
+
+      // Check weapon range
+      const distance = Math.sqrt(
+        Math.pow(destX - watcher.position.x, 2) +
+        Math.pow(destY - watcher.position.y, 2)
+      );
+      const weapon = getWeaponData(watcher.weapon);
+      if (distance > weapon.range) {
+        continue;
+      }
+
+      // Take the reaction shot!
+      EventBridge.emit('log-entry', {
+        id: `overwatch_${Date.now()}`,
+        timestamp: Date.now(),
+        type: 'system',
+        actor: watcher.name,
+        actorTeam: watcher.team,
+        target: movingUnit.name,
+        targetTeam: movingUnit.team,
+        message: `👁️ ${watcher.name} takes an OVERWATCH shot at ${movingUnit.name}!`,
+      });
+
+      // Execute the reaction shot (reduced AP cost - free reaction)
+      this.time.delayedCall(100, () => {
+        // Temporarily give them AP for the shot
+        const originalAP = watcher.ap;
+        watcher.ap = Math.max(watcher.ap, weapon.ap);
+
+        this.tryAttackUnit(watcher.id, movingUnit.id, () => {
+          // End overwatch after shot
+          watcher.overwatching = false;
+          watcher.stance = 'normal';
+          watcher.ap = Math.max(0, originalAP - 2); // Reaction costs 2 AP
+          this.updateStatusIcons(watcher);
+        });
+      });
+
+      // Only one overwatch shot per movement
+      break;
+    }
   }
 
   // ==================== FOG OF WAR ====================
@@ -3148,8 +4253,13 @@ export class CombatScene extends Phaser.Scene {
     if (!this.aiVsAi && unit.team !== this.currentTeam) return;
     if (!this.aiVsAi && unit.team !== this.playerTeam) return;
 
-    const moveCost = this.calculateMoveCost(unit.position.x, unit.position.y, targetX, targetY);
+    let moveCost = this.calculateMoveCost(unit.position.x, unit.position.y, targetX, targetY);
     const tile = this.tiles[targetY][targetX];
+
+    // Apply movement penalty from injuries (crippled leg = +50% cost)
+    if (unit.movementPenalty && unit.movementPenalty > 0) {
+      moveCost = Math.ceil(moveCost * (1 + unit.movementPenalty));
+    }
 
     if (
       moveCost <= unit.ap &&
@@ -3204,6 +4314,11 @@ export class CombatScene extends Phaser.Scene {
     const snapped = Math.round(degrees / 45) * 45;
     unit.facing = snapped % 360;
 
+    // Sync vision cone facing with unit facing
+    if (unit.vision) {
+      unit.vision.facing = unit.facing;
+    }
+
     // Update sprite flip based on facing
     // Sprites face right by default (0 degrees = east)
     // Flip if facing left-ish (90 < facing < 270 means facing any westward direction)
@@ -3222,6 +4337,10 @@ export class CombatScene extends Phaser.Scene {
 
     // Update facing based on movement direction
     this.updateUnitFacing(unit, oldPos.x, oldPos.y, targetX, targetY);
+
+    // Check for overwatch reactions before completing move
+    // Enemies on overwatch who can see this movement may take a shot
+    this.checkOverwatchReactions(unit, targetX, targetY);
 
     unit.position = { x: targetX, y: targetY };
     unit.ap -= distance;
@@ -3561,6 +4680,116 @@ export class CombatScene extends Phaser.Scene {
     this.emitAllUnitsData();
   }
 
+  /**
+   * Apply physics-based knockback using the full knockback system
+   * Uses force values from knockbackSystem.ts and calculates distance based on target weight
+   */
+  private applyPhysicsKnockback(
+    target: Unit,
+    attackerPos: { x: number; y: number },
+    attacker: Unit,
+    weaponKey: string,
+    damageTypeId: string
+  ): void {
+    // Get the damage type definition to check if it can cause knockback
+    const damageTypeDef = getDamageType(damageTypeId);
+    if (!damageTypeDef?.knockback?.enabled) return;
+
+    // Get force value from knockback system based on weapon
+    const forceSourceId = getWeaponForceSourceId(weaponKey);
+    let force = getForceValue(forceSourceId);
+
+    // If force is 0 (melee), scale by attacker STR
+    const attackerSTR = attacker.str || 15;
+    if (force === 0 && damageTypeDef.knockback.strengthScaling) {
+      force = attackerSTR; // STR directly becomes force for pure melee
+    } else if (damageTypeDef.knockback.strengthScaling) {
+      // Add STR bonus to projectile forces
+      force += Math.floor(attackerSTR / 10);
+    }
+
+    // Get target STR for weight calculation (done internally by knockbackSystem)
+    const targetSTR = target.str || 15;
+
+    // Calculate knockback using physics formula: Force - (Weight × 0.3) = Impact
+    // Weight is calculated from STR using getCharacterWeight() inside calculateKnockback
+    const knockbackResult = calculateKnockback(force, targetSTR, attackerSTR);
+
+    // Only apply knockback if there's actual distance
+    if (knockbackResult.spaces <= 0) {
+      this.emitToUI('combat-log', {
+        message: `${target.name} stands firm! (STR ${targetSTR} absorbs force ${force})`,
+        type: 'status'
+      });
+      return;
+    }
+
+    // Get direction from attacker to target
+    const direction = getKnockbackDirection(attackerPos, target.position);
+
+    // Apply knockback on the grid with collision detection
+    const gridResult = applyKnockback(
+      target.position,
+      direction,
+      knockbackResult.spaces,
+      knockbackResult.impactForce,
+      (x, y) => {
+        // Check map bounds
+        if (x < 0 || x >= this.mapWidth || y < 0 || y >= this.mapHeight) {
+          return { walkable: false, hasUnit: false };
+        }
+        const tile = this.tiles[y]?.[x];
+        if (!tile) return { walkable: false, hasUnit: false };
+
+        // Check terrain
+        const isWalkable = TERRAIN_TYPES[tile.terrain].walkable;
+
+        // Check for other units (not self)
+        const hasUnit = !!(tile.occupant && tile.occupant !== target.id);
+        const occupantUnit = hasUnit ? this.units.get(tile.occupant!) : undefined;
+
+        return {
+          walkable: isWalkable,
+          hasUnit,
+          unitId: tile.occupant,
+          unitSTR: occupantUnit?.str || 15
+        };
+      }
+    );
+
+    // Log the physics-based knockback
+    this.emitToUI('combat-log', {
+      message: `💨 Force ${force} vs STR ${targetSTR} = ${knockbackResult.impactForce} impact → ${knockbackResult.spaces} tiles`,
+      type: 'status'
+    });
+
+    // Use existing knockback animation/logic
+    this.knockbackUnit(target, attackerPos.x, attackerPos.y, knockbackResult.spaces, weaponKey);
+
+    // Handle chain knockback if hit another unit (60% force transfer)
+    if (gridResult.stoppedBy === 'unit' && gridResult.chainKnockback) {
+      const chainUnitId = gridResult.chainKnockback.unitId;
+      if (chainUnitId) {
+        const chainUnit = this.units.get(chainUnitId);
+        if (chainUnit && chainUnit.hp > 0) {
+          const chainForce = Math.floor(knockbackResult.impactForce * 0.6); // 60% force transfer
+          this.emitToUI('combat-log', {
+            message: `⛓️ Chain knockback! ${chainUnit.name} hit with ${chainForce} force!`,
+            type: 'status'
+          });
+
+          // Apply chain knockback with reduced force
+          const chainSTR = chainUnit.str || 15;
+          const chainResult = calculateKnockback(chainForce, chainSTR);
+
+          if (chainResult.spaces > 0) {
+            this.knockbackUnit(chainUnit, target.position.x, target.position.y, chainResult.spaces, weaponKey);
+          }
+        }
+      }
+    }
+  }
+
   // ==================== TELEPORT ====================
 
   private teleportUnit(unit: Unit, targetX: number, targetY: number, callback?: () => void): void {
@@ -3743,7 +4972,7 @@ export class CombatScene extends Phaser.Scene {
       return;
     }
 
-    const weapon = WEAPONS[attacker.weapon];
+    const weapon = getWeaponData(attacker.weapon);
     const apCost = weapon.ap;
     if (attacker.ap < apCost) {
       if (callback) callback();
@@ -3811,21 +5040,40 @@ export class CombatScene extends Phaser.Scene {
       const effectiveAccuracy = weapon.accuracy + (attacker.agl - 50) * 0.3;
       const hitResult = getHitResult(roll, effectiveAccuracy);
 
-      // Get damage type and verbs for this weapon
+      // Get full damage definition from damage system
+      const damageSystemTypeId = getDamageSystemType(attacker.weapon);
+      const damageTypeDef = getDamageType(damageSystemTypeId);
+
+      // Get damage type and verbs for this weapon (for combat log)
       const damageType = WEAPON_DAMAGE_TYPES[attacker.weapon];
       const verbs = DAMAGE_VERBS[damageType];
+
+      // === SPECIAL MECHANICS: Cannot Be Dodged (lasers, mental attacks) ===
+      // Lasers and mental attacks hit automatically if accuracy check passes
+      let finalHitResult = hitResult;
+      if (damageTypeDef?.specialMechanics?.cannotBeDodged && hitResult === 'miss') {
+        // Re-roll: cannotBeDodged means target can't dodge, but attacker still needs aim
+        // Convert miss to graze if the attack was close
+        if (roll > 30) { // Was close to hitting
+          finalHitResult = 'graze';
+          this.emitToUI('combat-log', {
+            message: `⚡ ${damageTypeDef.name} cannot be dodged!`,
+            type: 'status'
+          });
+        }
+      }
 
       // Calculate damage based on hit result
       let damage = 0;
       let baseDamage = weapon.damage + Math.floor(attacker.str / 10);
 
-      if (hitResult === 'crit') {
+      if (finalHitResult === 'crit') {
         damage = Math.floor(baseDamage * 1.5); // 150% damage
         this.playSound('impact.crit', target.position);
-      } else if (hitResult === 'hit') {
+      } else if (finalHitResult === 'hit') {
         damage = baseDamage; // 100% damage
         this.playSound('impact.flesh', target.position);
-      } else if (hitResult === 'graze') {
+      } else if (finalHitResult === 'graze') {
         damage = Math.floor(baseDamage * 0.5); // 50% damage
         this.playSound('impact.flesh', target.position);
       } else {
@@ -3833,9 +5081,116 @@ export class CombatScene extends Phaser.Scene {
         this.playSound('impact.miss', target.position);
       }
 
-      const didHit = hitResult !== 'miss';
-      const isCrit = hitResult === 'crit';
-      const isGraze = hitResult === 'graze';
+      const didHit = finalHitResult !== 'miss';
+      const isCrit = finalHitResult === 'crit';
+      const isGraze = finalHitResult === 'graze';
+
+      // === ORIGIN MODIFIERS: Damage multipliers based on target type ===
+      // Electricity does 2x to robots, Poison does 0x to robots, etc.
+      if (didHit && damage > 0 && damageTypeDef) {
+        const targetOriginType = getOriginType(target.origin);
+        const originMultiplier = damageTypeDef.originModifiers[targetOriginType];
+        if (originMultiplier !== 1.0) {
+          const originalDamage = damage;
+          damage = Math.floor(damage * originMultiplier);
+          if (originMultiplier > 1.0) {
+            this.emitToUI('combat-log', {
+              message: `⚡ ${damageTypeDef.name} is EFFECTIVE vs ${targetOriginType}! (${originMultiplier}x)`,
+              type: 'status'
+            });
+          } else if (originMultiplier < 1.0 && originMultiplier > 0) {
+            this.emitToUI('combat-log', {
+              message: `🛡️ ${target.name} RESISTS ${damageTypeDef.name}! (${originMultiplier}x)`,
+              type: 'status'
+            });
+          } else if (originMultiplier === 0) {
+            this.emitToUI('combat-log', {
+              message: `❌ ${target.name} is IMMUNE to ${damageTypeDef.name}!`,
+              type: 'status'
+            });
+          }
+        }
+      }
+
+      // === APPLY ARMOR (Full Damage System) ===
+      const armorInteraction = damageTypeDef?.armorInteraction;
+      let shieldAbsorbed = 0;
+      let armorBlocked = false;
+
+      // Step 1: Shield absorption (if target has shield AND damage doesn't bypass shields)
+      const bypassesShields = armorInteraction?.bypassesShields ?? false;
+      if (didHit && target.shieldHp > 0 && damage > 0 && !bypassesShields) {
+        shieldAbsorbed = Math.min(target.shieldHp, damage);
+        target.shieldHp -= shieldAbsorbed;
+        damage -= shieldAbsorbed;
+        if (shieldAbsorbed > 0) {
+          this.playSound('impact.shield', target.position);
+        }
+      } else if (bypassesShields && target.shieldHp > 0) {
+        this.emitToUI('combat-log', {
+          message: `💀 ${damageTypeDef?.name || 'Attack'} bypasses shields!`,
+          type: 'status'
+        });
+      }
+
+      // Step 2: Check if damage ignores armor entirely
+      const ignoresArmor = armorInteraction?.ignoresArmor ?? false;
+
+      if (!ignoresArmor) {
+        // Step 2a: Stopping Power check with armor effectiveness modifier
+        const armorEffectiveness = armorInteraction?.armorEffectiveness ?? 1.0;
+        const effectiveStoppingPower = Math.floor(target.stoppingPower * armorEffectiveness);
+
+        if (didHit && damage > 0 && effectiveStoppingPower > 0) {
+          if (damage <= effectiveStoppingPower) {
+            // Armor completely blocks the shot
+            armorBlocked = true;
+            damage = 0;
+            this.playSound('impact.armor_block', target.position);
+            if (armorEffectiveness > 1.0) {
+              this.emitToUI('combat-log', {
+                message: `🛡️ Armor EXTRA effective vs ${damageTypeDef?.name || 'this damage'}! (${armorEffectiveness}x)`,
+                type: 'status'
+              });
+            }
+          } else {
+            // Damage penetrates, reduced by effective stopping power
+            damage -= effectiveStoppingPower;
+          }
+        }
+
+        // Step 2b: DR reduces remaining damage with effectiveness modifier
+        // === COVER DR BONUS (Now wired!) ===
+        // Get cover DR bonus from terrain
+        const targetCoverType = this.getTileCover(target.position.x, target.position.y);
+        const coverDRBonus = COVER_BONUSES[targetCoverType]?.drBonus || 0;
+        const totalDR = target.dr + coverDRBonus;
+
+        if (didHit && damage > 0 && totalDR > 0) {
+          const effectiveDR = Math.floor(totalDR * armorEffectiveness);
+          damage = Math.max(1, damage - effectiveDR);
+        }
+      } else {
+        // Armor-piercing damage - log it
+        if (target.dr > 0 || target.stoppingPower > 0) {
+          this.emitToUI('combat-log', {
+            message: `💀 ${damageTypeDef?.name || 'Attack'} ignores armor!`,
+            type: 'status'
+          });
+        }
+      }
+
+      // Step 3: Check if damage type damages armor
+      if (didHit && damage > 0 && armorInteraction?.damagesArmor) {
+        // Reduce armor effectiveness over time (simplified: reduce DR by 1)
+        if (target.dr > 0) {
+          target.dr = Math.max(0, target.dr - 1);
+          this.emitToUI('combat-log', {
+            message: `🔥 ${target.name}'s armor is damaged! (DR -1)`,
+            type: 'status'
+          });
+        }
+      }
 
       // === TRACK COMBAT STATS ===
       const attackerTeam = attacker.team as 'blue' | 'red';
@@ -3886,12 +5241,54 @@ export class CombatScene extends Phaser.Scene {
         target.hp = Math.max(0, target.hp - damage);
         this.updateHealthBar(target);
 
+        // Apply status effects based on damage type (uses full damage system)
+        const damageSystemType = getDamageSystemType(attacker.weapon);
+        if (damageSystemType && target.hp > 0) {
+          this.applyDamageTypeEffects(target, damageSystemType, damage, isCrit);
+        }
+
+        // INJURY ROLL: Every hit can cause additional injuries beyond HP damage
+        // Armor DR provides bonus to injury roll (less severe injuries)
+        if (damage > 0) {
+          const injury = this.rollInjury(target, damage, isCrit, target.dr || 0);
+          if (injury?.type === 'instant_death' || (injury && target.hp <= 0)) {
+            // Fatal injury or already dead - ensure death
+            target.hp = 0;
+          }
+        }
+
         // Floating damage text with verb-appropriate styling
         let textContent = '';
         let fontSize = '16px';
         let textColor = '#ffff00';
 
-        if (isCrit) {
+        // Show shield absorbed if any
+        if (shieldAbsorbed > 0) {
+          const shieldText = this.add.text(tx, ty - 20, `SHIELD -${shieldAbsorbed}`, {
+            fontSize: '12px',
+            color: '#00ffff',
+            fontStyle: 'bold',
+            stroke: '#000000',
+            strokeThickness: 2,
+          });
+          shieldText.setOrigin(0.5, 1);
+          shieldText.setDepth(200);
+          this.tweens.add({
+            targets: shieldText,
+            y: ty - 60,
+            alpha: 0,
+            duration: 1000,
+            ease: 'Power2',
+            onComplete: () => shieldText.destroy(),
+          });
+        }
+
+        // Armor blocked indicator
+        if (armorBlocked) {
+          textContent = 'BLOCKED!';
+          fontSize = '16px';
+          textColor = '#888888';
+        } else if (isCrit) {
           textContent = `${verbs.crit}! -${damage}`;
           fontSize = '22px';
           textColor = '#ff0000';
@@ -3992,17 +5389,26 @@ export class CombatScene extends Phaser.Scene {
       const isOverkill = target.hp <= 0 && damage > target.maxHp * 0.5;
       const overkillText = isOverkill ? ' 💀 OVERKILL!' : '';
 
+      // Flanking indicator for combat log
+      const flankResult = this.getFlankingResultForUnits(attacker, target);
+      const flankPrefix = {
+        front: '',
+        side: '📐 FLANKING! ',
+        rear: '🗡️ BACKSTAB! ',
+        blindspot: '👁️ BLINDSPOT! ',
+      }[flankResult];
+
       let resultText = '';
       if (isCrit) {
         const severity = getDamageSeverity(damage, target.maxHp);
-        resultText = `${weapon.emoji} ${attacker.name} ${verbs.crit} ${target.name}! ${severity} ${damage} damage!${overkillText}`;
+        resultText = `${weapon.emoji} ${flankPrefix}${attacker.name} ${verbs.crit} ${target.name}! ${severity} ${damage} damage!${overkillText}`;
       } else if (isGraze) {
-        resultText = `${weapon.emoji} ${attacker.name} ${verbs.graze} ${target.name} - ${damage} damage`;
+        resultText = `${weapon.emoji} ${flankPrefix}${attacker.name} ${verbs.graze} ${target.name} - ${damage} damage`;
       } else if (didHit) {
         const severity = getDamageSeverity(damage, target.maxHp);
-        resultText = `${weapon.emoji} ${attacker.name} ${verbs.hit} ${target.name} for ${severity} ${damage} damage!${overkillText}`;
+        resultText = `${weapon.emoji} ${flankPrefix}${attacker.name} ${verbs.hit} ${target.name} for ${severity} ${damage} damage!${overkillText}`;
       } else {
-        resultText = `${weapon.emoji} ${attacker.name} ${verbs.miss} ${target.name}!`;
+        resultText = `${weapon.emoji} ${flankPrefix}${attacker.name} ${verbs.miss} ${target.name}!`;
       }
 
       EventBridge.emit('log-entry', {
@@ -4017,9 +5423,17 @@ export class CombatScene extends Phaser.Scene {
         details: didHit ? [`${target.name}: ${target.hp}/${target.maxHp} HP`] : [],
       });
 
-      // Apply knockback if weapon has it and target was hit
-      if (didHit && weapon.knockback && weapon.knockback > 0 && target.hp > 0) {
-        this.knockbackUnit(target, attacker.position.x, attacker.position.y, weapon.knockback, weapon.name);
+      // Apply knockback using full physics system
+      // Uses force vs weight calculation from knockbackSystem.ts
+      if (didHit && target.hp > 0) {
+        // Try physics-based knockback first (uses damage type definition)
+        this.applyPhysicsKnockback(
+          target,
+          attacker.position,
+          attacker,
+          attacker.weapon,
+          damageSystemTypeId
+        );
       }
 
       // Check for death
@@ -4783,12 +6197,51 @@ export class CombatScene extends Phaser.Scene {
     this.units.forEach(unit => {
       if (unit.team === this.currentTeam) {
         unit.ap = unit.maxAp;
+
+        // Apply AP penalty from injuries (broken bone, winded)
+        if (unit.apPenalty && unit.apPenalty > 0) {
+          unit.ap = Math.max(1, unit.ap - unit.apPenalty);
+          this.emitToUI('combat-log', { message: `${unit.name} starts with reduced AP due to injuries (-${unit.apPenalty})`, type: 'status' });
+        }
+
         unit.acted = false;
+
+        // Shield regeneration at turn start
+        if (unit.shieldRegenRate > 0 && unit.shieldMaxHp > 0 && unit.shieldHp < unit.shieldMaxHp) {
+          const regenAmount = Math.min(unit.shieldRegenRate, unit.shieldMaxHp - unit.shieldHp);
+          unit.shieldHp += regenAmount;
+          if (regenAmount > 0) {
+            const screenPos = gridToScreen(unit.position.x, unit.position.y, this.offsetX, this.offsetY);
+            const shieldText = this.add.text(screenPos.x, screenPos.y - TILE_HEIGHT, `+${regenAmount} SHIELD`, {
+              fontSize: '12px',
+              color: '#00ffff',
+              fontStyle: 'bold',
+              stroke: '#000000',
+              strokeThickness: 2,
+            });
+            shieldText.setOrigin(0.5, 1);
+            shieldText.setDepth(200);
+            this.tweens.add({
+              targets: shieldText,
+              y: screenPos.y - TILE_HEIGHT - 30,
+              alpha: 0,
+              duration: 1000,
+              ease: 'Power2',
+              onComplete: () => shieldText.destroy(),
+            });
+          }
+        }
       }
     });
 
     // Process status effects for all units whose turn is starting
     this.processTeamStatusEffects(this.currentTeam);
+
+    // Process environmental effects (fire spread, ice terrain, acid damage)
+    // Only process once per round (on blue team's turn)
+    if (this.currentTeam === 'blue') {
+      this.processEnvironmentalEffects();
+    }
 
     // Reduce power cooldowns for current team
     this.reducePowerCooldowns(this.currentTeam);
@@ -4939,7 +6392,7 @@ export class CombatScene extends Phaser.Scene {
       return;
     }
 
-    const weapon = WEAPONS[unit.weapon];
+    const weapon = getWeaponData(unit.weapon);
     const dist = Math.sqrt(
       Math.pow(target.position.x - unit.position.x, 2) +
       Math.pow(target.position.y - unit.position.y, 2)
@@ -5075,7 +6528,7 @@ export class CombatScene extends Phaser.Scene {
   }
 
   private findMoveTowardsTarget(unit: Unit, target: Unit): Position | null {
-    const weapon = WEAPONS[unit.weapon];
+    const weapon = getWeaponData(unit.weapon);
     const idealRange = Math.max(1, weapon.range - 1);
 
     // Calculate current distance to target
@@ -5159,7 +6612,7 @@ export class CombatScene extends Phaser.Scene {
       maxAp: unit.maxAp,
       position: unit.position,
       weapon: unit.weapon,
-      weaponEmoji: WEAPONS[unit.weapon].emoji,
+      weaponEmoji: getWeaponData(unit.weapon).emoji,
       personality: unit.personality,
       acted: unit.acted,
       statusEffects: unit.statusEffects,
