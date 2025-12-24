@@ -210,6 +210,86 @@ export interface SimUnit {
   acted: boolean;
 }
 
+// ============ GRENADE TYPES ============
+export interface SimGrenade {
+  id: string;
+  name: string;
+  damageAtCenter: number;
+  blastRadius: number;
+  damageFalloff: 'linear' | 'quadratic';
+  statusEffects: StatusEffectId[];
+  knockbackForce: number;
+  maxRange: number;
+}
+
+// Grenade definitions for the headless simulator
+export const GRENADES: Record<string, SimGrenade> = {
+  FRAG: {
+    id: 'FRAG',
+    name: 'Frag Grenade',
+    damageAtCenter: 50,
+    blastRadius: 3,
+    damageFalloff: 'linear',
+    statusEffects: ['bleeding'],
+    knockbackForce: 160,
+    maxRange: 12,
+  },
+  CONCUSSION: {
+    id: 'CONCUSSION',
+    name: 'Concussion Grenade',
+    damageAtCenter: 35,
+    blastRadius: 4,
+    damageFalloff: 'quadratic',
+    statusEffects: ['stunned'],
+    knockbackForce: 200,
+    maxRange: 12,
+  },
+  FLASHBANG: {
+    id: 'FLASHBANG',
+    name: 'Flashbang',
+    damageAtCenter: 5,
+    blastRadius: 5,
+    damageFalloff: 'quadratic',
+    statusEffects: ['stunned'],
+    knockbackForce: 80,
+    maxRange: 15,
+  },
+  INCENDIARY: {
+    id: 'INCENDIARY',
+    name: 'Incendiary Grenade',
+    damageAtCenter: 30,
+    blastRadius: 2,
+    damageFalloff: 'linear',
+    statusEffects: ['burning'],
+    knockbackForce: 160,
+    maxRange: 12,
+  },
+  SMOKE: {
+    id: 'SMOKE',
+    name: 'Smoke Grenade',
+    damageAtCenter: 0,
+    blastRadius: 4,
+    damageFalloff: 'linear',
+    statusEffects: [],
+    knockbackForce: 0,
+    maxRange: 15,
+  },
+};
+
+// Grenade explosion result
+export interface GrenadeExplosionResult {
+  grenadeId: string;
+  centerPosition: { x: number; y: number };
+  victims: Array<{
+    unitId: string;
+    distance: number;
+    damage: number;
+    knockbackTiles: number;
+    effectsApplied: StatusEffectId[];
+  }>;
+  tilesAffected: number;
+}
+
 // Default fist weapon for disarmed units
 export const FIST_WEAPON: SimWeapon = {
   name: 'Fist',

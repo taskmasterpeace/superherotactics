@@ -43,6 +43,9 @@ export {
   getFlankingBonus,
   canReact,
   faceToward,
+  // Grenades
+  resolveGrenade,
+  applyGrenadeResult,
 } from './core';
 
 // Status effects

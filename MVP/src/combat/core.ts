@@ -20,11 +20,14 @@ import {
   DisarmResult,
   FlankingResult,
   VisionCone,
+  SimGrenade,
+  GrenadeExplosionResult,
   STANCES,
   COVER_BONUSES,
   FIST_WEAPON,
   FLANKING_BONUSES,
   DEFAULT_VISION,
+  GRENADES as SIM_GRENADES,
 } from './types';
 
 import {
@@ -609,6 +612,139 @@ export function applyAttackResult(target: SimUnit, result: AttackResult): void {
   // Apply status effects if present
   if (result._statusEffects && result._statusEffects.length > 0) {
     applyStatusEffects(target, result._statusEffects);
+  }
+}
+
+// ============ GRENADE RESOLUTION ============
+
+/**
+ * Resolve a grenade explosion at a position.
+ * Returns damage and effects for all units in blast radius.
+ */
+export function resolveGrenade(
+  grenade: SimGrenade,
+  centerPos: { x: number; y: number },
+  units: SimUnit[]
+): GrenadeExplosionResult {
+  const victims: GrenadeExplosionResult['victims'] = [];
+  let tilesAffected = 0;
+
+  // Count affected tiles (circle)
+  for (let dx = -grenade.blastRadius; dx <= grenade.blastRadius; dx++) {
+    for (let dy = -grenade.blastRadius; dy <= grenade.blastRadius; dy++) {
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist <= grenade.blastRadius) tilesAffected++;
+    }
+  }
+
+  // Check each unit
+  for (const unit of units) {
+    if (!unit.position || !unit.alive) continue;
+
+    const dx = unit.position.x - centerPos.x;
+    const dy = unit.position.y - centerPos.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Skip if outside blast radius
+    if (distance > grenade.blastRadius) continue;
+
+    // Calculate damage based on distance and falloff type
+    let damageMult = 1.0;
+    if (grenade.damageFalloff === 'linear') {
+      damageMult = 1 - (distance / grenade.blastRadius);
+    } else {
+      damageMult = Math.pow(1 - (distance / grenade.blastRadius), 2);
+    }
+
+    const damage = Math.floor(grenade.damageAtCenter * damageMult);
+
+    // Calculate knockback
+    const knockbackTiles = Math.floor(
+      (grenade.knockbackForce * damageMult) / (30 + unit.stats.STR)
+    );
+
+    victims.push({
+      unitId: unit.id,
+      distance,
+      damage,
+      knockbackTiles,
+      effectsApplied: [...grenade.statusEffects],
+    });
+  }
+
+  return {
+    grenadeId: grenade.id,
+    centerPosition: centerPos,
+    victims,
+    tilesAffected,
+  };
+}
+
+/**
+ * Apply grenade explosion result to units.
+ */
+export function applyGrenadeResult(
+  units: SimUnit[],
+  result: GrenadeExplosionResult
+): void {
+  for (const victim of result.victims) {
+    const unit = units.find(u => u.id === victim.unitId);
+    if (!unit) continue;
+
+    // Apply damage
+    unit.hp = Math.max(0, unit.hp - victim.damage);
+    unit.alive = unit.hp > 0;
+
+    // Apply status effects with intensity based on distance
+    const grenade = SIM_GRENADES[result.grenadeId];
+    if (grenade && grenade.statusEffects.length > 0) {
+      const intensity = 1 - (victim.distance / grenade.blastRadius);
+
+      for (const effectId of grenade.statusEffects) {
+        const effect = createGrenadeEffect(effectId, intensity);
+        if (effect) {
+          applyStatusEffects(unit, [effect]);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Create status effect with intensity scaling for grenades.
+ */
+function createGrenadeEffect(
+  effectId: StatusEffectId,
+  intensity: number
+): StatusEffectInstance | null {
+  switch (effectId) {
+    case 'bleeding':
+      return {
+        id: 'bleeding',
+        duration: Math.max(1, Math.round(3 * intensity)),
+        damagePerTick: Math.max(2, Math.round(4 * intensity)),
+        scaling: 'constant',
+        source: 'grenade',
+      };
+    case 'burning':
+      return {
+        id: 'burning',
+        duration: Math.max(1, Math.round(3 * intensity)),
+        damagePerTick: Math.max(3, Math.round(6 * intensity)),
+        scaling: 'increasing',
+        damageChange: 2,
+        spreadChance: 0.1,
+        source: 'grenade',
+      };
+    case 'stunned':
+      return {
+        id: 'stunned',
+        duration: Math.max(1, Math.round(2 * intensity)),
+        skipTurn: true,
+        source: 'grenade',
+      };
+    default:
+      return null;
   }
 }
 
