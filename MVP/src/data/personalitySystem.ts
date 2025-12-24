@@ -295,6 +295,140 @@ export function getPersonalityDescription(traits: PersonalityTraits): string {
   return descriptors.join(', ') || 'balanced';
 }
 
+// =============================================================================
+// MBTI TO CALLING ALIGNMENT
+// =============================================================================
+
+import { CallingId } from './callingSystem';
+
+/**
+ * Each MBTI type has callings that naturally fit their personality.
+ * Primary callings are most common, secondary are less common but still fitting.
+ */
+export const MBTI_CALLING_ALIGNMENT: Record<string, {
+  primary: CallingId[];
+  secondary: CallingId[];
+}> = {
+  // ANALYSTS - Rational, strategic thinkers
+  'INTJ': {
+    primary: ['architect', 'visionary', 'professional'],
+    secondary: ['seeker', 'untouchable', 'reformer'],
+  },
+  'INTP': {
+    primary: ['seeker', 'professional', 'collector'],
+    secondary: ['reluctant', 'outcast', 'visionary'],
+  },
+  'ENTJ': {
+    primary: ['conqueror', 'architect', 'visionary'],
+    secondary: ['soldier', 'legacy', 'reformer'],
+  },
+  'ENTP': {
+    primary: ['thrill_seeker', 'visionary', 'chaos_agent'],
+    secondary: ['rival', 'seeker', 'glory_hound'],
+  },
+
+  // DIPLOMATS - Empathetic, idealistic
+  'INFJ': {
+    primary: ['idealist', 'shepherd', 'visionary'],
+    secondary: ['protector', 'repentant', 'seeker'],
+  },
+  'INFP': {
+    primary: ['idealist', 'seeker', 'repentant'],
+    secondary: ['outcast', 'romantic', 'shepherd'],
+  },
+  'ENFJ': {
+    primary: ['shepherd', 'idealist', 'protector'],
+    secondary: ['visionary', 'reformer', 'legacy'],
+  },
+  'ENFP': {
+    primary: ['idealist', 'thrill_seeker', 'liberator'],
+    secondary: ['seeker', 'romantic', 'glory_hound'],
+  },
+
+  // SENTINELS - Dutiful, reliable
+  'ISTJ': {
+    primary: ['soldier', 'professional', 'legacy'],
+    secondary: ['guardian', 'loyalist', 'protector'],
+  },
+  'ISFJ': {
+    primary: ['guardian', 'protector', 'shepherd'],
+    secondary: ['loyalist', 'repentant', 'professional'],
+  },
+  'ESTJ': {
+    primary: ['soldier', 'legacy', 'professional'],
+    secondary: ['architect', 'reformer', 'conqueror'],
+  },
+  'ESFJ': {
+    primary: ['protector', 'shepherd', 'loyalist'],
+    secondary: ['guardian', 'romantic', 'glory_hound'],
+  },
+
+  // EXPLORERS - Adaptable, practical
+  'ISTP': {
+    primary: ['professional', 'mercenary', 'survivor'],
+    secondary: ['thrill_seeker', 'soldier', 'untouchable'],
+  },
+  'ISFP': {
+    primary: ['romantic', 'seeker', 'outcast'],
+    secondary: ['idealist', 'reluctant', 'survivor'],
+  },
+  'ESTP': {
+    primary: ['thrill_seeker', 'mercenary', 'glory_hound'],
+    secondary: ['predator', 'rival', 'professional'],
+  },
+  'ESFP': {
+    primary: ['thrill_seeker', 'glory_hound', 'romantic'],
+    secondary: ['protector', 'liberator', 'born_to_it'],
+  },
+};
+
+/**
+ * Generate a calling that fits the character's MBTI
+ */
+export function generateCallingForMBTI(mbti?: string): CallingId {
+  if (!mbti || !MBTI_CALLING_ALIGNMENT[mbti]) {
+    // Random from common callings
+    const common: CallingId[] = ['soldier', 'professional', 'mercenary', 'protector', 'survivor'];
+    return common[Math.floor(Math.random() * common.length)];
+  }
+
+  const alignment = MBTI_CALLING_ALIGNMENT[mbti];
+
+  // 70% primary, 30% secondary
+  const pool = Math.random() < 0.7 ? alignment.primary : alignment.secondary;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+/**
+ * Check if a calling fits an MBTI type
+ */
+export function doesCallingFitMBTI(calling: CallingId, mbti: string): 'natural' | 'possible' | 'unusual' {
+  const alignment = MBTI_CALLING_ALIGNMENT[mbti];
+  if (!alignment) return 'possible';
+
+  if (alignment.primary.includes(calling)) return 'natural';
+  if (alignment.secondary.includes(calling)) return 'possible';
+  return 'unusual';
+}
+
+/**
+ * Get personality + calling description for character sheet
+ */
+export function getFullPersonalityDescription(
+  traits: PersonalityTraits,
+  calling?: CallingId,
+  mbti?: string
+): string {
+  const traitDesc = getPersonalityDescription(traits);
+
+  if (!calling) return traitDesc;
+
+  const fit = mbti ? doesCallingFitMBTI(calling, mbti) : 'possible';
+  const fitNote = fit === 'unusual' ? ' (atypical)' : '';
+
+  return `${traitDesc} — ${calling}${fitNote}`;
+}
+
 export default {
   MBTI_PERSONALITY_TRAITS,
   DEFAULT_PERSONALITY_TRAITS,
@@ -309,4 +443,9 @@ export default {
   getPersonalityTraits,
   generatePersonalityWithVariation,
   getPersonalityDescription,
+  // Calling alignment
+  MBTI_CALLING_ALIGNMENT,
+  generateCallingForMBTI,
+  doesCallingFitMBTI,
+  getFullPersonalityDescription,
 };

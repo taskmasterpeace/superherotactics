@@ -10,6 +10,7 @@
 
 import { cities, City, CULTURE_CODES } from './cities';
 import { ALL_COUNTRIES as countries } from './countries';
+import { generateName } from './nameDatabase';
 import {
   GameCharacter,
   CityFamiliarity,
@@ -19,6 +20,15 @@ import {
   CharacterGenerationConfig,
   DEFAULT_CHARACTER_GEN_CONFIG,
 } from '../types';
+
+// Personality & Calling systems
+import {
+  generateMBTI,
+  generatePersonalityWithVariation,
+  generateCallingForMBTI,
+  PersonalityTraits,
+} from './personalitySystem';
+import { CallingId, generateCallingForBackground } from './callingSystem';
 
 // =============================================================================
 // CULTURE CODE NEIGHBORS
@@ -394,8 +404,8 @@ export function generateCharacter(options: CharacterGenerationOptions = {}): Gam
   // Generate stats
   const stats = generateStats(threatLevel);
 
-  // Calculate health from stats
-  const maxHealth = 20 + (stats.STA * 2) + stats.STR;
+  // Calculate health from stats (MEL + AGL + STA + STR = ~60 HP for average human)
+  const maxHealth = stats.MEL + stats.AGL + stats.STA + stats.STR;
 
   // Get country info
   const country = countries.find(c =>
@@ -409,9 +419,13 @@ export function generateCharacter(options: CharacterGenerationOptions = {}): Gam
   // Generate unique ID
   const id = `char_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-  // Generate names if not provided
-  const realName = options.realName ?? `Agent ${randomInt(100, 999)}`;
-  const codeName = options.name ?? `${birthCity.country.slice(0, 3).toUpperCase()}-${randomInt(10, 99)}`;
+  // Generate gender first (needed for culture-appropriate name generation)
+  const gender = randomPick(['male', 'female']) as 'male' | 'female';
+
+  // Generate culture-appropriate names using birth city's culture code
+  const cultureName = generateName(birthCity.cultureCode, gender);
+  const realName = options.realName ?? (cultureName?.fullName ?? `Agent ${randomInt(100, 999)}`);
+  const codeName = options.name ?? (cultureName?.fullName ?? `${birthCity.country.slice(0, 3).toUpperCase()}-${randomInt(10, 99)}`);
 
   // Generate origin and career first (needed for secret identity)
   const origin = options.origin ?? generateOrigin();
@@ -481,14 +495,32 @@ export function generateCharacter(options: CharacterGenerationOptions = {}): Gam
     medicalHistory: [],
     recoveryTime: 0,
 
-    // Personality
-    personality: {
-      mbti: randomPick(['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP',
-                        'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ', 'ISTP', 'ISFP', 'ESTP', 'ESFP']),
-      volatility: randomInt(1, 10),
-      motivation: randomPick(['Money', 'Fame', 'Justice', 'Power', 'Adventure', 'Loyalty', 'Revenge']),
-      harmAvoidance: randomInt(1, 10),
-    },
+    // Personality - generated from MBTI with aligned calling
+    personality: (() => {
+      // Generate MBTI first (weighted distribution)
+      const mbti = generateMBTI();
+
+      // Generate calling that fits MBTI (70% primary, 30% secondary)
+      // Can also consider career for additional context
+      let calling: CallingId;
+      if (Math.random() < 0.8) {
+        // 80% use MBTI-aligned calling
+        calling = generateCallingForMBTI(mbti);
+      } else {
+        // 20% use career-based calling for variety
+        calling = generateCallingForBackground(career);
+      }
+
+      // Generate personality traits with variation
+      const traits = generatePersonalityWithVariation(mbti);
+
+      return {
+        mbti,
+        calling,
+        volatility: traits.volatility,
+        harmAvoidance: traits.harmAvoidance,
+      };
+    })(),
 
     // Reputation
     reputation: {
@@ -506,7 +538,7 @@ export function generateCharacter(options: CharacterGenerationOptions = {}): Gam
     },
 
     // Appearance
-    gender: randomPick(['male', 'female']),
+    gender,
     age: randomInt(18, 55),
     handedness: weightedRandom([
       { value: 0, weight: 90 },  // Right

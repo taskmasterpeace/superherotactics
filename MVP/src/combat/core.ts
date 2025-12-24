@@ -1,0 +1,663 @@
+/**
+ * Portable Combat Engine - Core Functions
+ *
+ * Pure functions for combat calculations.
+ * NO Phaser dependencies - used by both simulator and CombatScene.
+ *
+ * Performance target: 1000 battles in < 1 second
+ */
+
+import {
+  SimUnit,
+  SimWeapon,
+  AttackResult,
+  HitResult,
+  StatusEffectId,
+  StatusEffectInstance,
+  StanceType,
+  CoverType,
+  OriginType,
+  DisarmResult,
+  STANCES,
+  COVER_BONUSES,
+  FIST_WEAPON,
+} from './types';
+
+import {
+  getDamageType,
+  calculateOriginDamage,
+  calculateArmoredDamage,
+  DamageSubType,
+} from '../data/damageSystem';
+
+import {
+  getStatusEffectsForDamage,
+  applyStatusEffects,
+  getAccuracyPenalty,
+} from './statusEffects';
+
+// ============ DISTANCE CALCULATION ============
+
+/**
+ * Calculate distance between two units.
+ * Uses Manhattan distance for grid-based combat.
+ */
+export function calculateDistance(attacker: SimUnit, target: SimUnit): number | undefined {
+  if (!attacker.position || !target.position) {
+    return undefined; // No positions, use optimal range
+  }
+  const dx = Math.abs(attacker.position.x - target.position.x);
+  const dy = Math.abs(attacker.position.y - target.position.y);
+  // Use Euclidean for more natural range calculation
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+// ============ HIT CALCULATION ============
+
+/**
+ * Calculate hit result from a roll and accuracy.
+ * Extracted from CombatScene - pure function, no dependencies.
+ *
+ * @param roll - Random roll 0-100
+ * @param accuracy - Final accuracy after all modifiers
+ * @returns Hit result: miss, graze, hit, or crit
+ */
+export function getHitResult(roll: number, accuracy: number): HitResult {
+  // Normalize accuracy to 0-100 range
+  const normalizedAccuracy = Math.max(5, Math.min(95, accuracy));
+
+  // Calculate thresholds relative to normalized accuracy
+  // Base: 70 accuracy means 70% hit chance
+  // Higher accuracy shifts thresholds down (easier to hit)
+  const missThreshold = 100 - normalizedAccuracy;       // e.g., 30 at 70 acc
+  const grazeThreshold = missThreshold + 15;            // e.g., 45 at 70 acc
+  const critThreshold = 95;                             // Always need high roll for crit
+
+  if (roll <= missThreshold) return 'miss';
+  if (roll <= grazeThreshold) return 'graze';
+  if (roll >= critThreshold) return 'crit';
+  return 'hit';
+}
+
+/**
+ * Calculate accuracy with all modifiers applied.
+ *
+ * @param attacker - Attacking unit
+ * @param target - Target unit
+ * @param distance - Distance to target (optional, uses optimal if not provided)
+ * @returns Final accuracy value
+ */
+export function calculateAccuracy(
+  attacker: SimUnit,
+  target: SimUnit,
+  distance?: number
+): number {
+  const weapon = attacker.weapon;
+  let accuracy = weapon.accuracy || 70;
+
+  // Range bracket modifiers (if distance provided and weapon has brackets)
+  if (distance !== undefined && weapon.rangeBrackets) {
+    const brackets = weapon.rangeBrackets;
+    if (distance > brackets.max) {
+      return 0; // Out of range
+    }
+
+    if (distance <= brackets.pointBlank) {
+      accuracy += brackets.pointBlankMod;
+    } else if (distance <= brackets.short) {
+      accuracy += brackets.shortMod;
+    } else if (distance <= brackets.optimal) {
+      accuracy += brackets.optimalMod;
+    } else if (distance <= brackets.long) {
+      accuracy += brackets.longMod;
+    } else {
+      accuracy += brackets.extremeMod;
+    }
+  }
+
+  // Stance modifiers
+  const attackerStance = STANCES[attacker.stance] || STANCES.normal;
+  const targetStance = STANCES[target.stance] || STANCES.normal;
+  accuracy += attackerStance.accuracyMod;
+  accuracy -= targetStance.evasionMod;
+
+  // Cover modifiers
+  // Target's cover reduces attacker accuracy (evasion)
+  const targetCover = COVER_BONUSES[target.cover] || COVER_BONUSES.none;
+  accuracy -= targetCover.evasionBonus;
+
+  // Attacker's cover also reduces accuracy (peeking penalty)
+  const attackerCover = COVER_BONUSES[attacker.cover] || COVER_BONUSES.none;
+  accuracy += attackerCover.accuracyPenalty; // Negative value = penalty
+
+  // MELEE DEFENSE BONUS
+  // Trained fighters (high MEL) are harder to hit in close quarters.
+  // A boxer can slip punches, a martial artist can evade knife slashes.
+  // Bonus: +1 evasion per 2 MEL above 15 (baseline human)
+  // MEL 15 = +0, MEL 20 = +2.5, MEL 25 = +5, MEL 30 = +7.5
+  const isMeleeAttack = weapon.range <= 2;
+  if (isMeleeAttack) {
+    const meleeDefenseBonus = Math.floor((target.stats.MEL - 15) / 2);
+    accuracy -= Math.max(0, meleeDefenseBonus);
+
+    // INSIDE GUARD BONUS
+    // Unarmed/fist fighters get bonus evasion vs armed melee opponents.
+    // When you don't have a weapon, you can get INSIDE their weapon's reach.
+    // A boxer slipping inside a knife fighter's guard is dangerous.
+    // Bonus: +12 evasion if target is unarmed AND attacker has weapon
+    const targetIsUnarmed = target.weapon.range <= 1 &&
+      (target.weapon.name === 'Fist' ||
+       target.weapon.name === 'Fists' ||
+       target.weapon.damageType === 'SMASHING_MELEE' ||
+       target.weapon.damageType === 'IMPACT_BLUNT');
+    const attackerHasWeapon = attacker.weapon.name !== 'Fist' &&
+      attacker.weapon.name !== 'Fists' &&
+      attacker.weapon.damageType !== 'SMASHING_MELEE';
+
+    if (targetIsUnarmed && attackerHasWeapon) {
+      // Trained fighters (MEL 20+) get full bonus, untrained get less
+      // This is substantial - a trained martial artist inside a knife's reach
+      // is very hard to hit. They can slip, parry, deflect.
+      const insideGuardBonus = target.stats.MEL >= 25 ? 20 :
+                               target.stats.MEL >= 20 ? 15 : 8;
+      accuracy -= insideGuardBonus;
+    }
+  }
+
+  // AGL bonus (every 5 AGL above 50 = +1%)
+  accuracy += Math.floor((attacker.stats.AGL - 50) / 5);
+
+  // Injury/status penalty (legacy field)
+  if (attacker.accuracyPenalty) {
+    accuracy += attacker.accuracyPenalty;
+  }
+
+  // Status effect accuracy penalties (from stun, etc.)
+  const statusAccPenalty = getAccuracyPenalty(attacker);
+  accuracy += statusAccPenalty;
+
+  // Clamp to valid range
+  return Math.max(5, Math.min(95, accuracy));
+}
+
+/**
+ * Get range bracket name for display.
+ */
+export function getRangeBracket(weapon: SimWeapon, distance: number): string {
+  if (!weapon.rangeBrackets) return 'UNKNOWN';
+  const brackets = weapon.rangeBrackets;
+
+  if (distance > brackets.max) return 'OUT OF RANGE';
+  if (distance <= brackets.pointBlank) return 'POINT BLANK';
+  if (distance <= brackets.short) return 'SHORT';
+  if (distance <= brackets.optimal) return 'OPTIMAL';
+  if (distance <= brackets.long) return 'LONG';
+  return 'EXTREME';
+}
+
+// ============ DAMAGE CALCULATION ============
+
+/**
+ * Calculate base damage before modifiers.
+ */
+export function getBaseDamage(weapon: SimWeapon, attacker: SimUnit): number {
+  return weapon.damage + Math.floor(attacker.stats.STR / 10);
+}
+
+/**
+ * Apply hit result multiplier to damage.
+ */
+export function applyHitMultiplier(damage: number, hitResult: HitResult): number {
+  switch (hitResult) {
+    case 'crit': return Math.floor(damage * 1.5);
+    case 'hit': return damage;
+    case 'graze': return Math.floor(damage * 0.5);
+    case 'miss': return 0;
+  }
+}
+
+/**
+ * Calculate origin damage modifier.
+ */
+export function getOriginMultiplier(damageType: string, targetOrigin: OriginType): number {
+  const damageTypeDef = getDamageType(damageType as DamageSubType);
+  if (!damageTypeDef?.originModifiers) return 1.0;
+  return damageTypeDef.originModifiers[targetOrigin] ?? 1.0;
+}
+
+/**
+ * Calculate armor effectiveness based on damage type.
+ */
+export function getArmorEffectiveness(damageType: string): {
+  effectiveness: number;
+  ignoresArmor: boolean;
+  bypassesShields: boolean;
+} {
+  const damageTypeDef = getDamageType(damageType as DamageSubType);
+  if (!damageTypeDef?.armorInteraction) {
+    return { effectiveness: 1.0, ignoresArmor: false, bypassesShields: false };
+  }
+
+  return {
+    effectiveness: damageTypeDef.armorInteraction.armorEffectiveness ?? 1.0,
+    ignoresArmor: damageTypeDef.armorInteraction.ignoresArmor ?? false,
+    bypassesShields: damageTypeDef.armorInteraction.bypassesShields ?? false,
+  };
+}
+
+/**
+ * Apply full damage pipeline: origin -> shield -> armor -> DR -> cover.
+ */
+export function calculateFinalDamage(
+  rawDamage: number,
+  damageType: string,
+  target: SimUnit
+): {
+  finalDamage: number;
+  originMultiplier: number;
+  shieldAbsorbed: number;
+  armorBlocked: number;
+  drReduced: number;
+  coverDRBonus: number;
+} {
+  let damage = rawDamage;
+
+  // Step 1: Origin multiplier
+  const originMult = getOriginMultiplier(damageType, target.origin);
+  damage = Math.floor(damage * originMult);
+
+  // If immune (0 multiplier), stop here
+  if (damage <= 0) {
+    return {
+      finalDamage: 0,
+      originMultiplier: originMult,
+      shieldAbsorbed: 0,
+      armorBlocked: 0,
+      drReduced: 0,
+      coverDRBonus: 0,
+    };
+  }
+
+  const armorInfo = getArmorEffectiveness(damageType);
+  let shieldAbsorbed = 0;
+  let armorBlocked = 0;
+  let drReduced = 0;
+
+  // Step 2: Shield absorption
+  if (!armorInfo.bypassesShields && target.shieldHp > 0) {
+    shieldAbsorbed = Math.min(target.shieldHp, damage);
+    damage -= shieldAbsorbed;
+  }
+
+  // Step 3: Armor (if not armor-piercing)
+  if (!armorInfo.ignoresArmor && damage > 0) {
+    const effectiveness = armorInfo.effectiveness;
+
+    // Stopping power check
+    if (target.stoppingPower > 0) {
+      const effectiveSP = Math.floor(target.stoppingPower * effectiveness);
+      if (damage <= effectiveSP) {
+        armorBlocked = damage;
+        damage = 0;
+      } else {
+        armorBlocked = effectiveSP;
+        damage -= effectiveSP;
+      }
+    }
+
+    // DR reduction (including cover bonus)
+    if (damage > 0) {
+      const coverBonus = COVER_BONUSES[target.cover]?.drBonus || 0;
+      const totalDR = target.dr + coverBonus;
+      const effectiveDR = Math.floor(totalDR * effectiveness);
+      drReduced = Math.min(effectiveDR, damage - 1);
+      damage = Math.max(1, damage - effectiveDR);
+    }
+  }
+
+  return {
+    finalDamage: damage,
+    originMultiplier: originMult,
+    shieldAbsorbed,
+    armorBlocked,
+    drReduced,
+    coverDRBonus: COVER_BONUSES[target.cover]?.drBonus || 0,
+  };
+}
+
+// ============ FULL ATTACK RESOLUTION ============
+
+/**
+ * Resolve a single attack from attacker to target.
+ * Pure function - does not modify units.
+ *
+ * @param attacker - Attacking unit
+ * @param target - Target unit
+ * @param distance - Distance (optional, uses optimal if not provided)
+ * @param roll - Random roll 0-100 (optional, generates if not provided)
+ * @returns Full attack result with all details
+ */
+export function resolveAttack(
+  attacker: SimUnit,
+  target: SimUnit,
+  distance?: number,
+  roll?: number
+): AttackResult {
+  const weapon = attacker.weapon;
+  const actualRoll = roll ?? Math.random() * 100;
+
+  // Calculate accuracy
+  const accuracy = calculateAccuracy(attacker, target, distance);
+
+  // Get hit result
+  const hitResult = getHitResult(actualRoll, accuracy);
+
+  // Calculate damage
+  const baseDamage = getBaseDamage(weapon, attacker);
+  const damageAfterHit = applyHitMultiplier(baseDamage, hitResult);
+
+  // Apply damage pipeline
+  const damageResult = calculateFinalDamage(
+    damageAfterHit,
+    weapon.damageType,
+    target
+  );
+
+  // Calculate new HP values
+  const targetHpBefore = target.hp;
+  const targetShieldBefore = target.shieldHp;
+  const targetHpAfter = Math.max(0, target.hp - damageResult.finalDamage);
+  const targetShieldAfter = Math.max(0, target.shieldHp - damageResult.shieldAbsorbed);
+
+  // Stance modifiers for logging
+  const attackerStance = STANCES[attacker.stance] || STANCES.normal;
+  const targetStance = STANCES[target.stance] || STANCES.normal;
+
+  // Generate status effects based on damage type and hit result
+  // Uses damageSystem.ts definitions (bleeding, burning, frozen, poison, stun)
+  const statusEffects = getStatusEffectsForDamage(
+    weapon.damageType,
+    hitResult,
+    target.origin
+  );
+  const effectIds = statusEffects.map(e => e.id);
+
+  return {
+    attacker: attacker.id,
+    target: target.id,
+    weapon: weapon.name,
+
+    roll: actualRoll,
+    accuracy,
+    hitResult,
+
+    rawDamage: baseDamage,
+    critMultiplier: hitResult === 'crit' ? 1.5 : 1.0,
+    originMultiplier: damageResult.originMultiplier,
+    shieldAbsorbed: damageResult.shieldAbsorbed,
+    armorBlocked: damageResult.armorBlocked,
+    drReduced: damageResult.drReduced,
+    coverDRBonus: damageResult.coverDRBonus,
+    finalDamage: damageResult.finalDamage,
+
+    targetHpBefore,
+    targetHpAfter,
+    targetShieldBefore,
+    targetShieldAfter,
+    killed: targetHpAfter <= 0,
+
+    effectsApplied: effectIds,
+    knockbackTiles: 0,  // TODO: Knockback calculation
+
+    stanceAccuracyMod: attackerStance.accuracyMod,
+    stanceEvasionMod: targetStance.evasionMod,
+    rangeBracket: distance !== undefined ? getRangeBracket(weapon, distance) : 'OPTIMAL',
+    distance,
+
+    // Store full effect instances for application
+    _statusEffects: statusEffects,
+  };
+}
+
+/**
+ * Apply attack result to unit (mutates unit state).
+ * Separate from resolveAttack to allow preview before applying.
+ * Now also applies status effects from the attack.
+ */
+export function applyAttackResult(target: SimUnit, result: AttackResult): void {
+  target.hp = result.targetHpAfter;
+  target.shieldHp = result.targetShieldAfter;
+  target.alive = target.hp > 0;
+
+  // Apply status effects if present
+  if (result._statusEffects && result._statusEffects.length > 0) {
+    applyStatusEffects(target, result._statusEffects);
+  }
+}
+
+// ============ TURN ORDER ============
+
+/**
+ * Calculate initiative for a unit.
+ * Higher = goes first.
+ */
+export function calculateInitiative(unit: SimUnit, roll?: number): number {
+  const base = unit.stats.AGL + unit.stats.MEL;
+  const randomComponent = roll ?? Math.random() * 100;
+  return base + randomComponent;
+}
+
+/**
+ * Sort units by initiative for turn order.
+ */
+export function getTurnOrder(units: SimUnit[]): SimUnit[] {
+  return [...units]
+    .filter(u => u.alive)
+    .map(u => ({ unit: u, initiative: calculateInitiative(u) }))
+    .sort((a, b) => b.initiative - a.initiative)
+    .map(item => item.unit);
+}
+
+/**
+ * Get the best target for a unit (simple AI).
+ * Prioritizes: low HP > closest > highest threat
+ */
+export function selectTarget(attacker: SimUnit, enemies: SimUnit[]): SimUnit | null {
+  const aliveEnemies = enemies.filter(e => e.alive);
+  if (aliveEnemies.length === 0) return null;
+
+  // Sort by HP (lowest first) then by AGL (highest threat first)
+  return aliveEnemies.sort((a, b) => {
+    // Prioritize low HP targets
+    const hpRatio = (a.hp / a.maxHp) - (b.hp / b.maxHp);
+    if (Math.abs(hpRatio) > 0.1) return hpRatio;
+
+    // Then prioritize high damage threats
+    return b.weapon.damage - a.weapon.damage;
+  })[0];
+}
+
+// ============ DISARM MECHANICS ============
+
+/**
+ * Calculate disarm chance based on attacker's weapon and both units' STR.
+ *
+ * Base chance: 30%
+ * Weapon bonus: nunchucks +25%, sai +15%
+ * STR contest: +2% per STR difference (attacker - defender)
+ * Blade trapping (sai): +20% vs edged weapons
+ */
+export function calculateDisarmChance(
+  attacker: SimUnit,
+  target: SimUnit
+): number {
+  // Can't disarm someone who's already disarmed or using fists
+  if (target.disarmed || target.weapon.name === 'Fist') {
+    return 0;
+  }
+
+  let chance = 30; // Base disarm chance
+
+  // Weapon bonus
+  const weaponBonus = attacker.weapon.special?.disarmBonus || 0;
+  chance += weaponBonus;
+
+  // STR contest: +2% per STR difference
+  const strDiff = attacker.stats.STR - target.stats.STR;
+  chance += strDiff * 2;
+
+  // Blade trapping bonus (sai vs edged weapons)
+  if (attacker.weapon.special?.bladeTrapping) {
+    const isEdged = target.weapon.damageType.startsWith('EDGED');
+    if (isEdged) {
+      chance += 20;
+    }
+  }
+
+  // Clamp to reasonable range
+  return Math.max(5, Math.min(95, chance));
+}
+
+/**
+ * Attempt to disarm target.
+ * Returns detailed result for logging.
+ */
+export function attemptDisarm(
+  attacker: SimUnit,
+  target: SimUnit,
+  roll?: number
+): DisarmResult {
+  const chance = calculateDisarmChance(attacker, target);
+  const actualRoll = roll ?? Math.random() * 100;
+
+  const result: DisarmResult = {
+    success: actualRoll <= chance,
+    roll: actualRoll,
+    chance,
+    attackerSTR: attacker.stats.STR,
+    defenderSTR: target.stats.STR,
+    weaponBonus: attacker.weapon.special?.disarmBonus || 0,
+  };
+
+  return result;
+}
+
+/**
+ * Apply disarm effect to target (mutates target).
+ * Stores original weapon and switches to fists.
+ */
+export function applyDisarm(target: SimUnit): void {
+  if (target.disarmed) return;
+
+  target.originalWeapon = { ...target.weapon };
+  target.weapon = { ...FIST_WEAPON };
+  target.disarmed = true;
+}
+
+/**
+ * Restore target's weapon after being disarmed (mutates target).
+ * Used when picking up dropped weapon or recovering.
+ */
+export function restoreWeapon(target: SimUnit): void {
+  if (!target.disarmed || !target.originalWeapon) return;
+
+  target.weapon = { ...target.originalWeapon };
+  target.originalWeapon = undefined;
+  target.disarmed = false;
+}
+
+// ============ COUNTER-ATTACK MECHANICS ============
+
+/**
+ * Quick counter-strike weapon for trained martial artists.
+ * Used when they successfully dodge a melee attack.
+ * This is a powerful strike - the opponent is off-balance and exposed.
+ */
+const COUNTER_STRIKE: SimWeapon = {
+  name: 'Counter Strike',
+  damage: 14,      // Solid counter (like a cross punch)
+  accuracy: 92,    // High accuracy (they're in close, opponent overextended)
+  damageType: 'SMASHING_MELEE',
+  range: 1,
+  apCost: 0,       // Free action
+};
+
+/**
+ * Check if a unit can counter-attack after dodging a melee attack.
+ * Requires:
+ * - Target is an unarmed fighter (fists, not a weapon)
+ * - Target has MEL 18+ (trained in close combat)
+ * - The incoming attack was melee (range <= 2)
+ * - The incoming attack missed
+ */
+export function canCounterAttack(
+  target: SimUnit,
+  attacker: SimUnit,
+  attackResult: AttackResult
+): boolean {
+  // Must have dodged (miss only, not graze)
+  if (attackResult.hitResult !== 'miss') return false;
+
+  // Attacker must have used melee weapon
+  if (attacker.weapon.range > 2) return false;
+
+  // Target must be alive
+  if (!target.alive) return false;
+
+  // Target must be trained in melee (MEL 18+)
+  if (target.stats.MEL < 18) return false;
+
+  // Target must be unarmed (fists, not martial arts weapon)
+  const isUnarmed = target.weapon.range <= 1 &&
+    (target.weapon.name === 'Fist' ||
+     target.weapon.name === 'Fists' ||
+     target.weapon.damageType === 'SMASHING_MELEE' ||
+     target.weapon.damageType === 'IMPACT_BLUNT');
+
+  return isUnarmed;
+}
+
+/**
+ * Resolve a counter-attack from a martial artist who dodged a melee attack.
+ * The counter is a quick strike - high accuracy, solid damage.
+ *
+ * Counter-attack chance scales with MEL:
+ * - MEL 18-19: 50% chance
+ * - MEL 20-24: 70% chance
+ * - MEL 25-29: 85% chance
+ * - MEL 30+: 95% chance
+ */
+export function resolveCounterAttack(
+  counter: SimUnit,
+  attacker: SimUnit,
+  roll?: number
+): AttackResult | null {
+  // Calculate counter chance based on MEL
+  const mel = counter.stats.MEL;
+  let counterChance: number;
+  if (mel >= 30) counterChance = 95;
+  else if (mel >= 25) counterChance = 85;
+  else if (mel >= 20) counterChance = 70;
+  else counterChance = 50;
+
+  // Roll to see if counter triggers
+  const triggerRoll = roll ?? Math.random() * 100;
+  if (triggerRoll > counterChance) {
+    return null; // Counter didn't trigger
+  }
+
+  // Counter triggers - resolve as a quick strike
+  // Use COUNTER_STRIKE weapon temporarily
+  const originalWeapon = counter.weapon;
+  counter.weapon = COUNTER_STRIKE;
+
+  const counterResult = resolveAttack(counter, attacker, 1);
+
+  // Restore original weapon
+  counter.weapon = originalWeapon;
+
+  // Mark as counter-attack in the result
+  counterResult.weapon = 'Counter Strike';
+
+  return counterResult;
+}

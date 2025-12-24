@@ -149,6 +149,8 @@ export type NotificationType =
     | 'departure'       // Character left location
     | 'status_change'   // Status changed (ready → preparing → travel)
     | 'mission'         // Mission related
+    | 'mission_complete' // Mission completed successfully
+    | 'mission_failed'  // Mission failed
     | 'combat'          // Combat started/ended
     | 'injury'          // Character injured
     | 'death'           // Character died
@@ -156,7 +158,10 @@ export type NotificationType =
     | 'call_incoming'   // Character calling you
     | 'email'           // Email received
     | 'world_event'     // Something happened in the world
-    | 'handler';        // Handler message
+    | 'handler'         // Handler message
+    | 'investigation_discovered' // New investigation lead found
+    | 'investigation_complete'   // Investigation completed
+    | 'investigation_failed';    // Investigation failed
 
 export type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent';
 
@@ -325,8 +330,8 @@ export interface GameCharacter {
     // Personality (for merc system)
     personality?: {
         mbti?: string;         // INTJ, ENFP, etc.
+        calling?: string;      // CallingId - WHY they fight (protector, mercenary, etc.)
         volatility?: number;   // 1-10, affects mood swings
-        motivation?: string;   // Money, Fame, Justice, etc.
         harmAvoidance?: number; // 1-10, willingness to kill
     };
 
