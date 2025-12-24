@@ -35,6 +35,14 @@ export {
   attemptDisarm,
   applyDisarm,
   restoreWeapon,
+  // Vision & Flanking
+  getAngleToTarget,
+  getVisionCone,
+  isInVisionCone,
+  getFlankingResult,
+  getFlankingBonus,
+  canReact,
+  faceToward,
 } from './core';
 
 // Status effects

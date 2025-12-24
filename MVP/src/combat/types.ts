@@ -137,6 +137,32 @@ export interface DisarmResult {
   droppedWeapon?: SimWeapon;
 }
 
+// ============ VISION & FACING ============
+export interface VisionCone {
+  facing: number;      // Direction facing in degrees (0=right, 90=up, 180=left, 270=down)
+  angle: number;       // Field of view in degrees (120=human, 180=enhanced, 360=superhuman)
+  range: number;       // How far they can see (tiles)
+}
+
+// Flanking result based on attack angle relative to target's facing
+export type FlankingResult = 'front' | 'side' | 'rear' | 'blindspot';
+
+// Flanking bonuses to accuracy
+export const FLANKING_BONUSES: Record<FlankingResult, number> = {
+  front: 0,       // Normal attack
+  side: 10,       // Side attack: +10% accuracy
+  rear: 25,       // Rear attack: +25% accuracy (flanking)
+  blindspot: 40,  // Outside vision cone: +40% accuracy + no reaction
+};
+
+// Default vision for different unit types
+export const DEFAULT_VISION = {
+  human: { angle: 120, range: 15 },      // 120° FoV, 15 tiles
+  enhanced: { angle: 180, range: 20 },   // Half-circle, 20 tiles
+  superhuman: { angle: 360, range: 30 }, // Full circle (eyes everywhere)
+  robot: { angle: 270, range: 25 },      // Nearly full, sensors
+};
+
 // ============ UNIT TYPES ============
 export interface SimUnit {
   id: string;
@@ -161,6 +187,9 @@ export interface SimUnit {
     STR: number;  // Strength for knockback resistance
     STA: number;  // Stamina for HP
   };
+
+  // Vision & Facing
+  vision?: VisionCone;  // If undefined, uses human defaults
 
   // Combat modifiers
   stance: StanceType;
@@ -228,6 +257,10 @@ export interface AttackResult {
   stanceEvasionMod: number;
   rangeBracket?: string;
   distance?: number;
+
+  // Flanking
+  flanking?: FlankingResult;
+  flankingBonus?: number;
 
   // Internal: full status effect instances for application
   _statusEffects?: StatusEffectInstance[];

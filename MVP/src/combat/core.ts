@@ -18,9 +18,13 @@ import {
   CoverType,
   OriginType,
   DisarmResult,
+  FlankingResult,
+  VisionCone,
   STANCES,
   COVER_BONUSES,
   FIST_WEAPON,
+  FLANKING_BONUSES,
+  DEFAULT_VISION,
 } from './types';
 
 import {
@@ -50,6 +54,168 @@ export function calculateDistance(attacker: SimUnit, target: SimUnit): number | 
   const dy = Math.abs(attacker.position.y - target.position.y);
   // Use Euclidean for more natural range calculation
   return Math.sqrt(dx * dx + dy * dy);
+}
+
+// ============ VISION & FLANKING ============
+
+/**
+ * Normalize angle to 0-360 range.
+ */
+function normalizeAngle(angle: number): number {
+  let normalized = angle % 360;
+  if (normalized < 0) normalized += 360;
+  return normalized;
+}
+
+/**
+ * Calculate the angle from one position to another.
+ * Returns angle in degrees (0=right, 90=up, 180=left, 270=down).
+ */
+export function getAngleToTarget(
+  fromX: number, fromY: number,
+  toX: number, toY: number
+): number {
+  const dx = toX - fromX;
+  const dy = toY - fromY;
+  // atan2 returns radians, convert to degrees
+  // Math.atan2 uses standard math coords (up = positive Y)
+  // We negate dy because screen coords have Y increasing downward
+  const radians = Math.atan2(-dy, dx);
+  const degrees = radians * (180 / Math.PI);
+  return normalizeAngle(degrees);
+}
+
+/**
+ * Get unit's vision cone, defaulting to human vision if not set.
+ */
+export function getVisionCone(unit: SimUnit): VisionCone {
+  if (unit.vision) return unit.vision;
+  return {
+    facing: 0, // Default facing right
+    ...DEFAULT_VISION.human,
+  };
+}
+
+/**
+ * Check if a position is within the unit's vision cone.
+ * Returns true if the target position is visible.
+ */
+export function isInVisionCone(
+  unit: SimUnit,
+  targetX: number,
+  targetY: number
+): boolean {
+  if (!unit.position) return true; // No position = always visible
+
+  const vision = getVisionCone(unit);
+
+  // 360° vision sees everything
+  if (vision.angle >= 360) return true;
+
+  // Calculate distance
+  const dx = targetX - unit.position.x;
+  const dy = targetY - unit.position.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  // Beyond vision range
+  if (distance > vision.range) return false;
+
+  // Calculate angle to target
+  const angleToTarget = getAngleToTarget(
+    unit.position.x, unit.position.y,
+    targetX, targetY
+  );
+
+  // Calculate angle difference from facing
+  let angleDiff = Math.abs(normalizeAngle(angleToTarget - vision.facing));
+  if (angleDiff > 180) angleDiff = 360 - angleDiff;
+
+  // Check if within half the vision angle on each side
+  return angleDiff <= vision.angle / 2;
+}
+
+/**
+ * Determine flanking result based on attack angle relative to target's facing.
+ *
+ * Attack angles (relative to target's facing):
+ * - Front:    within ±45° of facing direction
+ * - Side:     45-135° from facing (either side)
+ * - Rear:     135-180° from facing (behind)
+ * - Blindspot: Rear AND outside vision cone
+ *
+ * @returns FlankingResult with corresponding accuracy bonus
+ */
+export function getFlankingResult(
+  attacker: SimUnit,
+  target: SimUnit
+): FlankingResult {
+  // No positions = no flanking (use front)
+  if (!attacker.position || !target.position) {
+    return 'front';
+  }
+
+  const vision = getVisionCone(target);
+
+  // Calculate angle FROM target TO attacker
+  const attackAngle = getAngleToTarget(
+    target.position.x, target.position.y,
+    attacker.position.x, attacker.position.y
+  );
+
+  // Calculate angle difference from target's facing
+  let angleDiff = Math.abs(normalizeAngle(attackAngle - vision.facing));
+  if (angleDiff > 180) angleDiff = 360 - angleDiff;
+
+  // Classify attack angle
+  // Front: 0-45°, Side: 45-120°, Rear: 120-180°
+  // Rear zone larger than side - easier to flank
+  if (angleDiff <= 45) {
+    return 'front';
+  } else if (angleDiff <= 120) {
+    return 'side';
+  } else {
+    // Rear attack - check if also in blindspot
+    const inVision = isInVisionCone(target, attacker.position.x, attacker.position.y);
+    if (!inVision) {
+      return 'blindspot';
+    }
+    return 'rear';
+  }
+}
+
+/**
+ * Get accuracy bonus for flanking.
+ */
+export function getFlankingBonus(attacker: SimUnit, target: SimUnit): number {
+  const flanking = getFlankingResult(attacker, target);
+  return FLANKING_BONUSES[flanking];
+}
+
+/**
+ * Check if target can perform a reaction shot against attacker.
+ * No reaction if attacker is in blindspot.
+ */
+export function canReact(target: SimUnit, attacker: SimUnit): boolean {
+  const flanking = getFlankingResult(attacker, target);
+  return flanking !== 'blindspot';
+}
+
+/**
+ * Update a unit's facing to look at a target position.
+ */
+export function faceToward(unit: SimUnit, targetX: number, targetY: number): void {
+  if (!unit.position) return;
+
+  const angle = getAngleToTarget(
+    unit.position.x, unit.position.y,
+    targetX, targetY
+  );
+
+  if (!unit.vision) {
+    unit.vision = { ...DEFAULT_VISION.human, facing: angle };
+  } else {
+    unit.vision.facing = angle;
+  }
 }
 
 // ============ HIT CALCULATION ============
@@ -175,6 +341,13 @@ export function calculateAccuracy(
   // Status effect accuracy penalties (from stun, etc.)
   const statusAccPenalty = getAccuracyPenalty(attacker);
   accuracy += statusAccPenalty;
+
+  // FLANKING BONUS
+  // Attacking from the side, rear, or blindspot gives accuracy bonus.
+  // Side: +10, Rear: +25, Blindspot: +40 (behind and outside vision cone)
+  // Only applies if both units have positions set.
+  const flankingBonus = getFlankingBonus(attacker, target);
+  accuracy += flankingBonus;
 
   // Clamp to valid range
   return Math.max(5, Math.min(95, accuracy));
@@ -413,6 +586,10 @@ export function resolveAttack(
     stanceEvasionMod: targetStance.evasionMod,
     rangeBracket: distance !== undefined ? getRangeBracket(weapon, distance) : 'OPTIMAL',
     distance,
+
+    // Flanking
+    flanking: getFlankingResult(attacker, target),
+    flankingBonus: getFlankingBonus(attacker, target),
 
     // Store full effect instances for application
     _statusEffects: statusEffects,
