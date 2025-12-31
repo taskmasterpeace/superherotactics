@@ -130,6 +130,42 @@ import {
   calculateMonthlyUpkeep,
 } from '../data/baseSystem'
 
+// Faction Relations System
+import {
+  FactionType,
+  FactionStanding,
+  StandingLabel,
+  CountryReputation,
+  FACTION_NAMES,
+  FACTION_ICONS,
+  getStandingLabel,
+  getStandingColor,
+  getPriceModifier,
+  getSellPriceModifier,
+  getTravelTimeModifier,
+  canEnterLegally,
+  modifyStanding,
+  getRelatedFactionEffects,
+  getStandingDecay,
+  checkBountyStatus,
+  getCountryReputation,
+  initializeFactionStandings,
+} from '../data/factionSystem'
+
+// Squad System
+import {
+  Squad,
+  SquadMember,
+  SquadStatus,
+  PersonalityType,
+  createSquad,
+  addMemberToSquad,
+  removeMemberFromSquad,
+  calculateSquadMorale,
+  assignVehicleToSquad,
+  collectSquadModifiers,
+} from '../data/squadSystem'
+
 // Character Life Cycle System
 import {
   CityFamiliarity,
@@ -279,6 +315,8 @@ interface EnhancedGameStore {
   reputation: ReputationState
   newsState: NewsState
   baseState: BaseState
+  factionStandings: FactionStanding[]
+  squads: Squad[]  // Multiple squad support
 
   // Character Life Cycle State
   pendingActivityRequests: ActivityRequest[]
@@ -444,6 +482,25 @@ interface EnhancedGameStore {
   removeFacilityAt: (gridX: number, gridY: number) => void
   processConstruction: (hours: number) => void
   getBaseBonuses: () => { education: number; healing: number; investigation: number }
+
+  // Faction Relations Actions
+  initFactionStandings: () => void
+  modifyFactionStanding: (factionType: FactionType, countryCode: string, change: number, reason: string) => void
+  getFactionStanding: (factionType: FactionType, countryCode: string) => FactionStanding | undefined
+  getCountryReputation: (countryCode: string) => CountryReputation | null
+  applyFactionDecay: () => void
+
+  // Squad Management Actions
+  initializeSquads: () => void  // Create initial squad from characters
+  createNewSquad: (name: string, characterIds: string[]) => Squad | null
+  disbandSquad: (squadId: string) => boolean
+  assignToSquad: (characterId: string, squadId: string) => boolean
+  removeFromSquad: (characterId: string, squadId: string) => boolean
+  setActiveSquad: (squadId: string) => void
+  getSquadById: (squadId: string) => Squad | undefined
+  getSquadForCharacter: (characterId: string) => Squad | undefined
+  assignVehicle: (squadId: string, vehicleId: string) => { success: boolean; reason?: string }
+  deploySquad: (squadId: string, sector: string) => void
 
   // Character Life Cycle Actions
   processCharacterIdleDay: (characterId: string) => DailyActivityReport | null
@@ -698,6 +755,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   reputation: createInitialReputationState(),
   newsState: createInitialNewsState(),
   baseState: createInitialBaseState(),
+  factionStandings: [] as FactionStanding[],  // Initialized when country is selected
+  squads: [] as Squad[],  // Multi-squad support - initialized with characters
 
   // Character Life Cycle State - Initial State
   pendingActivityRequests: [] as ActivityRequest[],
@@ -751,6 +810,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       selectedCountry: country,
       gamePhase: 'city-selection'
     })
+    // Initialize faction standings for this country
+    get().initFactionStandings()
     toast.success(`Operations authorized in ${country}`)
   },
 
@@ -766,6 +827,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       localNewspaperName: newspaperName,
       gamePhase: 'recruiting'
     })
+    // Initialize squads with starting characters
+    get().initializeSquads()
     toast.success(`Headquarters established in ${city} - Now recruit your team!`)
   },
 
@@ -3213,6 +3276,297 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       healing: getHealingBonus(activeBase),
       investigation: getInvestigationBonus(activeBase),
     }
+  },
+
+  // =============================================================================
+  // FACTION RELATIONS ACTIONS
+  // =============================================================================
+
+  initFactionStandings: () => {
+    const state = get()
+    const { ALL_COUNTRIES } = require('../data/countries')
+    const homeCountry = state.selectedCountry || 'US'
+
+    const standings = initializeFactionStandings(ALL_COUNTRIES, homeCountry)
+    set({ factionStandings: standings })
+
+    console.log(`[FACTIONS] Initialized ${standings.length} faction standings for ${ALL_COUNTRIES.length} countries`)
+  },
+
+  modifyFactionStanding: (factionType, countryCode, change, reason) => {
+    const state = get()
+    const factionId = `${factionType}_${countryCode.toLowerCase()}`
+
+    const standing = state.factionStandings.find(s => s.factionId === factionId)
+    if (!standing) {
+      console.warn(`[FACTIONS] Faction not found: ${factionId}`)
+      return
+    }
+
+    const timestamp = state.gameTime.day * 1440 + state.gameTime.minutes
+    const updatedStanding = modifyStanding(standing, change, reason, timestamp)
+
+    // Check for bounty updates
+    const newBounty = checkBountyStatus(updatedStanding, timestamp)
+    updatedStanding.activeBounty = newBounty
+
+    // Apply related faction effects
+    const relatedEffects = getRelatedFactionEffects(factionType, change)
+    const updatedStandings = state.factionStandings.map(s => {
+      if (s.factionId === factionId) return updatedStanding
+      const related = relatedEffects.find(e =>
+        e.factionType === s.factionType && s.countryCode === countryCode
+      )
+      if (related) {
+        return modifyStanding(s, related.change, `Related: ${reason}`, timestamp)
+      }
+      return s
+    })
+
+    set({ factionStandings: updatedStandings })
+
+    // Show toast for significant changes
+    if (Math.abs(change) >= 10) {
+      const icon = change > 0 ? '📈' : '📉'
+      toast.success(`${icon} ${FACTION_NAMES[factionType]} (${countryCode}): ${change > 0 ? '+' : ''}${change}`)
+    }
+
+    console.log(`[FACTIONS] ${factionType} in ${countryCode}: ${change > 0 ? '+' : ''}${change} (${reason})`)
+  },
+
+  getFactionStanding: (factionType, countryCode) => {
+    const state = get()
+    const factionId = `${factionType}_${countryCode.toLowerCase()}`
+    return state.factionStandings.find(s => s.factionId === factionId)
+  },
+
+  getCountryReputation: (countryCode) => {
+    const state = get()
+    const { getCountryByCode } = require('../data/countries')
+    const country = getCountryByCode(countryCode)
+    if (!country) return null
+
+    return getCountryReputation(countryCode, country.name, state.factionStandings)
+  },
+
+  applyFactionDecay: () => {
+    const state = get()
+    const updatedStandings = state.factionStandings.map(standing => {
+      const decay = getStandingDecay(standing.standing, 1)
+      if (decay !== 0) {
+        return modifyStanding(
+          standing,
+          decay,
+          'Natural decay',
+          state.gameTime.day * 1440 + state.gameTime.minutes
+        )
+      }
+      return standing
+    })
+
+    set({ factionStandings: updatedStandings })
+  },
+
+  // =============================================================================
+  // SQUAD MANAGEMENT ACTIONS
+  // =============================================================================
+
+  initializeSquads: () => {
+    const state = get()
+    if (state.squads.length > 0) return  // Already initialized
+
+    // Create default squad from all characters
+    const characters = state.characters
+    if (characters.length === 0) return
+
+    // Convert characters to SquadMembers
+    const members: SquadMember[] = characters.map((c: any, index: number) => ({
+      characterId: c.id,
+      name: c.name,
+      personality: (c.personality?.mbti || 'ISTJ') as PersonalityType,
+      role: index === 0 ? 'leader' : 'member' as const,
+      health: c.health?.current ? Math.round((c.health.current / c.health.maximum) * 100) : 100,
+      morale: 75,  // Default morale
+      stamina: 100,
+      pilotingGround: c.stats?.AGL ? Math.round(c.stats.AGL * 0.8) : 40,
+      pilotingAir: c.stats?.AGL ? Math.round(c.stats.AGL * 0.5) : 20,
+      pilotingWater: c.stats?.AGL ? Math.round(c.stats.AGL * 0.6) : 30,
+      survival: c.stats?.INS ? Math.round(c.stats.INS * 0.7) : 35,
+      stealth: c.stats?.AGL ? Math.round(c.stats.AGL * 0.7) : 35,
+      travelModifiers: [],
+    }))
+
+    const initialSquad = createSquad(
+      'squad-alpha',
+      'Alpha Squad',
+      members,
+      state.currentSector || 'K3'
+    )
+
+    set({ squads: [initialSquad] })
+    console.log('[SQUADS] Initialized Alpha Squad with', members.length, 'members')
+  },
+
+  createNewSquad: (name, characterIds) => {
+    const state = get()
+
+    // Verify characters exist and aren't already in a squad
+    const availableChars = characterIds.filter(id => {
+      const char = state.characters.find((c: any) => c.id === id)
+      const inSquad = state.squads.some(s => s.members.some(m => m.characterId === id))
+      return char && !inSquad
+    })
+
+    if (availableChars.length === 0) {
+      toast.error('No available characters for new squad')
+      return null
+    }
+
+    const members: SquadMember[] = availableChars.map((id, index) => {
+      const c = state.characters.find((char: any) => char.id === id)!
+      return {
+        characterId: c.id,
+        name: c.name,
+        personality: (c.personality?.mbti || 'ISTJ') as PersonalityType,
+        role: index === 0 ? 'leader' : 'member' as const,
+        health: c.health?.current ? Math.round((c.health.current / c.health.maximum) * 100) : 100,
+        morale: 75,
+        stamina: 100,
+        pilotingGround: c.stats?.AGL ? Math.round(c.stats.AGL * 0.8) : 40,
+        pilotingAir: c.stats?.AGL ? Math.round(c.stats.AGL * 0.5) : 20,
+        pilotingWater: c.stats?.AGL ? Math.round(c.stats.AGL * 0.6) : 30,
+        survival: c.stats?.INS ? Math.round(c.stats.INS * 0.7) : 35,
+        stealth: c.stats?.AGL ? Math.round(c.stats.AGL * 0.7) : 35,
+        travelModifiers: [],
+      }
+    })
+
+    const newSquad = createSquad(
+      `squad-${Date.now()}`,
+      name,
+      members,
+      state.currentSector || 'K3'
+    )
+
+    set({ squads: [...state.squads, newSquad] })
+    toast.success(`Created ${name} with ${members.length} members`)
+    return newSquad
+  },
+
+  disbandSquad: (squadId) => {
+    const state = get()
+    const squad = state.squads.find(s => s.id === squadId)
+    if (!squad) return false
+
+    set({ squads: state.squads.filter(s => s.id !== squadId) })
+    toast.info(`${squad.name} disbanded`)
+    return true
+  },
+
+  assignToSquad: (characterId, squadId) => {
+    const state = get()
+    const squad = state.squads.find(s => s.id === squadId)
+    const character = state.characters.find((c: any) => c.id === characterId)
+
+    if (!squad || !character) return false
+
+    // Check if already in a squad
+    const currentSquad = state.squads.find(s => s.members.some(m => m.characterId === characterId))
+    if (currentSquad) {
+      toast.error(`${character.name} is already in ${currentSquad.name}`)
+      return false
+    }
+
+    const newMember: SquadMember = {
+      characterId: character.id,
+      name: character.name,
+      personality: (character.personality?.mbti || 'ISTJ') as PersonalityType,
+      role: 'member',
+      health: character.health?.current ? Math.round((character.health.current / character.health.maximum) * 100) : 100,
+      morale: 75,
+      stamina: 100,
+      pilotingGround: character.stats?.AGL ? Math.round(character.stats.AGL * 0.8) : 40,
+      pilotingAir: character.stats?.AGL ? Math.round(character.stats.AGL * 0.5) : 20,
+      pilotingWater: character.stats?.AGL ? Math.round(character.stats.AGL * 0.6) : 30,
+      survival: character.stats?.INS ? Math.round(character.stats.INS * 0.7) : 35,
+      stealth: character.stats?.AGL ? Math.round(character.stats.AGL * 0.7) : 35,
+      travelModifiers: [],
+    }
+
+    const success = addMemberToSquad(squad, newMember)
+    if (success) {
+      set({ squads: [...state.squads] })  // Trigger re-render
+      toast.success(`${character.name} joined ${squad.name}`)
+    }
+    return success
+  },
+
+  removeFromSquad: (characterId, squadId) => {
+    const state = get()
+    const squad = state.squads.find(s => s.id === squadId)
+    if (!squad) return false
+
+    const success = removeMemberFromSquad(squad, characterId)
+    if (success) {
+      // If squad is empty, disband it
+      if (squad.members.length === 0) {
+        set({ squads: state.squads.filter(s => s.id !== squadId) })
+        toast.info(`${squad.name} disbanded (no members)`)
+      } else {
+        set({ squads: [...state.squads] })
+      }
+    }
+    return success
+  },
+
+  setActiveSquad: (squadId) => {
+    const state = get()
+    const squad = state.squads.find(s => s.id === squadId)
+    if (squad) {
+      // Update currentSector to match squad's position
+      set({ currentSector: squad.currentSector })
+      toast.info(`Active squad: ${squad.name}`)
+    }
+  },
+
+  getSquadById: (squadId) => {
+    return get().squads.find(s => s.id === squadId)
+  },
+
+  getSquadForCharacter: (characterId) => {
+    return get().squads.find(s => s.members.some(m => m.characterId === characterId))
+  },
+
+  assignVehicle: (squadId, vehicleId) => {
+    const state = get()
+    const squad = state.squads.find(s => s.id === squadId)
+    if (!squad) return { success: false, reason: 'Squad not found' }
+
+    const result = assignVehicleToSquad(squad, vehicleId)
+    if (result.success) {
+      set({ squads: [...state.squads] })
+      toast.success(`Vehicle assigned to ${squad.name}`)
+    } else {
+      toast.error(result.reason || 'Failed to assign vehicle')
+    }
+    return result
+  },
+
+  deploySquad: (squadId, sector) => {
+    const state = get()
+    const squadIndex = state.squads.findIndex(s => s.id === squadId)
+    if (squadIndex === -1) return
+
+    const updatedSquads = [...state.squads]
+    updatedSquads[squadIndex] = {
+      ...updatedSquads[squadIndex],
+      status: 'traveling' as SquadStatus,
+      destinationSector: sector,
+      travelProgress: 0,
+    }
+
+    set({ squads: updatedSquads })
+    toast.success(`${updatedSquads[squadIndex].name} deploying to sector ${sector}`)
   },
 
   // =============================================================================

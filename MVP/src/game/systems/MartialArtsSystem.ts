@@ -36,6 +36,33 @@ export function getBeltName(beltLevel: number): string {
 }
 
 /**
+ * Get tier label for display (Novice, Trained, Skilled, Expert, Master, Grandmaster)
+ * Used in combat tooltips for less "martial arts specific" display
+ */
+export function getTierLabel(beltLevel: number): string {
+  const rank = martialArtsData.beltRanks.find(r => r.rank === beltLevel) as { tier?: string } | undefined;
+  return rank?.tier || 'Untrained';
+}
+
+/**
+ * Get belt emoji for visual display
+ */
+export function getBeltEmoji(beltLevel: number): string {
+  const rank = martialArtsData.beltRanks.find(r => r.rank === beltLevel) as { emoji?: string } | undefined;
+  return rank?.emoji || '🥋';
+}
+
+/**
+ * Get formatted display string with both belt and tier
+ * e.g., "🟣 Purple Belt - Expert"
+ */
+export function getFullBeltDisplay(beltLevel: number): string {
+  const rank = martialArtsData.beltRanks.find(r => r.rank === beltLevel) as { emoji?: string; label?: string; tier?: string } | undefined;
+  if (!rank) return '🥋 Untrained';
+  return `${rank.emoji || '🥋'} ${rank.label || 'Untrained'} - ${rank.tier || 'Novice'}`;
+}
+
+/**
  * Get all techniques a character can use based on their belt level
  */
 export function getAvailableTechniques(

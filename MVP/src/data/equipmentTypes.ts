@@ -143,6 +143,12 @@ export interface Weapon {
   range: number;              // Squares (tiles)
   accuracyCS: number;         // Column shift (-3 to +3)
   penetrationMult: number;    // Armor penetration multiplier
+  noise?: number;             // Sound level 0-100 for stealth detection
+                              // 0-10: Silent (knife, suppressed) - 1 tile
+                              // 11-30: Quiet (silenced SMG) - 3 tiles
+                              // 31-60: Normal (pistol, SMG) - 8 tiles
+                              // 61-80: Loud (rifle, shotgun) - 15 tiles
+                              // 81-100: Very Loud (explosives) - 25+ tiles
 
   // Requirements
   skillRequired: SkillRequirement;

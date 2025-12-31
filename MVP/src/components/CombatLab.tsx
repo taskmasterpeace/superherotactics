@@ -9,13 +9,16 @@
  * - Full combat log
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { PhaserGame, useCombatState, useCombatActions } from './PhaserGame';
 import { EventBridge, LogEntry, CombatCharacter, CombatStatsEvent, CombatAwards, CombatStats, UnitCombatStats, KillEntry, GrappleInteraction, GrappleState, CharacterMartialArts } from '../game/EventBridge';
 import { useGameStore } from '../stores/enhancedGameStore';
 import { PowersPanel } from './PowersPanel';
 import { GrapplePanel } from './GrapplePanel';
 import QuickInventory from './QuickInventory';
+// Weapon and Armor Database for Balance Testing
+import { ALL_WEAPONS, getWeaponByName } from '../data/weapons';
+import { ALL_ARMOR, getArmorByName } from '../data/armor';
 
 // Icons from lucide-react
 import {
@@ -150,6 +153,13 @@ export const CombatLab: React.FC = () => {
   const [combatSummary, setCombatSummary] = useState<CombatStatsEvent | null>(null);
   const [aiVsAi, setAiVsAi] = useState(false);
 
+  // Balance Test Mode state
+  const [showBalanceTest, setShowBalanceTest] = useState(false);
+  const [testWeapon, setTestWeapon] = useState('Assault Rifle');
+  const [testArmor, setTestArmor] = useState('Tactical Vest');
+  const [testTeam, setTestTeam] = useState<'blue' | 'red'>('red');
+  const [testStats, setTestStats] = useState({ STR: 50, AGL: 50, STA: 50 });
+
   // Handlers for gadget and inventory
   const onGadgetClick = () => {
     setShowGadgetPanel(!showGadgetPanel);
@@ -198,6 +208,48 @@ export const CombatLab: React.FC = () => {
   // Generate enemy team
   const generateEnemyTeam = (count: number): CombatCharacter[] => {
     return Array.from({ length: count }, (_, i) => generateRandomEnemy(i));
+  };
+
+  // Spawn a test unit with specific weapon and armor for balance testing
+  const spawnTestUnit = () => {
+    const weapon = getWeaponByName(testWeapon);
+    const armor = getArmorByName(testArmor);
+
+    const testUnit: CombatCharacter = {
+      id: `test-${Date.now()}`,
+      name: `Test Unit (${testWeapon})`,
+      team: testTeam,
+      stats: {
+        MEL: testStats.STR,
+        AGL: testStats.AGL,
+        STR: testStats.STR,
+        STA: testStats.STA,
+        INT: 50,
+        INS: 50,
+        CON: 50,
+      },
+      health: { current: 80, maximum: 80 },
+      shield: 0,
+      maxShield: 0,
+      shieldRegen: 0,
+      dr: armor?.drPhysical || 0,
+      powers: [],
+      equipment: [testWeapon, testArmor],
+      threatLevel: 'THREAT_2',
+      origin: 'Test',
+    };
+
+    console.log('[BALANCE TEST] Spawning test unit:', {
+      weapon: testWeapon,
+      weaponData: weapon,
+      armor: testArmor,
+      armorData: armor,
+      stats: testStats,
+      team: testTeam,
+    });
+
+    // Emit spawn event to CombatScene
+    EventBridge.emit('spawn-test-unit', testUnit);
   };
 
   // Load combat when Phaser is ready
@@ -320,6 +372,7 @@ export const CombatLab: React.FC = () => {
         roundNumber={roundNumber}
         teamColor={teamColor}
         aiVsAi={aiVsAi}
+        showBalanceTest={showBalanceTest}
         onToggleAi={toggleAiVsAi}
         onRestartCombat={() => {
           setShowSummary(false);
@@ -330,6 +383,7 @@ export const CombatLab: React.FC = () => {
         }}
         onExit={() => setCurrentView('world-map')}
         onSettings={() => setShowSettings(true)}
+        onBalanceTest={() => setShowBalanceTest(!showBalanceTest)}
       />
 
       {/* MAIN CONTENT */}
@@ -422,6 +476,115 @@ export const CombatLab: React.FC = () => {
         <SettingsModal onClose={() => setShowSettings(false)} />
       )}
 
+      {/* Balance Test Panel - Spawn units with specific weapons/armor */}
+      {showBalanceTest && (
+        <div className="fixed top-20 left-4 z-50 w-80 bg-gray-900 border border-cyan-500 rounded-lg p-4 shadow-xl">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-cyan-400 font-bold text-lg">⚖️ Balance Test</h3>
+            <button
+              onClick={() => setShowBalanceTest(false)}
+              className="text-gray-400 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Weapon Selector */}
+          <div className="mb-3">
+            <label className="text-gray-300 text-sm block mb-1">Weapon ({ALL_WEAPONS.length} available)</label>
+            <select
+              value={testWeapon}
+              onChange={(e) => setTestWeapon(e.target.value)}
+              className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white text-sm"
+            >
+              {ALL_WEAPONS.map(w => (
+                <option key={w.id} value={w.name}>
+                  {w.emoji} {w.name} (dmg: {w.baseDamage}, rng: {w.range})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Armor Selector */}
+          <div className="mb-3">
+            <label className="text-gray-300 text-sm block mb-1">Armor ({ALL_ARMOR.length} available)</label>
+            <select
+              value={testArmor}
+              onChange={(e) => setTestArmor(e.target.value)}
+              className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-white text-sm"
+            >
+              <option value="">No Armor</option>
+              {ALL_ARMOR.map(a => (
+                <option key={a.id} value={a.name}>
+                  {a.emoji} {a.name} (DR: {a.drPhysical})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Team Selector */}
+          <div className="mb-3">
+            <label className="text-gray-300 text-sm block mb-1">Team</label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setTestTeam('blue')}
+                className={`flex-1 py-2 rounded font-bold ${testTeam === 'blue'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-700 text-gray-300'}`}
+              >
+                🔵 Blue
+              </button>
+              <button
+                onClick={() => setTestTeam('red')}
+                className={`flex-1 py-2 rounded font-bold ${testTeam === 'red'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-gray-700 text-gray-300'}`}
+              >
+                🔴 Red
+              </button>
+            </div>
+          </div>
+
+          {/* Stats Sliders */}
+          <div className="mb-3">
+            <label className="text-gray-300 text-sm">STR: {testStats.STR}</label>
+            <input
+              type="range" min="20" max="100"
+              value={testStats.STR}
+              onChange={(e) => setTestStats({ ...testStats, STR: parseInt(e.target.value) })}
+              className="w-full"
+            />
+          </div>
+          <div className="mb-3">
+            <label className="text-gray-300 text-sm">AGL: {testStats.AGL}</label>
+            <input
+              type="range" min="20" max="100"
+              value={testStats.AGL}
+              onChange={(e) => setTestStats({ ...testStats, AGL: parseInt(e.target.value) })}
+              className="w-full"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="text-gray-300 text-sm">STA: {testStats.STA}</label>
+            <input
+              type="range" min="20" max="100"
+              value={testStats.STA}
+              onChange={(e) => setTestStats({ ...testStats, STA: parseInt(e.target.value) })}
+              className="w-full"
+            />
+          </div>
+
+          {/* Spawn Button */}
+          <button
+            onClick={spawnTestUnit}
+            className="w-full py-3 bg-green-600 hover:bg-green-500 rounded font-bold text-white flex items-center justify-center gap-2"
+          >
+            <Zap className="w-5 h-5" />
+            Spawn Test Unit
+          </button>
+        </div>
+      )}
+
       {/* Grapple Panel - Shows when selected unit is in a grapple */}
       {activeGrapple && selectedUnit && (
         activeGrapple.attackerId === selectedUnit.id || activeGrapple.defenderId === selectedUnit.id
@@ -481,10 +644,12 @@ interface TopBarProps {
   roundNumber: number;
   teamColor: string;
   aiVsAi: boolean;
+  showBalanceTest: boolean;
   onToggleAi: () => void;
   onRestartCombat: () => void;
   onExit: () => void;
   onSettings: () => void;
+  onBalanceTest: () => void;
 }
 
 const TopBar: React.FC<TopBarProps> = ({
@@ -492,10 +657,12 @@ const TopBar: React.FC<TopBarProps> = ({
   roundNumber,
   teamColor,
   aiVsAi,
+  showBalanceTest,
   onToggleAi,
   onRestartCombat,
   onExit,
   onSettings,
+  onBalanceTest,
 }) => (
   <div className="h-14 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4">
     <div className="flex items-center gap-6">
@@ -529,6 +696,17 @@ const TopBar: React.FC<TopBarProps> = ({
       >
         <Bot className="w-5 h-5" />
         {aiVsAi ? 'AI vs AI ON' : 'AI vs AI'}
+      </button>
+      <button
+        onClick={onBalanceTest}
+        className={`flex items-center gap-2 px-3 py-2 rounded font-bold transition-all ${showBalanceTest
+          ? 'bg-cyan-600 hover:bg-cyan-500'
+          : 'bg-cyan-800 hover:bg-cyan-700'
+          }`}
+        title="Balance Test - Spawn units with specific weapons"
+      >
+        <Zap className="w-4 h-4" />
+        Balance
       </button>
       <button
         onClick={onSettings}

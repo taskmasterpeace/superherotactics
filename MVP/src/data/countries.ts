@@ -5,6 +5,7 @@
  */
 
 import { ALL_COUNTRIES as COUNTRIES_FROM_FILE, Country } from './allCountries';
+import { getCityByName } from './cities';
 
 // Re-export the interface and data
 export type { Country };
@@ -144,6 +145,13 @@ export function getFactionAlignment(country: Country): 'US' | 'China' | 'India' 
   if (country.name === 'India' || country.name === 'Bangladesh' || country.name === 'Pakistan') return 'India';
   if (country.name === 'Nigeria' || (country.lswRegulations === 'Legal' && country.governmentPerception === 'Hybrid Regime')) return 'Nigeria';
   return 'Neutral';
+}
+
+// Get country by city name (used by shop system)
+export function getCountryByCity(cityName: string): Country | undefined {
+  const city = getCityByName(cityName);
+  if (!city) return undefined;
+  return getCountryByName(city.country);
 }
 
 // Statistics

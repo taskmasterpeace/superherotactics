@@ -82,6 +82,10 @@ export interface OriginInfo {
 
   // Generation probability (for random gen)
   generationWeight: number;
+
+  // What happens when character reaches 0 HP
+  zeroHpBehavior: 'hospital' | 'dead' | 'destroyed' | 'varies';
+  zeroHpDescription: string;
 }
 
 export const ORIGIN_TYPES: Record<OriginType, OriginInfo> = {
@@ -95,6 +99,8 @@ export const ORIGIN_TYPES: Record<OriginType, OriginInfo> = {
     specialAbilities: ['Can learn any skill quickly', 'No power restrictions'],
     equipmentAccess: 'Basic equipment only',
     generationWeight: 30,
+    zeroHpBehavior: 'hospital',
+    zeroHpDescription: 'Hospitalized, can recover with medical care',
   },
   altered_human: {
     id: 'altered_human',
@@ -106,6 +112,8 @@ export const ORIGIN_TYPES: Record<OriginType, OriginInfo> = {
     specialAbilities: ['Enhanced physical capabilities', 'Medical equipment access'],
     equipmentAccess: 'Standard + Medical',
     generationWeight: 25,
+    zeroHpBehavior: 'hospital',
+    zeroHpDescription: 'Hospitalized, enhanced healing may help',
   },
   tech_enhancement: {
     id: 'tech_enhancement',
@@ -118,6 +126,8 @@ export const ORIGIN_TYPES: Record<OriginType, OriginInfo> = {
     restrictions: ['Requires Engineering skill'],
     equipmentAccess: 'Advanced Tech',
     generationWeight: 15,
+    zeroHpBehavior: 'hospital',
+    zeroHpDescription: 'Hospitalized, may require tech repairs',
   },
   mutated_human: {
     id: 'mutated_human',
@@ -130,6 +140,8 @@ export const ORIGIN_TYPES: Record<OriginType, OriginInfo> = {
     restrictions: ['Random power assignment', 'May face discrimination'],
     equipmentAccess: 'Standard',
     generationWeight: 4,
+    zeroHpBehavior: 'hospital',
+    zeroHpDescription: 'Hospitalized, mutation may aid recovery',
   },
   spiritual: {
     id: 'spiritual',
@@ -142,6 +154,8 @@ export const ORIGIN_TYPES: Record<OriginType, OriginInfo> = {
     restrictions: ['Requires Religion/Occult skill'],
     equipmentAccess: 'Mystical',
     generationWeight: 10,
+    zeroHpBehavior: 'dead',
+    zeroHpDescription: 'Spirit departs permanently - character dies',
   },
   synthetics: {
     id: 'synthetics',
@@ -154,17 +168,25 @@ export const ORIGIN_TYPES: Record<OriginType, OriginInfo> = {
     restrictions: ['Cannot heal naturally', 'EMP vulnerability'],
     equipmentAccess: 'Tech Built-in',
     generationWeight: 2,
+    zeroHpBehavior: 'destroyed',
+    zeroHpDescription: 'Unit is destroyed permanently - cannot be rebuilt',
   },
   symbiotic: {
     id: 'symbiotic',
     name: 'Symbiotic',
-    description: 'Bonded with alien symbiote',
+    description: 'Bonded with alien symbiote that enhances host and team',
     characterType: 'lsw',
     combatModifier: '+3CS when symbiote cooperates',
-    specialAbilities: ['Symbiote communication', 'Symbiote-provided abilities'],
+    specialAbilities: [
+      'Grants stat bonuses to bonded host',
+      'Can share powers with team members',
+      'Symbiote communication and coordination',
+    ],
     restrictions: ['Symbiote may have own agenda', 'Requires relationship management'],
     equipmentAccess: 'Symbiote provides',
     generationWeight: 5,
+    zeroHpBehavior: 'hospital',
+    zeroHpDescription: 'Host hospitalized, symbiote remains bonded',
   },
   aliens: {
     id: 'aliens',
@@ -177,6 +199,8 @@ export const ORIGIN_TYPES: Record<OriginType, OriginInfo> = {
     restrictions: ['May face discrimination', 'Different physiology'],
     equipmentAccess: 'Alien',
     generationWeight: 8,
+    zeroHpBehavior: 'varies',
+    zeroHpDescription: 'Depends on alien physiology and race',
   },
   scientific_weapon: {
     id: 'scientific_weapon',
@@ -189,6 +213,8 @@ export const ORIGIN_TYPES: Record<OriginType, OriginInfo> = {
     restrictions: ['Requires Science skill'],
     equipmentAccess: 'Prototype',
     generationWeight: 1,
+    zeroHpBehavior: 'hospital',
+    zeroHpDescription: 'Hospitalized, weapon may need separate repairs',
   },
 };
 
@@ -363,9 +389,13 @@ export interface DerivedStats {
 
 export function calculateDerivedStats(
   primary: PrimaryStats,
-  baseHealth: number = 20
+  _baseHealth: number = 20 // Kept for API compatibility, not used
 ): DerivedStats {
-  const health = baseHealth + (primary.STA * 2) + primary.STR;
+  // Health = MEL + AGL + STA + STR (FASERIP-based)
+  // Average human (stats ~15): 60 HP
+  // Exceptional (stats ~25): 100 HP
+  // Peak human (stats ~35): 140 HP
+  const health = primary.MEL + primary.AGL + primary.STA + primary.STR;
 
   return {
     health,
@@ -665,6 +695,21 @@ export interface FactionStanding {
   standing: number;     // -100 to 100
   rank?: number;        // If member, their rank
   isMember: boolean;
+}
+
+/**
+ * Character's familiarity with a specific city
+ * Tracked per character - different characters know different cities
+ */
+export interface CityFamiliarityEntry {
+  cityId: string;          // Unique city identifier
+  cityName: string;        // Human-readable name
+  level: number;           // 0-100 familiarity level
+  lastVisit: number;       // Game day of last visit
+  totalDaysSpent: number;  // Total days in this city
+  missionsCompleted: number;
+  contactsMade: number;
+  isHometown: boolean;     // Bonus morale when here
 }
 
 export interface Reputation {
@@ -1973,6 +2018,9 @@ export interface CharacterSheet {
   factionStandings: FactionStanding[];
   reputation: Reputation;
 
+  // === CITY FAMILIARITY ===
+  cityFamiliarity: CityFamiliarityEntry[];  // Per-city knowledge/connections
+
   // === PERSONALITY (INTERNAL - NOT SHOWN TO PLAYER) ===
   // Used for AI behavior decisions, not displayed on character sheet
   personality: {
@@ -2119,6 +2167,7 @@ export function createBlankCharacter(id: string): CharacterSheet {
 
     contacts: [],
     factionStandings: [],
+    cityFamiliarity: [],
     reputation: {
       publicReputation: 0,
       mediaExposure: 0,
@@ -2552,6 +2601,7 @@ export function generateRandomCharacter(
 
     contacts: [],
     factionStandings: [],
+    cityFamiliarity: [],
     reputation: {
       publicReputation: 0,
       mediaExposure: 0,
@@ -3150,6 +3200,7 @@ export function generateSoldier(
 
     contacts: [],
     factionStandings: [],
+    cityFamiliarity: [],
     reputation: {
       publicReputation: serviceYears * 2,
       mediaExposure: 0,
@@ -3684,6 +3735,7 @@ export function generateCivilian(
 
     contacts: [],
     factionStandings: [],
+    cityFamiliarity: [],
     reputation: {
       publicReputation: careerInfo.socialClass === 'upper' ? 20 : (careerInfo.socialClass === 'middle' ? 5 : 0),
       mediaExposure: 0,

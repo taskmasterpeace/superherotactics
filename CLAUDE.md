@@ -1,15 +1,36 @@
-# CLAUDE.md
+# CLAUDE.md - SuperHero Tactics + Claude Flow
 
 > **Master Documents**:
 > - [GAME_PLAN.md](GAME_PLAN.md) - Strategic development roadmap and checklists
 > - [V0_INTEGRATION_SPEC.md](V0_INTEGRATION_SPEC.md) - For V0 developers building strategic layer
-> - [NEWS_SYSTEM_SUMMARY.md](NEWS_SYSTEM_SUMMARY.md) - **NEW**: News system design (passive/aggressive info delivery)
+> - [NEWS_SYSTEM_SUMMARY.md](NEWS_SYSTEM_SUMMARY.md) - News system design (passive/aggressive info delivery)
+
+---
+
+## Claude Flow Integration
+
+This project uses **Claude Flow v2.7** for multi-agent orchestration. Use Claude Code's Task tool to spawn parallel agents for implementation work.
+
+### Quick Commands
+```bash
+claude-flow swarm "implement feature" --claude    # Start agent swarm
+claude-flow hive-mind spawn "task" --claude       # Spawn coordinated agents
+claude-flow sparc tdd "feature"                   # TDD workflow
+```
+
+### Agent Execution Pattern
+```javascript
+// Use Claude Code's Task tool for parallel agent execution
+Task("Research agent", "Analyze requirements...", "researcher")
+Task("Coder agent", "Implement features...", "coder")
+Task("Tester agent", "Create tests...", "tester")
+```
 
 ---
 
 ## Project Overview
 
-SuperHero Tactics (SHT) - A geopolitical turn-based tactical superhero strategy game.
+**SuperHero Tactics (SHT)** - A geopolitical turn-based tactical superhero strategy game.
 
 **Core Loop**: Country Selection -> City Selection -> Base Setup -> Recruit Team -> Equip -> World Map -> Tactical Combat
 
@@ -98,15 +119,15 @@ Phaser-based turn-based tactical combat.
 
 **Single stats are WEAK. Combined stats create RICH gameplay.**
 
-Every game system should combine 2-4 country/city stats to create emergent mechanics. This makes each location feel unique and creates natural gameplay variety.
+Every game system should combine 2-4 country/city stats to create emergent mechanics.
 
 ### Location Cascade System
 ```
-COUNTRY stats → set the rules, quality levels, prices, factions
-    ↓
-CITY stats → tactical options, services, encounters, missions
-    ↓
-COMBINED effects → emergent systems (cloning, black market, etc.)
+COUNTRY stats -> set the rules, quality levels, prices, factions
+    |
+CITY stats -> tactical options, services, encounters, missions
+    |
+COMBINED effects -> emergent systems (cloning, black market, etc.)
 ```
 
 **Files**:
@@ -131,68 +152,6 @@ COMBINED effects → emergent systems (cloning, black market, etc.)
 | **Politics** | GDP + Corruption + MediaFreedom | Lobbying, bribes, coup possibility |
 | **Superhuman Affairs** | LSW + Intel + Military + Science | Registration, government stance, public opinion |
 
-### Design Rules
-
-1. **Every stat must have gameplay meaning** - No decorative data
-2. **2-4 stats combine** - Creates natural variety (168 countries = 168 unique experiences)
-3. **Formulas should be intuitive** - Player can reason about them
-4. **Systems generate content** - Ads, news, missions, encounters based on combined effects
-5. **High/low extremes create special cases** - Science 90+ enables superhuman cloning
-
-### Example: Cloning in USA vs Somalia
-
-| Factor | USA | Somalia |
-|--------|-----|---------|
-| Healthcare | 90 | 15 |
-| Science | 85 | 10 |
-| GDP | 95 | 5 |
-| **Clone Quality** | 87.5% | 12.5% |
-| **Base Cost** | $95,000 | $2,500 |
-| **Wait Time** | 15 days | 52 days |
-| **Memory Transfer** | YES | NO |
-| **Can Clone Supers** | YES | NO |
-| **Defect Chance** | 3% | 45% |
-
-Same mechanic, completely different experience.
-
-### Adding New Combined Systems
-
-When creating new systems, follow this pattern:
-```typescript
-export function calculateNewSystem(country: Country): NewSystem {
-  // 1. Get raw stats
-  const stat1 = country.statA;
-  const stat2 = country.statB;
-
-  // 2. Combine with intuitive formula
-  const quality = (stat1 + stat2) / 2;
-  const cost = basePrice * (gdpFactor) * (1.5 - quality/200);
-
-  // 3. Create thresholds for special abilities
-  const specialAbility = stat1 >= 80 && stat2 >= 70;
-
-  return { quality, cost, specialAbility };
-}
-```
-
----
-
-## BASE BUILDING SYSTEM (PLANNED)
-
-Inspired by XCOM base management:
-
-**Concept**:
-- Grid-based underground/building base layout
-- Rooms: Barracks, Armory, Med Bay, Research Lab, Training Room, Prison, etc.
-- Construction takes time and money
-- Can be raided by enemies
-- Hallways connecting rooms (for tactical raids)
-
-**Research Needed**:
-- Phaser tilemap generation for base layout
-- Procedural room placement
-- Integration with world map (base location = sector)
-
 ---
 
 ## Repository Structure
@@ -211,6 +170,7 @@ sht/
 │   │   │   ├── armor.ts          # 50+ armor with stopping power
 │   │   │   ├── cities.ts         # 1050 cities
 │   │   │   ├── countries.ts      # 168 countries
+│   │   │   ├── newsTemplates.ts  # News generation templates
 │   │   │   ├── equipmentTypes.ts # Weapon range brackets, armor types
 │   │   │   └── ...
 │   │   ├── game/
@@ -220,37 +180,13 @@ sht/
 │   │   └── stores/
 │   │       └── enhancedGameStore.ts   # Game state
 ├── docs/                         # Documentation
-└── .claude/skills/               # 12 Claude Code skills
-```
-
----
-
-## Combat Balance Targets
-
-| Weapon | Shots to Kill (Unarmored) |
-|--------|---------------------------|
-| Pistol | 1.5 shots |
-| Rifle | 1 shot |
-| Shotgun (close) | 1 shot |
-| SMG | 2-3 shots |
-| Sniper | 1 shot |
-
-**Range Bracket System**:
-- Each weapon has: pointBlank, short, optimal, long, extreme, max ranges
-- Hit modifiers apply per bracket (-30% to +25%)
-- Snipers get PENALTY at point blank (-15%)
-- Shotguns get BONUS at point blank (+25%)
-
----
-
-## Event Bridge (React <-> Phaser)
-
-```typescript
-// Deploy squad to combat
-EventBridge.emit('deploy-to-combat', { squad, mission });
-
-// Combat complete
-EventBridge.on('combat-complete', (result) => { ... });
+│   ├── NEWS_SYSTEM_PROPOSAL.md   # Full news system spec
+│   └── NEWS_SYSTEM_QUICK_START.md
+├── .claude/                      # Claude Flow configuration
+│   ├── agents/                   # 64 specialized agents
+│   ├── commands/                 # 94 command docs
+│   └── skills/                   # 38 skills including SHT-specific
+└── .swarm/                       # Claude Flow memory system
 ```
 
 ---
@@ -269,9 +205,9 @@ npm run build    # Production build
 
 ---
 
-## Claude Skills (12 available)
+## Claude Skills (12 SHT-specific + 26 Claude Flow)
 
-Use `Skill` tool to invoke:
+### SHT Game Skills
 - `sht-world-data` - Query 1050 cities, 168 countries
 - `sht-strategic-layer` - Sector control, militia, travel
 - `sht-combat-balance` - Weapon/armor balance analysis
@@ -287,27 +223,29 @@ Use `Skill` tool to invoke:
 
 ---
 
-## Current Session Progress
+## Implementation Priority
 
-**COMPLETED**:
-- [x] Weapon range bracket system (per-weapon optimal ranges)
-- [x] RPG weapon with knockback and blast radius
-- [x] World map squad deployment
-- [x] Travel time calculation
-- [x] Enter Combat button from world map
-- [x] Squad status tracking (idle/traveling/on_mission/in_combat)
-- [x] Hit preview shows range bracket name
-- [x] Location Effects System (country→city cascading)
-- [x] Combined Effects Philosophy (6+ systems)
-- [x] 8 System Proposals (see SYSTEM_PROPOSALS.md)
+### Phase 1: News System (MVP)
+- [ ] Add news store to enhancedGameStore.ts
+- [ ] Create NewsBrowser component
+- [ ] Hook mission completion -> news generation
+- [ ] Implement fame/public opinion tracking
 
-**IN PROGRESS**:
-- [ ] Economy Loop implementation
-- [ ] News System implementation
-- [ ] Faction Relations implementation
-- [ ] Free movement mode before enemy contact
-- [ ] Wire DR/armor stopping power in combat
+### Phase 2: Time & Economy
+- [ ] Time progression system (day/night, calendar)
+- [ ] Economy loop (income, expenses, budget)
+- [ ] Combat results -> strategic layer
+
+### Phase 3: Combat Polish
+- [ ] Wire DR/armor stopping power
+- [ ] Free movement before enemy contact
+- [ ] Import full weapon database (70+ weapons)
+
+### Phase 4: Strategic Depth
+- [ ] Faction relations system
+- [ ] Multiple squads
+- [ ] Base building
 
 ---
 
-*Updated: December 2024*
+*Updated: December 2024 - Claude Flow v2.7 integrated*

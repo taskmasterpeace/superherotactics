@@ -1,15 +1,15 @@
 {
   "beltRanks": [
-    { "belt": "white", "rank": 1, "bonus": 1, "label": "White Belt" },
-    { "belt": "yellow", "rank": 2, "bonus": 2, "label": "Yellow Belt" },
-    { "belt": "orange", "rank": 3, "bonus": 3, "label": "Orange Belt" },
-    { "belt": "green", "rank": 4, "bonus": 4, "label": "Green Belt" },
-    { "belt": "blue", "rank": 5, "bonus": 5, "label": "Blue Belt" },
-    { "belt": "purple", "rank": 6, "bonus": 6, "label": "Purple Belt" },
-    { "belt": "brown", "rank": 7, "bonus": 7, "label": "Brown Belt" },
-    { "belt": "red", "rank": 8, "bonus": 8, "label": "Red Belt" },
-    { "belt": "black1", "rank": 9, "bonus": 9, "label": "Black Belt I" },
-    { "belt": "black2", "rank": 10, "bonus": 10, "label": "Black Belt II" }
+    { "belt": "white", "rank": 1, "bonus": 1, "label": "White Belt", "tier": "Novice", "emoji": "🥋" },
+    { "belt": "yellow", "rank": 2, "bonus": 2, "label": "Yellow Belt", "tier": "Trained", "emoji": "🟡" },
+    { "belt": "orange", "rank": 3, "bonus": 3, "label": "Orange Belt", "tier": "Trained", "emoji": "🟠" },
+    { "belt": "green", "rank": 4, "bonus": 4, "label": "Green Belt", "tier": "Skilled", "emoji": "🟢" },
+    { "belt": "blue", "rank": 5, "bonus": 5, "label": "Blue Belt", "tier": "Skilled", "emoji": "🔵" },
+    { "belt": "purple", "rank": 6, "bonus": 6, "label": "Purple Belt", "tier": "Expert", "emoji": "🟣" },
+    { "belt": "brown", "rank": 7, "bonus": 7, "label": "Brown Belt", "tier": "Expert", "emoji": "🟤" },
+    { "belt": "red", "rank": 8, "bonus": 8, "label": "Red Belt", "tier": "Master", "emoji": "🔴" },
+    { "belt": "black1", "rank": 9, "bonus": 9, "label": "Black Belt I", "tier": "Master", "emoji": "⬛" },
+    { "belt": "black2", "rank": 10, "bonus": 10, "label": "Black Belt II", "tier": "Grandmaster", "emoji": "⬛" }
   ],
   "styles": [
     {

@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useMemo } from 'react'
-import { useGameStore } from '../stores/enhancedGameStore'
+import { useGameStore, TrainingEnrollment } from '../stores/enhancedGameStore'
 import {
   FIELDS_OF_STUDY,
   INSTITUTIONS,
@@ -23,36 +23,26 @@ import {
 } from '../data/educationSystem'
 
 // ============================================================================
-// TYPES
-// ============================================================================
-
-interface TrainingEnrollment {
-  characterId: string
-  characterName: string
-  fieldId: string
-  institutionId: string
-  level: DegreeLevel
-  progress: number
-  startDay: number
-  weeksRemaining: number
-}
-
-// ============================================================================
 // COMPONENT
 // ============================================================================
 
 export const TrainingCenter: React.FC = () => {
   const characters = useGameStore((state) => state.characters)
-  const money = useGameStore((state) => state.money)
+  const budget = useGameStore((state) => state.budget)
   const gameTime = useGameStore((state) => state.gameTime)
+  const trainingEnrollments = useGameStore((state) => state.trainingEnrollments)
+  const enrollCharacter = useGameStore((state) => state.enrollCharacter)
+  const dropTraining = useGameStore((state) => state.dropTraining)
 
-  // Local state
+  // Local state for selection UI
   const [selectedTrack, setSelectedTrack] = useState<EducationTrack | 'all'>('all')
   const [selectedField, setSelectedField] = useState<FieldOfStudy | null>(null)
   const [selectedInstitution, setSelectedInstitution] = useState<Institution | null>(null)
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null)
   const [selectedLevel, setSelectedLevel] = useState<DegreeLevel>('basic')
-  const [enrollments, setEnrollments] = useState<TrainingEnrollment[]>([])
+
+  // Active enrollments from store
+  const enrollments = trainingEnrollments.filter(e => e.status === 'active')
 
   // Filter fields by track
   const filteredFields = useMemo(() => {
@@ -101,30 +91,41 @@ export const TrainingCenter: React.FC = () => {
     return Math.ceil(calculateDegreeTime(baseWeeks, selectedInstitution, avgStat, optimalStat))
   }, [selectedField, selectedInstitution, selectedLevel])
 
-  // Enroll character
+  // Enroll character using store action
   const handleEnroll = () => {
     if (!selectedField || !selectedInstitution || !selectedCharacter) return
-    if (money < estimatedCost) return
+    if (budget < estimatedCost) return
 
-    const character = characters.find((c) => c.id === selectedCharacter)
+    const character = characters.find((c: any) => c.id === selectedCharacter)
     if (!character) return
 
-    const newEnrollment: TrainingEnrollment = {
+    // Calculate end day (weeks to days)
+    const currentDay = gameTime?.day || 0
+    const durationDays = estimatedWeeks * 7
+
+    // Get stat bonuses from the field
+    const statBonuses: Record<string, number> = {}
+    if (selectedField.optimalStat) {
+      statBonuses[selectedField.optimalStat.toLowerCase()] = 5 // +5 to optimal stat
+    }
+    statBonuses.int = 3 // Education always increases INT
+
+    // Call store action
+    enrollCharacter({
       characterId: selectedCharacter,
       characterName: character.name,
       fieldId: selectedField.id,
       institutionId: selectedInstitution.id,
-      level: selectedLevel,
+      degreeLevel: selectedLevel as TrainingEnrollment['degreeLevel'],
+      startDay: currentDay,
+      endDay: currentDay + durationDays,
       progress: 0,
-      startDay: gameTime?.day || 0,
-      weeksRemaining: estimatedWeeks,
-    }
+      cost: estimatedCost,
+      statBonuses,
+      skillsUnlocked: selectedField.skillsProvided?.slice(0, 2) || []
+    })
 
-    setEnrollments((prev) => [...prev, newEnrollment])
     setSelectedCharacter(null)
-
-    // Deduct cost (would wire to store in full implementation)
-    useGameStore.getState().addMoney(-estimatedCost)
   }
 
   // Get level options based on track
@@ -152,9 +153,11 @@ export const TrainingCenter: React.FC = () => {
             {enrollments.map((enrollment) => {
               const field = FIELDS_OF_STUDY.find((f) => f.id === enrollment.fieldId)
               const institution = INSTITUTIONS.find((i) => i.id === enrollment.institutionId)
+              const daysRemaining = Math.max(0, enrollment.endDay - (gameTime?.day || 0))
+              const weeksRemaining = Math.ceil(daysRemaining / 7)
               return (
                 <div
-                  key={enrollment.characterId}
+                  key={enrollment.id}
                   className="bg-gray-700 rounded p-3 flex justify-between items-center"
                 >
                   <div>
@@ -167,19 +170,27 @@ export const TrainingCenter: React.FC = () => {
                       @ {institution?.name || 'Unknown'}
                     </span>
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm text-gray-400">
-                      {formatDegreeLevel(enrollment.level)}
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="text-sm text-gray-400">
+                        {formatDegreeLevel(enrollment.degreeLevel as DegreeLevel)}
+                      </div>
+                      <div className="text-xs text-yellow-500">
+                        {weeksRemaining} weeks remaining
+                      </div>
+                      <div className="w-32 h-2 bg-gray-600 rounded mt-1">
+                        <div
+                          className="h-full bg-cyan-500 rounded"
+                          style={{ width: `${enrollment.progress}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="text-xs text-yellow-500">
-                      {enrollment.weeksRemaining} weeks remaining
-                    </div>
-                    <div className="w-32 h-2 bg-gray-600 rounded mt-1">
-                      <div
-                        className="h-full bg-cyan-500 rounded"
-                        style={{ width: `${enrollment.progress}%` }}
-                      />
-                    </div>
+                    <button
+                      onClick={() => dropTraining(enrollment.id)}
+                      className="text-red-400 hover:text-red-300 text-xs px-2 py-1 border border-red-400 rounded"
+                    >
+                      Drop
+                    </button>
                   </div>
                 </div>
               )

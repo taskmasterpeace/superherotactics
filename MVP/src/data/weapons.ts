@@ -1698,6 +1698,55 @@ function applyStunProperties(weapon: Omit<Weapon, 'stunCapable' | 'defaultMode' 
   } as Weapon;
 }
 
+// ==================== DAMAGE REBALANCING ====================
+// Target: Average human (60 HP) dies in 1.5 shots from smallest gun
+// Damage scale: baseDamage values in data are "design values"
+// Combat applies DAMAGE_MULTIPLIER to achieve lethality targets
+
+export const DAMAGE_MULTIPLIER = 2.0; // Global multiplier for all weapon damage
+
+/**
+ * Weapon damage targets (after multiplier):
+ * - Knife: ~20 (3 hits to kill)
+ * - Light Pistol: 30-35 (2 shots)
+ * - Standard Pistol: 40-45 (1.5 shots)
+ * - Heavy Pistol: 50-55 (1.2 shots)
+ * - Revolver .357: 50-55 (1.2 shots)
+ * - SMG (per bullet): 40 (burst = instant kill)
+ * - Shotgun: 70-80 (nearly 1-shot)
+ * - Rifle: 60-70 (1 shot)
+ * - Sniper: 80-100 (1 shot + overkill)
+ */
+
+/**
+ * Apply damage scaling to a weapon based on its category and type
+ * Returns the combat-ready damage value
+ */
+export function getScaledDamage(weapon: Weapon): number {
+  let damage = weapon.baseDamage * DAMAGE_MULTIPLIER;
+
+  // Additional scaling by weapon category for fine-tuning
+  if (weapon.category === 'Ranged_Regular' || weapon.category === 'Ranged_Skill') {
+    // Shotguns get extra boost (devastating close range)
+    if (weapon.damageSubType === 'BUCKSHOT' || weapon.damageSubType === 'SLUG') {
+      damage *= 1.15;
+    }
+    // Rifles are already well-balanced with multiplier
+  }
+
+  // Grenades are already high damage, slight reduction
+  if (weapon.category === 'Grenades') {
+    damage *= 0.9;
+  }
+
+  // Energy weapons slightly boosted (futuristic = powerful)
+  if (weapon.category === 'Energy_Weapons') {
+    damage *= 1.1;
+  }
+
+  return Math.round(damage);
+}
+
 // ==================== COMBINED WEAPON LIST ====================
 
 // Apply stun properties to all weapons
@@ -1758,6 +1807,112 @@ export function getRecommendedWeapons(
     if (w.skillRequired !== 'None' && !skills.includes(w.skillRequired)) return false;
     return true;
   }).sort((a, b) => calculateDPS(b) - calculateDPS(a));
+}
+
+// ==================== NOISE SYSTEM ====================
+// Noise levels determine stealth detection range
+// 0-10: Silent (1 tile detection)
+// 11-30: Quiet (3 tiles detection)
+// 31-60: Normal (8 tiles detection)
+// 61-80: Loud (15 tiles detection)
+// 81-100: Very Loud (25+ tiles detection)
+
+/**
+ * Calculate default noise level for a weapon based on its properties
+ */
+export function getWeaponNoise(weapon: Weapon): number {
+  // If weapon has explicit noise, use it
+  if (weapon.noise !== undefined) return weapon.noise;
+
+  // Melee weapons are silent or quiet
+  if (weapon.category.includes('Melee')) {
+    if (weapon.damageSubType === 'EDGED_MELEE') return 5; // Silent stabs
+    if (weapon.damageSubType === 'SMASHING_MELEE') return 15; // Impacts make noise
+    return 10; // Default melee
+  }
+
+  // Thrown weapons
+  if (weapon.category === 'Thrown') {
+    if (weapon.name.toLowerCase().includes('knife') ||
+        weapon.name.toLowerCase().includes('star')) return 8;
+    return 20; // Thrown objects make some noise
+  }
+
+  // Grenades
+  if (weapon.category === 'Grenades') {
+    if (weapon.damageSubType === 'FLASH') return 90;
+    if (weapon.damageSubType === 'SMOKE') return 30;
+    if (weapon.damageSubType === 'EMP') return 60;
+    if (weapon.damageSubType === 'GAS') return 40;
+    return 100; // Explosions are very loud
+  }
+
+  // Energy weapons (typically quieter than firearms)
+  if (weapon.category === 'Energy_Weapons') {
+    if (weapon.damageSubType === 'STUN') return 25;
+    if (weapon.name.toLowerCase().includes('laser')) return 35;
+    return 45; // Default energy weapon
+  }
+
+  // Special weapons
+  if (weapon.category === 'Special') {
+    if (weapon.name.toLowerCase().includes('bow') ||
+        weapon.name.toLowerCase().includes('crossbow')) return 15;
+    if (weapon.name.toLowerCase().includes('taser')) return 20;
+    if (weapon.name.toLowerCase().includes('net')) return 15;
+    if (weapon.name.toLowerCase().includes('rocket') ||
+        weapon.name.toLowerCase().includes('grenade launcher')) return 100;
+    if (weapon.name.toLowerCase().includes('flame')) return 70;
+    return 50;
+  }
+
+  // Ranged firearms (loudest category)
+  if (weapon.category === 'Ranged') {
+    // Check for suppressor in notes or special effects
+    const hasSuppressor = weapon.notes?.toLowerCase().includes('suppressed') ||
+                         weapon.notes?.toLowerCase().includes('silenced') ||
+                         weapon.specialEffects.some(e => e.toLowerCase().includes('suppress'));
+    if (hasSuppressor) return 25;
+
+    // By weapon type
+    if (weapon.name.toLowerCase().includes('derringer')) return 50;
+    if (weapon.name.toLowerCase().includes('pistol_light')) return 55;
+    if (weapon.name.toLowerCase().includes('pistol')) return 60;
+    if (weapon.name.toLowerCase().includes('revolver')) return 65;
+    if (weapon.name.toLowerCase().includes('smg')) return 65;
+    if (weapon.name.toLowerCase().includes('shotgun')) return 80;
+    if (weapon.name.toLowerCase().includes('rifle') &&
+        weapon.name.toLowerCase().includes('sniper')) return 85;
+    if (weapon.name.toLowerCase().includes('rifle')) return 75;
+    if (weapon.name.toLowerCase().includes('machine')) return 90;
+    if (weapon.name.toLowerCase().includes('minigun')) return 100;
+
+    return 65; // Default firearm
+  }
+
+  return 50; // Default fallback
+}
+
+/**
+ * Get detection range in tiles based on noise level
+ */
+export function getNoiseDetectionRange(noise: number): number {
+  if (noise <= 10) return 1;
+  if (noise <= 30) return 3;
+  if (noise <= 60) return 8;
+  if (noise <= 80) return 15;
+  return 25;
+}
+
+/**
+ * Get human-readable noise level
+ */
+export function getNoiseLevelName(noise: number): string {
+  if (noise <= 10) return 'Silent';
+  if (noise <= 30) return 'Quiet';
+  if (noise <= 60) return 'Normal';
+  if (noise <= 80) return 'Loud';
+  return 'Very Loud';
 }
 
 export default ALL_WEAPONS;

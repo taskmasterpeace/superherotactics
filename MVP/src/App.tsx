@@ -64,6 +64,9 @@ import { initTerritorySystem, cleanupTerritorySystem } from './data/territorySys
 // Email System - mission briefings, intel reports, contact messages
 import { initEmailSystem, cleanupEmailSystem } from './data/emailSystem'
 
+// Combat Results Handler - processes combat completion for XP, loot, fame, injuries
+import { initCombatResultsHandler, cleanupCombatResultsHandler } from './stores/combatResultsHandler'
+
 function App() {
   const { gamePhase, currentView, setCurrentView, setGamePhase } = useGameStore()
   const [devMode, setDevMode] = useState(false)
@@ -95,6 +98,9 @@ function App() {
 
     // Initialize email system (mission briefings, intel, contacts)
     initEmailSystem()
+
+    // Initialize combat results handler (XP, loot, fame, injuries from combat)
+    initCombatResultsHandler()
 
     // Handle resize
     const handleResize = () => setIsMobile(window.innerWidth <= 768)
@@ -128,6 +134,7 @@ function App() {
       cleanupEconomyEventHandler()
       cleanupTerritorySystem()
       cleanupEmailSystem()
+      cleanupCombatResultsHandler()
     }
   }, [checkIdleCharacters])
 
