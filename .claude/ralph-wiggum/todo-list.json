@@ -406,34 +406,34 @@
     {
       "id": "INVESTIGATION",
       "name": "Investigation System",
-      "status": "pending",
+      "status": "completed",
       "priority": 9,
       "phase": 3,
       "tasks": [
         {
           "id": "IV-001",
           "task": "Wire investigation backend",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "IV-002",
           "task": "Implement clue generation",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "IV-003",
           "task": "Create case resolution mechanics",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "IV-004",
           "task": "Wire to InvestigationCenter UI",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "IV-005",
           "task": "Create investigation events for EventBus",
-          "status": "pending"
+          "status": "completed"
         }
       ],
       "triggers": [
@@ -441,41 +441,42 @@
       ],
       "files": [
         "MVP/src/data/investigationSystem.ts",
+        "MVP/src/data/investigationGenerator.ts",
         "MVP/src/components/InvestigationCenter.tsx"
       ],
-      "completedAt": null
+      "completedAt": "2024-12-30T03:00:00.000Z"
     },
     {
       "id": "TIME-EVENTS",
       "name": "Time Event System",
-      "status": "pending",
+      "status": "completed",
       "priority": 10,
       "phase": 3,
       "tasks": [
         {
           "id": "TE-001",
           "task": "Fire events on time passage",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "TE-002",
           "task": "Implement day/night effects",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "TE-003",
           "task": "Create NPC schedule system",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "TE-004",
           "task": "Wire time-gated activities",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "TE-005",
           "task": "Create random encounter triggers",
-          "status": "pending"
+          "status": "completed"
         }
       ],
       "triggers": [
@@ -483,49 +484,51 @@
       ],
       "files": [
         "MVP/src/data/timeSystem.ts",
+        "MVP/src/data/timeEventGenerator.ts",
         "MVP/src/stores/enhancedGameStore.ts"
       ],
-      "completedAt": null
+      "completedAt": "2024-12-30T03:15:00.000Z"
     },
     {
       "id": "ECONOMY",
       "name": "Economy System",
-      "status": "pending",
+      "status": "completed",
       "priority": 11,
       "phase": 3,
       "tasks": [
         {
           "id": "EC-001",
           "task": "Implement income system",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "EC-002",
           "task": "Implement expense tracking",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "EC-003",
           "task": "Wire prices to location stats",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "EC-004",
           "task": "Create budget management UI",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "EC-005",
           "task": "Implement payday/billing cycles",
-          "status": "pending"
+          "status": "completed"
         }
       ],
       "triggers": [],
       "files": [
         "MVP/src/data/economySystem.ts",
+        "MVP/src/data/economyEventHandler.ts",
         "MVP/src/stores/enhancedGameStore.ts"
       ],
-      "completedAt": null
+      "completedAt": "2024-12-30T03:30:00.000Z"
     },
     {
       "id": "VEHICLE-INT",
@@ -849,12 +852,12 @@
       "completedAt": null
     }
   ],
-  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI"],
+  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI", "INVESTIGATION", "TIME-EVENTS", "ECONOMY"],
   "statistics": {
     "totalSystems": 20,
-    "completedSystems": 10,
+    "completedSystems": 13,
     "totalTasks": 105,
-    "completedTasks": 58,
+    "completedTasks": 73,
     "totalIterations": 0,
     "startedAt": "2024-12-30T00:00:00.000Z"
   }

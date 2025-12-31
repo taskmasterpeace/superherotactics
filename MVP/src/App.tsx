@@ -47,6 +47,15 @@ import EquipmentShop from './components/EquipmentShop'
 // News Generator - subscribes to EventBus for automatic news generation
 import { initNewsGenerator, cleanupNewsGenerator } from './data/newsGenerator'
 
+// Investigation Generator - subscribes to EventBus for automatic investigation discovery
+import { initInvestigationGenerator, cleanupInvestigationGenerator } from './data/investigationGenerator'
+
+// Time Event Generator - fires events on time passage (day/night, encounters, payday)
+import { initTimeEventGenerator, cleanupTimeEventGenerator } from './data/timeEventGenerator'
+
+// Economy Event Handler - processes payday, mission rewards, expenses
+import { initEconomyEventHandler, cleanupEconomyEventHandler } from './data/economyEventHandler'
+
 function App() {
   const { gamePhase, currentView, setCurrentView, setGamePhase } = useGameStore()
   const [devMode, setDevMode] = useState(false)
@@ -63,6 +72,15 @@ function App() {
 
     // Initialize news generator (subscribes to EventBus for automatic news)
     initNewsGenerator()
+
+    // Initialize investigation generator (discovers investigations from events)
+    initInvestigationGenerator()
+
+    // Initialize time event generator (day/night effects, encounters, payday)
+    initTimeEventGenerator()
+
+    // Initialize economy event handler (payday, mission rewards, expenses)
+    initEconomyEventHandler()
 
     // Handle resize
     const handleResize = () => setIsMobile(window.innerWidth <= 768)
@@ -91,6 +109,9 @@ function App() {
       window.removeEventListener('keydown', handleKeyDown)
       clearInterval(idleCheckInterval)
       cleanupNewsGenerator()
+      cleanupInvestigationGenerator()
+      cleanupTimeEventGenerator()
+      cleanupEconomyEventHandler()
     }
   }, [checkIdleCharacters])
 
