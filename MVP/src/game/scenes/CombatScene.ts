@@ -777,9 +777,15 @@ interface Unit {
   injuries: InjuryInstance[];
   weapon: WeaponType;
   personality: PersonalityType;
-  str: number;
-  agl: number;
-  evasion: number; // Base evasion
+  // Primary stats from character
+  str: number;  // STR: Strength - melee damage, grappling, throwing
+  agl: number;  // AGL: Agility - dodge, initiative, ranged
+  int: number;  // INT: Intelligence - accuracy, tech use
+  sta: number;  // STA: Stamina - HP base, recovery
+  ins: number;  // INS: Instinct - detection, awareness, reaction
+  con: number;  // CON: Concentration - willpower, fear resistance
+  mel: number;  // MEL: Melee skill - hand-to-hand combat
+  evasion: number; // Base evasion (derived from AGL)
   dr: number; // Damage reduction (armor) - reduces penetrating damage
   stoppingPower: number; // Armor stopping power - blocks damage completely if damage <= SP
   shieldHp: number; // Shield HP - absorbs damage before health
@@ -1893,6 +1899,11 @@ export class CombatScene extends Phaser.Scene {
         personality,
         str: char.stats.STR,
         agl: char.stats.AGL,
+        int: char.stats.INT,
+        sta: char.stats.STA,
+        ins: char.stats.INS,
+        con: char.stats.CON,
+        mel: char.stats.MEL,
         dr: char.dr || 0, // Damage reduction from armor
         stoppingPower: char.stoppingPower || 0, // Armor stopping power
         acted: false,
@@ -1938,6 +1949,11 @@ export class CombatScene extends Phaser.Scene {
         personality,
         str: char.stats.STR,
         agl: char.stats.AGL,
+        int: char.stats.INT,
+        sta: char.stats.STA,
+        ins: char.stats.INS,
+        con: char.stats.CON,
+        mel: char.stats.MEL,
         dr: char.dr || 0, // Damage reduction from armor
         stoppingPower: char.stoppingPower || 0, // Armor stopping power
         acted: false,
@@ -1984,6 +2000,11 @@ export class CombatScene extends Phaser.Scene {
       personality: unitData.personality ?? 'tactical',
       str: unitData.str ?? 50,
       agl: unitData.agl ?? 50,
+      int: unitData.int ?? 50,  // Intelligence for accuracy
+      sta: unitData.sta ?? 50,  // Stamina for recovery
+      ins: unitData.ins ?? 50,  // Instinct for detection
+      con: unitData.con ?? 50,  // Concentration for fear resistance
+      mel: unitData.mel ?? 50,  // Melee skill
       evasion: unitData.evasion ?? 30,
       dr: unitData.dr ?? 0,
       stoppingPower: unitData.stoppingPower ?? 0, // Default no armor
@@ -1999,10 +2020,11 @@ export class CombatScene extends Phaser.Scene {
       overwatching: unitData.overwatching ?? false,
       spriteId: unitData.spriteId,
       // Vision cone for flanking calculations (default: human 120° FOV)
+      // INS affects detection range: base 12 + INS/10 (so INS 50 = 17 tiles, INS 80 = 20 tiles)
       vision: unitData.vision ?? {
         facing: unitData.facing ?? 90,
         angle: 120,   // Human field of view
-        range: 15,    // Human vision range in tiles
+        range: 12 + Math.floor((unitData.ins ?? 50) / 10),  // INS improves detection range
       },
     };
     // Convert grid position to isometric screen position
@@ -2190,6 +2212,21 @@ export class CombatScene extends Phaser.Scene {
         type: 'status'
       });
       return;
+    }
+
+    // CON-based resistance for mental/morale effects
+    // High CON = better willpower to resist fear, suppression, stun, daze
+    const mentalEffects: StatusEffectType[] = ['stunned', 'dazed', 'suppressed', 'panicked'];
+    if (mentalEffects.includes(effectType)) {
+      // Resistance chance: (CON - 30) / 2 = 0% at CON 30, 10% at CON 50, 25% at CON 80
+      const resistChance = Math.max(0, (unit.con - 30) / 2);
+      if (Math.random() * 100 < resistChance) {
+        this.emitToUI('combat-log', {
+          message: `💪 ${unit.name} resists ${effectDef.name}! (CON ${unit.con})`,
+          type: 'status'
+        });
+        return;
+      }
     }
 
     // Check if already has this effect
@@ -3927,8 +3964,18 @@ export class CombatScene extends Phaser.Scene {
       }
     }
 
-    // AGL bonus for attacker (every 10 AGL above 50 = +2%)
+    // AGL bonus for attacker (every 5 AGL above 50 = +1%)
     hitChance += Math.floor((attacker.agl - 50) / 5);
+
+    // INT bonus for attacker (every 5 INT above 50 = +1% precision)
+    // Intelligence helps with aiming, calculating trajectories
+    hitChance += Math.floor((attacker.int - 50) / 5);
+
+    // INS bonus for attacker when target is flanked or in blindspot
+    // High instinct = better at exploiting enemy vulnerabilities
+    if (this.getFlankingBonusForUnits(attacker, target) > 0) {
+      hitChance += Math.floor((attacker.ins - 50) / 10); // Smaller bonus
+    }
 
     // Injury penalty (from crippled arm, concussion, etc.)
     if (attacker.accuracyPenalty) {

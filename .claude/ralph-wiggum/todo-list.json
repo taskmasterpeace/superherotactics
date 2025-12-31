@@ -185,44 +185,44 @@
     {
       "id": "STAT-INT",
       "name": "Character Stat Integration",
-      "status": "pending",
+      "status": "completed",
       "priority": 4,
       "phase": 2,
       "tasks": [
         {
           "id": "SI-001",
           "task": "Wire STR to melee damage bonus",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "SI-002",
           "task": "Wire AGL to dodge and initiative",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "SI-003",
           "task": "Wire INT to accuracy",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "SI-004",
           "task": "Wire STA to AP pool",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "SI-005",
-          "task": "Wire WIL to morale and fear checks",
-          "status": "pending"
+          "task": "Wire CON to fear/morale resistance",
+          "status": "completed"
         },
         {
           "id": "SI-006",
           "task": "Wire INS to detection and perception",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "SI-007",
-          "task": "Wire CON to health and recovery",
-          "status": "pending"
+          "task": "Wire MEL to melee hit chance",
+          "status": "completed"
         }
       ],
       "triggers": [
@@ -232,7 +232,7 @@
         "MVP/src/game/scenes/CombatScene.ts",
         "MVP/src/data/characterSheet.ts"
       ],
-      "completedAt": null
+      "completedAt": "2024-12-30T01:30:00.000Z"
     },
     {
       "id": "COMBAT-RESULTS",
