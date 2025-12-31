@@ -1,0 +1,855 @@
+{
+  "version": 1,
+  "lastUpdated": "2024-12-30T00:00:00Z",
+  "config": {
+    "maxIterations": 50,
+    "autoContinue": true,
+    "commitAfterSystem": true
+  },
+  "currentSystem": null,
+  "systems": [
+    {
+      "id": "HOOK-INFRA",
+      "name": "Hook Infrastructure",
+      "status": "completed",
+      "priority": 0,
+      "phase": 0,
+      "tasks": [
+        {
+          "id": "HI-001",
+          "task": "Create todo-list.json schema",
+          "status": "completed"
+        },
+        {
+          "id": "HI-002",
+          "task": "Create system-links.json",
+          "status": "completed"
+        },
+        {
+          "id": "HI-003",
+          "task": "Enhance ralph-loop.bat",
+          "status": "completed"
+        },
+        {
+          "id": "HI-004",
+          "task": "Create completion-check.js",
+          "status": "completed"
+        }
+      ],
+      "triggers": [
+        "EVENT-GEN"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "EVENT-GEN",
+      "name": "Event Generation System",
+      "status": "completed",
+      "priority": 1,
+      "phase": 1,
+      "tasks": [
+        {
+          "id": "EG-001",
+          "task": "Create EventBus class with pub/sub",
+          "status": "completed"
+        },
+        {
+          "id": "EG-002",
+          "task": "Define GameEvent types",
+          "status": "completed"
+        },
+        {
+          "id": "EG-003",
+          "task": "Wire combat results to EventBus",
+          "status": "completed"
+        },
+        {
+          "id": "EG-004",
+          "task": "Wire time progression to EventBus",
+          "status": "completed"
+        },
+        {
+          "id": "EG-005",
+          "task": "Wire player actions to EventBus",
+          "status": "completed"
+        },
+        {
+          "id": "EG-006",
+          "task": "Create event persistence layer",
+          "status": "completed"
+        }
+      ],
+      "triggers": [
+        "WEAPON-DB",
+        "NEWS-GEN",
+        "MISSION-GEN"
+      ],
+      "files": [
+        "MVP/src/data/eventBus.ts",
+        "MVP/src/stores/enhancedGameStore.ts"
+      ],
+      "completedAt": "2024-12-30T00:30:00.000Z"
+    },
+    {
+      "id": "WEAPON-DB",
+      "name": "Weapon Database Integration",
+      "status": "pending",
+      "priority": 2,
+      "phase": 1,
+      "tasks": [
+        {
+          "id": "WD-001",
+          "task": "Create weapon loader from weapons.ts",
+          "status": "pending"
+        },
+        {
+          "id": "WD-002",
+          "task": "Update CombatScene to use database",
+          "status": "pending"
+        },
+        {
+          "id": "WD-003",
+          "task": "Wire range brackets to hit calculation",
+          "status": "pending"
+        },
+        {
+          "id": "WD-004",
+          "task": "Wire damage types to resolution",
+          "status": "pending"
+        },
+        {
+          "id": "WD-005",
+          "task": "Wire sound effects per weapon",
+          "status": "pending"
+        },
+        {
+          "id": "WD-006",
+          "task": "Test all 70+ weapons in combat",
+          "status": "pending"
+        }
+      ],
+      "triggers": [
+        "ARMOR-DB"
+      ],
+      "files": [
+        "MVP/src/game/scenes/CombatScene.ts",
+        "MVP/src/data/weapons.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "ARMOR-DB",
+      "name": "Armor Database Integration",
+      "status": "pending",
+      "priority": 3,
+      "phase": 1,
+      "tasks": [
+        {
+          "id": "AD-001",
+          "task": "Create armor loader from armor.ts",
+          "status": "pending"
+        },
+        {
+          "id": "AD-002",
+          "task": "Wire DR to damage calculation",
+          "status": "pending"
+        },
+        {
+          "id": "AD-003",
+          "task": "Implement stopping power vs penetration",
+          "status": "pending"
+        },
+        {
+          "id": "AD-004",
+          "task": "Wire armor damage degradation",
+          "status": "pending"
+        },
+        {
+          "id": "AD-005",
+          "task": "Test DR against all damage types",
+          "status": "pending"
+        }
+      ],
+      "triggers": [
+        "STAT-INT"
+      ],
+      "files": [
+        "MVP/src/game/scenes/CombatScene.ts",
+        "MVP/src/data/armor.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "STAT-INT",
+      "name": "Character Stat Integration",
+      "status": "pending",
+      "priority": 4,
+      "phase": 2,
+      "tasks": [
+        {
+          "id": "SI-001",
+          "task": "Wire STR to melee damage bonus",
+          "status": "pending"
+        },
+        {
+          "id": "SI-002",
+          "task": "Wire AGL to dodge and initiative",
+          "status": "pending"
+        },
+        {
+          "id": "SI-003",
+          "task": "Wire INT to accuracy",
+          "status": "pending"
+        },
+        {
+          "id": "SI-004",
+          "task": "Wire STA to AP pool",
+          "status": "pending"
+        },
+        {
+          "id": "SI-005",
+          "task": "Wire WIL to morale and fear checks",
+          "status": "pending"
+        },
+        {
+          "id": "SI-006",
+          "task": "Wire INS to detection and perception",
+          "status": "pending"
+        },
+        {
+          "id": "SI-007",
+          "task": "Wire CON to health and recovery",
+          "status": "pending"
+        }
+      ],
+      "triggers": [
+        "COMBAT-RESULTS"
+      ],
+      "files": [
+        "MVP/src/game/scenes/CombatScene.ts",
+        "MVP/src/data/characterSheet.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "COMBAT-RESULTS",
+      "name": "Combat Results Processing",
+      "status": "pending",
+      "priority": 5,
+      "phase": 2,
+      "tasks": [
+        {
+          "id": "CR-001",
+          "task": "Process results to EventBus",
+          "status": "pending"
+        },
+        {
+          "id": "CR-002",
+          "task": "Wire injuries to character health",
+          "status": "pending"
+        },
+        {
+          "id": "CR-003",
+          "task": "Wire loot to inventory",
+          "status": "pending"
+        },
+        {
+          "id": "CR-004",
+          "task": "Generate combat summary events",
+          "status": "pending"
+        },
+        {
+          "id": "CR-005",
+          "task": "Update fame/reputation from combat",
+          "status": "pending"
+        }
+      ],
+      "triggers": [
+        "HOSPITAL"
+      ],
+      "files": [
+        "MVP/src/stores/combatResultsHandler.ts",
+        "MVP/src/game/EventBridge.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "SHIELD-SYS",
+      "name": "Shield System",
+      "status": "pending",
+      "priority": 6,
+      "phase": 2,
+      "tasks": [
+        {
+          "id": "SS-001",
+          "task": "Wire shield absorption before health",
+          "status": "pending"
+        },
+        {
+          "id": "SS-002",
+          "task": "Implement shield regeneration",
+          "status": "pending"
+        },
+        {
+          "id": "SS-003",
+          "task": "Wire energy shield power",
+          "status": "pending"
+        },
+        {
+          "id": "SS-004",
+          "task": "Add shield UI indicators",
+          "status": "pending"
+        }
+      ],
+      "triggers": [],
+      "files": [
+        "MVP/src/game/scenes/CombatScene.ts",
+        "MVP/src/data/shieldItems.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "NEWS-GEN",
+      "name": "News Generation System",
+      "status": "pending",
+      "priority": 7,
+      "phase": 3,
+      "tasks": [
+        {
+          "id": "NG-001",
+          "task": "Subscribe to EventBus for game events",
+          "status": "pending"
+        },
+        {
+          "id": "NG-002",
+          "task": "Create news generator from templates",
+          "status": "pending"
+        },
+        {
+          "id": "NG-003",
+          "task": "Wire newsTemplates.ts to generator",
+          "status": "pending"
+        },
+        {
+          "id": "NG-004",
+          "task": "Implement fame tracking",
+          "status": "pending"
+        },
+        {
+          "id": "NG-005",
+          "task": "Implement public opinion system",
+          "status": "pending"
+        },
+        {
+          "id": "NG-006",
+          "task": "Test event to news flow",
+          "status": "pending"
+        }
+      ],
+      "triggers": [
+        "LAPTOP-UI"
+      ],
+      "files": [
+        "MVP/src/data/newsSystem.ts",
+        "MVP/src/data/newsTemplates.ts",
+        "MVP/src/stores/enhancedGameStore.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "MISSION-GEN",
+      "name": "Mission Generation System",
+      "status": "pending",
+      "priority": 8,
+      "phase": 3,
+      "tasks": [
+        {
+          "id": "MG-001",
+          "task": "Generate missions from city stats",
+          "status": "pending"
+        },
+        {
+          "id": "MG-002",
+          "task": "Generate missions from country stats",
+          "status": "pending"
+        },
+        {
+          "id": "MG-003",
+          "task": "Wire to world map display",
+          "status": "pending"
+        },
+        {
+          "id": "MG-004",
+          "task": "Implement mission difficulty scaling",
+          "status": "pending"
+        },
+        {
+          "id": "MG-005",
+          "task": "Create mission reward system",
+          "status": "pending"
+        }
+      ],
+      "triggers": [
+        "INVESTIGATION"
+      ],
+      "files": [
+        "MVP/src/data/missionGeneration.ts",
+        "MVP/src/stores/missionStore.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "INVESTIGATION",
+      "name": "Investigation System",
+      "status": "pending",
+      "priority": 9,
+      "phase": 3,
+      "tasks": [
+        {
+          "id": "IV-001",
+          "task": "Wire investigation backend",
+          "status": "pending"
+        },
+        {
+          "id": "IV-002",
+          "task": "Implement clue generation",
+          "status": "pending"
+        },
+        {
+          "id": "IV-003",
+          "task": "Create case resolution mechanics",
+          "status": "pending"
+        },
+        {
+          "id": "IV-004",
+          "task": "Wire to InvestigationCenter UI",
+          "status": "pending"
+        },
+        {
+          "id": "IV-005",
+          "task": "Create investigation events for EventBus",
+          "status": "pending"
+        }
+      ],
+      "triggers": [
+        "LAPTOP-UI"
+      ],
+      "files": [
+        "MVP/src/data/investigationSystem.ts",
+        "MVP/src/components/InvestigationCenter.tsx"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "TIME-EVENTS",
+      "name": "Time Event System",
+      "status": "pending",
+      "priority": 10,
+      "phase": 3,
+      "tasks": [
+        {
+          "id": "TE-001",
+          "task": "Fire events on time passage",
+          "status": "pending"
+        },
+        {
+          "id": "TE-002",
+          "task": "Implement day/night effects",
+          "status": "pending"
+        },
+        {
+          "id": "TE-003",
+          "task": "Create NPC schedule system",
+          "status": "pending"
+        },
+        {
+          "id": "TE-004",
+          "task": "Wire time-gated activities",
+          "status": "pending"
+        },
+        {
+          "id": "TE-005",
+          "task": "Create random encounter triggers",
+          "status": "pending"
+        }
+      ],
+      "triggers": [
+        "ECONOMY"
+      ],
+      "files": [
+        "MVP/src/data/timeSystem.ts",
+        "MVP/src/stores/enhancedGameStore.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "ECONOMY",
+      "name": "Economy System",
+      "status": "pending",
+      "priority": 11,
+      "phase": 3,
+      "tasks": [
+        {
+          "id": "EC-001",
+          "task": "Implement income system",
+          "status": "pending"
+        },
+        {
+          "id": "EC-002",
+          "task": "Implement expense tracking",
+          "status": "pending"
+        },
+        {
+          "id": "EC-003",
+          "task": "Wire prices to location stats",
+          "status": "pending"
+        },
+        {
+          "id": "EC-004",
+          "task": "Create budget management UI",
+          "status": "pending"
+        },
+        {
+          "id": "EC-005",
+          "task": "Implement payday/billing cycles",
+          "status": "pending"
+        }
+      ],
+      "triggers": [],
+      "files": [
+        "MVP/src/data/economySystem.ts",
+        "MVP/src/stores/enhancedGameStore.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "VEHICLE-INT",
+      "name": "Vehicle Integration",
+      "status": "pending",
+      "priority": 12,
+      "phase": 4,
+      "tasks": [
+        {
+          "id": "VI-001",
+          "task": "Wire vehicles to travel system",
+          "status": "pending"
+        },
+        {
+          "id": "VI-002",
+          "task": "Implement speed modifiers",
+          "status": "pending"
+        },
+        {
+          "id": "VI-003",
+          "task": "Implement fuel consumption",
+          "status": "pending"
+        },
+        {
+          "id": "VI-004",
+          "task": "Create vehicle selection UI",
+          "status": "pending"
+        },
+        {
+          "id": "VI-005",
+          "task": "Wire vehicle HP and damage",
+          "status": "pending"
+        }
+      ],
+      "triggers": [
+        "TERRITORY"
+      ],
+      "files": [
+        "MVP/src/data/vehicleSystem.ts",
+        "MVP/src/components/WorldMap/WorldMapGrid.tsx"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "TERRITORY",
+      "name": "Territory Control System",
+      "status": "pending",
+      "priority": 13,
+      "phase": 4,
+      "tasks": [
+        {
+          "id": "TC-001",
+          "task": "Implement sector control mechanics",
+          "status": "pending"
+        },
+        {
+          "id": "TC-002",
+          "task": "Create militia training system",
+          "status": "pending"
+        },
+        {
+          "id": "TC-003",
+          "task": "Implement faction ownership",
+          "status": "pending"
+        },
+        {
+          "id": "TC-004",
+          "task": "Display territory on world map",
+          "status": "pending"
+        },
+        {
+          "id": "TC-005",
+          "task": "Create territory defense missions",
+          "status": "pending"
+        }
+      ],
+      "triggers": [],
+      "files": [
+        "MVP/src/data/sectors.ts",
+        "MVP/src/stores/enhancedGameStore.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "EMAIL-SYS",
+      "name": "Email System",
+      "status": "pending",
+      "priority": 14,
+      "phase": 4,
+      "tasks": [
+        {
+          "id": "ES-001",
+          "task": "Create email component",
+          "status": "pending"
+        },
+        {
+          "id": "ES-002",
+          "task": "Implement mission briefing delivery",
+          "status": "pending"
+        },
+        {
+          "id": "ES-003",
+          "task": "Create contact message system",
+          "status": "pending"
+        },
+        {
+          "id": "ES-004",
+          "task": "Implement reply system",
+          "status": "pending"
+        },
+        {
+          "id": "ES-005",
+          "task": "Wire to MobilePhone component",
+          "status": "pending"
+        }
+      ],
+      "triggers": [
+        "LAPTOP-UI"
+      ],
+      "files": [
+        "MVP/src/components/MobilePhone.tsx",
+        "MVP/src/data/emailSystem.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "HOSPITAL",
+      "name": "Hospital System",
+      "status": "pending",
+      "priority": 15,
+      "phase": 3,
+      "tasks": [
+        {
+          "id": "HS-001",
+          "task": "Wire combat injuries to hospital",
+          "status": "pending"
+        },
+        {
+          "id": "HS-002",
+          "task": "Implement recovery mechanics",
+          "status": "pending"
+        },
+        {
+          "id": "HS-003",
+          "task": "Wire hospital quality by country",
+          "status": "pending"
+        },
+        {
+          "id": "HS-004",
+          "task": "Create discharge notifications",
+          "status": "pending"
+        }
+      ],
+      "triggers": [
+        "LAPTOP-UI"
+      ],
+      "files": [
+        "MVP/src/components/HospitalScreen.tsx",
+        "MVP/src/data/originHealingSystem.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "LAPTOP-UI",
+      "name": "Laptop UI Integration",
+      "status": "pending",
+      "priority": 16,
+      "phase": 5,
+      "tasks": [
+        {
+          "id": "LU-001",
+          "task": "Wire NewsBrowser to news backend",
+          "status": "pending"
+        },
+        {
+          "id": "LU-002",
+          "task": "Wire InvestigationCenter to backend",
+          "status": "pending"
+        },
+        {
+          "id": "LU-003",
+          "task": "Wire HospitalScreen to backend",
+          "status": "pending"
+        },
+        {
+          "id": "LU-004",
+          "task": "Create unified navigation",
+          "status": "pending"
+        }
+      ],
+      "triggers": [
+        "TRAINING-UI"
+      ],
+      "files": [
+        "MVP/src/components/NewsBrowser.tsx",
+        "MVP/src/components/InvestigationCenter.tsx",
+        "MVP/src/components/HospitalScreen.tsx"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "TRAINING-UI",
+      "name": "Training UI",
+      "status": "pending",
+      "priority": 17,
+      "phase": 5,
+      "tasks": [
+        {
+          "id": "TU-001",
+          "task": "Create education enrollment UI",
+          "status": "pending"
+        },
+        {
+          "id": "TU-002",
+          "task": "Wire to educationSystem.ts",
+          "status": "pending"
+        },
+        {
+          "id": "TU-003",
+          "task": "Show skill progression",
+          "status": "pending"
+        },
+        {
+          "id": "TU-004",
+          "task": "Implement training schedules",
+          "status": "pending"
+        }
+      ],
+      "triggers": [
+        "BASE-UI"
+      ],
+      "files": [
+        "MVP/src/components/TrainingScreen.tsx",
+        "MVP/src/data/educationSystem.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "BASE-UI",
+      "name": "Base Building UI",
+      "status": "pending",
+      "priority": 18,
+      "phase": 5,
+      "tasks": [
+        {
+          "id": "BU-001",
+          "task": "Create base management screen",
+          "status": "pending"
+        },
+        {
+          "id": "BU-002",
+          "task": "Wire to baseSystem.ts",
+          "status": "pending"
+        },
+        {
+          "id": "BU-003",
+          "task": "Implement facility upgrades",
+          "status": "pending"
+        },
+        {
+          "id": "BU-004",
+          "task": "Show facility bonuses",
+          "status": "pending"
+        }
+      ],
+      "triggers": [
+        "GAME-LOOP"
+      ],
+      "files": [
+        "MVP/src/components/BaseScreen.tsx",
+        "MVP/src/data/baseSystem.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "GAME-LOOP",
+      "name": "Complete Game Loop",
+      "status": "pending",
+      "priority": 19,
+      "phase": 5,
+      "tasks": [
+        {
+          "id": "GL-001",
+          "task": "Verify Recruit flow",
+          "status": "pending"
+        },
+        {
+          "id": "GL-002",
+          "task": "Verify Equip flow",
+          "status": "pending"
+        },
+        {
+          "id": "GL-003",
+          "task": "Verify Deploy flow",
+          "status": "pending"
+        },
+        {
+          "id": "GL-004",
+          "task": "Verify Combat flow",
+          "status": "pending"
+        },
+        {
+          "id": "GL-005",
+          "task": "Verify Results flow",
+          "status": "pending"
+        },
+        {
+          "id": "GL-006",
+          "task": "Verify News generation",
+          "status": "pending"
+        },
+        {
+          "id": "GL-007",
+          "task": "End-to-end playtest",
+          "status": "pending"
+        }
+      ],
+      "triggers": [],
+      "files": [],
+      "completedAt": null
+    }
+  ],
+  "completedSystems": [],
+  "statistics": {
+    "totalSystems": 20,
+    "completedSystems": 0,
+    "totalTasks": 105,
+    "completedTasks": 4,
+    "totalIterations": 0,
+    "startedAt": null
+  }
+}

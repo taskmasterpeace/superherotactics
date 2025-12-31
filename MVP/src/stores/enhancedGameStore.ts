@@ -7,6 +7,144 @@ import {
   getImpatienceState,
   IMPATIENCE_STATE_MESSAGES,
 } from '../data/personalitySystem'
+// News templates (old API removed - using new news system)
+import { getCountryByCode } from '../data/countries'
+import { calculateMedicalSystem } from '../data/combinedEffects'
+import {
+  Investigation,
+  InvestigationTemplate,
+  ApproachType,
+  ActionResult,
+  generateInvestigation,
+  advanceInvestigation,
+  INVESTIGATION_TEMPLATES
+} from '../data/investigationSystem'
+import { GeneratedMission } from '../data/missionSystem'
+import {
+  createMissionActions,
+  shouldRefreshMissions,
+  MissionStoreState,
+} from './missionStore'
+
+// Underworld System Imports
+import {
+  CriminalOrganization,
+  createOrganization,
+  getHeatLevel,
+  CITY_CRIME_MAP,
+  NEUTRAL_CALLINGS,
+  getMotivationFromHarmAvoidance,
+} from '../data/criminalOrganization'
+import { simulateWeek, SimulationEvent, SimulationResult } from '../data/criminalSimulation'
+import { generateWeeklyNews } from '../data/criminalNewsBridge'
+import { getCitiesByCountry } from '../data/cities'
+
+// New World Systems Imports
+import {
+  GameTime as NewGameTime,
+  GameDate,
+  TimeOfDay,
+  DayOfWeek,
+  ACTIVITY_HOURS,
+  createInitialGameTime,
+  advanceGameTime as advanceNewTime,
+  getTimeOfDay,
+  getDayOfWeek,
+  formatTime,
+  formatDate,
+  isWeekend,
+} from '../data/timeSystem'
+import {
+  EconomyState,
+  Transaction,
+  TransactionCategory,
+  createInitialEconomyState,
+  processPayday,
+  processTransaction,
+  makePurchase,
+  receiveIncome,
+  calculateNetWorth,
+  canAfford,
+} from '../data/economySystem'
+import {
+  ReputationState,
+  ReputationAxis,
+  ReputationTier,
+  createInitialReputationState,
+  adjustReputation,
+  getReputationTier,
+  getActiveEffects,
+  applyReputationDecay,
+  ACTION_REPUTATION_CHANGES,
+} from '../data/reputationSystem'
+
+// EventBus for game-wide event emission
+import { EventBus } from '../data/eventBus'
+import {
+  NewsState,
+  NewsArticle,
+  NewsEvent,
+  NewsCategory,
+  createInitialNewsState,
+  addNewsArticle as addArticleToState,
+  markArticleRead,
+  toggleBookmark,
+  getArticlesWithLeads,
+  cleanExpiredArticles,
+} from '../data/newsSystem'
+import {
+  generateMissionNews as genMissionNews,
+  generateCrimeNews,
+  generateWorldEventNews,
+  generateFillerNews,
+} from '../data/newsTemplates'
+import { getCityByName } from '../data/cities'
+import { generateNewspaperName } from '../data/newspaperExpansion'
+import {
+  BaseState,
+  PlayerBase,
+  Facility,
+  FacilityType,
+  BaseType,
+  createInitialBaseState,
+  createBase,
+  addFacility,
+  removeFacility,
+  upgradeFacility,
+  addBaseToState,
+  removeBaseFromState,
+  getActiveBase,
+  updateBase,
+  getEducationBonus,
+  getHealingBonus,
+  getInvestigationBonus,
+  progressConstruction,
+  startConstruction,
+  calculateMonthlyUpkeep,
+} from '../data/baseSystem'
+
+// Character Life Cycle System
+import {
+  CityFamiliarity,
+  ActivityCategory,
+  ActivityDesires,
+  ActivityRequest,
+  ActivityResult,
+  DailyActivityReport,
+  CityType,
+  calculateActivityDesires,
+  processIdleDay,
+  updateFamiliarityForVisit,
+  getCityTypeMoraleModifier,
+  getCityPreferences,
+  getFamiliarityTier,
+  getFamiliarityDiscount,
+  createActivityRequest,
+  executeActivity,
+  shouldAutoExecute,
+  getAvailableActivities,
+  ACTIVITIES,
+} from '../data/characterLifeCycle'
 
 // Travel Unit - represents something traveling on the world map
 // Time System Types
@@ -74,7 +212,7 @@ interface EnhancedGameStore {
   selectedCity: string
 
   // Game State
-  currentView: 'world-map' | 'tactical-combat' | 'investigation' | 'characters' | 'combat-lab' | 'encyclopedia' | 'balance' | 'world-map-grid' | 'database' | 'data-viewer' | 'sound-config' | 'loadout-editor' | 'sector-editor' | 'world-data'
+  currentView: 'world-map' | 'tactical-combat' | 'investigation' | 'investigation-board' | 'characters' | 'combat-lab' | 'news' | 'encyclopedia' | 'balance' | 'world-map-grid' | 'database' | 'data-viewer' | 'sound-config' | 'loadout-editor' | 'sector-editor' | 'world-data' | 'almanac' | 'hospital' | 'equipment-shop'
   budget: number
   day: number  // Legacy - use gameTime.day instead
 
@@ -97,12 +235,74 @@ interface EnhancedGameStore {
 
   // Enhanced Character System
   characters: any[]
-  investigations: any[]
+  investigations: Investigation[]
+  activeInvestigations: Investigation[]
+  investigationLeads: Investigation[]  // Discovered but not started
   worldEvents: any[]
   medicalQueue: any[]
 
   // Notification System
   notifications: GameNotification[]
+
+  // News System
+  newsArticles: NewsArticle[]
+  playerFame: number  // 0-1000 (fame score)
+  publicOpinion: Record<string, number>  // country code -> opinion (-100 to +100)
+  localNewspaperName: string  // Generated newspaper name for home city
+
+  // New World Systems State
+  economy: EconomyState
+  reputation: ReputationState
+  newsState: NewsState
+  baseState: BaseState
+
+  // Character Life Cycle State
+  pendingActivityRequests: ActivityRequest[]
+  completedActivityReports: DailyActivityReport[]
+  lastDayProcessed: number  // Track which day was last processed to avoid duplicates
+
+  // Inventory System
+  inventory: {
+    weapons: string[]      // Weapon IDs owned but not equipped
+    armor: string[]        // Armor IDs owned but not equipped
+    gadgets: string[]      // Gadget IDs
+    consumables: string[]  // Grenades, medkits, etc.
+  }
+
+  // Mission System
+  availableMissions: Map<string, GeneratedMission[]>  // sector -> missions[]
+  activeMissions: GeneratedMission[]  // Missions currently in progress
+  completedMissions: GeneratedMission[]  // Mission history
+  lastMissionGeneration: number  // Game time when missions were last generated
+  missionRefreshInterval: number  // How often missions refresh (in game hours)
+
+  // Mission System Actions
+  generateMissionsForSector: (sectorCode: string) => void
+  generateMissionsForAllSectors: () => void
+  getMissionsForSector: (sectorCode: string) => GeneratedMission[]
+  getActiveMissions: () => GeneratedMission[]
+  acceptMission: (missionId: string) => void
+  completeMissionById: (missionId: string, success: boolean) => void
+  abandonMission: (missionId: string) => void
+  expireMissions: () => void
+  refreshMissions: () => void
+
+  // Underworld System
+  criminalOrganizations: CriminalOrganization[]
+  underworldEvents: SimulationEvent[]
+  lastUnderworldWeek: number  // Track last simulated week to avoid duplicates
+  underworldStats: {
+    totalArrests: number
+    totalProfit: number
+    totalEvents: number
+  }
+
+  // Underworld Actions
+  initializeUnderworld: () => void
+  runUnderworldSimulation: () => SimulationResult | null
+  getCriminalOrganizations: () => CriminalOrganization[]
+  getUnderworldEvents: () => SimulationEvent[]
+  getOrganizationsByCity: (cityName: string) => CriminalOrganization[]
 
   // Actions
   setGamePhase: (phase: any) => void
@@ -118,11 +318,25 @@ interface EnhancedGameStore {
   startCombat: () => void
   assignInvestigation: (invId: string) => void
 
+  // Investigation System
+  discoverInvestigation: (template: InvestigationTemplate, city: string, country: string, sector: string) => void
+  startInvestigation: (investigationId: string, characterId: string) => void
+  advanceInvestigationProgress: (investigationId: string, characterId: string, approach: ApproachType) => void
+  completeInvestigation: (investigationId: string) => void
+  failInvestigation: (investigationId: string) => void
+  expireInvestigation: (investigationId: string) => void
+  getAvailableInvestigations: () => Investigation[]
+  getActiveInvestigations: () => Investigation[]
+
   // Medical system
   addInjury: (characterId: string, injury: any) => void
   scheduleHospitalStay: (characterId: string, injury: any) => void
   processRecovery: () => void
   updateCharacterInjuries: (characterId: string, injury: any) => void
+  hospitalizeCharacter: (characterId: string, injuries: any[], countryCode?: string) => void
+  calculateRecoveryTime: (injury: any, hospitalQuality: number) => number
+  getHospitalQuality: (countryCode: string) => number
+  transferToHospital: (characterId: string, targetCountryCode: string) => void
 
   // Character management
   addCharacter: (character: any) => void
@@ -150,9 +364,32 @@ interface EnhancedGameStore {
   clearAllNotifications: () => void
   getUnreadCount: () => number
 
+  // News System
+  addNewsArticle: (article: NewsArticle) => void
+  generateMissionNews: (missionResult: {
+    success: boolean
+    collateralDamage: number
+    civilianCasualties: number
+    city: string
+    country: string
+    missionType: string
+    enemyType: string
+    vigilantismLegal: boolean
+  }) => void
+  updatePublicOpinion: (country: string, change: number) => void
+
   // Idle Detection System
   checkIdleCharacters: () => void
   setCharacterStatus: (characterId: string, status: string, data?: Record<string, unknown>) => void
+
+  // Inventory System Actions
+  buyItem: (itemId: string, itemType: 'weapon' | 'armor' | 'gadget' | 'consumable', cost: number) => void
+  sellItem: (itemId: string, itemType: 'weapon' | 'armor' | 'gadget' | 'consumable', sellPrice: number) => void
+  addToInventory: (itemId: string, itemType: 'weapon' | 'armor' | 'gadget' | 'consumable') => void
+  removeFromInventory: (itemId: string, itemType: 'weapon' | 'armor' | 'gadget' | 'consumable') => void
+  equipWeaponToCharacter: (characterId: string, weaponId: string) => void
+  equipArmorToCharacter: (characterId: string, armorId: string) => void
+  unequipFromCharacter: (characterId: string, slot: 'weapon' | 'armor' | 'shield') => void
 
   // Time System Actions
   togglePause: () => void
@@ -161,6 +398,35 @@ interface EnhancedGameStore {
   tickTime: () => void  // Called by interval - advances time based on speed
   advanceTime: (minutes: number) => void  // Manually advance time
   getFormattedTime: () => { time: string; dayOfWeek: string; timeOfDay: 'morning' | 'noon' | 'evening' | 'night' }
+
+  // New World Systems Actions
+  // Economy
+  recordTransaction: (type: 'income' | 'expense' | 'purchase' | 'sale', category: TransactionCategory, amount: number, description: string) => void
+  processWeeklyPayday: () => void
+  getEconomyStats: () => { netWorth: number; weeklyIncome: number; weeklyExpenses: number }
+
+  // Reputation
+  adjustReputationAxis: (axis: ReputationAxis, delta: number, reason: string) => void
+  getReputationEffects: () => string[]
+  processReputationDecay: () => void
+
+  // Base Building
+  purchaseBase: (type: BaseType, name: string, sectorCode: string, countryCode: string) => void
+  buildFacility: (facilityType: FacilityType, gridX: number, gridY: number) => void
+  upgradeFacilityAt: (gridX: number, gridY: number) => void
+  removeFacilityAt: (gridX: number, gridY: number) => void
+  processConstruction: (hours: number) => void
+  getBaseBonuses: () => { education: number; healing: number; investigation: number }
+
+  // Character Life Cycle Actions
+  processCharacterIdleDay: (characterId: string) => DailyActivityReport | null
+  processAllIdleCharacters: () => DailyActivityReport[]
+  approveActivityRequest: (requestId: string) => ActivityResult | null
+  denyActivityRequest: (requestId: string) => void
+  getCharacterFamiliarity: (characterId: string, cityId: string) => CityFamiliarity | null
+  updateCharacterFamiliarity: (characterId: string, cityId: string, change: number) => void
+  getPendingRequests: () => ActivityRequest[]
+  getCharacterActivityDesires: (characterId: string) => ActivityDesires | null
 }
 
 export const useGameStore = create<EnhancedGameStore>((set, get) => ({
@@ -338,30 +604,24 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     }
   ],
 
-  investigations: [
-    {
-      id: 'inv-001',
-      title: 'Corporate Sabotage Investigation',
-      description: 'Industrial accidents increasing at suspicious rate in automotive manufacturing',
-      location: { country: 'United States', city: 'Detroit' },
-      difficulty: 6,
-      priority: 'high',
-      timeLimit: 48,
-      progress: 0,
-      assignedCharacters: []
-    },
-    {
-      id: 'inv-002',
-      title: 'Missing Government Official',
-      description: 'State senator disappeared with access to LSW classification documents',
-      location: { country: 'United States', city: 'Sacramento' },
-      difficulty: 8,
-      priority: 'critical',
-      timeLimit: 24,
-      progress: 0,
-      assignedCharacters: []
-    }
-  ],
+  // Investigation System - using new Investigation type
+  investigations: [] as Investigation[],
+  activeInvestigations: [] as Investigation[],
+  investigationLeads: [
+    // Start with a couple of discovered leads
+    generateInvestigation(
+      INVESTIGATION_TEMPLATES[0],  // Drug Distribution Ring
+      'Washington DC',
+      'United States',
+      'K3'
+    ),
+    generateInvestigation(
+      INVESTIGATION_TEMPLATES[3],  // Corporate Cover-up
+      'Detroit',
+      'United States',
+      'J7'
+    )
+  ] as Investigation[],
 
   worldEvents: [
     {
@@ -391,6 +651,48 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     }
   ] as GameNotification[],
 
+  // News System
+  newsArticles: [] as NewsArticle[],
+  playerFame: 0,
+  publicOpinion: {} as Record<string, number>,
+  localNewspaperName: '',
+
+  // New World Systems Initial State
+  economy: createInitialEconomyState(),
+  reputation: createInitialReputationState(),
+  newsState: createInitialNewsState(),
+  baseState: createInitialBaseState(),
+
+  // Character Life Cycle State - Initial State
+  pendingActivityRequests: [] as ActivityRequest[],
+  completedActivityReports: [] as DailyActivityReport[],
+  lastDayProcessed: 0,
+
+  // Inventory System - Initial State
+  inventory: {
+    weapons: [],
+    armor: [],
+    gadgets: [],
+    consumables: [],
+  },
+
+  // Mission System - Initial State
+  availableMissions: new Map<string, GeneratedMission[]>(),
+  activeMissions: [] as GeneratedMission[],
+  completedMissions: [] as GeneratedMission[],
+  lastMissionGeneration: 0,
+  missionRefreshInterval: 24,  // Refresh every 24 game hours
+
+  // Underworld System - Initial State
+  criminalOrganizations: [] as CriminalOrganization[],
+  underworldEvents: [] as SimulationEvent[],
+  lastUnderworldWeek: 0,
+  underworldStats: {
+    totalArrests: 0,
+    totalProfit: 0,
+    totalEvents: 0,
+  },
+
   // WORKING Actions
   setGamePhase: (phase) => {
     set({ gamePhase: phase })
@@ -414,8 +716,15 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   },
 
   selectCity: (city) => {
+    // Generate newspaper name based on city's culture code
+    const cityData = getCityByName(city);
+    const newspaperName = cityData
+      ? generateNewspaperName(city, cityData.cultureCode)
+      : `The ${city} Times`;  // Fallback if city not found
+
     set({
       selectedCity: city,
+      localNewspaperName: newspaperName,
       gamePhase: 'recruiting'
     })
     toast.success(`Headquarters established in ${city} - Now recruit your team!`)
@@ -565,15 +874,21 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     const recovered = []
 
     const updatedCharacters = state.characters.map(char => {
-      if (char.status === 'hospitalized' && char.recoveryTime > 0) {
+      // Process both 'hospitalized' (legacy) and 'hospital' (new) status
+      if ((char.status === 'hospitalized' || char.status === 'hospital') && char.recoveryTime > 0) {
+        // Reduce recovery time by 1 hour per tick
         const newRecoveryTime = char.recoveryTime - 1
+
         if (newRecoveryTime <= 0) {
           recovered.push(char.name)
           return {
             ...char,
             status: 'ready',
             recoveryTime: 0,
-            health: { ...char.health, current: char.health.maximum }
+            injuries: [], // Clear injuries upon full recovery
+            health: { ...char.health, current: char.health.maximum },
+            statusStartTime: Date.now(),
+            idleEscalationLevel: 0
           }
         }
         return { ...char, recoveryTime: newRecoveryTime }
@@ -585,6 +900,15 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       set({ characters: updatedCharacters })
       recovered.forEach(name => {
         toast.success(`${name} has recovered and returned to duty`)
+
+        // Create notification
+        get().addNotification({
+          type: 'status_change',
+          priority: 'medium',
+          title: `${name} Discharged`,
+          message: `${name} has fully recovered and is ready for duty.`,
+          timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
+        })
       })
     }
   },
@@ -628,6 +952,197 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     }
   },
 
+  // Hospital Management System
+  getHospitalQuality: (countryCode: string) => {
+    const country = getCountryByCode(countryCode)
+    if (!country) return 50 // Default quality
+
+    // Calculate hospital quality from Healthcare + GDP + Lifestyle (combined effects)
+    const medicalSystem = calculateMedicalSystem(country)
+    return medicalSystem.healthcareQuality
+  },
+
+  calculateRecoveryTime: (injury: any, hospitalQuality: number) => {
+    // Base recovery time by severity (in game hours)
+    const baseHours: Record<string, number> = {
+      minor: 24,       // 1 day
+      moderate: 72,    // 3 days
+      severe: 168,     // 7 days
+      critical: 336,   // 14 days
+      permanent: 720   // 30 days
+    }
+
+    const base = baseHours[injury.severity] || 72
+
+    // Hospital quality modifier: 50% quality = 2x time, 100% quality = 0.5x time
+    const qualityMultiplier = 2 - (hospitalQuality / 100) * 1.5
+
+    // Calculate final recovery time in hours
+    const recoveryHours = Math.max(1, Math.round(base * qualityMultiplier))
+
+    return recoveryHours
+  },
+
+  hospitalizeCharacter: (characterId: string, injuries: any[], countryCode?: string) => {
+    const state = get()
+    const character = state.characters.find(c => c.id === characterId)
+
+    if (!character) {
+      toast.error('Character not found')
+      return
+    }
+
+    // Use character's current country or fallback
+    const hospitalCountry = countryCode || character.location?.country || state.selectedCountry
+    const country = getCountryByCode(hospitalCountry)
+
+    if (!country) {
+      toast.error('Invalid country for hospitalization')
+      return
+    }
+
+    // Get hospital quality and medical costs
+    const medicalSystem = calculateMedicalSystem(country)
+    const hospitalQuality = medicalSystem.healthcareQuality
+
+    // Calculate total recovery time and cost
+    let totalRecoveryHours = 0
+    let totalCost = 0
+
+    injuries.forEach(injury => {
+      const recoveryTime = get().calculateRecoveryTime(injury, hospitalQuality)
+      totalRecoveryHours += recoveryTime
+
+      // Cost based on severity and country healthcare cost
+      const baseCost = {
+        minor: medicalSystem.emergencyCareCost * 0.5,
+        moderate: medicalSystem.emergencyCareCost,
+        severe: medicalSystem.surgeryCost,
+        critical: medicalSystem.surgeryCost * 2,
+        permanent: medicalSystem.surgeryCost * 3
+      }[injury.severity] || medicalSystem.emergencyCareCost
+
+      totalCost += baseCost
+    })
+
+    // Calculate cost per hour for long-term care
+    const daysInHospital = Math.ceil(totalRecoveryHours / 24)
+    if (daysInHospital > 3) {
+      totalCost += medicalSystem.longTermCareCost * Math.floor(daysInHospital / 7)
+    }
+
+    // Check budget
+    if (state.budget < totalCost) {
+      toast.error(`Insufficient funds! Hospital costs $${totalCost.toLocaleString()} but you have $${state.budget.toLocaleString()}`)
+      return
+    }
+
+    // Hospitalize the character
+    set({
+      characters: state.characters.map(char =>
+        char.id === characterId
+          ? {
+            ...char,
+            status: 'hospital',
+            recoveryTime: totalRecoveryHours,
+            injuries: injuries,
+            location: {
+              ...char.location,
+              country: hospitalCountry,
+              city: `Hospital in ${hospitalCountry}`
+            }
+          }
+          : char
+      ),
+      budget: state.budget - totalCost
+    })
+
+    // Create notification
+    get().addNotification({
+      type: 'injury',
+      priority: 'high',
+      title: `${character.name} Hospitalized`,
+      message: `Admitted to ${country.name} hospital (Tier ${medicalSystem.hospitalTier}). Recovery time: ${Math.ceil(totalRecoveryHours / 24)} days. Cost: $${totalCost.toLocaleString()}`,
+      characterId: character.id,
+      characterName: character.name,
+      location: hospitalCountry,
+      timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
+    })
+
+    toast.error(`${character.name} hospitalized in ${country.name}. Recovery: ${Math.ceil(totalRecoveryHours / 24)} days`)
+  },
+
+  transferToHospital: (characterId: string, targetCountryCode: string) => {
+    const state = get()
+    const character = state.characters.find(c => c.id === characterId)
+
+    if (!character || character.status !== 'hospital') {
+      toast.error('Character is not currently hospitalized')
+      return
+    }
+
+    const targetCountry = getCountryByCode(targetCountryCode)
+    if (!targetCountry) {
+      toast.error('Invalid target country')
+      return
+    }
+
+    const currentCountry = character.location?.country || state.selectedCountry
+    const currentMedical = calculateMedicalSystem(getCountryByCode(currentCountry)!)
+    const targetMedical = calculateMedicalSystem(targetCountry)
+
+    // Calculate transfer costs
+    const transferCost = Math.round(5000 * (targetMedical.healthcareCost / currentMedical.healthcareCost))
+    const travelTime = 12 // 12 hours base travel time for medical evacuation
+
+    if (state.budget < transferCost) {
+      toast.error(`Transfer costs $${transferCost.toLocaleString()} but you have $${state.budget.toLocaleString()}`)
+      return
+    }
+
+    // Recalculate recovery time with new hospital quality
+    const newQuality = targetMedical.healthcareQuality
+    const oldQuality = currentMedical.healthcareQuality
+    const qualityRatio = oldQuality / newQuality
+    const newRecoveryTime = Math.max(1, Math.round(character.recoveryTime * qualityRatio))
+
+    // Transfer the character
+    set({
+      characters: state.characters.map(char =>
+        char.id === characterId
+          ? {
+            ...char,
+            recoveryTime: newRecoveryTime + travelTime, // Add travel time
+            location: {
+              ...char.location,
+              country: targetCountryCode,
+              city: `Hospital in ${targetCountryCode}`
+            }
+          }
+          : char
+      ),
+      budget: state.budget - transferCost
+    })
+
+    const timeSaved = character.recoveryTime - newRecoveryTime
+    const message = timeSaved > 0
+      ? `Transfer complete. Upgraded to Tier ${targetMedical.hospitalTier} hospital. Recovery time reduced by ${Math.ceil(timeSaved / 24)} days.`
+      : `Transfer complete. Hospital quality: Tier ${targetMedical.hospitalTier}.`
+
+    get().addNotification({
+      type: 'status_change',
+      priority: 'medium',
+      title: `${character.name} Transferred`,
+      message,
+      characterId: character.id,
+      characterName: character.name,
+      location: targetCountryCode,
+      timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
+    })
+
+    toast.success(`${character.name} transferred to ${targetCountry.name}. ${timeSaved > 0 ? `Saves ${Math.ceil(timeSaved / 24)} days` : ''}`)
+  },
+
   // Character Management Functions
   addCharacter: (character) => {
     const state = get()
@@ -655,6 +1170,22 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       ...character
     }
     set({ characters: [...state.characters, newCharacter] })
+
+    // Emit character recruited event
+    EventBus.emit({
+      id: `recruit-${newCharacter.id}`,
+      type: 'player:character-recruited',
+      category: 'player',
+      timestamp: Date.now(),
+      data: {
+        characterId: newCharacter.id,
+        characterName: newCharacter.name,
+        origin: newCharacter.origin,
+        threatLevel: newCharacter.threatLevel,
+        location: newCharacter.location
+      }
+    })
+
     toast.success(`${newCharacter.name} has joined your team!`)
   },
 
@@ -708,6 +1239,22 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       )
     })
 
+    // Emit travel started event
+    EventBus.emit({
+      id: `travel-${Date.now()}`,
+      type: 'player:travel-started',
+      category: 'player',
+      timestamp: Date.now(),
+      data: {
+        characterIds: availableTeam.map(c => c.id),
+        originSector: state.currentSector,
+        destinationSector: sector,
+        destinationCity: city,
+        travelTimeHours: travelHours,
+        vehicleUsed: undefined
+      }
+    })
+
     toast.success(`Squad deployed to sector ${sector}. ETA: ${travelHours} hours`)
 
     // Simulate instant travel for testing (normally would be time-based)
@@ -721,21 +1268,54 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
           travelProgress: 100,
           pendingMission: city ? { sector, city, type: 'patrol' } : null
         })
+
+        // Emit travel completed event
+        EventBus.emit({
+          id: `travel-complete-${Date.now()}`,
+          type: 'player:travel-completed',
+          category: 'player',
+          timestamp: Date.now(),
+          data: {
+            characterIds: availableTeam.map(c => c.id),
+            destinationSector: sector,
+            destinationCity: city
+          }
+        })
+
         toast.success(`Squad arrived at sector ${sector}${city ? ` - ${city}` : ''}`)
       }
     }, 1500)
   },
 
   startMission: (sector, city, missionType) => {
+    const missionId = `mission-${Date.now()}`
+
     set({
       pendingMission: { sector, city, type: missionType },
       squadStatus: 'on_mission'
     })
+
+    // Emit mission started event
+    EventBus.emit({
+      id: missionId,
+      type: 'mission:started',
+      category: 'mission',
+      timestamp: Date.now(),
+      data: {
+        missionId,
+        missionType,
+        location: { sector, city },
+        difficulty: 'medium'
+      }
+    })
+
     toast.info(`Mission started: ${missionType} in ${city}`)
   },
 
   enterCombat: () => {
     const state = get()
+    const combatId = `combat-${Date.now()}`
+
     set({
       squadStatus: 'in_combat',
       currentView: 'combat-lab',
@@ -743,12 +1323,31 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
         char.status === 'traveling' ? { ...char, status: 'in_combat' } : char
       )
     })
+
+    // Emit combat started event
+    EventBus.emit({
+      id: combatId,
+      type: 'combat:started',
+      category: 'combat',
+      timestamp: Date.now(),
+      data: {
+        combatId,
+        location: state.pendingMission ? {
+          sector: state.pendingMission.sector,
+          city: state.pendingMission.city
+        } : undefined,
+        playerUnits: state.characters.filter(c => c.status === 'in_combat').map(c => c.id),
+        enemyCount: 0  // Will be populated by combat scene
+      }
+    })
+
     toast.success('Engaging hostiles!')
   },
 
   completeMission: (success) => {
     const state = get()
     const reward = success ? 5000 : 0
+    const missionData = state.pendingMission
 
     set({
       squadStatus: 'idle',
@@ -761,6 +1360,22 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
           : char
       )
     })
+
+    // Emit mission completed event
+    if (missionData) {
+      EventBus.emit({
+        id: `mission-complete-${Date.now()}`,
+        type: 'mission:completed',
+        category: 'mission',
+        timestamp: Date.now(),
+        data: {
+          missionId: `mission-${missionData.sector}-${missionData.city}`,
+          outcome: success ? 'success' : 'failure',
+          rewards: { money: reward },
+          location: { sector: missionData.sector, city: missionData.city }
+        }
+      })
+    }
 
     if (success) {
       toast.success(`Mission complete! +$${reward.toLocaleString()}`)
@@ -824,6 +1439,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     }
 
     const travelTimeSeconds = distance * secondsPerSector
+    const travelTimeMinutes = travelTimeSeconds / 60
     const startTime = Date.now()
     const estimatedArrival = startTime + travelTimeSeconds * 1000  // Convert to ms
 
@@ -861,9 +1477,24 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
         : state.fleetVehicles
     })
 
-    const etaStr = travelTimeHours < 1
-      ? `${Math.round(travelTimeHours * 60)} minutes`
-      : `${travelTimeHours.toFixed(1)} hours`
+    const etaStr = travelTimeMinutes < 1
+      ? `${Math.round(travelTimeSeconds)} seconds`
+      : `${travelTimeMinutes.toFixed(1)} minutes`
+
+    // Emit travel started event
+    EventBus.emit({
+      id: travelUnit.id,
+      type: 'player:travel-started',
+      category: 'player',
+      timestamp: Date.now(),
+      data: {
+        characterIds,
+        originSector,
+        destinationSector,
+        travelTimeHours: travelTimeMinutes / 60,
+        vehicleUsed: vehicleId
+      }
+    })
 
     toast.success(`${travelUnit.name} en route to ${destinationSector}. ETA: ${etaStr}`)
   },
@@ -901,6 +1532,19 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
             )
           : state.fleetVehicles
       }))
+
+      // Emit travel completed event
+      EventBus.emit({
+        id: `${unit.id}-complete`,
+        type: 'player:travel-completed',
+        category: 'player',
+        timestamp: Date.now(),
+        data: {
+          characterIds: unit.characterIds,
+          destinationSector: unit.destinationSector,
+          travelTimeActual: (now - unit.startTime) / 1000 / 60 / 60  // hours
+        }
+      })
 
       toast.success(`${unit.name} arrived at ${unit.destinationSector}`)
     })
@@ -1207,6 +1851,243 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   },
 
   // =============================================================================
+  // INVENTORY SYSTEM
+  // =============================================================================
+
+  buyItem: (itemId, itemType, cost) => {
+    const state = get()
+
+    if (state.budget < cost) {
+      toast.error(`Insufficient funds! Need $${cost.toLocaleString()} but have $${state.budget.toLocaleString()}`)
+      return
+    }
+
+    // Add to inventory based on type
+    const inventoryKey = itemType === 'weapon' ? 'weapons' :
+                         itemType === 'armor' ? 'armor' :
+                         itemType === 'gadget' ? 'gadgets' : 'consumables'
+
+    set({
+      budget: state.budget - cost,
+      inventory: {
+        ...state.inventory,
+        [inventoryKey]: [...state.inventory[inventoryKey], itemId]
+      }
+    })
+
+    toast.success(`Purchased item for $${cost.toLocaleString()}`)
+  },
+
+  sellItem: (itemId, itemType, sellPrice) => {
+    const state = get()
+
+    const inventoryKey = itemType === 'weapon' ? 'weapons' :
+                         itemType === 'armor' ? 'armor' :
+                         itemType === 'gadget' ? 'gadgets' : 'consumables'
+
+    // Check if item is in inventory
+    const itemIndex = state.inventory[inventoryKey].indexOf(itemId)
+    if (itemIndex === -1) {
+      toast.error('Item not found in inventory')
+      return
+    }
+
+    // Remove from inventory and add money
+    const newInventory = [...state.inventory[inventoryKey]]
+    newInventory.splice(itemIndex, 1)
+
+    set({
+      budget: state.budget + sellPrice,
+      inventory: {
+        ...state.inventory,
+        [inventoryKey]: newInventory
+      }
+    })
+
+    toast.success(`Sold item for $${sellPrice.toLocaleString()}`)
+  },
+
+  addToInventory: (itemId, itemType) => {
+    const state = get()
+
+    const inventoryKey = itemType === 'weapon' ? 'weapons' :
+                         itemType === 'armor' ? 'armor' :
+                         itemType === 'gadget' ? 'gadgets' : 'consumables'
+
+    set({
+      inventory: {
+        ...state.inventory,
+        [inventoryKey]: [...state.inventory[inventoryKey], itemId]
+      }
+    })
+  },
+
+  removeFromInventory: (itemId, itemType) => {
+    const state = get()
+
+    const inventoryKey = itemType === 'weapon' ? 'weapons' :
+                         itemType === 'armor' ? 'armor' :
+                         itemType === 'gadget' ? 'gadgets' : 'consumables'
+
+    const itemIndex = state.inventory[inventoryKey].indexOf(itemId)
+    if (itemIndex === -1) return
+
+    const newInventory = [...state.inventory[inventoryKey]]
+    newInventory.splice(itemIndex, 1)
+
+    set({
+      inventory: {
+        ...state.inventory,
+        [inventoryKey]: newInventory
+      }
+    })
+  },
+
+  equipWeaponToCharacter: (characterId, weaponId) => {
+    const state = get()
+    const character = state.characters.find(c => c.id === characterId)
+
+    if (!character) {
+      toast.error('Character not found')
+      return
+    }
+
+    // Check if weapon is in inventory
+    const weaponIndex = state.inventory.weapons.indexOf(weaponId)
+    if (weaponIndex === -1) {
+      toast.error('Weapon not in inventory')
+      return
+    }
+
+    // Remove from inventory
+    const newWeapons = [...state.inventory.weapons]
+    newWeapons.splice(weaponIndex, 1)
+
+    // If character has a weapon equipped, put it back in inventory
+    const oldWeapon = character.equipment?.[0]
+
+    set({
+      characters: state.characters.map(char =>
+        char.id === characterId
+          ? { ...char, equipment: [weaponId, ...(char.equipment?.slice(1) || [])] }
+          : char
+      ),
+      inventory: {
+        ...state.inventory,
+        weapons: oldWeapon ? [...newWeapons, oldWeapon] : newWeapons
+      }
+    })
+
+    toast.success('Weapon equipped')
+  },
+
+  equipArmorToCharacter: (characterId, armorId) => {
+    const state = get()
+    const character = state.characters.find(c => c.id === characterId)
+
+    if (!character) {
+      toast.error('Character not found')
+      return
+    }
+
+    // Check if armor is in inventory
+    const armorIndex = state.inventory.armor.indexOf(armorId)
+    if (armorIndex === -1) {
+      toast.error('Armor not in inventory')
+      return
+    }
+
+    // Remove from inventory
+    const newArmor = [...state.inventory.armor]
+    newArmor.splice(armorIndex, 1)
+
+    // If character has armor equipped, put it back in inventory
+    const oldArmor = character.equippedArmor
+
+    set({
+      characters: state.characters.map(char =>
+        char.id === characterId
+          ? { ...char, equippedArmor: armorId }
+          : char
+      ),
+      inventory: {
+        ...state.inventory,
+        armor: oldArmor ? [...newArmor, oldArmor] : newArmor
+      }
+    })
+
+    toast.success('Armor equipped')
+  },
+
+  unequipFromCharacter: (characterId, slot) => {
+    const state = get()
+    const character = state.characters.find(c => c.id === characterId)
+
+    if (!character) {
+      toast.error('Character not found')
+      return
+    }
+
+    if (slot === 'weapon') {
+      const weapon = character.equipment?.[0]
+      if (!weapon) {
+        toast.error('No weapon equipped')
+        return
+      }
+
+      set({
+        characters: state.characters.map(char =>
+          char.id === characterId
+            ? { ...char, equipment: char.equipment?.slice(1) || [] }
+            : char
+        ),
+        inventory: {
+          ...state.inventory,
+          weapons: [...state.inventory.weapons, weapon]
+        }
+      })
+    } else if (slot === 'armor') {
+      const armor = character.equippedArmor
+      if (!armor) {
+        toast.error('No armor equipped')
+        return
+      }
+
+      set({
+        characters: state.characters.map(char =>
+          char.id === characterId
+            ? { ...char, equippedArmor: null }
+            : char
+        ),
+        inventory: {
+          ...state.inventory,
+          armor: [...state.inventory.armor, armor]
+        }
+      })
+    } else if (slot === 'shield') {
+      const shield = character.equippedShield
+      if (!shield) {
+        toast.error('No shield equipped')
+        return
+      }
+
+      set({
+        characters: state.characters.map(char =>
+          char.id === characterId
+            ? { ...char, equippedShield: null }
+            : char
+        ),
+        inventory: {
+          ...state.inventory,
+          armor: [...state.inventory.armor, shield]  // Shields go in armor inventory
+        }
+      })
+    }
+
+    toast.success(`${slot} unequipped`)
+  },
+
+  // =============================================================================
   // TIME SYSTEM
   // =============================================================================
 
@@ -1252,10 +2133,29 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     const minutesToAdd = config.minutesPerTick
 
     get().advanceTime(minutesToAdd)
+
+    // Process recovery each tick (reduces recovery time by hours = minutesToAdd / 60)
+    const hoursToProcess = minutesToAdd / 60
+    const currentRecoveryProcessing = state.characters.filter(
+      c => (c.status === 'hospital' || c.status === 'hospitalized') && c.recoveryTime > 0
+    )
+
+    if (currentRecoveryProcessing.length > 0) {
+      // Process recovery for each hour passed
+      for (let i = 0; i < Math.floor(hoursToProcess); i++) {
+        get().processRecovery()
+      }
+    }
+
     set({ lastTimeTick: Date.now() })
   },
 
   advanceTime: (minutes: number) => {
+    const previousMinutes = get().gameTime.minutes
+    const previousHour = Math.floor(previousMinutes / 60)
+    const previousDay = get().gameTime.day
+    const previousWeek = Math.floor(previousDay / 7)
+
     set(state => {
       let newMinutes = state.gameTime.minutes + minutes
       let newDay = state.gameTime.day
@@ -1282,6 +2182,91 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
         day: newDay,  // Keep legacy field in sync
       }
     })
+
+    // Get updated state
+    const newState = get()
+    const newHour = Math.floor(newState.gameTime.minutes / 60)
+    const newDay = newState.gameTime.day
+    const newWeek = Math.floor(newDay / 7)
+
+    // ============== EVENTBUS TIME EVENTS ==============
+
+    // Emit hour-passed events for each hour that passed
+    if (newHour !== previousHour || newDay !== previousDay) {
+      const hoursToEmit = newDay > previousDay
+        ? (24 - previousHour) + newHour  // Crossed midnight
+        : newHour - previousHour
+
+      for (let i = 0; i < hoursToEmit; i++) {
+        const emitHour = (previousHour + i + 1) % 24
+        const emitDay = previousHour + i + 1 >= 24 ? newDay : previousDay
+
+        EventBus.emitTimePassed('time:hour-passed', {
+          previousTime: {
+            hour: previousHour,
+            day: previousDay,
+            year: newState.gameTime.year
+          },
+          newTime: {
+            hour: emitHour,
+            day: emitDay,
+            year: newState.gameTime.year
+          },
+          minutesAdvanced: minutes,
+          gameSpeed: newState.timeSpeed,
+          isNight: emitHour >= 21 || emitHour < 6
+        })
+      }
+    }
+
+    // Emit day-passed event
+    if (newDay > previousDay) {
+      const dayOfWeekNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const
+
+      EventBus.emitTimePassed('time:day-passed', {
+        previousTime: {
+          hour: previousHour,
+          day: previousDay,
+          year: newState.gameTime.year
+        },
+        newTime: {
+          hour: newHour,
+          day: newDay,
+          year: newState.gameTime.year
+        },
+        minutesAdvanced: minutes,
+        gameSpeed: newState.timeSpeed,
+        dayOfWeek: dayOfWeekNames[(newDay - 1) % 7],
+        isWeekend: dayOfWeekNames[(newDay - 1) % 7] === 'saturday' || dayOfWeekNames[(newDay - 1) % 7] === 'sunday'
+      })
+    }
+
+    // Check if we crossed a week boundary - trigger underworld simulation
+    if (newWeek > previousWeek) {
+      // Emit week-passed event
+      EventBus.emitTimePassed('time:week-passed', {
+        previousTime: {
+          hour: previousHour,
+          day: previousDay,
+          year: newState.gameTime.year
+        },
+        newTime: {
+          hour: newHour,
+          day: newDay,
+          year: newState.gameTime.year
+        },
+        minutesAdvanced: minutes,
+        gameSpeed: newState.timeSpeed,
+        weekNumber: newWeek
+      })
+
+      // Initialize underworld if not yet done
+      if (newState.criminalOrganizations.length === 0) {
+        get().initializeUnderworld()
+      }
+      // Run weekly simulation
+      get().runUnderworldSimulation()
+    }
   },
 
   getFormattedTime: () => {
@@ -1312,5 +2297,1077 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     }
 
     return { time, dayOfWeek, timeOfDay }
+  },
+
+  // =============================================================================
+  // NEWS SYSTEM
+  // =============================================================================
+
+  addNewsArticle: (article) => {
+    const state = get()
+    set({
+      newsArticles: [article, ...state.newsArticles].slice(0, 100)  // Keep last 100 articles
+    })
+  },
+
+  generateMissionNews: (missionResult) => {
+    const state = get()
+    const {
+      success,
+      collateralDamage,
+      civilianCasualties,
+      city,
+      country,
+      missionType,
+      enemyType,
+      vigilantismLegal
+    } = missionResult
+
+    // Get current fame
+    const fame = state.playerFame
+
+    // Convert old format to new MissionCompleteData format
+    const missionData = {
+      missionId: `mission-${Date.now()}`,
+      missionName: missionType || 'Operation',
+      outcome: success ? 'success' as const : 'failure' as const,
+      visibility: fame >= 300 ? 100 : fame >= 150 ? 75 : fame >= 50 ? 50 : 25,
+      location: city || country,
+      casualties: civilianCasualties || 0,
+      propertyDamage: collateralDamage || 0,
+      heroesInvolved: ['Hero'],
+      villainsInvolved: enemyType ? [enemyType] : [],
+    }
+
+    // Convert gameTime to the format expected by news system
+    const gameTimeForNews = {
+      day: state.gameTime.day,
+      hour: Math.floor(state.gameTime.minutes / 60),
+      date: {
+        year: state.gameTime.year,
+        month: Math.floor(state.gameTime.day / 30) + 1,
+        dayOfMonth: (state.gameTime.day % 30) + 1,
+        dayOfWeek: (['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const)[state.gameTime.day % 7],
+      }
+    }
+
+    // Generate news article using new system
+    const article = genMissionNews(missionData, gameTimeForNews, fame)
+
+    // Calculate fame impact
+    let fameImpact = 0
+    if (success) {
+      fameImpact = 10 + Math.floor(Math.random() * 10)  // +10 to +20
+      if (civilianCasualties > 0) fameImpact -= civilianCasualties * 3
+      if (collateralDamage > 50000) fameImpact -= 5
+    } else {
+      fameImpact = -10 - Math.floor(Math.random() * 10)  // -10 to -20
+    }
+
+    // Calculate public opinion shift
+    let opinionShift = 0
+    if (success) {
+      opinionShift = vigilantismLegal ? 10 : -5
+      if (civilianCasualties > 0) opinionShift -= civilianCasualties * 5
+      if (collateralDamage > 100000) opinionShift -= 10
+    } else {
+      opinionShift = -10
+    }
+
+    // Add article to store (both legacy and new systems)
+    get().addNewsArticle(article)
+
+    // Update fame
+    const newFame = Math.max(0, Math.min(1000, state.playerFame + fameImpact))
+    set({ playerFame: newFame })
+
+    // Update public opinion
+    get().updatePublicOpinion(country, opinionShift)
+
+    // Show toast notification
+    if (Math.abs(fameImpact) >= 15) {
+      toast.info(`📰 News: ${article.headline}`)
+    }
+  },
+
+  updatePublicOpinion: (country, change) => {
+    const state = get()
+    const currentOpinion = state.publicOpinion[country] || 0
+    const newOpinion = Math.max(-100, Math.min(100, currentOpinion + change))
+
+    set({
+      publicOpinion: {
+        ...state.publicOpinion,
+        [country]: newOpinion
+      }
+    })
+  },
+
+  // =============================================================================
+  // INVESTIGATION SYSTEM
+  // =============================================================================
+
+  discoverInvestigation: (template, city, country, sector) => {
+    const state = get()
+    const investigation = generateInvestigation(template, city, country, sector)
+
+    set({
+      investigationLeads: [...state.investigationLeads, investigation]
+    })
+
+    get().addNotification({
+      type: 'investigation_discovered',
+      priority: investigation.dangerLevel >= 7 ? 'high' : 'medium',
+      title: `New Lead Discovered: ${investigation.title}`,
+      message: `${investigation.description} (${city}, ${country})`,
+      location: `Sector ${sector}`,
+      timestamp: Date.now()
+    })
+
+    toast.info(`New investigation lead: ${investigation.title}`)
+  },
+
+  startInvestigation: (investigationId, characterId) => {
+    const state = get()
+    const lead = state.investigationLeads.find(inv => inv.id === investigationId)
+    const character = state.characters.find(c => c.id === characterId)
+
+    if (!lead || !character) {
+      toast.error('Invalid investigation or character')
+      return
+    }
+
+    if (character.status !== 'ready') {
+      toast.error(`${character.name} is not available`)
+      return
+    }
+
+    // Move from leads to active
+    const updatedInvestigation: Investigation = {
+      ...lead,
+      status: 'active',
+      assignedCharacters: [characterId]
+    }
+
+    set({
+      investigationLeads: state.investigationLeads.filter(inv => inv.id !== investigationId),
+      activeInvestigations: [...state.activeInvestigations, updatedInvestigation],
+      characters: state.characters.map(char =>
+        char.id === characterId
+          ? { ...char, status: 'investigating', statusStartTime: Date.now(), idleEscalationLevel: 0 }
+          : char
+      )
+    })
+
+    // Emit investigation started event
+    EventBus.emit({
+      id: `investigation-${investigationId}`,
+      type: 'player:investigation-started',
+      category: 'player',
+      timestamp: Date.now(),
+      data: {
+        investigationId,
+        investigationTitle: lead.title,
+        characterId,
+        characterName: character.name,
+        location: { city: lead.city, country: lead.country, sector: lead.sector }
+      }
+    })
+
+    toast.success(`${character.name} begins investigating: ${lead.title}`)
+  },
+
+  advanceInvestigationProgress: (investigationId, characterId, approach) => {
+    const state = get()
+    const investigation = state.activeInvestigations.find(inv => inv.id === investigationId)
+    const character = state.characters.find(c => c.id === characterId)
+
+    if (!investigation || !character) {
+      toast.error('Investigation or character not found')
+      return
+    }
+
+    // Perform the investigation action
+    const result = advanceInvestigation(investigation, character, approach)
+
+    // Create decision log entry
+    const decision: any = {
+      id: `decision-${Date.now()}`,
+      timestamp: Date.now(),
+      phase: investigation.currentPhase,
+      chosenApproach: approach,
+      characterId,
+      skillRoll: {
+        skill: 'Investigation',
+        characterValue: character.stats.INT || 50,
+        difficulty: investigation.difficulty * 10,
+        roll: Math.floor(Math.random() * 100),
+        success: result.success
+      },
+      outcome: result.message,
+      consequenceType: result.consequenceType
+    }
+
+    // Update investigation
+    const updatedInvestigation: Investigation = {
+      ...investigation,
+      progress: Math.min(100, investigation.progress + result.progressGained),
+      cluesGathered: [...investigation.cluesGathered, ...result.cluesFound],
+      decisionsLog: [...investigation.decisionsLog, decision],
+      suspicionLevel: Math.min(100, investigation.suspicionLevel + result.suspicionChange),
+      publicExposure: Math.min(100, investigation.publicExposure + result.exposureChange),
+      currentPhase: result.nextPhase || investigation.currentPhase,
+      lastActionResult: result
+    }
+
+    // Check if investigation complete
+    if (updatedInvestigation.currentPhase === 'resolution' && updatedInvestigation.progress >= 100) {
+      get().completeInvestigation(investigationId)
+      return
+    }
+
+    // Check if too much suspicion = failure
+    if (updatedInvestigation.suspicionLevel >= 80) {
+      get().failInvestigation(investigationId)
+      return
+    }
+
+    set({
+      activeInvestigations: state.activeInvestigations.map(inv =>
+        inv.id === investigationId ? updatedInvestigation : inv
+      )
+    })
+
+    // Show result toast
+    if (result.consequenceType === 'critical') {
+      toast.success(result.message)
+    } else if (result.consequenceType === 'setback') {
+      toast.error(result.message)
+    } else {
+      toast.info(result.message)
+    }
+  },
+
+  completeInvestigation: (investigationId) => {
+    const state = get()
+    const investigation = state.activeInvestigations.find(inv => inv.id === investigationId)
+
+    if (!investigation) return
+
+    // Grant rewards
+    const reward = investigation.potentialReward
+    set({
+      budget: state.budget + reward.cash,
+      playerFame: state.playerFame + reward.fame,
+      activeInvestigations: state.activeInvestigations.filter(inv => inv.id !== investigationId),
+      characters: state.characters.map(char =>
+        investigation.assignedCharacters.includes(char.id)
+          ? { ...char, status: 'ready', statusStartTime: Date.now(), fame: (char.fame || 0) + Math.floor(reward.fame / investigation.assignedCharacters.length) }
+          : char
+      )
+    })
+
+    get().addNotification({
+      type: 'mission_complete',
+      priority: 'high',
+      title: `Investigation Complete: ${investigation.title}`,
+      message: `Earned $${reward.cash.toLocaleString()} and +${reward.fame} fame. ${reward.missionUnlocked ? 'New mission unlocked!' : ''}`,
+      location: `${investigation.city}, ${investigation.country}`,
+      timestamp: Date.now()
+    })
+
+    toast.success(`Investigation complete! +$${reward.cash.toLocaleString()}, +${reward.fame} fame`)
+
+    // Generate news article if public
+    if (investigation.publicExposure > 50) {
+      get().generateMissionNews({
+        success: true,
+        collateralDamage: 0,
+        civilianCasualties: 0,
+        city: investigation.city,
+        country: investigation.country,
+        missionType: investigation.type,
+        enemyType: investigation.type,
+        vigilantismLegal: true
+      })
+    }
+  },
+
+  failInvestigation: (investigationId) => {
+    const state = get()
+    const investigation = state.activeInvestigations.find(inv => inv.id === investigationId)
+
+    if (!investigation) return
+
+    set({
+      activeInvestigations: state.activeInvestigations.filter(inv => inv.id !== investigationId),
+      characters: state.characters.map(char =>
+        investigation.assignedCharacters.includes(char.id)
+          ? { ...char, status: 'ready', statusStartTime: Date.now() }
+          : char
+      )
+    })
+
+    get().addNotification({
+      type: 'mission_failed',
+      priority: 'medium',
+      title: `Investigation Failed: ${investigation.title}`,
+      message: `The suspects were alerted and the trail went cold.`,
+      location: `${investigation.city}, ${investigation.country}`,
+      timestamp: Date.now()
+    })
+
+    toast.error(`Investigation failed: ${investigation.title}`)
+  },
+
+  expireInvestigation: (investigationId) => {
+    const state = get()
+    const investigation = [...state.investigationLeads, ...state.activeInvestigations].find(inv => inv.id === investigationId)
+
+    if (!investigation) return
+
+    set({
+      investigationLeads: state.investigationLeads.filter(inv => inv.id !== investigationId),
+      activeInvestigations: state.activeInvestigations.filter(inv => inv.id !== investigationId),
+      characters: state.characters.map(char =>
+        investigation.assignedCharacters.includes(char.id)
+          ? { ...char, status: 'ready', statusStartTime: Date.now() }
+          : char
+      )
+    })
+
+    toast.warning(`Investigation expired: ${investigation.title}`)
+  },
+
+  getAvailableInvestigations: () => {
+    return get().investigationLeads.filter(inv => inv.status === 'discovered')
+  },
+
+  getActiveInvestigations: () => {
+    return get().activeInvestigations.filter(inv => inv.status === 'active')
+  },
+
+  // =====================================================================
+  // MISSION SYSTEM ACTIONS
+  // =====================================================================
+  ...createMissionActions(set, get),
+
+  // =====================================================================
+  // UNDERWORLD SYSTEM ACTIONS
+  // =====================================================================
+
+  initializeUnderworld: () => {
+    const state = get()
+    const countryCode = state.selectedCountry
+
+    // Get country data
+    const country = getCountryByCode(countryCode)
+    if (!country) {
+      console.warn(`[Underworld] Country not found: ${countryCode}`)
+      return
+    }
+
+    // Get all cities in the player's country
+    const cities = getCitiesByCountry(country.name)
+    if (cities.length === 0) {
+      console.warn(`[Underworld] No cities found for: ${country.name}`)
+      return
+    }
+
+    // Generate initial criminal organizations (1-3 per major city)
+    const organizations: CriminalOrganization[] = []
+    const majorCities = cities.slice(0, Math.min(10, cities.length)) // Top 10 cities
+
+    for (let i = 0; i < majorCities.length; i++) {
+      const city = majorCities[i]
+      const orgCount = 1 + Math.floor(Math.random() * 2) // 1-2 orgs per city
+
+      for (let j = 0; j < orgCount; j++) {
+        const orgTypes = ['street_gang', 'syndicate', 'cartel'] as const
+        const orgType = orgTypes[Math.min(Math.floor(city.crimeIndex / 30), 2)]
+
+        // Get available crime specialties based on city type
+        const cityTypes = [
+          (city as any).cityType1,
+          (city as any).cityType2,
+          (city as any).cityType3,
+          (city as any).cityType4,
+        ].filter(t => t && t.length > 0)
+
+        const specialties: string[] = []
+        for (const cityType of cityTypes) {
+          const typeSpecialties = CITY_CRIME_MAP[cityType]
+          if (typeSpecialties) {
+            specialties.push(...typeSpecialties)
+          }
+        }
+        const uniqueSpecialties = [...new Set(specialties)].slice(0, 3) as any[]
+        if (uniqueSpecialties.length === 0) {
+          uniqueSpecialties.push('theft', 'extortion')
+        }
+
+        const org = createOrganization(
+          `The ${city.name} ${['Syndicate', 'Cartel', 'Crew', 'Gang', 'Family'][j % 5]}`,
+          orgType,
+          city.name,
+          country.code,
+          {
+            id: `leader_${city.name}_${j}`,
+            name: `Boss ${city.name.substring(0, 3)}`,
+            motivation: getMotivationFromHarmAvoidance(3 + Math.floor(Math.random() * 7)),
+            calling: NEUTRAL_CALLINGS[Math.floor(Math.random() * NEUTRAL_CALLINGS.length)],
+            imprisoned: false,
+            loyalty: 50 + Math.floor(Math.random() * 40),
+            competence: 40 + Math.floor(Math.random() * 40),
+          },
+          uniqueSpecialties,
+          state.gameTime.day
+        )
+
+        // Set initial state based on city crime level
+        org.state = 'operating'
+        org.personnel = 15 + Math.floor(Math.random() * 30)
+        org.capital = 20 + Math.floor(Math.random() * 50)
+        org.heat = Math.floor(city.crimeIndex * 0.3 + Math.random() * 20)
+        org.reputation = 20 + Math.floor(Math.random() * 40)
+
+        organizations.push(org)
+      }
+    }
+
+    console.log(`[Underworld] Initialized ${organizations.length} criminal organizations in ${country.name}`)
+
+    set({
+      criminalOrganizations: organizations,
+      underworldEvents: [],
+      lastUnderworldWeek: Math.floor(state.gameTime.day / 7),
+      underworldStats: {
+        totalArrests: 0,
+        totalProfit: 0,
+        totalEvents: 0,
+      },
+    })
+  },
+
+  runUnderworldSimulation: () => {
+    const state = get()
+    const currentWeek = Math.floor(state.gameTime.day / 7)
+
+    // Only simulate once per week
+    if (currentWeek <= state.lastUnderworldWeek) {
+      return null
+    }
+
+    // Get country data
+    const country = getCountryByCode(state.selectedCountry)
+    if (!country) {
+      return null
+    }
+
+    const cities = getCitiesByCountry(country.name)
+    if (cities.length === 0 || state.criminalOrganizations.length === 0) {
+      return null
+    }
+
+    // Run the simulation
+    const result = simulateWeek(
+      state.criminalOrganizations,
+      country,
+      cities,
+      currentWeek
+    )
+
+    // Generate news from events
+    const newsArticles = generateWeeklyNews(result.events, country, state.gameTime.day)
+
+    // Add news articles to the existing news system
+    for (const article of newsArticles) {
+      get().addNewsArticle(article)
+    }
+
+    // Update state
+    set((prev) => ({
+      criminalOrganizations: [...prev.criminalOrganizations], // Updated in place by simulation
+      underworldEvents: [...prev.underworldEvents, ...result.events].slice(-200),
+      lastUnderworldWeek: currentWeek,
+      underworldStats: {
+        totalArrests: prev.underworldStats.totalArrests + result.arrestsMade,
+        totalProfit: prev.underworldStats.totalProfit + result.profitGenerated,
+        totalEvents: prev.underworldStats.totalEvents + result.events.length,
+      },
+    }))
+
+    // Toast notification for major events
+    const majorEvents = result.events.filter(e => e.newsworthy)
+    if (majorEvents.length > 0) {
+      toast(`🌃 Underworld: ${majorEvents.length} criminal events this week`, { icon: '🔪' })
+    }
+
+    console.log(`[Underworld] Week ${currentWeek}: ${result.activitiesExecuted} activities, ${result.arrestsMade} arrests, $${result.profitGenerated}k profit`)
+
+    return result
+  },
+
+  getCriminalOrganizations: () => {
+    return get().criminalOrganizations
+  },
+
+  getUnderworldEvents: () => {
+    return get().underworldEvents
+  },
+
+  getOrganizationsByCity: (cityName: string) => {
+    return get().criminalOrganizations.filter(org => org.headquarters === cityName)
+  },
+
+  // =====================================================================
+  // NEW WORLD SYSTEMS ACTIONS
+  // =====================================================================
+
+  // Economy System Actions
+  recordTransaction: (type, category, amount, description) => {
+    const state = get()
+    const transaction: Transaction = {
+      id: `tx_${Date.now()}`,
+      timestamp: state.gameTime.day,
+      type,
+      category,
+      amount,
+      description,
+    }
+    set({
+      economy: processTransaction(state.economy, transaction),
+      budget: type === 'income' || type === 'sale'
+        ? state.budget + amount
+        : state.budget - amount,
+    })
+  },
+
+  processWeeklyPayday: () => {
+    const state = get()
+    // Get team jobs (placeholder - would come from character data)
+    const teamJobs = state.characters
+      .filter(c => c.dayJob)
+      .map(c => c.dayJob)
+
+    const newEconomy = processPayday(state.economy, teamJobs || [], state.gameTime.day)
+    const netChange = newEconomy.weeklyIncome - newEconomy.weeklyExpenses
+
+    set({
+      economy: newEconomy,
+      budget: state.budget + netChange,
+    })
+
+    if (netChange >= 0) {
+      toast.success(`Payday! +$${netChange.toLocaleString()}`)
+    } else {
+      toast.error(`Expenses exceeded income: -$${Math.abs(netChange).toLocaleString()}`)
+    }
+
+    get().addNotification({
+      type: 'status_change',
+      priority: netChange >= 0 ? 'medium' : 'high',
+      title: 'Weekly Financial Report',
+      message: `Income: $${newEconomy.weeklyIncome.toLocaleString()} | Expenses: $${newEconomy.weeklyExpenses.toLocaleString()} | Net: ${netChange >= 0 ? '+' : ''}$${netChange.toLocaleString()}`,
+      timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
+    })
+  },
+
+  getEconomyStats: () => {
+    const state = get()
+    return {
+      netWorth: calculateNetWorth(state.economy),
+      weeklyIncome: state.economy.weeklyIncome,
+      weeklyExpenses: state.economy.weeklyExpenses,
+    }
+  },
+
+  // Reputation System Actions
+  adjustReputationAxis: (axis, delta, reason) => {
+    const state = get()
+    const newReputation = adjustReputation(state.reputation, axis, delta, reason, state.gameTime.day)
+
+    set({ reputation: newReputation })
+
+    // Check for tier change notifications
+    const oldTier = getReputationTier(state.reputation[axis])
+    const newTier = getReputationTier(newReputation[axis])
+
+    if (oldTier !== newTier) {
+      get().addNotification({
+        type: 'status_change',
+        priority: 'high',
+        title: `Reputation ${delta > 0 ? 'Increased' : 'Decreased'}`,
+        message: `Your ${axis} reputation is now: ${newTier} (${newReputation[axis] > 0 ? '+' : ''}${newReputation[axis]})`,
+        timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
+      })
+    }
+  },
+
+  getReputationEffects: () => {
+    const state = get()
+    return getActiveEffects(state.reputation)
+  },
+
+  processReputationDecay: () => {
+    const state = get()
+    set({
+      reputation: applyReputationDecay(state.reputation),
+    })
+  },
+
+  // Base Building Actions
+  purchaseBase: (type, name, sectorCode, countryCode) => {
+    const state = get()
+    const { BASE_TYPES } = require('../data/baseSystem')
+    const config = BASE_TYPES[type]
+
+    if (!canAfford(state.economy, config.purchaseCost)) {
+      toast.error(`Cannot afford base! Need $${config.purchaseCost.toLocaleString()}`)
+      return
+    }
+
+    if (state.baseState.bases.length >= state.baseState.maxBases) {
+      toast.error(`Maximum bases reached (${state.baseState.maxBases})`)
+      return
+    }
+
+    const newBase = createBase(type, name, sectorCode, countryCode)
+
+    set({
+      baseState: addBaseToState(state.baseState, newBase),
+      budget: state.budget - config.purchaseCost,
+      economy: processTransaction(state.economy, {
+        id: `tx_${Date.now()}`,
+        timestamp: state.gameTime.day,
+        type: 'purchase',
+        category: 'other',
+        amount: config.purchaseCost,
+        description: `Purchased ${name} (${config.name})`,
+      }),
+    })
+
+    toast.success(`${name} established in sector ${sectorCode}!`)
+
+    get().addNotification({
+      type: 'status_change',
+      priority: 'high',
+      title: 'New Base Established',
+      message: `${name} is now operational in sector ${sectorCode}. ${config.totalSlots} facility slots available.`,
+      location: `Sector ${sectorCode}`,
+      timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
+    })
+  },
+
+  buildFacility: (facilityType, gridX, gridY) => {
+    const state = get()
+    const activeBase = getActiveBase(state.baseState)
+
+    if (!activeBase) {
+      toast.error('No active base selected')
+      return
+    }
+
+    const { FACILITIES, createFacility, hasRequiredFacilities, isPositionAvailable } = require('../data/baseSystem')
+    const config = FACILITIES[facilityType]
+
+    if (!isPositionAvailable(activeBase, gridX, gridY)) {
+      toast.error('Position not available')
+      return
+    }
+
+    if (!hasRequiredFacilities(activeBase, facilityType)) {
+      toast.error(`Missing required facilities: ${config.requiredFacilities?.join(', ')}`)
+      return
+    }
+
+    const cost = config.buildCost[0] // Level 1 cost
+    if (!canAfford(state.economy, cost)) {
+      toast.error(`Cannot afford! Need $${cost.toLocaleString()}`)
+      return
+    }
+
+    // Start construction
+    const newBaseState = startConstruction(
+      state.baseState,
+      activeBase.id,
+      facilityType,
+      1, // Level 1
+      gridX,
+      gridY,
+      state.gameTime.day
+    )
+
+    set({
+      baseState: newBaseState,
+      budget: state.budget - cost,
+    })
+
+    toast.success(`Construction started: ${config.name}`)
+  },
+
+  upgradeFacilityAt: (gridX, gridY) => {
+    const state = get()
+    const activeBase = getActiveBase(state.baseState)
+
+    if (!activeBase) {
+      toast.error('No active base selected')
+      return
+    }
+
+    const updatedBase = upgradeFacility(activeBase, gridX, gridY)
+    if (updatedBase === activeBase) {
+      toast.error('Cannot upgrade facility')
+      return
+    }
+
+    set({
+      baseState: updateBase(state.baseState, updatedBase),
+    })
+
+    toast.success('Facility upgraded!')
+  },
+
+  removeFacilityAt: (gridX, gridY) => {
+    const state = get()
+    const activeBase = getActiveBase(state.baseState)
+
+    if (!activeBase) {
+      toast.error('No active base selected')
+      return
+    }
+
+    const updatedBase = removeFacility(activeBase, gridX, gridY)
+
+    set({
+      baseState: updateBase(state.baseState, updatedBase),
+    })
+
+    toast.info('Facility removed')
+  },
+
+  processConstruction: (hours) => {
+    const state = get()
+    const result = progressConstruction(state.baseState, hours)
+
+    set({ baseState: result.state })
+
+    result.completedProjects.forEach(project => {
+      toast.success(`Construction complete: ${project.facilityType}`)
+
+      get().addNotification({
+        type: 'status_change',
+        priority: 'medium',
+        title: 'Construction Complete',
+        message: `${project.facilityType} is now operational.`,
+        timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
+      })
+    })
+  },
+
+  getBaseBonuses: () => {
+    const state = get()
+    const activeBase = getActiveBase(state.baseState)
+
+    if (!activeBase) {
+      return { education: 0, healing: 0, investigation: 0 }
+    }
+
+    return {
+      education: getEducationBonus(activeBase, 'general'),
+      healing: getHealingBonus(activeBase),
+      investigation: getInvestigationBonus(activeBase),
+    }
+  },
+
+  // =============================================================================
+  // CHARACTER LIFE CYCLE ACTIONS
+  // =============================================================================
+
+  processCharacterIdleDay: (characterId: string) => {
+    const state = get()
+    const character = state.characters.find((c: any) => c.id === characterId)
+
+    if (!character) {
+      console.warn(`Character ${characterId} not found`)
+      return null
+    }
+
+    // Skip if character is on mission or in combat
+    if (character.status === 'on_mission' || character.status === 'in_combat') {
+      return null
+    }
+
+    // Get personality traits
+    const personality = character.personality || {
+      impatience: 5, initiative: 5, volatility: 5, discipline: 5,
+      sociability: 5, riskTolerance: 5, harmAvoidance: 5
+    }
+
+    // Get current city info (use selected city or character's location)
+    const cityId = character.currentCity || state.selectedCity
+    const cityName = cityId
+
+    // For now, use a default city type - later this would come from city data
+    const cityTypes: CityType[] = ['Political'] // Washington DC default
+
+    // Process the idle day
+    const report = processIdleDay(
+      characterId,
+      character.name || 'Unknown',
+      personality,
+      cityTypes,
+      cityId,
+      cityName,
+      state.gameTime.day,
+      character.health?.current || 100,
+      character.morale || 80,
+      character.cityFamiliarity || []
+    )
+
+    // Handle auto-executed activities
+    for (const activity of report.activitiesExecuted) {
+      // Deduct cost
+      if (activity.cost > 0) {
+        set(state => ({
+          economy: processTransaction(
+            state.economy,
+            'expense',
+            activity.category === 'recovery' ? 'medical_expense' :
+            activity.category === 'growth' ? 'education_tuition' :
+            activity.category === 'social' ? 'travel_expense' : 'equipment_maintenance',
+            activity.cost,
+            `${character.name}: ${activity.activityName}`
+          )
+        }))
+      }
+
+      // Apply morale change to character
+      if (activity.moraleChange !== 0) {
+        set(state => ({
+          characters: state.characters.map((c: any) =>
+            c.id === characterId
+              ? { ...c, morale: Math.max(0, Math.min(100, (c.morale || 80) + activity.moraleChange)) }
+              : c
+          )
+        }))
+      }
+    }
+
+    // Update character's familiarity
+    if (report.familiarityChange > 0) {
+      set(state => {
+        const char = state.characters.find((c: any) => c.id === characterId)
+        if (!char) return state
+
+        const existingFamiliarity = [...(char.cityFamiliarity || [])]
+        const existingIndex = existingFamiliarity.findIndex(f => f.cityId === cityId)
+
+        if (existingIndex >= 0) {
+          existingFamiliarity[existingIndex] = {
+            ...existingFamiliarity[existingIndex],
+            level: Math.min(100, existingFamiliarity[existingIndex].level + report.familiarityChange),
+            lastVisit: state.gameTime.day,
+            totalDaysSpent: existingFamiliarity[existingIndex].totalDaysSpent + 1
+          }
+        } else {
+          existingFamiliarity.push({
+            cityId,
+            cityName,
+            level: report.familiarityChange,
+            lastVisit: state.gameTime.day,
+            totalDaysSpent: 1,
+            missionsCompleted: 0,
+            contactsMade: 0,
+            isHometown: false
+          })
+        }
+
+        return {
+          characters: state.characters.map((c: any) =>
+            c.id === characterId ? { ...c, cityFamiliarity: existingFamiliarity } : c
+          )
+        }
+      })
+    }
+
+    // Add pending requests
+    if (report.requestsCreated.length > 0) {
+      set(state => ({
+        pendingActivityRequests: [...state.pendingActivityRequests, ...report.requestsCreated]
+      }))
+    }
+
+    // Store the report
+    set(state => ({
+      completedActivityReports: [...state.completedActivityReports.slice(-99), report]
+    }))
+
+    return report
+  },
+
+  processAllIdleCharacters: () => {
+    const state = get()
+    const reports: DailyActivityReport[] = []
+
+    // Only process if day has changed
+    if (state.gameTime.day === state.lastDayProcessed) {
+      return reports
+    }
+
+    // Update last processed day
+    set({ lastDayProcessed: state.gameTime.day })
+
+    // Process each idle character
+    for (const character of state.characters) {
+      if (character.status !== 'on_mission' && character.status !== 'in_combat') {
+        const report = get().processCharacterIdleDay(character.id)
+        if (report) {
+          reports.push(report)
+        }
+      }
+    }
+
+    return reports
+  },
+
+  approveActivityRequest: (requestId: string) => {
+    const state = get()
+    const request = state.pendingActivityRequests.find(r => r.id === requestId)
+
+    if (!request) {
+      console.warn(`Activity request ${requestId} not found`)
+      return null
+    }
+
+    // Find the activity
+    const activity = ACTIVITIES.find(a => a.id === request.activityId)
+    if (!activity) {
+      console.warn(`Activity ${request.activityId} not found`)
+      return null
+    }
+
+    // Check if can afford
+    if (!canAfford(state.economy, activity.cost)) {
+      toast.error(`Cannot afford ${activity.name} ($${activity.cost})`)
+      return null
+    }
+
+    // Execute the activity
+    const character = state.characters.find((c: any) => c.id === request.characterId)
+    const result = executeActivity(
+      activity,
+      request.characterId,
+      character?.name || 'Unknown',
+      state.gameTime.day
+    )
+
+    // Deduct cost
+    set(state => ({
+      economy: processTransaction(
+        state.economy,
+        'expense',
+        activity.category === 'recovery' ? 'medical_expense' :
+        activity.category === 'growth' ? 'education_tuition' :
+        activity.category === 'social' ? 'travel_expense' : 'equipment_maintenance',
+        activity.cost,
+        `${character?.name || 'Unknown'}: ${activity.name}`
+      ),
+      // Remove from pending
+      pendingActivityRequests: state.pendingActivityRequests.filter(r => r.id !== requestId)
+    }))
+
+    // Apply results to character
+    if (result.moraleChange !== 0 || result.skillProgress) {
+      set(state => ({
+        characters: state.characters.map((c: any) =>
+          c.id === request.characterId
+            ? {
+                ...c,
+                morale: Math.max(0, Math.min(100, (c.morale || 80) + result.moraleChange))
+              }
+            : c
+        )
+      }))
+    }
+
+    toast.success(`${character?.name} completed: ${activity.name}`)
+    return result
+  },
+
+  denyActivityRequest: (requestId: string) => {
+    set(state => ({
+      pendingActivityRequests: state.pendingActivityRequests.filter(r => r.id !== requestId)
+    }))
+  },
+
+  getCharacterFamiliarity: (characterId: string, cityId: string) => {
+    const state = get()
+    const character = state.characters.find((c: any) => c.id === characterId)
+
+    if (!character || !character.cityFamiliarity) {
+      return null
+    }
+
+    return character.cityFamiliarity.find((f: CityFamiliarity) => f.cityId === cityId) || null
+  },
+
+  updateCharacterFamiliarity: (characterId: string, cityId: string, change: number) => {
+    set(state => {
+      const character = state.characters.find((c: any) => c.id === characterId)
+      if (!character) return state
+
+      const existingFamiliarity = [...(character.cityFamiliarity || [])]
+      const existingIndex = existingFamiliarity.findIndex(f => f.cityId === cityId)
+
+      if (existingIndex >= 0) {
+        existingFamiliarity[existingIndex] = {
+          ...existingFamiliarity[existingIndex],
+          level: Math.max(0, Math.min(100, existingFamiliarity[existingIndex].level + change)),
+          lastVisit: state.gameTime.day
+        }
+      } else if (change > 0) {
+        existingFamiliarity.push({
+          cityId,
+          cityName: cityId,
+          level: change,
+          lastVisit: state.gameTime.day,
+          totalDaysSpent: 1,
+          missionsCompleted: 0,
+          contactsMade: 0,
+          isHometown: false
+        })
+      }
+
+      return {
+        characters: state.characters.map((c: any) =>
+          c.id === characterId ? { ...c, cityFamiliarity: existingFamiliarity } : c
+        )
+      }
+    })
+  },
+
+  getPendingRequests: () => {
+    return get().pendingActivityRequests
+  },
+
+  getCharacterActivityDesires: (characterId: string) => {
+    const state = get()
+    const character = state.characters.find((c: any) => c.id === characterId)
+
+    if (!character) {
+      return null
+    }
+
+    const personality = character.personality || {
+      impatience: 5, initiative: 5, volatility: 5, discipline: 5,
+      sociability: 5, riskTolerance: 5, harmAvoidance: 5
+    }
+
+    return calculateActivityDesires(
+      personality,
+      character.health?.current || 100,
+      character.morale || 80
+    )
   },
 }))
