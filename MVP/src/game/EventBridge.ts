@@ -90,6 +90,8 @@ export interface CombatCharacter {
   shieldRegen?: number;
   // Armor (DR) - reduces incoming damage
   dr?: number;
+  // Armor stopping power - blocks damage completely if damage <= SP
+  stoppingPower?: number;
   // Equipped armor info
   equippedArmor?: string;
   equippedShield?: string;
@@ -187,6 +189,76 @@ export interface CombatResult {
   rounds: number;
   casualties: { team: string; unitId: string }[];
   survivingUnits: { team: string; unitId: string; hp: number }[];
+}
+
+// Enhanced combat result for strategic layer integration
+export interface EnhancedCombatResult {
+  victory: boolean; // Did player team (blue) win?
+  winner: 'blue' | 'red';
+  rounds: number;
+  timeElapsed: number; // Minutes of game time elapsed
+
+  // Character outcomes
+  casualties: Array<{
+    characterId: string;
+    characterName: string;
+    status: 'dead' | 'unconscious';
+    killedBy?: string;
+  }>;
+
+  injuries: Array<{
+    characterId: string;
+    characterName: string;
+    bodyPart: string;
+    severity: 'LIGHT' | 'MODERATE' | 'SEVERE' | 'PERMANENT' | 'FATAL';
+    description: string;
+    healingTime?: number; // Days to recover
+    permanent: boolean;
+  }>;
+
+  survivors: Array<{
+    characterId: string;
+    characterName: string;
+    currentHp: number;
+    maxHp: number;
+    damageDealt: number;
+    damageTaken: number;
+    kills: number;
+  }>;
+
+  // Rewards
+  experienceGained: Array<{
+    characterId: string;
+    characterName: string;
+    xp: number;
+    reason: string; // 'survival', 'kill', 'damage', 'victory'
+  }>;
+
+  lootGained: Array<{
+    itemId: string;
+    itemName: string;
+    itemType: 'weapon' | 'armor' | 'gadget' | 'consumable';
+    quantity: number;
+  }>;
+
+  // Fame and reputation
+  fameChange: number;
+  publicOpinionChange?: Record<string, number>; // Country code -> opinion shift
+
+  // Mission context
+  missionLocation?: {
+    sector: string;
+    city: string;
+    country: string;
+  };
+
+  // Combat statistics summary
+  totalDamageDealt: number;
+  totalDamageTaken: number;
+  accuracyRate: number; // Hits / shots
+
+  collateralDamage?: number; // Property damage estimate
+  civilianCasualties?: number;
 }
 
 export interface LogEntry {

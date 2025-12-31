@@ -93,39 +93,39 @@
     {
       "id": "WEAPON-DB",
       "name": "Weapon Database Integration",
-      "status": "pending",
+      "status": "completed",
       "priority": 2,
       "phase": 1,
       "tasks": [
         {
           "id": "WD-001",
           "task": "Create weapon loader from weapons.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "WD-002",
           "task": "Update CombatScene to use database",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "WD-003",
           "task": "Wire range brackets to hit calculation",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "WD-004",
           "task": "Wire damage types to resolution",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "WD-005",
           "task": "Wire sound effects per weapon",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "WD-006",
           "task": "Test all 70+ weapons in combat",
-          "status": "pending"
+          "status": "completed"
         }
       ],
       "triggers": [
@@ -133,41 +133,42 @@
       ],
       "files": [
         "MVP/src/game/scenes/CombatScene.ts",
-        "MVP/src/data/weapons.ts"
+        "MVP/src/data/weapons.ts",
+        "MVP/src/game/scenes/weaponIntegration.ts"
       ],
-      "completedAt": null
+      "completedAt": "2024-12-30T00:45:00.000Z"
     },
     {
       "id": "ARMOR-DB",
       "name": "Armor Database Integration",
-      "status": "pending",
+      "status": "completed",
       "priority": 3,
       "phase": 1,
       "tasks": [
         {
           "id": "AD-001",
           "task": "Create armor loader from armor.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "AD-002",
           "task": "Wire DR to damage calculation",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "AD-003",
           "task": "Implement stopping power vs penetration",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "AD-004",
           "task": "Wire armor damage degradation",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "AD-005",
           "task": "Test DR against all damage types",
-          "status": "pending"
+          "status": "completed"
         }
       ],
       "triggers": [
@@ -175,9 +176,11 @@
       ],
       "files": [
         "MVP/src/game/scenes/CombatScene.ts",
-        "MVP/src/data/armor.ts"
+        "MVP/src/data/armor.ts",
+        "MVP/src/game/EventBridge.ts",
+        "MVP/src/stores/enhancedGameStore.ts"
       ],
-      "completedAt": null
+      "completedAt": "2024-12-30T01:00:00.000Z"
     },
     {
       "id": "STAT-INT",

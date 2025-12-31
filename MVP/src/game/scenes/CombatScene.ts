@@ -1403,6 +1403,7 @@ export class CombatScene extends Phaser.Scene {
         maxShield: character.maxShield || 0,
         shieldRegen: character.shieldRegen || 0,
         dr: character.dr || 0,
+        stoppingPower: character.stoppingPower || 0, // Armor stopping power from database
         stats: character.stats,
         powers: character.powers || [],
         equipment: character.equipment || [],
@@ -1892,6 +1893,8 @@ export class CombatScene extends Phaser.Scene {
         personality,
         str: char.stats.STR,
         agl: char.stats.AGL,
+        dr: char.dr || 0, // Damage reduction from armor
+        stoppingPower: char.stoppingPower || 0, // Armor stopping power
         acted: false,
         visible: true,
         spriteId,
@@ -1935,6 +1938,8 @@ export class CombatScene extends Phaser.Scene {
         personality,
         str: char.stats.STR,
         agl: char.stats.AGL,
+        dr: char.dr || 0, // Damage reduction from armor
+        stoppingPower: char.stoppingPower || 0, // Armor stopping power
         acted: false,
         visible: true,
         spriteId,
