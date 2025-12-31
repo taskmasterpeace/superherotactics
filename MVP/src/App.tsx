@@ -59,6 +59,9 @@ import { initEconomyEventHandler, cleanupEconomyEventHandler } from './data/econ
 // Territory System - tracks sector control, militia, and faction influence
 import { initTerritorySystem, cleanupTerritorySystem } from './data/territorySystem'
 
+// Email System - mission briefings, intel reports, contact messages
+import { initEmailSystem, cleanupEmailSystem } from './data/emailSystem'
+
 function App() {
   const { gamePhase, currentView, setCurrentView, setGamePhase } = useGameStore()
   const [devMode, setDevMode] = useState(false)
@@ -87,6 +90,9 @@ function App() {
 
     // Initialize territory system (sector control, militia, factions)
     initTerritorySystem()
+
+    // Initialize email system (mission briefings, intel, contacts)
+    initEmailSystem()
 
     // Handle resize
     const handleResize = () => setIsMobile(window.innerWidth <= 768)
@@ -119,6 +125,7 @@ function App() {
       cleanupTimeEventGenerator()
       cleanupEconomyEventHandler()
       cleanupTerritorySystem()
+      cleanupEmailSystem()
     }
   }, [checkIdleCharacters])
 
