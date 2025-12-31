@@ -23,7 +23,7 @@ import {
   WeaponRangeBrackets,
   DEFAULT_RANGE_BRACKETS,
 } from '../../data/equipmentTypes';
-import { lookupWeaponInDatabase, getDamageSystemType } from './weaponIntegration';
+import { lookupWeaponInDatabase, getDamageSystemType, getDamageTypeByKey } from './weaponIntegration';
 import {
   getFlankingResult,
   getFlankingBonus,
@@ -193,7 +193,8 @@ const WEAPONS = {
   },
 };
 
-type WeaponType = keyof typeof WEAPONS;
+// WeaponType can be internal key OR database weapon name/id
+type WeaponType = keyof typeof WEAPONS | string;
 
 // Combat weapon type (matches internal WEAPONS structure)
 type CombatWeapon = {
@@ -3999,6 +4000,13 @@ export class CombatScene extends Phaser.Scene {
       hitChance += attacker.accuracyPenalty; // Usually negative
     }
 
+    // CON bonus for stability under fire (reduces suppression/fear effects)
+    // High constitution = steady hands, better focus despite chaos
+    // Every 10 CON above 50 = +2% accuracy (max +10% at CON 100)
+    if (attacker.con > 50) {
+      hitChance += Math.floor((attacker.con - 50) / 10) * 2;
+    }
+
     // === FLANKING BONUS ===
     // Attack angle relative to target's facing direction
     // Front: +0%, Side: +10%, Rear: +25%, Blindspot: +40%
@@ -4203,7 +4211,20 @@ export class CombatScene extends Phaser.Scene {
       } else {
         // Check if any friendly unit has LOS to this enemy
         for (const friendly of friendlyUnits) {
-          if (this.hasLineOfSight(friendly.position.x, friendly.position.y, unit.position.x, unit.position.y)) {
+          // Calculate base vision range (8 tiles default)
+          // INS bonus: every 10 INS above 50 = +1 tile range (max +5 at INS 100)
+          const baseVisionRange = 8;
+          const insBonus = friendly.ins > 50 ? Math.floor((friendly.ins - 50) / 10) : 0;
+          const visionRange = baseVisionRange + insBonus;
+
+          // Calculate distance to enemy
+          const distance = Math.sqrt(
+            Math.pow(unit.position.x - friendly.position.x, 2) +
+            Math.pow(unit.position.y - friendly.position.y, 2)
+          );
+
+          // Check if within vision range AND has line of sight
+          if (distance <= visionRange && this.hasLineOfSight(friendly.position.x, friendly.position.y, unit.position.x, unit.position.y)) {
             isVisible = true;
             break;
           }
@@ -5114,8 +5135,9 @@ export class CombatScene extends Phaser.Scene {
       const damageTypeDef = getDamageType(damageSystemTypeId);
 
       // Get damage type and verbs for this weapon (for combat log)
-      const damageType = WEAPON_DAMAGE_TYPES[attacker.weapon];
-      const verbs = DAMAGE_VERBS[damageType];
+      // Use dynamic lookup to support 70+ database weapons
+      const damageType = WEAPON_DAMAGE_TYPES[attacker.weapon as keyof typeof WEAPONS] || getDamageTypeByKey(attacker.weapon);
+      const verbs = DAMAGE_VERBS[damageType] || DAMAGE_VERBS['GUNFIRE'];
 
       // === SPECIAL MECHANICS: Cannot Be Dodged (lasers, mental attacks) ===
       // Lasers and mental attacks hit automatically if accuracy check passes
@@ -5135,6 +5157,13 @@ export class CombatScene extends Phaser.Scene {
       // Calculate damage based on hit result
       let damage = 0;
       let baseDamage = weapon.damage + Math.floor(attacker.str / 10);
+
+      // MEL bonus for melee weapons (fist, super_punch, knives, etc.)
+      // Melee skill adds damage: every 10 MEL above 50 = +2 damage (max +10 at MEL 100)
+      const isMeleeWeapon = weapon.visual?.type === 'melee' || weapon.range <= 2;
+      if (isMeleeWeapon && attacker.mel > 50) {
+        baseDamage += Math.floor((attacker.mel - 50) / 10) * 2;
+      }
 
       if (finalHitResult === 'crit') {
         damage = Math.floor(baseDamage * 1.5); // 150% damage
@@ -6265,7 +6294,15 @@ export class CombatScene extends Phaser.Scene {
     // Restore AP and reset acted flag for current team
     this.units.forEach(unit => {
       if (unit.team === this.currentTeam) {
+        // Base AP from maxAp
         unit.ap = unit.maxAp;
+
+        // STA bonus: High stamina = more endurance = bonus AP
+        // Every 25 STA above 50 = +1 AP (max +2 at STA 100)
+        if (unit.sta > 50) {
+          const staBonus = Math.floor((unit.sta - 50) / 25);
+          unit.ap += staBonus;
+        }
 
         // Apply AP penalty from injuries (broken bone, winded)
         if (unit.apPenalty && unit.apPenalty > 0) {

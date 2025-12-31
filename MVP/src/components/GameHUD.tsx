@@ -8,7 +8,9 @@ import {
   Map,
   FlaskConical,
   Monitor,
-  Settings
+  Settings,
+  GraduationCap,
+  Building2
 } from 'lucide-react'
 
 export default function GameHUD() {
@@ -79,6 +81,18 @@ export default function GameHUD() {
               label="Computer"
               active={currentView === 'combat-lab'}
               onClick={() => setCurrentView('combat-lab')}
+            />
+            <NavButton
+              icon={<GraduationCap size={18} />}
+              label="Training"
+              active={currentView === 'training'}
+              onClick={() => setCurrentView('training')}
+            />
+            <NavButton
+              icon={<Building2 size={18} />}
+              label="Base"
+              active={currentView === 'base'}
+              onClick={() => setCurrentView('base')}
             />
           </div>
 
