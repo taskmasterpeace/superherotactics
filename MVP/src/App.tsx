@@ -56,6 +56,9 @@ import { initTimeEventGenerator, cleanupTimeEventGenerator } from './data/timeEv
 // Economy Event Handler - processes payday, mission rewards, expenses
 import { initEconomyEventHandler, cleanupEconomyEventHandler } from './data/economyEventHandler'
 
+// Territory System - tracks sector control, militia, and faction influence
+import { initTerritorySystem, cleanupTerritorySystem } from './data/territorySystem'
+
 function App() {
   const { gamePhase, currentView, setCurrentView, setGamePhase } = useGameStore()
   const [devMode, setDevMode] = useState(false)
@@ -81,6 +84,9 @@ function App() {
 
     // Initialize economy event handler (payday, mission rewards, expenses)
     initEconomyEventHandler()
+
+    // Initialize territory system (sector control, militia, factions)
+    initTerritorySystem()
 
     // Handle resize
     const handleResize = () => setIsMobile(window.innerWidth <= 768)
@@ -112,6 +118,7 @@ function App() {
       cleanupInvestigationGenerator()
       cleanupTimeEventGenerator()
       cleanupEconomyEventHandler()
+      cleanupTerritorySystem()
     }
   }, [checkIdleCharacters])
 
