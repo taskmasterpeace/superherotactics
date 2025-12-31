@@ -652,29 +652,29 @@
     {
       "id": "HOSPITAL",
       "name": "Hospital System",
-      "status": "pending",
+      "status": "completed",
       "priority": 15,
       "phase": 3,
       "tasks": [
         {
           "id": "HS-001",
           "task": "Wire combat injuries to hospital",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "HS-002",
           "task": "Implement recovery mechanics",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "HS-003",
           "task": "Wire hospital quality by country",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "HS-004",
           "task": "Create discharge notifications",
-          "status": "pending"
+          "status": "completed"
         }
       ],
       "triggers": [
@@ -682,9 +682,10 @@
       ],
       "files": [
         "MVP/src/components/HospitalScreen.tsx",
-        "MVP/src/data/originHealingSystem.ts"
+        "MVP/src/data/originHealingSystem.ts",
+        "MVP/src/stores/enhancedGameStore.ts"
       ],
-      "completedAt": null
+      "completedAt": "2024-12-30T02:00:00.000Z"
     },
     {
       "id": "LAPTOP-UI",
