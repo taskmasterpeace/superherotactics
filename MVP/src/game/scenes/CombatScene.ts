@@ -28,6 +28,9 @@ import {
   getFlankingResult,
   getFlankingBonus,
   FlankingResult,
+  FIRE_MODES,
+  FireMode,
+  attemptSuppression,
 } from '../../combat';
 import {
   getDamageType,
@@ -777,6 +780,7 @@ interface Unit {
   statusEffects: StatusEffectInstance[];
   injuries: InjuryInstance[];
   weapon: WeaponType;
+  fireMode: FireMode; // Current fire mode: single, burst, auto
   personality: PersonalityType;
   // Primary stats from character
   str: number;  // STR: Strength - melee damage, grappling, throwing
@@ -862,6 +866,22 @@ interface MapTile {
 
 type ActionMode = 'idle' | 'move' | 'attack' | 'throw' | 'overwatch' | 'deploy' | 'teleport' | 'grapple';
 
+// Combat phase system for free movement before enemy contact
+type CombatPhase = 'exploration' | 'combat';
+
+const PHASE_CONFIGS: Record<CombatPhase, { movementCostMultiplier: number; turnOrder: boolean; enemiesVisible: boolean }> = {
+  exploration: {
+    movementCostMultiplier: 0,  // Free movement
+    turnOrder: false,            // No turn order
+    enemiesVisible: false,       // Enemies hidden (fog of war)
+  },
+  combat: {
+    movementCostMultiplier: 1,  // Normal AP cost
+    turnOrder: true,             // Turn-based
+    enemiesVisible: true,        // Enemies revealed
+  },
+};
+
 export class CombatScene extends Phaser.Scene {
   private mapWidth: number = 15;
   private mapHeight: number = 15;
@@ -872,6 +892,7 @@ export class CombatScene extends Phaser.Scene {
   private playerTeam: 'blue' | 'red' = 'blue';
   private roundNumber: number = 1;
   private actionMode: ActionMode = 'idle';
+  private combatPhase: CombatPhase = 'exploration'; // Start in exploration (free movement)
   private aiVsAi: boolean = false;
   private aiSpeed: number = 600;
   private animating: boolean = false;
@@ -1612,6 +1633,7 @@ export class CombatScene extends Phaser.Scene {
       facing: 90,
       statusEffects: [],
       weapon: 'rifle',
+      fireMode: 'single' as FireMode,
       personality: 'tactical',
       str: 60,
       agl: 70,
@@ -1633,6 +1655,7 @@ export class CombatScene extends Phaser.Scene {
       facing: 90,
       statusEffects: [],
       weapon: 'rifle',
+      fireMode: 'single' as FireMode,
       personality: 'sniper',
       str: 45,
       agl: 80,
@@ -1654,6 +1677,7 @@ export class CombatScene extends Phaser.Scene {
       facing: 90,
       statusEffects: [],
       weapon: 'beam',
+      fireMode: 'single' as FireMode,
       personality: 'tactical',
       str: 50,
       agl: 60,
@@ -1676,6 +1700,7 @@ export class CombatScene extends Phaser.Scene {
       facing: 270,
       statusEffects: [],
       weapon: 'rifle',
+      fireMode: 'single' as FireMode,
       personality: 'aggressive',
       str: 45,
       agl: 40,
@@ -1699,6 +1724,7 @@ export class CombatScene extends Phaser.Scene {
       facing: 270,
       statusEffects: [],
       weapon: 'shotgun',
+      fireMode: 'single' as FireMode,
       personality: 'berserker',
       str: 65,
       agl: 35,
@@ -1722,6 +1748,7 @@ export class CombatScene extends Phaser.Scene {
       facing: 270,
       statusEffects: [],
       weapon: 'shotgun',
+      fireMode: 'single' as FireMode,
       personality: 'sniper',
       str: 50,
       agl: 45,
@@ -1745,6 +1772,7 @@ export class CombatScene extends Phaser.Scene {
       position: { x: 3, y: 6 },
       facing: 90,
       weapon: 'pistol',
+      fireMode: 'single' as FireMode,
       personality: 'tactical',
       str: 40,
       agl: 85,
@@ -1766,6 +1794,7 @@ export class CombatScene extends Phaser.Scene {
       position: { x: 1, y: 5 },
       facing: 90,
       weapon: 'pistol',
+      fireMode: 'single' as FireMode,
       personality: 'tactical',
       str: 35,
       agl: 60,
@@ -1787,6 +1816,7 @@ export class CombatScene extends Phaser.Scene {
       position: { x: 1, y: 9 },
       facing: 90,
       weapon: 'pistol',
+      fireMode: 'single' as FireMode,
       personality: 'cautious',
       str: 40,
       agl: 55,
@@ -1808,6 +1838,7 @@ export class CombatScene extends Phaser.Scene {
       position: { x: 11, y: 6 },
       facing: 270,
       weapon: 'beam_wide',
+      fireMode: 'single' as FireMode,
       personality: 'aggressive',
       str: 55,
       agl: 50,
@@ -1829,6 +1860,7 @@ export class CombatScene extends Phaser.Scene {
       position: { x: 11, y: 8 },
       facing: 270,
       weapon: 'psychic',
+      fireMode: 'single' as FireMode,
       personality: 'tactical',
       str: 40,
       agl: 65,
@@ -2006,6 +2038,7 @@ export class CombatScene extends Phaser.Scene {
       statusEffects: unitData.statusEffects ?? [],
       injuries: unitData.injuries ?? [],
       weapon: unitData.weapon ?? 'rifle',
+      fireMode: (unitData as any).fireMode ?? 'single',
       personality: unitData.personality ?? 'tactical',
       str: unitData.str ?? 50,
       agl: unitData.agl ?? 50,
@@ -3104,6 +3137,11 @@ export class CombatScene extends Phaser.Scene {
   }
 
   private calculateMoveCost(fromX: number, fromY: number, toX: number, toY: number): number {
+    // Free movement in exploration phase (before enemy contact)
+    if (this.combatPhase === 'exploration') {
+      return 0;
+    }
+
     // Simple implementation: base distance + destination tile cost modifier
     const baseDistance = Math.abs(toX - fromX) + Math.abs(toY - fromY);
     const destTile = this.tiles[toY]?.[toX];
@@ -4568,6 +4606,68 @@ export class CombatScene extends Phaser.Scene {
 
     // Update fog of war after movement (might reveal/hide enemies)
     this.updateFogOfWar();
+
+    // Check if movement triggered combat (enemy spotted during exploration)
+    this.checkCombatTrigger(unit);
+  }
+
+  /**
+   * Check if combat should trigger (exploration -> combat phase transition)
+   * Combat triggers when a player unit spots an enemy within vision range
+   */
+  private checkCombatTrigger(movedUnit: Unit): void {
+    // Only check during exploration phase
+    if (this.combatPhase !== 'exploration') return;
+
+    const visionRange = 15; // Default vision range in tiles
+
+    // Check if moved unit can see any enemy
+    this.units.forEach(enemy => {
+      if (enemy.team === movedUnit.team) return;
+      if (enemy.hp <= 0) return;
+
+      const dx = movedUnit.position.x - enemy.position.x;
+      const dy = movedUnit.position.y - enemy.position.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance <= visionRange && this.hasLineOfSight(movedUnit.position.x, movedUnit.position.y, enemy.position.x, enemy.position.y)) {
+        // Enemy spotted! Trigger combat
+        this.triggerCombat(movedUnit, enemy);
+        return;
+      }
+    });
+  }
+
+  /**
+   * Transition from exploration to combat phase
+   */
+  private triggerCombat(spotter: Unit, spotted: Unit): void {
+    if (this.combatPhase === 'combat') return; // Already in combat
+
+    this.combatPhase = 'combat';
+
+    // Log the combat trigger
+    EventBridge.emit('log-entry', {
+      id: `combat_trigger_${Date.now()}`,
+      timestamp: Date.now(),
+      type: 'system',
+      actor: spotter.name,
+      actorTeam: spotter.team,
+      target: spotted.name,
+      targetTeam: spotted.team,
+      message: `CONTACT! ${spotter.name} spotted ${spotted.name}! Combat initiated!`,
+    });
+
+    // Emit phase change event
+    EventBridge.emit('combat-phase-changed', {
+      phase: 'combat',
+      spotter: spotter.name,
+      spotted: spotted.name,
+    });
+
+    // Force fog of war update to reveal enemies
+    this.updateFogOfWar();
+    this.emitAllUnitsData();
   }
 
   // ==================== KNOCKBACK ====================
@@ -5123,7 +5223,10 @@ export class CombatScene extends Phaser.Scene {
     }
 
     const weapon = getWeaponData(attacker.weapon);
-    const apCost = weapon.ap;
+    // Apply fire mode AP multiplier
+    const fireMode = attacker.fireMode || 'single';
+    const fireModeConfig = FIRE_MODES[fireMode];
+    const apCost = Math.ceil(weapon.ap * fireModeConfig.apMultiplier);
     if (attacker.ap < apCost) {
       if (callback) callback();
       return;
@@ -5187,7 +5290,9 @@ export class CombatScene extends Phaser.Scene {
       // Calculate hit using new verb system
       // Roll 0-100, modified by accuracy and agility
       const roll = Math.random() * 100;
-      const effectiveAccuracy = weapon.accuracy + (attacker.agl - 50) * 0.3;
+      // Check if attacker is suppressed (-20% accuracy from suppression status)
+      const suppressedPenalty = attacker.statusEffects?.some(e => e.id === 'suppressed') ? -20 : 0;
+      const effectiveAccuracy = weapon.accuracy + (attacker.agl - 50) * 0.3 + fireModeConfig.accuracyPenalty + suppressedPenalty;
       const hitResult = getHitResult(roll, effectiveAccuracy);
 
       // Get full damage definition from damage system
@@ -5216,7 +5321,8 @@ export class CombatScene extends Phaser.Scene {
 
       // Calculate damage based on hit result
       let damage = 0;
-      let baseDamage = weapon.damage + Math.floor(attacker.str / 10);
+      // Fire mode: shots × damage per shot multiplier
+      let baseDamage = Math.floor((weapon.damage + Math.floor(attacker.str / 10)) * fireModeConfig.damagePerShot * fireModeConfig.shotsPerAttack);
 
       // MEL bonus for melee weapons (fist, super_punch, knives, etc.)
       // Melee skill adds damage: every 10 MEL above 50 = +2 damage (max +10 at MEL 100)
@@ -5592,6 +5698,25 @@ export class CombatScene extends Phaser.Scene {
           attacker.weapon,
           damageSystemTypeId
         );
+      }
+
+      // Apply suppression from burst/auto fire
+      // Suppression gives -20% accuracy for 1 turn
+      if (fireModeConfig.suppressionChance > 0 && target.hp > 0) {
+        const suppressionRoll = Math.random() * 100;
+        if (suppressionRoll <= fireModeConfig.suppressionChance) {
+          this.applyStatusEffect(target, 'suppressed');
+          EventBridge.emit('log-entry', {
+            id: `suppress_${Date.now()}`,
+            timestamp: Date.now(),
+            type: 'effect',
+            actor: attacker.name,
+            actorTeam: attacker.team,
+            target: target.name,
+            targetTeam: target.team,
+            message: `${target.name} is suppressed by ${fireMode} fire!`,
+          });
+        }
       }
 
       // Check for death
