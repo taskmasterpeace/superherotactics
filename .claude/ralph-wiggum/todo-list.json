@@ -237,34 +237,34 @@
     {
       "id": "COMBAT-RESULTS",
       "name": "Combat Results Processing",
-      "status": "pending",
+      "status": "completed",
       "priority": 5,
       "phase": 2,
       "tasks": [
         {
           "id": "CR-001",
           "task": "Process results to EventBus",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "CR-002",
           "task": "Wire injuries to character health",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "CR-003",
           "task": "Wire loot to inventory",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "CR-004",
           "task": "Generate combat summary events",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "CR-005",
           "task": "Update fame/reputation from combat",
-          "status": "pending"
+          "status": "completed"
         }
       ],
       "triggers": [
@@ -274,7 +274,7 @@
         "MVP/src/stores/combatResultsHandler.ts",
         "MVP/src/game/EventBridge.ts"
       ],
-      "completedAt": null
+      "completedAt": "2024-12-30T01:45:00.000Z"
     },
     {
       "id": "SHIELD-SYS",
