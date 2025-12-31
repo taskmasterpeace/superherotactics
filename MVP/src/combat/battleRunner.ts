@@ -36,6 +36,10 @@ import {
   canUnitAct,
 } from './statusEffects';
 
+import {
+  processShieldRegen,
+} from './types';
+
 /**
  * Clone a unit for simulation (avoid mutating originals).
  */
@@ -158,6 +162,9 @@ export function runBattle(
       if (totalTurns >= fullConfig.maxTurnsPerRound * rounds) break;
 
       totalTurns++;
+
+      // PROCESS SHIELD REGENERATION at start of turn
+      processShieldRegen(unit);
 
       // PROCESS STATUS EFFECTS at start of turn
       // This handles: DoT damage, stun saves, duration countdown

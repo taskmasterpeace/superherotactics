@@ -134,6 +134,11 @@ export {
   createSamuraiVsSoldiersTest,
   createKickboxerVsBoxerTest,
   resetUnitIds,
+  // Weapon database (70+ weapons)
+  weaponToSimWeapon,
+  WEAPON_DATABASE,
+  getWeaponById,
+  getWeaponsByCategory,
 } from './humanPresets';
 
 // Advanced combat mechanics

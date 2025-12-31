@@ -7,10 +7,159 @@
 import {
   SimUnit,
   SimWeapon,
+  SimArmor,
   UnitPreset,
   calculateHP,
+  calculateArmorProtection,
   HUMAN_BASELINE_STATS,
+  ARMOR_PRESETS,
 } from './types';
+
+// Import full weapon database for conversion
+import {
+  Weapon,
+  WeaponRangeBrackets,
+  DEFAULT_RANGE_BRACKETS,
+  DamageSubType,
+} from '../data/equipmentTypes';
+import {
+  ALL_WEAPONS,
+  MELEE_WEAPONS,
+  RANGED_WEAPONS,
+  THROWN_WEAPONS,
+  SPECIAL_WEAPONS,
+  ENERGY_WEAPONS,
+} from '../data/weapons';
+
+// ============ WEAPON DATABASE CONVERTER ============
+
+/**
+ * Convert accuracy column shift (-3 to +3) to percentage (0-100)
+ * Base accuracy is 75%, each CS shifts by 5%
+ */
+function columnShiftToAccuracy(cs: number): number {
+  return Math.max(30, Math.min(95, 75 + cs * 5));
+}
+
+/**
+ * Convert attack speed (seconds) to AP cost
+ * Baseline: 1.5 seconds = 4 AP (standard pistol shot)
+ */
+function attackSpeedToAPCost(speed: number): number {
+  return Math.max(2, Math.min(8, Math.round(speed * 2.5)));
+}
+
+/**
+ * Get default range brackets for a weapon category
+ */
+function getDefaultBrackets(category: string, damageSubType: DamageSubType): WeaponRangeBrackets | undefined {
+  // Map category to bracket type
+  if (category.includes('Melee')) {
+    return damageSubType === 'PIERCING_MELEE' ? DEFAULT_RANGE_BRACKETS.polearm : DEFAULT_RANGE_BRACKETS.melee;
+  }
+  if (damageSubType === 'BUCKSHOT' || damageSubType === 'SLUG') {
+    return damageSubType === 'SLUG' ? DEFAULT_RANGE_BRACKETS.shotgun_slug : DEFAULT_RANGE_BRACKETS.shotgun;
+  }
+  if (damageSubType === 'LASER' || damageSubType === 'PLASMA' || damageSubType === 'PURE_ENERGY') {
+    return DEFAULT_RANGE_BRACKETS.energy;
+  }
+  if (damageSubType === 'EXPLOSION' || damageSubType === 'SHRAPNEL') {
+    return DEFAULT_RANGE_BRACKETS.grenade;
+  }
+  if (damageSubType === 'THROWN') {
+    return DEFAULT_RANGE_BRACKETS.thrown;
+  }
+  // Default to pistol for generic ranged
+  return DEFAULT_RANGE_BRACKETS.pistol;
+}
+
+/**
+ * Convert full Weapon from database to SimWeapon for combat engine
+ */
+export function weaponToSimWeapon(weapon: Weapon): SimWeapon {
+  // Get range brackets - use weapon-specific or default
+  const brackets = weapon.rangeBrackets || getDefaultBrackets(weapon.category, weapon.damageSubType);
+
+  // Convert to SimWeapon rangeBrackets format (slightly different structure)
+  const simBrackets = brackets ? {
+    pointBlank: brackets.pointBlank,
+    pointBlankMod: brackets.pointBlankMod,
+    short: brackets.short,
+    shortMod: brackets.shortMod,
+    optimal: brackets.optimal,
+    optimalMod: brackets.optimalMod,
+    long: brackets.long,
+    longMod: brackets.longMod,
+    max: brackets.max,
+    extremeMod: brackets.extremeMod,
+  } : undefined;
+
+  // Determine knockback from special effects or damage type
+  let knockbackForce: number | undefined;
+  if (weapon.specialEffects.some(e => e.toLowerCase().includes('knockback'))) {
+    knockbackForce = Math.round(weapon.baseDamage * 2.5);
+  }
+  if (weapon.damageSubType === 'BUCKSHOT') knockbackForce = 90;
+  if (weapon.damageSubType === 'SLUG') knockbackForce = 100;
+  if (weapon.damageSubType === 'EXPLOSION') knockbackForce = 150;
+
+  // Check for light attack (fast weapons)
+  const isLightAttack = weapon.attackSpeed <= 1.0 || weapon.category.includes('Melee');
+
+  // Build the SimWeapon
+  const simWeapon: SimWeapon = {
+    name: weapon.name,
+    damage: weapon.baseDamage,
+    accuracy: columnShiftToAccuracy(weapon.accuracyCS),
+    damageType: `${weapon.damageType}_${weapon.damageSubType}`,
+    range: weapon.range,
+    apCost: attackSpeedToAPCost(weapon.attackSpeed),
+  };
+
+  // Add optional properties
+  if (knockbackForce) simWeapon.knockbackForce = knockbackForce;
+  if (simBrackets) simWeapon.rangeBrackets = simBrackets;
+  if (isLightAttack && weapon.category.includes('Melee')) simWeapon.isLightAttack = true;
+
+  // Add melee special properties
+  if (weapon.disarmBonus) {
+    simWeapon.special = { ...simWeapon.special, disarmBonus: weapon.disarmBonus };
+  }
+  if (weapon.specialEffects.some(e => e.toLowerCase().includes('knockdown'))) {
+    simWeapon.special = { ...simWeapon.special, knockdownChance: 30 };
+  }
+
+  return simWeapon;
+}
+
+/**
+ * Full weapon database converted to SimWeapon format
+ * 70+ weapons ready for combat engine use
+ */
+export const WEAPON_DATABASE: Record<string, SimWeapon> = Object.fromEntries(
+  ALL_WEAPONS.map(w => [w.id, weaponToSimWeapon(w)])
+);
+
+/**
+ * Get a weapon from the database by ID
+ */
+export function getWeaponById(id: string): SimWeapon | undefined {
+  return WEAPON_DATABASE[id];
+}
+
+/**
+ * Get all weapons of a specific category
+ */
+export function getWeaponsByCategory(category: 'melee' | 'ranged' | 'thrown' | 'special' | 'energy'): SimWeapon[] {
+  const sources: Record<string, Weapon[]> = {
+    melee: MELEE_WEAPONS,
+    ranged: RANGED_WEAPONS,
+    thrown: THROWN_WEAPONS,
+    special: SPECIAL_WEAPONS,
+    energy: ENERGY_WEAPONS,
+  };
+  return sources[category].map(weaponToSimWeapon);
+}
 
 // ============ WEAPON PRESETS ============
 
@@ -909,6 +1058,7 @@ export function createCustomUnit(
     dr: number;
     stoppingPower: number;
     shieldHp: number;
+    armor: SimArmor;        // NEW: Equipped armor
     stance: SimUnit['stance'];
     cover: SimUnit['cover'];
     origin: SimUnit['origin'];
@@ -916,16 +1066,22 @@ export function createCustomUnit(
 ): SimUnit {
   const id = `${team}_${++unitIdCounter}`;
   const hp = calculateHP(stats);
+
+  // Calculate protection from armor if provided, otherwise use raw values
+  const armorProtection = options.armor
+    ? calculateArmorProtection(options.armor)
+    : { dr: options.dr || 0, stoppingPower: options.stoppingPower || 0, shieldHp: options.shieldHp || 0 };
+
   return {
     id,
     name,
     team,
     hp,
     maxHp: hp,
-    shieldHp: options.shieldHp || 0,
-    maxShieldHp: options.shieldHp || 0,
-    dr: options.dr || 0,
-    stoppingPower: options.stoppingPower || 0,
+    shieldHp: armorProtection.shieldHp,
+    maxShieldHp: armorProtection.shieldHp,
+    dr: armorProtection.dr,
+    stoppingPower: armorProtection.stoppingPower,
     origin: options.origin || 'biological',
     stats: { ...stats },
     stance: options.stance || 'normal',
@@ -933,6 +1089,7 @@ export function createCustomUnit(
     statusEffects: [],
     accuracyPenalty: 0,
     weapon: { ...weapon },
+    armor: options.armor,   // Store armor reference
     disarmed: false,
     alive: true,
     acted: false,

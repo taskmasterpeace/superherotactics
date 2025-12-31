@@ -98,6 +98,18 @@ import {
   cleanExpiredArticles,
   createNewsArticle,
 } from '../data/newsSystem'
+
+// Doom Clock System (XCOM 2 Avatar Project-style urgency)
+import {
+  DoomClockState,
+  ThresholdEvent,
+  createInitialDoomClockState,
+  calculateWeeklyProgress,
+  applySetback,
+  revealMastermind,
+  getThreatLevel,
+  generateDoomClockNews,
+} from '../data/doomClockSystem'
 import {
   generateMissionNews as genMissionNews,
   generateCrimeNews,
@@ -368,6 +380,13 @@ interface EnhancedGameStore {
   getCriminalOrganizations: () => CriminalOrganization[]
   getUnderworldEvents: () => SimulationEvent[]
   getOrganizationsByCity: (cityName: string) => CriminalOrganization[]
+
+  // Doom Clock System (XCOM 2 Avatar Project-style urgency)
+  doomClock: DoomClockState
+  advanceDoomClock: (shadowNetworkCount?: number, playerMissions?: number) => ThresholdEvent[]
+  applyDoomClockSetback: (amount?: number) => void
+  revealDoomClockMastermind: () => void
+  getDoomClockThreat: () => 'minimal' | 'low' | 'moderate' | 'high' | 'critical'
 
   // Actions
   setGamePhase: (phase: any) => void
@@ -790,6 +809,9 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     totalProfit: 0,
     totalEvents: 0,
   },
+
+  // Doom Clock Initial State
+  doomClock: createInitialDoomClockState(),
 
   // WORKING Actions
   setGamePhase: (phase) => {
@@ -3016,6 +3038,88 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   getOrganizationsByCity: (cityName: string) => {
     return get().criminalOrganizations.filter(org => org.headquarters === cityName)
+  },
+
+  // =====================================================================
+  // DOOM CLOCK ACTIONS (XCOM 2 Avatar Project-style urgency)
+  // =====================================================================
+
+  advanceDoomClock: (shadowNetworkCount?: number, playerMissions?: number) => {
+    const state = get()
+
+    // Count shadow networks from criminal organizations
+    const networks = shadowNetworkCount ??
+      state.criminalOrganizations.filter(org => org.type === 'shadow_network').length
+
+    // Calculate weekly progress
+    const { newProgress, eventsTriggered } = calculateWeeklyProgress(
+      state.doomClock,
+      networks,
+      playerMissions ?? 0
+    )
+
+    // Update state with new progress
+    const newDoomClock = {
+      ...state.doomClock,
+      progress: newProgress,
+      thresholdsPassed: {
+        intel: newProgress >= 25 || state.doomClock.thresholdsPassed.intel,
+        alliance: newProgress >= 50 || state.doomClock.thresholdsPassed.alliance,
+        crisis: newProgress >= 75 || state.doomClock.thresholdsPassed.crisis,
+        endgame: newProgress >= 100 || state.doomClock.thresholdsPassed.endgame,
+      },
+    }
+
+    set({ doomClock: newDoomClock })
+
+    // Generate news for threshold events
+    for (const event of eventsTriggered) {
+      const news = generateDoomClockNews(newDoomClock, event)
+      toast(`🚨 ${event.name}: ${event.description}`, {
+        icon: '⚠️',
+        duration: 8000,
+      })
+      console.log(`[DOOM CLOCK] Threshold crossed: ${event.name} (${event.threshold}%)`)
+    }
+
+    // Log progress
+    if (newProgress !== state.doomClock.progress) {
+      console.log(`[DOOM CLOCK] Progress: ${state.doomClock.progress.toFixed(1)}% -> ${newProgress.toFixed(1)}%`)
+    }
+
+    return eventsTriggered
+  },
+
+  applyDoomClockSetback: (amount?: number) => {
+    const state = get()
+    const currentWeek = Math.floor(state.gameTime.day / 7)
+
+    const newDoomClock = applySetback(state.doomClock, amount, currentWeek)
+    set({ doomClock: newDoomClock })
+
+    toast.success(`The Plan delayed! Progress reduced by ${amount ?? 5}%`, {
+      icon: '🎯',
+      duration: 5000,
+    })
+
+    console.log(`[DOOM CLOCK] Setback applied: ${state.doomClock.progress.toFixed(1)}% -> ${newDoomClock.progress.toFixed(1)}%`)
+  },
+
+  revealDoomClockMastermind: () => {
+    const state = get()
+    const newDoomClock = revealMastermind(state.doomClock)
+    set({ doomClock: newDoomClock })
+
+    toast(`🎭 Mastermind identified: ${newDoomClock.mastermind.name} (${newDoomClock.mastermind.alias})`, {
+      icon: '🔍',
+      duration: 8000,
+    })
+
+    console.log(`[DOOM CLOCK] Mastermind revealed: ${newDoomClock.mastermind.name}`)
+  },
+
+  getDoomClockThreat: () => {
+    return getThreatLevel(get().doomClock.progress)
   },
 
   // =====================================================================

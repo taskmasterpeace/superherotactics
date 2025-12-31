@@ -304,6 +304,110 @@ export interface SimWeapon {
   currentFireMode?: FireMode;       // Currently selected mode
 }
 
+// ============ ARMOR TYPES (Simplified from armor.ts) ============
+export interface SimArmor {
+  id: string;
+  name: string;
+  category: 'Light' | 'Medium' | 'Heavy' | 'Power' | 'Shield' | 'Natural';
+
+  // Damage Reduction by type
+  drPhysical: number;     // Reduces physical damage (bullets, blades)
+  drEnergy: number;       // Reduces energy damage (lasers, plasma)
+  drMental: number;       // Reduces mental damage (psychic)
+
+  // Ballistic Protection
+  stoppingPower: number;  // Blocks damage entirely if damage <= SP
+  caliberRating: 'none' | 'pistol' | 'smg' | 'rifle' | 'ap' | 'heavy';
+
+  // Coverage & Condition
+  coverage: 'Torso' | 'Full Body' | 'Arms' | 'Legs' | 'Head' | 'Hands' | 'Accessory';
+  condition: number;      // Current condition
+  conditionMax: number;   // Max durability
+
+  // Penalties
+  movementPenalty: number;  // Tiles per turn reduction
+  stealthPenalty: number;   // Noise level increase
+
+  // Shield-specific
+  shieldHp?: number;         // For energy shields
+  shieldRegenRate?: number;  // HP restored per turn
+  shieldRegenDelay?: number; // Turns after damage before regen starts
+}
+
+/**
+ * Calculate effective DR and stopping power from equipped armor.
+ * Used to populate SimUnit.dr and SimUnit.stoppingPower.
+ */
+export function calculateArmorProtection(armor: SimArmor | undefined): {
+  dr: number;
+  stoppingPower: number;
+  shieldHp: number;
+} {
+  if (!armor) {
+    return { dr: 0, stoppingPower: 0, shieldHp: 0 };
+  }
+
+  return {
+    dr: armor.drPhysical,  // Use physical DR as base
+    stoppingPower: armor.stoppingPower,
+    shieldHp: armor.shieldHp || 0,
+  };
+}
+
+// Common armor presets for quick unit creation
+export const ARMOR_PRESETS: Record<string, SimArmor> = {
+  none: {
+    id: 'NONE', name: 'Unarmored', category: 'Light',
+    drPhysical: 0, drEnergy: 0, drMental: 0,
+    stoppingPower: 0, caliberRating: 'none',
+    coverage: 'Torso', condition: 100, conditionMax: 100,
+    movementPenalty: 0, stealthPenalty: 0,
+  },
+  leatherJacket: {
+    id: 'ARM_LGT_001', name: 'Leather Jacket', category: 'Light',
+    drPhysical: 3, drEnergy: 0, drMental: 0,
+    stoppingPower: 0, caliberRating: 'none',
+    coverage: 'Torso', condition: 20, conditionMax: 20,
+    movementPenalty: 0, stealthPenalty: 0,
+  },
+  kevlarVest: {
+    id: 'ARM_LGT_002', name: 'Kevlar Vest', category: 'Light',
+    drPhysical: 8, drEnergy: 0, drMental: 0,
+    stoppingPower: 28, caliberRating: 'pistol',
+    coverage: 'Torso', condition: 40, conditionMax: 40,
+    movementPenalty: 0, stealthPenalty: 0,
+  },
+  tacticalVest: {
+    id: 'ARM_MED_001', name: 'Tactical Vest', category: 'Medium',
+    drPhysical: 12, drEnergy: 2, drMental: 0,
+    stoppingPower: 35, caliberRating: 'smg',
+    coverage: 'Torso', condition: 60, conditionMax: 60,
+    movementPenalty: 1, stealthPenalty: 1,
+  },
+  militaryPlate: {
+    id: 'ARM_HVY_001', name: 'Military Plate Carrier', category: 'Heavy',
+    drPhysical: 18, drEnergy: 5, drMental: 0,
+    stoppingPower: 48, caliberRating: 'rifle',
+    coverage: 'Torso', condition: 80, conditionMax: 80,
+    movementPenalty: 2, stealthPenalty: 2,
+  },
+  powerArmorMk1: {
+    id: 'ARM_PWR_001', name: 'Power Armor Mk1', category: 'Power',
+    drPhysical: 25, drEnergy: 15, drMental: 5,
+    stoppingPower: 55, caliberRating: 'ap',
+    coverage: 'Full Body', condition: 150, conditionMax: 150,
+    movementPenalty: 0, stealthPenalty: 3,  // Power-assisted, no move penalty
+  },
+  forceShield: {
+    id: 'ARM_SHD_005', name: 'Force Shield Generator', category: 'Shield',
+    drPhysical: 0, drEnergy: 0, drMental: 0,
+    stoppingPower: 0, caliberRating: 'none',
+    coverage: 'Accessory', condition: 100, conditionMax: 100,
+    movementPenalty: 0, stealthPenalty: 0,
+    shieldHp: 50, shieldRegenRate: 5, shieldRegenDelay: 2,
+  },
+};
+
 // ============ DISARM TYPES ============
 export interface DisarmResult {
   success: boolean;
@@ -340,6 +444,67 @@ export const DEFAULT_VISION = {
   superhuman: { angle: 360, range: 30 }, // Full circle (eyes everywhere)
   robot: { angle: 270, range: 25 },      // Nearly full, sensors
 };
+
+// ============ NIGHT COMBAT MODIFIERS ============
+
+/**
+ * Night combat reduces vision range unless unit has night vision.
+ * Flares restore vision in a radius temporarily.
+ */
+export const NIGHT_COMBAT = {
+  // Vision reduction at night (multiplier)
+  visionMultiplier: 0.4,        // 40% of normal range (15 -> 6 tiles)
+  nightVisionMultiplier: 0.8,   // Night vision: 80% of normal (15 -> 12 tiles)
+
+  // Flare illumination
+  flareRadius: 8,               // Tiles illuminated
+  flareDuration: 3,             // Combat turns
+
+  // Accuracy penalties at night
+  accuracyPenalty: -20,         // -20% accuracy without night vision
+  nightVisionPenalty: -5,       // -5% even with night vision (not perfect)
+
+  // Detection
+  muzzleFlashDetectionRange: 15, // Gunfire reveals position
+  noiseAlertRange: 10,           // Sound detection range
+};
+
+/**
+ * Get effective vision range considering night conditions.
+ */
+export function getEffectiveVisionRange(
+  baseRange: number,
+  isNight: boolean,
+  hasNightVision: boolean = false,
+  isInFlareRadius: boolean = false
+): number {
+  if (!isNight || isInFlareRadius) {
+    return baseRange;
+  }
+
+  const multiplier = hasNightVision
+    ? NIGHT_COMBAT.nightVisionMultiplier
+    : NIGHT_COMBAT.visionMultiplier;
+
+  return Math.round(baseRange * multiplier);
+}
+
+/**
+ * Get accuracy modifier for night conditions.
+ */
+export function getNightAccuracyMod(
+  isNight: boolean,
+  hasNightVision: boolean = false,
+  isInFlareRadius: boolean = false
+): number {
+  if (!isNight || isInFlareRadius) {
+    return 0;
+  }
+
+  return hasNightVision
+    ? NIGHT_COMBAT.nightVisionPenalty
+    : NIGHT_COMBAT.accuracyPenalty;
+}
 
 // ============ UNIT TYPES ============
 export interface SimUnit {
@@ -383,6 +548,7 @@ export interface SimUnit {
   weapon: SimWeapon;
   originalWeapon?: SimWeapon;  // Stored when disarmed
   disarmed: boolean;
+  armor?: SimArmor;           // Equipped armor (optional)
 
   // Position (optional, for grid-based combat)
   position?: { x: number; y: number };
@@ -393,6 +559,56 @@ export interface SimUnit {
 
   // XCOM-style action system (optional, for new 2-action system)
   turnState?: TurnState;
+
+  // Shield regeneration tracking
+  shieldRegenDelayRemaining?: number;  // Turns until shield can regen
+
+  // Night combat
+  hasNightVision?: boolean;  // Unit has night vision equipment
+}
+
+// ============ SHIELD REGENERATION ============
+
+/**
+ * Process shield regeneration for a unit at the start of their turn.
+ * Shields regen after a delay (turns since last damage).
+ *
+ * @param unit - Unit to process
+ * @returns Amount of shield HP regenerated
+ */
+export function processShieldRegen(unit: SimUnit): number {
+  // No armor with shields = no regen
+  if (!unit.armor?.shieldHp || unit.maxShieldHp <= 0) {
+    return 0;
+  }
+
+  // Already at max shields
+  if (unit.shieldHp >= unit.maxShieldHp) {
+    return 0;
+  }
+
+  // Check delay
+  const delayRemaining = unit.shieldRegenDelayRemaining ?? 0;
+  if (delayRemaining > 0) {
+    unit.shieldRegenDelayRemaining = delayRemaining - 1;
+    return 0;
+  }
+
+  // Regenerate shields
+  const regenRate = unit.armor.shieldRegenRate ?? 5;
+  const oldShield = unit.shieldHp;
+  unit.shieldHp = Math.min(unit.maxShieldHp, unit.shieldHp + regenRate);
+
+  return unit.shieldHp - oldShield;
+}
+
+/**
+ * Call this when unit takes damage to reset shield regen delay.
+ */
+export function resetShieldRegenDelay(unit: SimUnit): void {
+  if (unit.armor?.shieldRegenDelay) {
+    unit.shieldRegenDelayRemaining = unit.armor.shieldRegenDelay;
+  }
 }
 
 // ============ GRENADE TYPES ============
@@ -405,6 +621,10 @@ export interface SimGrenade {
   statusEffects: StatusEffectId[];
   knockbackForce: number;
   maxRange: number;
+  // Night combat - flares illuminate area
+  illuminates?: boolean;        // True if provides light (flares)
+  illuminationRadius?: number;  // Radius of illumination (uses NIGHT_COMBAT.flareRadius if not set)
+  illuminationDuration?: number; // Turns of illumination (uses NIGHT_COMBAT.flareDuration if not set)
 }
 
 // Grenade definitions for the headless simulator
@@ -458,6 +678,19 @@ export const GRENADES: Record<string, SimGrenade> = {
     statusEffects: [],
     knockbackForce: 0,
     maxRange: 15,
+  },
+  FLARE: {
+    id: 'FLARE',
+    name: 'Flare',
+    damageAtCenter: 5,            // Minor burn damage
+    blastRadius: 1,               // Small impact area
+    damageFalloff: 'linear',
+    statusEffects: [],
+    knockbackForce: 0,
+    maxRange: 20,                 // Can be thrown far
+    illuminates: true,            // Provides light!
+    illuminationRadius: NIGHT_COMBAT.flareRadius,     // 8 tiles
+    illuminationDuration: NIGHT_COMBAT.flareDuration, // 3 turns
   },
 };
 

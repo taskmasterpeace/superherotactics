@@ -46,6 +46,10 @@ import {
   BOND_LEVEL_BONUSES,
   MBTI_COMPATIBILITY_MULTIPLIER,
   MBTI_COMPATIBILITY_RULES,
+  resetShieldRegenDelay,
+  getNightAccuracyMod,
+  getEffectiveVisionRange,
+  NIGHT_COMBAT,
 } from './types';
 
 import {
@@ -126,7 +130,9 @@ export function getVisionCone(unit: SimUnit): VisionCone {
 export function isInVisionCone(
   unit: SimUnit,
   targetX: number,
-  targetY: number
+  targetY: number,
+  isNight: boolean = false,
+  isInFlareRadius: boolean = false
 ): boolean {
   if (!unit.position) return true; // No position = always visible
 
@@ -140,8 +146,16 @@ export function isInVisionCone(
   const dy = targetY - unit.position.y;
   const distance = Math.sqrt(dx * dx + dy * dy);
 
+  // Get effective vision range (reduced at night)
+  const effectiveRange = getEffectiveVisionRange(
+    vision.range,
+    isNight,
+    unit.hasNightVision,
+    isInFlareRadius
+  );
+
   // Beyond vision range
-  if (distance > vision.range) return false;
+  if (distance > effectiveRange) return false;
 
   // Calculate angle to target
   const angleToTarget = getAngleToTarget(
@@ -291,7 +305,9 @@ export function getHitResult(roll: number, accuracy: number): HitResult {
 export function calculateAccuracy(
   attacker: SimUnit,
   target: SimUnit,
-  distance?: number
+  distance?: number,
+  isNight: boolean = false,
+  isInFlareRadius: boolean = false
 ): number {
   const weapon = attacker.weapon;
   let accuracy = weapon.accuracy || 70;
@@ -403,6 +419,12 @@ export function calculateAccuracy(
   // Only applies if both units have positions set.
   const flankingBonus = getFlankingBonus(attacker, target);
   accuracy += flankingBonus;
+
+  // NIGHT COMBAT PENALTY
+  // -20% accuracy at night, reduced to -5% with night vision
+  // Flares negate the penalty completely in their radius
+  const nightPenalty = getNightAccuracyMod(isNight, attacker.hasNightVision, isInFlareRadius);
+  accuracy += nightPenalty;
 
   // Clamp to valid range
   return Math.max(5, Math.min(95, accuracy));
@@ -725,6 +747,11 @@ export function applyAttackResult(target: SimUnit, result: AttackResult): void {
   target.hp = result.targetHpAfter;
   target.shieldHp = result.targetShieldAfter;
   target.alive = target.hp > 0;
+
+  // Reset shield regen delay when taking damage
+  if (result.damage > 0) {
+    resetShieldRegenDelay(target);
+  }
 
   // Apply status effects if present
   if (result._statusEffects && result._statusEffects.length > 0) {
