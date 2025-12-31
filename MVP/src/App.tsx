@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { useGameStore } from './stores/enhancedGameStore'
 import { Toaster } from 'react-hot-toast'
 
+// Underworld Test - registers testUnderworldSystem() on window for console testing
+import './data/underworldTest'
+
 // Notification System
 import NotificationBar from './components/NotificationBar'
 
@@ -15,6 +18,7 @@ import GameHUD from './components/GameHUD'
 import TacticalCombat from './components/CompleteTacticalCombat'
 import CharacterScreen from './components/CharacterScreen'
 import InvestigationCenter from './components/WorkingInvestigationCenter'
+import InvestigationBoard from './components/InvestigationBoard'
 import MobileInterface from './components/MobileInterface'
 import CombatLab from './components/CombatLab'
 // import HexWorldMap from './components/HexWorldMap'  // Unused - keeping for reference
@@ -27,6 +31,7 @@ import LoadoutEditor from './components/LoadoutEditor'
 import MobilePhone from './components/MobilePhone'
 import SquadRoster from './components/SquadRoster'
 import QuickCombatSimulator from './components/QuickCombatSimulator'
+import InstantCombat from './components/InstantCombat'
 
 // Tools
 import { AssetManager } from './tools/AssetManager'
@@ -35,6 +40,12 @@ import DataViewer from './components/DataViewer'
 import SoundConfigUI from './components/SoundConfigUI'
 import SectorEditor from './tools/SectorEditor'
 import WorldDataEditor from './tools/WorldDataEditor'
+import NewsBrowser from './components/NewsBrowser'
+import HospitalScreen from './components/HospitalScreen'
+import EquipmentShop from './components/EquipmentShop'
+
+// News Generator - subscribes to EventBus for automatic news generation
+import { initNewsGenerator, cleanupNewsGenerator } from './data/newsGenerator'
 
 function App() {
   const { gamePhase, currentView, setCurrentView, setGamePhase } = useGameStore()
@@ -42,12 +53,16 @@ function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const [assetManagerOpen, setAssetManagerOpen] = useState(false)
   const [quickCombatOpen, setQuickCombatOpen] = useState(false)
+  const [instantCombatOpen, setInstantCombatOpen] = useState(false)
 
   // Get the idle check function from the store
   const checkIdleCharacters = useGameStore(state => state.checkIdleCharacters)
 
   useEffect(() => {
     console.log('🎮 SuperHero Tactics MVP initialized')
+
+    // Initialize news generator (subscribes to EventBus for automatic news)
+    initNewsGenerator()
 
     // Handle resize
     const handleResize = () => setIsMobile(window.innerWidth <= 768)
@@ -75,6 +90,7 @@ function App() {
       window.removeEventListener('resize', handleResize)
       window.removeEventListener('keydown', handleKeyDown)
       clearInterval(idleCheckInterval)
+      cleanupNewsGenerator()
     }
   }, [checkIdleCharacters])
 
@@ -128,8 +144,20 @@ function App() {
             <button onClick={() => { setGamePhase('playing'); setCurrentView('investigation'); }} className="text-left hover:text-green-400 px-2 py-1 hover:bg-gray-800 rounded">
               → Investigations
             </button>
+            <button onClick={() => { setGamePhase('playing'); setCurrentView('investigation-board'); }} className="text-left hover:text-yellow-400 px-2 py-1 hover:bg-gray-800 rounded">
+              → Investigation Board (NEW)
+            </button>
             <button onClick={() => { setGamePhase('playing'); setCurrentView('characters'); }} className="text-left hover:text-cyan-400 px-2 py-1 hover:bg-gray-800 rounded">
               → Characters
+            </button>
+            <button onClick={() => { setGamePhase('playing'); setCurrentView('hospital'); }} className="text-left hover:text-red-400 px-2 py-1 hover:bg-gray-800 rounded font-bold border-l-2 border-red-500 pl-2">
+              🏥 Hospital Management
+            </button>
+            <button onClick={() => { setGamePhase('playing'); setCurrentView('equipment-shop'); }} className="text-left hover:text-green-400 px-2 py-1 hover:bg-gray-800 rounded font-bold border-l-2 border-green-500 pl-2">
+              🏪 Equipment Shop
+            </button>
+            <button onClick={() => { setGamePhase('playing'); setCurrentView('news'); }} className="text-left hover:text-blue-400 px-2 py-1 hover:bg-gray-800 rounded font-bold border-l-2 border-blue-500 pl-2">
+              📰 News Browser
             </button>
             <button onClick={() => { setGamePhase('playing'); setCurrentView('almanac'); }} className="text-left hover:text-amber-400 px-2 py-1 hover:bg-gray-800 rounded font-bold border-l-2 border-amber-500 pl-2">
               📚 World Almanac
@@ -161,6 +189,9 @@ function App() {
             </button>
             <button onClick={() => { setQuickCombatOpen(true); setDevMode(false); }} className="text-left hover:text-red-400 px-2 py-1 hover:bg-gray-800 rounded font-bold border-l-2 border-red-500 pl-2">
               ⚔️ Quick Combat Simulator
+            </button>
+            <button onClick={() => { setInstantCombatOpen(true); setDevMode(false); }} className="text-left hover:text-yellow-400 px-2 py-1 hover:bg-gray-800 rounded font-bold border-l-2 border-yellow-500 pl-2">
+              ⚡ Instant Combat (Batch)
             </button>
             <div className="border-t border-gray-700 my-2"></div>
             <div className="text-xs text-gray-400 mb-2">Notification Tests:</div>
@@ -209,6 +240,62 @@ function App() {
             >
               Clear All Notifications
             </button>
+            <div className="border-t border-gray-700 my-2"></div>
+            <div className="text-xs text-gray-400 mb-2">News System Tests:</div>
+            <button
+              onClick={() => {
+                const { generateMissionNews } = useGameStore.getState()
+                generateMissionNews({
+                  success: true,
+                  collateralDamage: 15000,
+                  civilianCasualties: 0,
+                  city: 'New York',
+                  country: 'United States',
+                  missionType: 'bank_robbery',
+                  enemyType: 'gang_members',
+                  vigilantismLegal: true
+                })
+              }}
+              className="text-left hover:text-green-400 px-2 py-1 hover:bg-gray-800 rounded border-l-2 border-green-500 pl-2"
+            >
+              Generate Success Story
+            </button>
+            <button
+              onClick={() => {
+                const { generateMissionNews } = useGameStore.getState()
+                generateMissionNews({
+                  success: true,
+                  collateralDamage: 250000,
+                  civilianCasualties: 3,
+                  city: 'Los Angeles',
+                  country: 'United States',
+                  missionType: 'hostage_rescue',
+                  enemyType: 'terrorists',
+                  vigilantismLegal: true
+                })
+              }}
+              className="text-left hover:text-yellow-400 px-2 py-1 hover:bg-gray-800 rounded"
+            >
+              Generate Messy Victory
+            </button>
+            <button
+              onClick={() => {
+                const { generateMissionNews } = useGameStore.getState()
+                generateMissionNews({
+                  success: false,
+                  collateralDamage: 5000,
+                  civilianCasualties: 1,
+                  city: 'Chicago',
+                  country: 'United States',
+                  missionType: 'assassination_attempt',
+                  enemyType: 'mercenaries',
+                  vigilantismLegal: false
+                })
+              }}
+              className="text-left hover:text-red-400 px-2 py-1 hover:bg-gray-800 rounded"
+            >
+              Generate Failure Story
+            </button>
           </div>
           <div className="text-xs text-gray-500 mt-3">Phase: {gamePhase} | View: {currentView}</div>
         </div>
@@ -228,6 +315,9 @@ function App() {
 
       {/* Quick Combat Simulator Modal */}
       {quickCombatOpen && <QuickCombatSimulator onClose={() => setQuickCombatOpen(false)} />}
+
+      {/* Instant Combat (Batch Testing) Modal */}
+      {instantCombatOpen && <InstantCombat onClose={() => setInstantCombatOpen(false)} />}
 
       {/* Mobile Phone - Shows texts and calls */}
       <MobilePhone />
@@ -249,9 +339,13 @@ function App() {
           <div className={currentView !== 'combat-lab' && currentView !== 'world-map' ? 'pt-16' : ''}> {/* Account for HUD */}
             {currentView === 'world-map' && <WorldMapGrid />}
             {currentView === 'investigation' && <InvestigationCenter />}
+            {currentView === 'investigation-board' && <InvestigationBoard />}
             {currentView === 'tactical-combat' && <TacticalCombat />}
             {currentView === 'characters' && <CharacterScreen />}
+            {currentView === 'hospital' && <HospitalScreen />}
+            {currentView === 'equipment-shop' && <EquipmentShop />}
             {currentView === 'combat-lab' && <CombatLab />}
+            {currentView === 'news' && <NewsBrowser />}
             {currentView === 'encyclopedia' && <Encyclopedia />}
             {currentView === 'almanac' && <WorldAlmanac onClose={() => setCurrentView('world-map')} />}
             {currentView === 'balance' && <BalanceAnalyzer />}

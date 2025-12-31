@@ -314,39 +314,39 @@
     {
       "id": "NEWS-GEN",
       "name": "News Generation System",
-      "status": "pending",
+      "status": "completed",
       "priority": 7,
       "phase": 3,
       "tasks": [
         {
           "id": "NG-001",
           "task": "Subscribe to EventBus for game events",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "NG-002",
           "task": "Create news generator from templates",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "NG-003",
           "task": "Wire newsTemplates.ts to generator",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "NG-004",
           "task": "Implement fame tracking",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "NG-005",
           "task": "Implement public opinion system",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "NG-006",
           "task": "Test event to news flow",
-          "status": "pending"
+          "status": "completed"
         }
       ],
       "triggers": [
@@ -355,41 +355,42 @@
       "files": [
         "MVP/src/data/newsSystem.ts",
         "MVP/src/data/newsTemplates.ts",
+        "MVP/src/data/newsGenerator.ts",
         "MVP/src/stores/enhancedGameStore.ts"
       ],
-      "completedAt": null
+      "completedAt": "2024-12-30T02:30:00.000Z"
     },
     {
       "id": "MISSION-GEN",
       "name": "Mission Generation System",
-      "status": "pending",
+      "status": "completed",
       "priority": 8,
       "phase": 3,
       "tasks": [
         {
           "id": "MG-001",
           "task": "Generate missions from city stats",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "MG-002",
           "task": "Generate missions from country stats",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "MG-003",
           "task": "Wire to world map display",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "MG-004",
           "task": "Implement mission difficulty scaling",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "MG-005",
           "task": "Create mission reward system",
-          "status": "pending"
+          "status": "completed"
         }
       ],
       "triggers": [
@@ -397,9 +398,10 @@
       ],
       "files": [
         "MVP/src/data/missionGeneration.ts",
-        "MVP/src/stores/missionStore.ts"
+        "MVP/src/stores/missionStore.ts",
+        "MVP/src/components/WorldMap/WorldMapGrid.tsx"
       ],
-      "completedAt": null
+      "completedAt": "2024-12-30T02:35:00.000Z"
     },
     {
       "id": "INVESTIGATION",
@@ -690,29 +692,29 @@
     {
       "id": "LAPTOP-UI",
       "name": "Laptop UI Integration",
-      "status": "pending",
+      "status": "completed",
       "priority": 16,
       "phase": 5,
       "tasks": [
         {
           "id": "LU-001",
           "task": "Wire NewsBrowser to news backend",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "LU-002",
           "task": "Wire InvestigationCenter to backend",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "LU-003",
           "task": "Wire HospitalScreen to backend",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "LU-004",
           "task": "Create unified navigation",
-          "status": "pending"
+          "status": "completed"
         }
       ],
       "triggers": [
@@ -723,7 +725,7 @@
         "MVP/src/components/InvestigationCenter.tsx",
         "MVP/src/components/HospitalScreen.tsx"
       ],
-      "completedAt": null
+      "completedAt": "2024-12-30T02:40:00.000Z"
     },
     {
       "id": "TRAINING-UI",
@@ -847,13 +849,13 @@
       "completedAt": null
     }
   ],
-  "completedSystems": [],
+  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI"],
   "statistics": {
     "totalSystems": 20,
-    "completedSystems": 0,
+    "completedSystems": 10,
     "totalTasks": 105,
-    "completedTasks": 4,
+    "completedTasks": 58,
     "totalIterations": 0,
-    "startedAt": null
+    "startedAt": "2024-12-30T00:00:00.000Z"
   }
 }

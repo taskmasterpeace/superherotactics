@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { cities, City } from '../../data/cities';
+import { getCountryByName } from '../../data/countries';
 import { useGameStore, TravelingUnit, FleetVehicle, TIME_SPEEDS, TimeSpeed } from '../../stores/enhancedGameStore';
+import CityActionsPanel from './CityActionsPanel';
 import {
   ChevronUp,
   ChevronDown,
@@ -33,7 +35,10 @@ import {
   UserPlus,
   UserMinus,
   Timer,
+  Target,
+  Crosshair,
 } from 'lucide-react';
+import { RetroButton, RetroBadge, RetroTabs, RetroTabPanel, cn } from '../ui';
 
 // Grid configuration - 40 columns x 24 rows (matches V0)
 const GRID_COLS = 40;
@@ -60,7 +65,7 @@ interface GridCell {
 
 type TabType = 'character' | 'map' | 'vehicles';
 
-// Time Display Component
+// Time Display Component - Retro NeoBrutalism Style
 const TimeDisplay: React.FC<{
   day: number;
   year: number;
@@ -77,19 +82,23 @@ const TimeDisplay: React.FC<{
 
   return (
     <div className="flex items-center gap-2">
-      <div className="flex items-center gap-1 bg-[#1a2a3d] rounded-lg p-1 border border-cyan-600/30">
+      {/* Play/Pause and Speed Controls */}
+      <div className="flex items-center gap-1 bg-surface rounded-lg p-1 border-2 border-black shadow-retro-sm">
         <button
           onClick={onTogglePause}
-          className={`p-1.5 rounded transition-colors ${
-            isPaused ? 'bg-green-600 text-white hover:bg-green-500' : 'bg-yellow-600 text-white hover:bg-yellow-500'
-          }`}
+          className={cn(
+            "p-1.5 rounded-md border-2 border-black transition-all font-bold",
+            isPaused
+              ? 'bg-success text-white hover:bg-success/80 shadow-[2px_2px_0_0_#000] hover:translate-y-[-1px]'
+              : 'bg-warning text-black hover:bg-warning/80 shadow-[2px_2px_0_0_#000] hover:translate-y-[-1px]'
+          )}
           title={isPaused ? 'Play' : 'Pause'}
         >
           {isPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
         </button>
         <button
           onClick={onSpeedChange}
-          className="p-1.5 rounded bg-cyan-700 text-white hover:bg-cyan-600 transition-colors flex items-center gap-0.5"
+          className="p-1.5 rounded-md bg-primary text-white border-2 border-black shadow-[2px_2px_0_0_#000] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_0_#000] transition-all flex items-center gap-0.5"
           title="Change speed (1X → 10X → 60X → 360X)"
         >
           <FastForward className="w-3 h-3" />
@@ -97,23 +106,25 @@ const TimeDisplay: React.FC<{
         </button>
       </div>
 
-      <div className="flex items-center gap-2 bg-[#1a2a3d] rounded-lg px-3 py-1.5 border border-cyan-600/30">
+      {/* Time Display */}
+      <div className="flex items-center gap-2 bg-surface rounded-lg px-3 py-1.5 border-2 border-black shadow-retro-sm">
         <div
-          className="w-3 h-3 rounded-full"
+          className="w-3 h-3 rounded-full border border-black"
           style={{
-            backgroundColor: isNight ? '#C0C0C0' : '#FFD700',
-            boxShadow: isNight ? '0 0 6px rgba(192, 192, 192, 0.8)' : '0 0 8px rgba(255, 215, 0, 0.8)',
+            backgroundColor: isNight ? '#6366f1' : '#EAB308',
+            boxShadow: isNight ? '0 0 6px rgba(99, 102, 241, 0.8)' : '0 0 8px rgba(234, 179, 8, 0.8)',
           }}
         />
         <div className="flex flex-col items-start leading-tight">
-          <span className="text-white font-mono text-sm font-bold">{time}</span>
-          <span className="text-cyan-300 text-[10px] uppercase">{dayOfWeek}</span>
+          <span className="text-foreground font-mono text-sm font-bold">{time}</span>
+          <span className="text-primary-light text-[10px] uppercase">{dayOfWeek}</span>
         </div>
       </div>
 
-      <div className="flex flex-col items-start bg-[#1a2a3d] rounded-lg px-3 py-1 border border-cyan-600/30">
-        <span className="text-white font-mono text-sm font-bold leading-tight">Day {day}</span>
-        <span className="text-cyan-400 text-[10px] uppercase leading-tight">Year {year}</span>
+      {/* Day/Year Display */}
+      <div className="flex flex-col items-start bg-surface rounded-lg px-3 py-1 border-2 border-black shadow-retro-sm">
+        <span className="text-foreground font-mono text-sm font-bold leading-tight">Day {day}</span>
+        <span className="text-primary text-[10px] uppercase leading-tight">Year {year}</span>
       </div>
     </div>
   );
@@ -184,6 +195,16 @@ const MessagesPanel: React.FC<{
 }) => {
   const [isMessagesExpanded, setIsMessagesExpanded] = useState(true);
   const [expandedVehicleId, setExpandedVehicleId] = useState<string | null>(null);
+  const [selectedCity, setSelectedCity] = useState<City | null>(null);
+
+  // Get country for selected city (for city actions)
+  const selectedCityCountry = useMemo(() => {
+    if (!selectedCity) return null;
+    return getCountryByName(selectedCity.country);
+  }, [selectedCity]);
+
+  // Get budget and fame from store for city actions
+  const { budget: playerBudget, playerFame } = useGameStore();
 
   // Helper to format ETA
   const formatETA = (estimatedArrival: number) => {
@@ -208,7 +229,7 @@ const MessagesPanel: React.FC<{
       case 'morning': return <Sunrise className="w-4 h-4 text-orange-400" />;
       case 'noon': return <Sun className="w-4 h-4 text-yellow-400" />;
       case 'evening': return <Sunset className="w-4 h-4 text-orange-500" />;
-      case 'night': return <Moon className="w-4 h-4 text-blue-300" />;
+      case 'night': return <Moon className="w-4 h-4 text-indigo-300" />;
     }
   };
 
@@ -224,7 +245,7 @@ const MessagesPanel: React.FC<{
   const getVehicleStatusColor = (status: FleetVehicle['status']) => {
     switch (status) {
       case 'available': return 'bg-green-400';
-      case 'traveling': return 'bg-blue-400';
+      case 'traveling': return 'bg-orange-400';
       case 'deployed': return 'bg-purple-400';
       case 'maintenance': return 'bg-yellow-400';
       case 'damaged': return 'bg-red-400';
@@ -234,7 +255,7 @@ const MessagesPanel: React.FC<{
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'ready': return <Clock className="w-5 h-5 text-green-400" />;
-      case 'traveling': return <Navigation className="w-5 h-5 text-blue-400" />;
+      case 'traveling': return <Navigation className="w-5 h-5 text-orange-400" />;
       case 'on_mission': return <Swords className="w-5 h-5 text-orange-400" />;
       case 'injured': return <Heart className="w-5 h-5 text-red-400" />;
       default: return <Clock className="w-5 h-5 text-gray-400" />;
@@ -243,28 +264,28 @@ const MessagesPanel: React.FC<{
 
   return (
     <div className="flex flex-col gap-2 w-full h-full">
-      {/* Messages Section */}
-      <div className="bg-[#1a1a2e] border border-[#E71D36] rounded-lg overflow-hidden">
+      {/* Messages Section - Retro Style */}
+      <div className="bg-card border-2 border-black rounded-lg overflow-hidden shadow-retro-sm">
         <button
           onClick={() => setIsMessagesExpanded(!isMessagesExpanded)}
-          className="w-full flex items-center justify-between px-3 py-2 bg-[#2a2a3e] hover:bg-[#3a3a4e]"
+          className="w-full flex items-center justify-between px-3 py-2 bg-surface hover:bg-surface-light transition-colors border-b-2 border-black"
         >
-          <span className="text-white font-bold text-sm tracking-wide">MESSAGES</span>
+          <span className="text-foreground font-bold text-sm tracking-wide">MESSAGES</span>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#E71D36]">0 new</span>
-            <span className="text-white text-sm">{isMessagesExpanded ? '−' : '+'}</span>
+            <RetroBadge variant="primary" size="sm">0 new</RetroBadge>
+            <span className="text-foreground text-sm font-bold">{isMessagesExpanded ? '−' : '+'}</span>
           </div>
         </button>
         {isMessagesExpanded && (
-          <div className="max-h-[120px] overflow-y-auto p-3">
-            <p className="text-gray-500 text-xs text-center italic">No messages yet</p>
+          <div className="max-h-[120px] overflow-y-auto p-3 bg-background">
+            <p className="text-muted-foreground text-xs text-center italic">No messages yet</p>
           </div>
         )}
       </div>
 
-      {/* Tabbed Team/Map/Vehicles Section */}
-      <div className="flex-1 bg-[#F5BF29] border border-[#E71D36] rounded-lg overflow-hidden flex flex-col">
-        <div className="flex border-b-2 border-[#E71D36]">
+      {/* Tabbed Team/Map/Vehicles Section - Retro NeoBrutalism */}
+      <div className="flex-1 bg-primary border-2 border-black rounded-lg overflow-hidden flex flex-col shadow-retro">
+        <div className="flex border-b-2 border-black">
           {[
             { id: 'character' as TabType, label: 'TEAM', icon: <Users className="w-4 h-4" /> },
             { id: 'map' as TabType, label: 'MAP', icon: <MapPin className="w-4 h-4" /> },
@@ -273,11 +294,12 @@ const MessagesPanel: React.FC<{
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-bold tracking-wide transition-colors ${
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-bold tracking-wide transition-colors",
                 activeTab === tab.id
-                  ? 'bg-[#F5BF29] text-[#141204] border-b-2 border-[#141204]'
-                  : 'bg-[rgba(0,0,0,0.2)] text-[#141204]/70 hover:bg-[rgba(0,0,0,0.1)]'
-              }`}
+                  ? 'bg-primary text-primary-foreground border-b-2 border-black'
+                  : 'bg-black/20 text-primary-foreground/70 hover:bg-black/10'
+              )}
             >
               {tab.icon}
               {tab.label}
@@ -288,33 +310,34 @@ const MessagesPanel: React.FC<{
         {/* Tab Content */}
         <div className="flex-1 overflow-y-auto">
           {activeTab === 'character' && (
-            <div>
+            <div className="bg-background">
               {/* Selection Summary */}
               {selectedCharacterIds.length > 0 && (
-                <div className="px-3 py-2 bg-yellow-600/80">
+                <div className="px-3 py-2 bg-accent border-b-2 border-black">
                   <div className="flex items-center justify-between">
-                    <span className="text-white font-bold text-xs">
+                    <span className="text-black font-bold text-xs">
                       {selectedCharacterIds.length} SELECTED
                     </span>
                     {selectedCell && (
-                      <button
+                      <RetroButton
+                        variant="success"
+                        size="sm"
                         onClick={onStartTravel}
-                        className="text-xs bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded font-bold"
                       >
                         → {selectedCell.id}
-                      </button>
+                      </RetroButton>
                     )}
                   </div>
                 </div>
               )}
 
-              <div className="px-3 py-2 bg-[rgba(231,29,54,0.6)]">
+              <div className="px-3 py-2 bg-primary/80 border-b-2 border-black">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-white font-bold text-sm uppercase tracking-wider">Team Roster</h3>
-                  <span className="text-white/70 text-[10px]">Click to select • Shift+Click multi</span>
+                  <h3 className="text-primary-foreground font-bold text-sm uppercase tracking-wider">Team Roster</h3>
+                  <span className="text-primary-foreground/70 text-[10px]">Click to select • Shift+Click multi</span>
                 </div>
               </div>
-              <div className="divide-y divide-cyan-900/30">
+              <div className="divide-y-2 divide-black/20">
                 {characters.map((char) => {
                   const isSelected = selectedCharacterIds.includes(char.id);
                   const canTravel = char.status === 'ready';
@@ -326,30 +349,33 @@ const MessagesPanel: React.FC<{
                           onCharacterSelect(char.id, e.shiftKey);
                         }
                       }}
-                      className={`flex items-center gap-3 px-3 py-2 transition-colors ${
-                        canTravel ? 'cursor-pointer hover:bg-[rgba(231,29,54,0.2)]' : 'opacity-50 cursor-not-allowed'
-                      } ${isSelected ? 'bg-yellow-600/30 border-l-4 border-yellow-400' : ''}`}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-2 transition-colors",
+                        canTravel ? 'cursor-pointer hover:bg-primary/10' : 'opacity-50 cursor-not-allowed',
+                        isSelected && 'bg-accent/30 border-l-4 border-accent pl-3'
+                      )}
                     >
                       <div className="relative">
-                        <div className={`w-10 h-10 rounded-lg bg-[#1a1a2e] border-2 flex items-center justify-center ${
-                          isSelected ? 'border-yellow-400' : 'border-cyan-600'
-                        }`}>
+                        <div className={cn(
+                          "w-10 h-10 rounded-lg bg-surface border-2 flex items-center justify-center shadow-retro-sm",
+                          isSelected ? 'border-accent' : 'border-black'
+                        )}>
                           {getStatusIcon(char.status)}
                         </div>
                         {isSelected && (
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center">
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-accent rounded-full flex items-center justify-center border border-black">
                             <span className="text-[10px] text-black font-bold">✓</span>
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`font-bold text-sm truncate ${isSelected ? 'text-yellow-300' : 'text-cyan-100'}`}>
+                        <p className={cn("font-bold text-sm truncate", isSelected ? 'text-accent' : 'text-foreground')}>
                           {char.name}
                         </p>
-                        <p className="text-cyan-400/70 text-xs truncate">{char.status?.toUpperCase()}</p>
+                        <p className="text-muted-foreground text-xs truncate">{char.status?.toUpperCase()}</p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className="text-yellow-400 font-mono font-bold text-sm">{char.sector || 'HQ'}</p>
+                        <p className="text-primary font-mono font-bold text-sm">{char.sector || 'HQ'}</p>
                       </div>
                     </div>
                   );
@@ -358,43 +384,44 @@ const MessagesPanel: React.FC<{
 
               {/* Traveling Units */}
               {travelingUnits.length > 0 && (
-                <div className="mt-2">
-                  <div className="px-3 py-2 bg-blue-600/80">
-                    <h3 className="text-white font-bold text-xs uppercase tracking-wider">
+                <div className="mt-2 border-t-2 border-black">
+                  <div className="px-3 py-2 bg-secondary border-b-2 border-black">
+                    <h3 className="text-secondary-foreground font-bold text-xs uppercase tracking-wider">
                       En Route ({travelingUnits.length})
                     </h3>
                   </div>
-                  <div className="divide-y divide-blue-900/30">
+                  <div className="divide-y-2 divide-black/20 bg-background">
                     {travelingUnits.map((unit) => (
                       <div
                         key={unit.id}
-                        className="flex items-center gap-3 px-3 py-2 bg-blue-900/20"
+                        className="flex items-center gap-3 px-3 py-2 bg-secondary/10"
                       >
-                        <div className="w-10 h-10 rounded-lg bg-blue-800 border-2 border-blue-400 flex items-center justify-center">
-                          <Navigation className="w-5 h-5 text-blue-300" />
+                        <div className="w-10 h-10 rounded-lg bg-secondary border-2 border-black flex items-center justify-center shadow-retro-sm">
+                          <Navigation className="w-5 h-5 text-secondary-foreground" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <p className="text-blue-100 font-bold text-sm truncate">{unit.name}</p>
-                            <div className="flex items-center gap-1 text-yellow-300">
+                            <p className="text-foreground font-bold text-sm truncate">{unit.name}</p>
+                            <div className="flex items-center gap-1 text-accent">
                               <Timer className="w-3 h-3" />
                               <span className="text-[10px] font-mono font-bold">{formatETA(unit.estimatedArrival)}</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-blue-400/70 text-xs">{unit.originSector} → {unit.destinationSector}</span>
-                            <span className="text-blue-300/60 text-[10px]">({Math.round(unit.progress)}%)</span>
+                            <span className="text-muted-foreground text-xs">{unit.originSector} → {unit.destinationSector}</span>
+                            <span className="text-muted-foreground/60 text-[10px]">({Math.round(unit.progress)}%)</span>
                           </div>
-                          <div className="w-full h-1.5 bg-blue-900 rounded-full mt-1 overflow-hidden">
-                            <div className="h-full bg-gradient-to-r from-blue-400 to-cyan-400 transition-all" style={{ width: `${unit.progress}%` }} />
+                          <div className="w-full h-1.5 bg-surface rounded-full mt-1 overflow-hidden border border-black">
+                            <div className="h-full bg-gradient-to-r from-primary to-secondary transition-all" style={{ width: `${unit.progress}%` }} />
                           </div>
                         </div>
-                        <button
+                        <RetroButton
+                          variant="destructive"
+                          size="sm"
                           onClick={() => onCancelTravel(unit.id)}
-                          className="text-[10px] bg-red-600/80 hover:bg-red-500 text-white px-2 py-1 rounded"
                         >
                           Cancel
-                        </button>
+                        </RetroButton>
                       </div>
                     ))}
                   </div>
@@ -404,105 +431,178 @@ const MessagesPanel: React.FC<{
           )}
 
           {activeTab === 'map' && (
-            <div className="p-3 min-h-[180px]">
+            <div className="p-3 min-h-[180px] bg-background">
               {selectedCell ? (
                 <div className="space-y-2">
-                  <div className="bg-[rgba(231,29,54,0.6)] rounded px-3 py-2">
+                  <div className="bg-primary rounded-lg px-3 py-2 border-2 border-black shadow-retro-sm">
                     <div className="flex items-center justify-between">
-                      <span className="text-white font-bold text-base tracking-wider">
+                      <span className="text-primary-foreground font-bold text-base tracking-wider">
                         SECTOR {selectedCell.id}
                       </span>
-                      <span className="text-white/80 text-xs">
+                      <span className="text-primary-foreground/80 text-xs">
                         Col {selectedCell.col + 1} / Row {ROW_LABELS[selectedCell.row]}
                       </span>
                     </div>
                   </div>
 
-                  <div className="bg-[rgba(0,0,0,0.2)] rounded px-3 py-2">
-                    <p className="text-xs text-[#141204]/70 uppercase">Region</p>
-                    <p className="text-[#141204] font-bold text-lg">{selectedCell.region}</p>
+                  <div className="bg-surface rounded-lg px-3 py-2 border-2 border-black">
+                    <p className="text-xs text-muted-foreground uppercase">Region</p>
+                    <p className="text-foreground font-bold text-lg">{selectedCell.region}</p>
                   </div>
 
                   {selectedCell.countries.length > 0 && (
-                    <div className="bg-[rgba(0,0,0,0.2)] rounded px-3 py-2">
-                      <p className="text-xs text-[#141204]/70 uppercase">Countries</p>
-                      <p className="text-[#141204] text-sm">{selectedCell.countries.join(', ')}</p>
+                    <div className="bg-surface rounded-lg px-3 py-2 border-2 border-black">
+                      <p className="text-xs text-muted-foreground uppercase">Countries</p>
+                      <p className="text-foreground text-sm">{selectedCell.countries.join(', ')}</p>
                     </div>
                   )}
 
                   {selectedCell.cities.length > 0 && (
-                    <div className="bg-[rgba(0,0,0,0.2)] rounded px-3 py-2">
-                      <p className="text-xs text-[#141204]/70 uppercase flex items-center gap-1">
-                        <Building2 className="w-3 h-3" /> Cities ({selectedCell.cities.length})
+                    <div className="bg-surface rounded-lg px-3 py-2 border-2 border-black">
+                      <p className="text-xs text-muted-foreground uppercase flex items-center gap-1">
+                        <Building2 className="w-3 h-3" /> Cities ({selectedCell.cities.length}) - Click to view actions
                       </p>
                       <div className="space-y-1 mt-1 max-h-32 overflow-y-auto">
-                        {selectedCell.cities.slice(0, 5).map((city, idx) => (
-                          <div key={idx} className="flex items-center justify-between">
-                            <span className="text-[#141204] text-sm font-medium">{city.name}</span>
-                            <span className="text-[#141204]/60 text-xs">Pop: {(city.population / 1000000).toFixed(1)}M</span>
-                          </div>
+                        {selectedCell.cities.slice(0, 8).map((city, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setSelectedCity(selectedCity?.name === city.name ? null : city)}
+                            className={cn(
+                              "w-full flex items-center justify-between px-2 py-1 rounded transition-colors text-left",
+                              selectedCity?.name === city.name
+                                ? "bg-primary text-primary-foreground"
+                                : "hover:bg-surface-light"
+                            )}
+                          >
+                            <span className={cn(
+                              "text-sm font-medium",
+                              selectedCity?.name === city.name ? "text-primary-foreground" : "text-foreground"
+                            )}>
+                              {city.name}
+                            </span>
+                            <span className={cn(
+                              "text-xs",
+                              selectedCity?.name === city.name ? "text-primary-foreground/70" : "text-muted-foreground"
+                            )}>
+                              Pop: {(city.population / 1000000).toFixed(1)}M
+                            </span>
+                          </button>
                         ))}
-                        {selectedCell.cities.length > 5 && (
-                          <p className="text-[#141204]/50 text-xs">+{selectedCell.cities.length - 5} more cities</p>
+                        {selectedCell.cities.length > 8 && (
+                          <p className="text-muted-foreground/50 text-xs px-2">+{selectedCell.cities.length - 8} more cities</p>
                         )}
                       </div>
                     </div>
                   )}
 
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-[rgba(0,0,0,0.2)] rounded px-3 py-2">
-                      <p className="text-[10px] text-[#141204]/70 uppercase">Terrain</p>
-                      <p className="text-[#141204] text-xs">{selectedCell.terrain || 'Various'}</p>
+                    <div className="bg-surface rounded-lg px-3 py-2 border-2 border-black">
+                      <p className="text-[10px] text-muted-foreground uppercase">Terrain</p>
+                      <p className="text-foreground text-xs">{selectedCell.terrain || 'Various'}</p>
                     </div>
-                    <div className="bg-[rgba(0,0,0,0.2)] rounded px-3 py-2">
-                      <p className="text-[10px] text-[#141204]/70 uppercase">Climate</p>
-                      <p className="text-[#141204] text-xs">{selectedCell.climate || 'Varied'}</p>
+                    <div className="bg-surface rounded-lg px-3 py-2 border-2 border-black">
+                      <p className="text-[10px] text-muted-foreground uppercase">Climate</p>
+                      <p className="text-foreground text-xs">{selectedCell.climate || 'Varied'}</p>
                     </div>
                   </div>
 
+                  {/* Available Missions */}
+                  {sectorMissions.length > 0 && (
+                    <div className="mt-3">
+                      <div className="flex items-center gap-1.5 text-muted-foreground mb-2">
+                        <Target className="w-3 h-3" /> Available Missions ({sectorMissions.length})
+                      </div>
+                      <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                        {sectorMissions.slice(0, 5).map((mission) => (
+                          <div
+                            key={mission.id}
+                            className="bg-surface rounded-lg px-2 py-1.5 border border-black/50 hover:border-primary cursor-pointer flex items-center justify-between"
+                            onClick={() => {
+                              acceptMission(mission.id);
+                              console.log('[MISSION] Accepted:', mission.name);
+                            }}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <p className="text-foreground text-xs font-medium truncate">{mission.name}</p>
+                              <p className="text-muted-foreground text-[10px] truncate">
+                                💰 ${mission.reward.toLocaleString()} • ⚠️ {mission.difficulty}
+                              </p>
+                            </div>
+                            <Crosshair className="w-4 h-4 text-primary ml-2 flex-shrink-0" />
+                          </div>
+                        ))}
+                        {sectorMissions.length > 5 && (
+                          <p className="text-muted-foreground/50 text-[10px] text-center">
+                            +{sectorMissions.length - 5} more missions
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Action Buttons */}
                   <div className="flex gap-2 mt-3">
-                    <button className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-xs py-2 rounded font-bold">
+                    <RetroButton variant="secondary" size="sm" className="flex-1">
                       DEPLOY SQUAD
-                    </button>
-                    <button className="flex-1 bg-red-600 hover:bg-red-500 text-white text-xs py-2 rounded font-bold">
+                    </RetroButton>
+                    <RetroButton variant="destructive" size="sm" className="flex-1">
                       ENTER COMBAT
-                    </button>
+                    </RetroButton>
                   </div>
+
+                  {/* City Actions Panel */}
+                  {selectedCity && (
+                    <div className="mt-3">
+                      <CityActionsPanel
+                        selectedCity={selectedCity}
+                        country={selectedCityCountry}
+                        playerFame={playerFame}
+                        playerBudget={playerBudget}
+                        onActionSelect={(action, city) => {
+                          console.log('[CITY ACTION] Selected:', action.name, 'in', city.name);
+                          // TODO: Wire to game store action execution
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full py-8 text-center">
-                  <MapPin className="w-12 h-12 text-[#141204]/30 mb-3" />
-                  <p className="text-[#141204]/50 text-sm font-medium">No Sector Selected</p>
-                  <p className="text-[#141204]/40 text-xs mt-1">Click a sector on the map</p>
+                  <div className="w-16 h-16 rounded-xl bg-surface border-2 border-black flex items-center justify-center shadow-retro-sm mb-3">
+                    <MapPin className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <p className="text-foreground font-semibold">No Sector Selected</p>
+                  <p className="text-muted-foreground text-xs mt-1">Click a sector on the map</p>
                 </div>
               )}
             </div>
           )}
 
           {activeTab === 'vehicles' && (
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full bg-background">
               {/* Selected Vehicle for Travel */}
               {selectedVehicleId && (
-                <div className="px-3 py-2 bg-cyan-600/80 flex-shrink-0">
+                <div className="px-3 py-2 bg-secondary border-b-2 border-black flex-shrink-0">
                   <div className="flex items-center justify-between">
-                    <span className="text-white font-bold text-xs">
+                    <span className="text-secondary-foreground font-bold text-xs">
                       {vehicles.find(v => v.id === selectedVehicleId)?.name} SELECTED FOR TRAVEL
                     </span>
-                    <button
+                    <RetroButton
+                      variant="destructive"
+                      size="sm"
+                      shadow="sm"
                       onClick={() => onVehicleSelect(selectedVehicleId)}
-                      className="text-[10px] bg-red-500/80 hover:bg-red-500 text-white px-2 py-0.5 rounded"
                     >
                       Clear
-                    </button>
+                    </RetroButton>
                   </div>
                 </div>
               )}
 
-              <div className="px-3 py-2 bg-[rgba(231,29,54,0.6)] flex-shrink-0">
+              <div className="px-3 py-2 bg-primary/80 border-b-2 border-black flex-shrink-0">
                 <div className="flex items-center justify-between">
-                  <span className="text-white font-bold text-sm tracking-wider">FLEET MANAGEMENT</span>
-                  <span className="text-white/70 text-[10px]">Click vehicle to manage crew</span>
+                  <span className="text-primary-foreground font-bold text-sm tracking-wider">FLEET MANAGEMENT</span>
+                  <span className="text-primary-foreground/70 text-[10px]">Click vehicle to manage crew</span>
                 </div>
               </div>
 
@@ -516,74 +616,73 @@ const MessagesPanel: React.FC<{
                   const seatsUsed = vehicle.assignedCharacters.length;
 
                   return (
-                    <div key={vehicle.id} className="border-b border-[#E71D36]/30">
+                    <div key={vehicle.id} className="border-b-2 border-black/20">
                       {/* Vehicle Header */}
                       <div
                         onClick={() => setExpandedVehicleId(isExpanded ? null : vehicle.id)}
-                        className={`flex items-center px-3 py-2 transition-colors cursor-pointer hover:bg-[rgba(0,0,0,0.1)] ${
-                          isSelectedForTravel ? 'bg-cyan-600/30 border-l-4 border-cyan-400' : ''
-                        }`}
+                        className={cn(
+                          "flex items-center px-3 py-2 transition-colors cursor-pointer hover:bg-primary/10",
+                          isSelectedForTravel && 'bg-secondary/30 border-l-4 border-secondary'
+                        )}
                       >
-                        <div className={`mr-2 ${isSelectedForTravel ? 'text-cyan-300' : 'text-[#141204]'}`}>
+                        <div className={cn("mr-2", isSelectedForTravel ? 'text-secondary' : 'text-foreground')}>
                           {getVehicleIcon(vehicle.type)}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-xs font-bold truncate ${isSelectedForTravel ? 'text-cyan-200' : 'text-[#141204]'}`}>
+                          <p className={cn("text-xs font-bold truncate", isSelectedForTravel ? 'text-secondary' : 'text-foreground')}>
                             {vehicle.name}
                           </p>
                           <div className="flex items-center gap-2">
-                            <span className="text-[#141204]/60 text-[10px]">{vehicle.speed} mph</span>
-                            <span className="text-[#141204]/80 text-[10px] font-medium">
+                            <span className="text-muted-foreground text-[10px]">{vehicle.speed} mph</span>
+                            <span className="text-foreground/80 text-[10px] font-medium">
                               {seatsUsed}/{vehicle.capacity} crew
                             </span>
                           </div>
                         </div>
                         <div className="text-right mr-2">
-                          <p className="text-yellow-600 font-mono text-xs font-bold">{vehicle.currentSector}</p>
+                          <p className="text-primary font-mono text-xs font-bold">{vehicle.currentSector}</p>
                         </div>
                         <div
                           className={`w-3 h-3 rounded-full border border-black flex-shrink-0 ${getVehicleStatusColor(vehicle.status)}`}
                           title={vehicle.status}
                         />
-                        <ChevronDown className={`w-4 h-4 ml-2 text-[#141204]/60 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={cn("w-4 h-4 ml-2 text-muted-foreground transition-transform", isExpanded && 'rotate-180')} />
                       </div>
 
                       {/* Expanded Content - Crew Management */}
                       {isExpanded && (
-                        <div className="bg-[rgba(0,0,0,0.15)] px-3 py-2">
+                        <div className="bg-surface/50 px-3 py-2 border-t border-black/20">
                           {/* Select for Travel Button */}
                           {canSelect && (
-                            <button
+                            <RetroButton
+                              variant={isSelectedForTravel ? 'secondary' : 'outline'}
+                              size="sm"
+                              className="w-full mb-2"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onVehicleSelect(vehicle.id);
                               }}
-                              className={`w-full mb-2 py-1.5 rounded text-xs font-bold transition-colors ${
-                                isSelectedForTravel
-                                  ? 'bg-cyan-600 text-white'
-                                  : 'bg-cyan-600/30 text-cyan-800 hover:bg-cyan-600/50'
-                              }`}
                             >
                               {isSelectedForTravel ? '✓ SELECTED FOR TRAVEL' : 'SELECT FOR TRAVEL'}
-                            </button>
+                            </RetroButton>
                           )}
 
                           {/* Current Crew */}
                           <div className="mb-2">
-                            <p className="text-[10px] text-[#141204]/70 uppercase font-bold mb-1">Current Crew ({seatsUsed})</p>
+                            <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Current Crew ({seatsUsed})</p>
                             {assignedChars.length === 0 ? (
-                              <p className="text-[#141204]/50 text-xs italic">No crew assigned</p>
+                              <p className="text-muted-foreground/50 text-xs italic">No crew assigned</p>
                             ) : (
                               <div className="space-y-1">
                                 {assignedChars.map(char => (
-                                  <div key={char.id} className="flex items-center justify-between bg-[rgba(255,255,255,0.3)] rounded px-2 py-1">
-                                    <span className="text-[#141204] text-xs font-medium">{char.name}</span>
+                                  <div key={char.id} className="flex items-center justify-between bg-surface rounded-lg px-2 py-1 border border-black/30">
+                                    <span className="text-foreground text-xs font-medium">{char.name}</span>
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         onUnassignFromVehicle(char.id, vehicle.id);
                                       }}
-                                      className="p-0.5 rounded bg-red-500/80 hover:bg-red-500 text-white"
+                                      className="p-0.5 rounded bg-destructive hover:bg-destructive/80 text-white border border-black"
                                       title="Remove from vehicle"
                                     >
                                       <UserMinus className="w-3 h-3" />
@@ -597,17 +696,17 @@ const MessagesPanel: React.FC<{
                           {/* Add Crew Section */}
                           {seatsUsed < vehicle.capacity && availableCharacters.length > 0 && (
                             <div>
-                              <p className="text-[10px] text-[#141204]/70 uppercase font-bold mb-1">Add Crew</p>
+                              <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Add Crew</p>
                               <div className="space-y-1 max-h-24 overflow-y-auto">
                                 {availableCharacters.map(char => (
-                                  <div key={char.id} className="flex items-center justify-between bg-green-500/20 rounded px-2 py-1">
-                                    <span className="text-[#141204] text-xs">{char.name}</span>
+                                  <div key={char.id} className="flex items-center justify-between bg-success/20 rounded-lg px-2 py-1 border border-black/30">
+                                    <span className="text-foreground text-xs">{char.name}</span>
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         onAssignToVehicle(char.id, vehicle.id);
                                       }}
-                                      className="p-0.5 rounded bg-green-500/80 hover:bg-green-500 text-white"
+                                      className="p-0.5 rounded bg-success hover:bg-success/80 text-white border border-black"
                                       title="Add to vehicle"
                                     >
                                       <UserPlus className="w-3 h-3" />
@@ -619,7 +718,7 @@ const MessagesPanel: React.FC<{
                           )}
 
                           {seatsUsed >= vehicle.capacity && (
-                            <p className="text-orange-600 text-[10px] font-bold">Vehicle at full capacity</p>
+                            <p className="text-warning text-[10px] font-bold">Vehicle at full capacity</p>
                           )}
                         </div>
                       )}
@@ -629,25 +728,26 @@ const MessagesPanel: React.FC<{
               </div>
 
               {/* Status Legend */}
-              <div className="px-3 py-2 border-t border-[#E71D36]/50 flex flex-wrap gap-3 text-[10px] flex-shrink-0">
-                <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full bg-green-400 border border-black" /> Ready</span>
-                <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full bg-blue-400 border border-black" /> Traveling</span>
-                <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full bg-yellow-400 border border-black" /> Maintenance</span>
+              <div className="px-3 py-2 border-t-2 border-black bg-surface flex flex-wrap gap-3 text-[10px] flex-shrink-0 text-foreground">
+                <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full bg-success border border-black" /> Ready</span>
+                <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full bg-secondary border border-black" /> Traveling</span>
+                <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded-full bg-warning border border-black" /> Maintenance</span>
               </div>
 
               {/* Travel Summary */}
               {selectedCharacterIds.length > 0 && selectedVehicleId && selectedCell && (
-                <div className="px-3 py-2 bg-green-600/80 border-t border-green-400 flex-shrink-0">
+                <div className="px-3 py-2 bg-success border-t-2 border-black flex-shrink-0">
                   <div className="flex items-center justify-between">
-                    <span className="text-white text-xs">
+                    <span className="text-success-foreground text-xs font-bold">
                       {selectedCharacterIds.length} chars + {vehicles.find(v => v.id === selectedVehicleId)?.name}
                     </span>
-                    <button
+                    <RetroButton
+                      variant="primary"
+                      size="sm"
                       onClick={onStartTravel}
-                      className="text-xs bg-white text-green-700 px-3 py-1 rounded font-bold hover:bg-green-100"
                     >
                       DEPLOY → {selectedCell.id}
-                    </button>
+                    </RetroButton>
                   </div>
                 </div>
               )}
@@ -656,67 +756,62 @@ const MessagesPanel: React.FC<{
         </div>
       </div>
 
-      {/* Bottom Controls */}
-      <div className="bg-[#1a1a2e] border border-cyan-600/50 rounded-lg p-2">
+      {/* Bottom Controls - Retro Style */}
+      <div className="bg-card border-2 border-black rounded-lg p-2 shadow-retro-sm">
         <div className="flex items-center justify-between mb-2 px-1">
           <div className="flex items-center gap-2">
             {getTimeOfDayIcon()}
-            <span className="text-cyan-100 font-mono text-sm">{gameTime}</span>
+            <span className="text-foreground font-mono text-sm">{gameTime}</span>
           </div>
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-cyan-400">{dayOfWeek}</span>
-            <span className="text-cyan-100 font-bold">Day {gameDay}</span>
-            <span className="text-cyan-400/70">Year {gameYear}</span>
+            <span className="text-primary">{dayOfWeek}</span>
+            <span className="text-foreground font-bold">Day {gameDay}</span>
+            <span className="text-muted-foreground">Year {gameYear}</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between gap-2 mb-2">
-          <button
+          <RetroButton
+            variant={isPaused ? 'success' : 'warning'}
+            size="sm"
+            className="flex-1"
             onClick={onTogglePause}
-            className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded transition-colors border ${
-              isPaused
-                ? 'bg-green-600/20 border-green-500/50 text-green-400 hover:bg-green-600/30'
-                : 'bg-yellow-600/20 border-yellow-500/50 text-yellow-400 hover:bg-yellow-600/30'
-            }`}
           >
             {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
             <span className="text-xs font-bold">{isPaused ? 'PLAY' : 'PAUSE'}</span>
-          </button>
-          <button
+          </RetroButton>
+          <RetroButton
+            variant="primary"
+            size="sm"
             onClick={onSpeedChange}
-            className="flex items-center justify-center gap-1 px-3 py-1.5 rounded bg-cyan-600/20 border border-cyan-500/50 text-cyan-400 hover:bg-cyan-600/30 transition-colors"
           >
             <FastForward className="w-4 h-4" />
             <span className="text-xs font-bold">{timeSpeed}X</span>
-          </button>
+          </RetroButton>
         </div>
 
         <div className="flex items-center gap-2">
-          <button
+          <RetroButton
+            variant={showPhone ? 'secondary' : 'outline'}
+            size="sm"
+            className="flex-1"
             onClick={onShowPhone}
-            className={`flex-1 flex items-center justify-center gap-1 py-2 rounded transition-colors border ${
-              showPhone
-                ? 'bg-cyan-600 border-cyan-400 text-white'
-                : 'bg-[#2a3a4d] border-cyan-600/30 text-cyan-400 hover:bg-[#3a4a5d]'
-            }`}
           >
             <Smartphone className="w-4 h-4" />
             <span className="text-xs font-bold">PHONE</span>
-          </button>
-          <button
+          </RetroButton>
+          <RetroButton
+            variant={showLaptop ? 'secondary' : 'outline'}
+            size="sm"
+            className="flex-1"
             onClick={onShowLaptop}
-            className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded transition-colors border ${
-              showLaptop
-                ? 'bg-cyan-600 border-cyan-400 text-white'
-                : 'bg-[#2a3a4d] border-cyan-600/30 text-cyan-400 hover:bg-[#3a4a5d]'
-            }`}
           >
             <Laptop className="w-4 h-4" />
             <span className="text-xs font-bold">LAPTOP</span>
-          </button>
-          <button className="p-2 rounded bg-[#2a3a4d] border border-cyan-600/30 text-cyan-400 hover:bg-[#3a4a5d] transition-colors">
+          </RetroButton>
+          <RetroButton variant="ghost" size="icon" shadow="none">
             <Settings className="w-4 h-4" />
-          </button>
+          </RetroButton>
         </div>
       </div>
     </div>
@@ -765,11 +860,30 @@ export const WorldMapGrid: React.FC = () => {
     cycleTimeSpeed,
     tickTime,
     getFormattedTime,
+    // Mission system
+    getMissionsForSector,
+    generateMissionsForSector,
+    acceptMission,
+    activeMissions,
   } = useGameStore();
 
   // Selected characters for travel
   const [selectedCharacterIds, setSelectedCharacterIds] = useState<string[]>([]);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+
+  // Generate missions when a sector is selected
+  useEffect(() => {
+    if (selectedCell) {
+      // Generate missions for the selected sector if none exist
+      const existingMissions = getMissionsForSector(selectedCell.id);
+      if (!existingMissions || existingMissions.length === 0) {
+        generateMissionsForSector(selectedCell.id);
+      }
+    }
+  }, [selectedCell?.id, getMissionsForSector, generateMissionsForSector]);
+
+  // Get missions for currently selected sector
+  const sectorMissions = selectedCell ? getMissionsForSector(selectedCell.id) : [];
 
   // Update travel progress periodically
   useEffect(() => {
@@ -1014,23 +1128,23 @@ export const WorldMapGrid: React.FC = () => {
   }, [timeOfDay]);
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#0a1628] overflow-hidden">
-      {/* Top Bar */}
-      <div className="flex-shrink-0 bg-[#0d1a2d] border-b-2 border-cyan-600/50 px-4 py-2 flex items-center justify-between">
+    <div className="h-screen w-screen flex flex-col bg-background overflow-hidden">
+      {/* Top Bar - Retro NeoBrutalism */}
+      <div className="flex-shrink-0 bg-surface border-b-2 border-black px-4 py-2 flex items-center justify-between shadow-retro-sm">
         {/* Left - Country Flag and Name */}
         <div className="flex items-center gap-3 min-w-[180px]">
           {selectedCountry && (
             <>
-              <div className="w-10 h-7 rounded overflow-hidden border-2 border-cyan-500/50 shadow-lg bg-gray-700">
-                <span className="text-xs text-white flex items-center justify-center h-full">
+              <div className="w-10 h-7 rounded-lg overflow-hidden border-2 border-black shadow-retro-sm bg-primary/20">
+                <span className="text-xs text-foreground flex items-center justify-center h-full font-bold">
                   {selectedCountry.slice(0, 2).toUpperCase()}
                 </span>
               </div>
               <div className="flex flex-col">
-                <span className="text-cyan-100 font-bold text-sm uppercase tracking-wide leading-tight">
+                <span className="text-foreground font-bold text-sm uppercase tracking-wide leading-tight">
                   {selectedCountry}
                 </span>
-                <span className="text-cyan-400/70 text-xs">Headquarters</span>
+                <span className="text-muted-foreground text-xs">Headquarters</span>
               </div>
             </>
           )}
@@ -1053,8 +1167,8 @@ export const WorldMapGrid: React.FC = () => {
 
         {/* Right - Budget */}
         <div className="min-w-[180px] flex justify-end">
-          <div className="bg-[#1a2a3d] rounded-lg px-3 py-1 border border-green-600/30">
-            <span className="text-green-400 font-mono font-bold">${budget.toLocaleString()}</span>
+          <div className="bg-surface rounded-lg px-3 py-1 border-2 border-black shadow-retro-sm">
+            <span className="text-success font-mono font-bold">${budget.toLocaleString()}</span>
           </div>
         </div>
       </div>
@@ -1062,11 +1176,11 @@ export const WorldMapGrid: React.FC = () => {
       {/* Main Content - Map and Panel */}
       <div className="flex-1 flex gap-2 p-2 min-h-0 overflow-hidden">
         {/* LEFT - Map Panel (2/3) */}
-        <div className="flex-1 md:w-2/3 md:flex-none flex flex-col min-h-0 bg-[#0d1a2d] border-2 border-cyan-600/30 rounded-lg overflow-hidden relative">
-          <div className="flex-1 relative overflow-hidden bg-[#0a0a1a]" ref={mapContainerRef}>
+        <div className="flex-1 md:w-2/3 md:flex-none flex flex-col min-h-0 bg-card border-2 border-black rounded-lg overflow-hidden relative shadow-retro">
+          <div className="flex-1 relative overflow-hidden bg-background" ref={mapContainerRef}>
             {/* Fixed Column Labels at Top */}
             <div
-              className="absolute top-0 left-0 right-0 z-30 bg-[#0a0a1a] overflow-hidden"
+              className="absolute top-0 left-0 right-0 z-30 bg-surface overflow-hidden"
               style={{ height: `${COL_LABEL_HEIGHT}px`, paddingLeft: `${ROW_LABEL_WIDTH}px` }}
             >
               <div
@@ -1080,11 +1194,12 @@ export const WorldMapGrid: React.FC = () => {
                 {Array.from({ length: GRID_COLS }, (_, i) => (
                   <div
                     key={i}
-                    className={`flex items-center justify-center font-mono text-[10px] transition-colors ${
+                    className={cn(
+                      "flex items-center justify-center font-mono text-[10px] transition-colors",
                       hoveredCell?.col === i || selectedCell?.col === i
-                        ? 'text-yellow-300 font-bold'
-                        : 'text-cyan-400/70'
-                    }`}
+                        ? 'text-accent font-bold'
+                        : 'text-primary/70'
+                    )}
                     style={{ width: `${GRID_CELL_SIZE}px`, height: `${COL_LABEL_HEIGHT}px`, flexShrink: 0 }}
                   >
                     {i + 1}
@@ -1095,7 +1210,7 @@ export const WorldMapGrid: React.FC = () => {
 
             {/* Fixed Row Labels on Left */}
             <div
-              className="absolute top-0 left-0 bottom-0 z-30 bg-[#0a0a1a] overflow-hidden"
+              className="absolute top-0 left-0 bottom-0 z-30 bg-surface overflow-hidden"
               style={{ width: `${ROW_LABEL_WIDTH}px`, paddingTop: `${COL_LABEL_HEIGHT}px` }}
             >
               <div
@@ -1109,11 +1224,12 @@ export const WorldMapGrid: React.FC = () => {
                 {ROW_LABELS.map((label, index) => (
                   <div
                     key={label}
-                    className={`flex items-center justify-center font-mono text-[10px] transition-colors ${
+                    className={cn(
+                      "flex items-center justify-center font-mono text-[10px] transition-colors",
                       hoveredCell?.row === index || selectedCell?.row === index
-                        ? 'text-yellow-300 font-bold'
-                        : 'text-cyan-400/70'
-                    }`}
+                        ? 'text-accent font-bold'
+                        : 'text-primary/70'
+                    )}
                     style={{ width: `${ROW_LABEL_WIDTH}px`, height: `${GRID_CELL_SIZE}px`, flexShrink: 0 }}
                   >
                     {label}
@@ -1124,7 +1240,7 @@ export const WorldMapGrid: React.FC = () => {
 
             {/* Corner cell */}
             <div
-              className="absolute top-0 left-0 z-40 bg-[#0a0a1a]"
+              className="absolute top-0 left-0 z-40 bg-surface"
               style={{ width: `${ROW_LABEL_WIDTH}px`, height: `${COL_LABEL_HEIGHT}px` }}
             />
 
@@ -1184,22 +1300,23 @@ export const WorldMapGrid: React.FC = () => {
                     {gridData.map((cell) => (
                       <div
                         key={cell.id}
-                        className={`border transition-colors pointer-events-auto ${
+                        className={cn(
+                          "border transition-colors pointer-events-auto",
                           selectedCell?.id === cell.id
-                            ? 'bg-yellow-500/30 border-yellow-400 border-2'
+                            ? 'bg-accent/30 border-accent border-2'
                             : hoveredCell?.id === cell.id
-                              ? 'bg-cyan-500/20 border-cyan-400'
+                              ? 'bg-primary/20 border-primary'
                               : cell.cities.length > 0
-                                ? 'border-cyan-500/40 hover:bg-blue-500/20'
-                                : 'border-cyan-500/20 hover:bg-gray-500/10'
-                        }`}
+                                ? 'border-primary/40 hover:bg-primary/20'
+                                : 'border-primary/20 hover:bg-surface/50'
+                        )}
                         onClick={() => handleCellClick(cell)}
                         onMouseEnter={() => setHoveredCell(cell)}
                         onMouseLeave={() => setHoveredCell(null)}
                       >
                         {/* City indicator */}
                         {cell.cities.length > 0 && !hoveredCell && selectedCell?.id !== cell.id && (
-                          <div className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full shadow-lg shadow-green-500/50" />
+                          <div className="absolute top-1 right-1 w-2 h-2 bg-success rounded-full shadow-lg shadow-success/50" />
                         )}
                       </div>
                     ))}
@@ -1215,9 +1332,10 @@ export const WorldMapGrid: React.FC = () => {
                   return (
                     <div
                       key={char.id}
-                      className={`absolute w-6 h-6 rounded-full border-2 flex items-center justify-center text-white text-xs font-bold shadow-lg z-20 cursor-pointer hover:scale-110 transition-transform ${
-                        isSelected ? 'bg-yellow-500 border-yellow-300 ring-2 ring-yellow-400' : 'bg-blue-600 border-white'
-                      }`}
+                      className={cn(
+                        "absolute w-6 h-6 rounded-lg border-2 flex items-center justify-center text-white text-xs font-bold z-20 cursor-pointer hover:scale-110 transition-transform shadow-retro-sm",
+                        isSelected ? 'bg-accent border-black ring-2 ring-accent' : 'bg-primary border-black'
+                      )}
                       style={{
                         left: cell.col * GRID_CELL_SIZE + GRID_CELL_SIZE / 2 - 12,
                         top: cell.row * GRID_CELL_SIZE + GRID_CELL_SIZE / 2 - 12,
@@ -1355,9 +1473,9 @@ export const WorldMapGrid: React.FC = () => {
                   const getVehicleColor = () => {
                     if (!vehicle) return 'bg-orange-500';  // Walking
                     switch (vehicle.type) {
-                      case 'aircraft': return 'bg-cyan-500';
+                      case 'aircraft': return 'bg-yellow-500';
                       case 'ground': return 'bg-green-500';
-                      case 'sea': return 'bg-blue-500';
+                      case 'sea': return 'bg-orange-500';
                       default: return 'bg-gray-500';
                     }
                   };
@@ -1439,79 +1557,82 @@ export const WorldMapGrid: React.FC = () => {
 
             {/* Day/Night Indicator */}
             <div className="absolute z-20" style={{ top: `${COL_LABEL_HEIGHT + 8}px`, left: `${ROW_LABEL_WIDTH + 8}px` }}>
-              <div className="bg-[#0d1a2d]/90 border border-cyan-600/50 rounded px-2 py-1 flex items-center gap-2">
-                {timeOfDay === 'night' && <Moon className="w-3 h-3 text-blue-300" />}
-                {timeOfDay === 'noon' && <Sun className="w-3 h-3 text-yellow-400" />}
-                {timeOfDay === 'morning' && <Sunrise className="w-3 h-3 text-orange-400" />}
-                {timeOfDay === 'evening' && <Sunset className="w-3 h-3 text-orange-500" />}
-                <span className="text-cyan-300 text-[10px] font-mono capitalize">{timeOfDay}</span>
+              <div className="bg-card/90 border-2 border-black rounded-lg px-2 py-1 flex items-center gap-2 shadow-retro-sm">
+                {timeOfDay === 'night' && <Moon className="w-3 h-3 text-primary-light" />}
+                {timeOfDay === 'noon' && <Sun className="w-3 h-3 text-warning" />}
+                {timeOfDay === 'morning' && <Sunrise className="w-3 h-3 text-warning" />}
+                {timeOfDay === 'evening' && <Sunset className="w-3 h-3 text-accent" />}
+                <span className="text-foreground text-[10px] font-mono capitalize font-bold">{timeOfDay}</span>
               </div>
             </div>
 
             {/* Selected Sector Info Overlay */}
             {selectedCell && (
               <div className="absolute z-20" style={{ bottom: '8px', left: '50%', transform: 'translateX(-50%)' }}>
-                <div className="bg-[#0d1a2d]/90 border border-yellow-500/50 rounded px-3 py-1">
-                  <span className="text-yellow-300 text-xs font-mono">
+                <div className="bg-card/90 border-2 border-black rounded-lg px-3 py-1 shadow-retro-sm">
+                  <span className="text-accent text-xs font-mono font-bold">
                     {selectedCell.id} - {selectedCell.region}
                   </span>
                 </div>
               </div>
             )}
 
-            {/* Map Controls */}
+            {/* Map Controls - Retro Style */}
             <div className="absolute z-20 flex flex-col items-end gap-1" style={{ bottom: '8px', right: '8px' }}>
               {controlsMinimized ? (
                 <button
                   onClick={() => setControlsMinimized(false)}
-                  className="p-2 rounded-lg bg-[#0d1a2d]/90 border border-cyan-600/50 text-cyan-400 hover:bg-cyan-700 hover:text-white transition-colors"
+                  className="p-2 rounded-lg bg-card/90 border-2 border-black text-primary hover:bg-primary hover:text-primary-foreground transition-colors shadow-retro-sm"
                 >
                   <ChevronUp className="w-4 h-4" />
                 </button>
               ) : (
                 <>
-                  <div className="flex items-center gap-1 bg-[#0d1a2d]/90 rounded-lg p-1 border border-cyan-600/50">
+                  <div className="flex items-center gap-1 bg-card/90 rounded-lg p-1 border-2 border-black shadow-retro-sm">
                     <button
                       onClick={() => setControlsMinimized(true)}
-                      className="p-1.5 rounded bg-[#1a2a3d] text-cyan-400 hover:bg-cyan-700 hover:text-white transition-colors"
+                      className="p-1.5 rounded bg-surface text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
                     >
                       <ChevronDown className="w-3 h-3" />
                     </button>
-                    <div className="w-px h-5 bg-cyan-600/30" />
+                    <div className="w-px h-5 bg-black/30" />
                     <button
                       onClick={() => setShowGrid(!showGrid)}
-                      className={`p-1.5 rounded transition-colors ${showGrid ? 'bg-cyan-600 text-white' : 'bg-[#1a2a3d] text-cyan-400 hover:bg-cyan-700 hover:text-white'}`}
+                      className={cn(
+                        "p-1.5 rounded transition-colors",
+                        showGrid ? 'bg-primary text-primary-foreground' : 'bg-surface text-primary hover:bg-primary hover:text-primary-foreground'
+                      )}
                     >
                       <Grid className="w-3 h-3" />
                     </button>
-                    <div className="w-px h-5 bg-cyan-600/30" />
-                    <button onClick={handleZoomOut} className="p-1.5 rounded bg-[#1a2a3d] text-cyan-400 hover:bg-cyan-700 hover:text-white transition-colors">
+                    <div className="w-px h-5 bg-black/30" />
+                    <button onClick={handleZoomOut} className="p-1.5 rounded bg-surface text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
                       <ZoomOut className="w-3 h-3" />
                     </button>
-                    <span className="text-cyan-300 text-[9px] font-mono w-7 text-center">
+                    <span className="text-foreground text-[9px] font-mono w-7 text-center font-bold">
                       {mapScale === 1 ? '1X' : `${mapScale}X`}
                     </span>
-                    <button onClick={handleZoomIn} className="p-1.5 rounded bg-[#1a2a3d] text-cyan-400 hover:bg-cyan-700 hover:text-white transition-colors">
+                    <button onClick={handleZoomIn} className="p-1.5 rounded bg-surface text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
                       <ZoomIn className="w-3 h-3" />
                     </button>
                   </div>
 
-                  <div className="flex flex-col items-center gap-0.5 bg-[#0d1a2d]/90 rounded-lg p-1 border border-cyan-600/50">
-                    <button onClick={() => handlePan('up')} className="p-1 rounded bg-[#1a2a3d] text-cyan-400 hover:bg-cyan-700 hover:text-white transition-colors">
+                  <div className="flex flex-col items-center gap-0.5 bg-card/90 rounded-lg p-1 border-2 border-black shadow-retro-sm">
+                    <button onClick={() => handlePan('up')} className="p-1 rounded bg-surface text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
                       <ChevronUp className="w-3 h-3" />
                     </button>
                     <div className="flex gap-0.5">
-                      <button onClick={() => handlePan('left')} className="p-1 rounded bg-[#1a2a3d] text-cyan-400 hover:bg-cyan-700 hover:text-white transition-colors">
+                      <button onClick={() => handlePan('left')} className="p-1 rounded bg-surface text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
                         <ChevronLeft className="w-3 h-3" />
                       </button>
-                      <div className="w-5 h-5 rounded bg-[#1a2a3d] flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
+                      <div className="w-5 h-5 rounded bg-surface flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                       </div>
-                      <button onClick={() => handlePan('right')} className="p-1 rounded bg-[#1a2a3d] text-cyan-400 hover:bg-cyan-700 hover:text-white transition-colors">
+                      <button onClick={() => handlePan('right')} className="p-1 rounded bg-surface text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
                         <ChevronRight className="w-3 h-3" />
                       </button>
                     </div>
-                    <button onClick={() => handlePan('down')} className="p-1 rounded bg-[#1a2a3d] text-cyan-400 hover:bg-cyan-700 hover:text-white transition-colors">
+                    <button onClick={() => handlePan('down')} className="p-1 rounded bg-surface text-primary hover:bg-primary hover:text-primary-foreground transition-colors">
                       <ChevronDown className="w-3 h-3" />
                     </button>
                   </div>
