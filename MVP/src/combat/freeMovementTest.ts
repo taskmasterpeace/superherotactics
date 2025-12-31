@@ -12,64 +12,45 @@
 
 import {
   SimUnit,
-  SimWeapon,
-  BattleState,
+  CombatPhase,
+  PhaseConfig,
+  PHASE_CONFIGS,
 } from './types';
 
-import { runBatch } from './batchTester';
-import { createTeam, createUnit, UNIT_PRESETS, WEAPONS } from './humanPresets';
+import {
+  getMovementCostByPhase,
+  canSeeEnemyByRange,
+  checkCombatTrigger,
+} from './core';
 
-// ============ COMBAT PHASE TYPES ============
+import { createUnit, UNIT_PRESETS } from './humanPresets';
 
-export type CombatPhase = 'exploration' | 'combat';
-
-export interface PhaseConfig {
-  phase: CombatPhase;
-  movementCostMultiplier: number; // 0 for exploration, 1 for combat
-  turnOrder: boolean;              // false for exploration, true for combat
-  enemiesVisible: boolean;         // false until contact
-}
-
-export const PHASE_CONFIGS: Record<CombatPhase, PhaseConfig> = {
-  exploration: {
-    phase: 'exploration',
-    movementCostMultiplier: 0,  // Free movement
-    turnOrder: false,            // No turn order
-    enemiesVisible: false,       // Enemies hidden
-  },
-  combat: {
-    phase: 'combat',
-    movementCostMultiplier: 1,  // Normal AP cost
-    turnOrder: true,             // Turn-based
-    enemiesVisible: true,        // Enemies revealed
-  },
-};
+// Re-export types for backwards compatibility
+export { CombatPhase, PhaseConfig, PHASE_CONFIGS } from './types';
 
 // ============ HELPER FUNCTIONS ============
 
+// These are now imported from core.ts:
+// - getMovementCostByPhase (was getMovementCost)
+// - canSeeEnemyByRange (was canSeeEnemy)
+// - checkCombatTrigger (was simulateMove)
+
 /**
- * Calculate movement AP cost based on phase.
- * In exploration: 0 AP
- * In combat: distance * 1 AP per tile
+ * Wrapper for backwards compatibility with tests.
  */
 function getMovementCost(distance: number, phase: CombatPhase): number {
-  const config = PHASE_CONFIGS[phase];
-  return Math.ceil(distance * config.movementCostMultiplier);
+  return getMovementCostByPhase(distance, phase);
 }
 
 /**
- * Check if two units can see each other.
- * Uses simple Euclidean distance for now.
+ * Wrapper for backwards compatibility with tests.
  */
 function canSeeEnemy(unit: SimUnit, enemy: SimUnit, visionRange: number = 15): boolean {
-  const dx = unit.position.x - enemy.position.x;
-  const dy = unit.position.y - enemy.position.y;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-  return distance <= visionRange;
+  return canSeeEnemyByRange(unit, enemy, visionRange);
 }
 
 /**
- * Simulate moving a unit and check if combat triggers.
+ * Wrapper for backwards compatibility with tests.
  */
 function simulateMove(
   unit: SimUnit,
@@ -78,32 +59,7 @@ function simulateMove(
   currentPhase: CombatPhase,
   visionRange: number = 15
 ): { newPhase: CombatPhase; apCost: number; triggered: boolean } {
-  // Calculate movement distance
-  const dx = newPosition.x - unit.position.x;
-  const dy = newPosition.y - unit.position.y;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-
-  // Calculate AP cost
-  const apCost = getMovementCost(distance, currentPhase);
-
-  // Move the unit (virtually)
-  const movedUnit = { ...unit, position: newPosition };
-
-  // Check if any enemy is now visible
-  let triggered = false;
-  if (currentPhase === 'exploration') {
-    for (const enemy of enemies) {
-      if (canSeeEnemy(movedUnit, enemy, visionRange)) {
-        triggered = true;
-        break;
-      }
-    }
-  }
-
-  // Determine new phase
-  const newPhase = triggered ? 'combat' : currentPhase;
-
-  return { newPhase, apCost, triggered };
+  return checkCombatTrigger(unit, newPosition, enemies, currentPhase, visionRange);
 }
 
 // ============ TEST FUNCTIONS ============

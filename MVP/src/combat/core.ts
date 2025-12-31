@@ -26,6 +26,13 @@ import {
   ActionType,
   FireMode,
   FireModeConfig,
+  CombatPhase,
+  EnemyPod,
+  PodActivationResult,
+  CombatBond,
+  BondBonuses,
+  BondLevel,
+  MBTICompatibility,
   STANCES,
   COVER_BONUSES,
   FIST_WEAPON,
@@ -33,6 +40,12 @@ import {
   DEFAULT_VISION,
   GRENADES as SIM_GRENADES,
   FIRE_MODES,
+  PHASE_CONFIGS,
+  POD_CONFIG,
+  BOND_THRESHOLDS,
+  BOND_LEVEL_BONUSES,
+  MBTI_COMPATIBILITY_MULTIPLIER,
+  MBTI_COMPATIBILITY_RULES,
 } from './types';
 
 import {
@@ -195,10 +208,22 @@ export function getFlankingResult(
 
 /**
  * Get accuracy bonus for flanking.
+ * High INS targets are harder to flank (better awareness).
  */
 export function getFlankingBonus(attacker: SimUnit, target: SimUnit): number {
   const flanking = getFlankingResult(attacker, target);
-  return FLANKING_BONUSES[flanking];
+  const baseBonus = FLANKING_BONUSES[flanking];
+
+  // INS FLANKING DEFENSE
+  // High INS = better spatial awareness, reduces flanking effectiveness.
+  // Reduces flanking bonus by 1 per 3 INS above 15.
+  // INS 15 = full flanking, INS 21 = -2, INS 27 = -4, INS 33 = -6
+  // Cannot reduce below 0 (no bonus for target having high INS)
+  const targetIns = target.stats.INS || 15;
+  const insDefense = Math.floor((targetIns - 15) / 3);
+  const adjustedBonus = Math.max(0, baseBonus - insDefense);
+
+  return adjustedBonus;
 }
 
 /**
@@ -343,6 +368,26 @@ export function calculateAccuracy(
   // AGL bonus (every 5 AGL above 50 = +1%)
   accuracy += Math.floor((attacker.stats.AGL - 50) / 5);
 
+  // RNG STAT BONUS (Ranged skill)
+  // High RNG = better ranged accuracy. JA2 style: 95 Marksmanship = GOD.
+  // Bonus: +1% accuracy per 2 RNG above 15 (baseline human)
+  // RNG 15 = +0, RNG 20 = +2.5, RNG 25 = +5, RNG 30 = +7.5
+  // Only applies to ranged attacks (weapon range > 2)
+  const isRangedAttack = weapon.range > 2;
+  if (isRangedAttack && attacker.stats.RNG) {
+    const rangedBonus = Math.floor((attacker.stats.RNG - 15) / 2);
+    accuracy += Math.max(0, rangedBonus);
+  }
+
+  // TARGET AGL EVASION (Agility defense)
+  // High AGL = harder to hit. Nimble characters dodge bullets.
+  // Penalty to attacker: -1% per 2 AGL above 15 (baseline human)
+  // AGL 15 = +0 evasion, AGL 20 = +2.5, AGL 25 = +5, AGL 30 = +7.5
+  if (target.stats.AGL) {
+    const aglEvasion = Math.floor((target.stats.AGL - 15) / 2);
+    accuracy -= Math.max(0, aglEvasion);
+  }
+
   // Injury/status penalty (legacy field)
   if (attacker.accuracyPenalty) {
     accuracy += attacker.accuracyPenalty;
@@ -382,9 +427,24 @@ export function getRangeBracket(weapon: SimWeapon, distance: number): string {
 
 /**
  * Calculate base damage before modifiers.
+ * - Melee weapons use MEL stat for bonus damage
+ * - Ranged weapons use base weapon damage only
+ * - STR still affects knockback and grappling (handled elsewhere)
  */
 export function getBaseDamage(weapon: SimWeapon, attacker: SimUnit): number {
-  return weapon.damage + Math.floor(attacker.stats.STR / 10);
+  let damage = weapon.damage;
+
+  // MEL DAMAGE BONUS (Melee skill)
+  // High MEL = more melee damage. JA2 style: 95 Strength = crushing blows.
+  // Bonus: +1 damage per 3 MEL above 15 (baseline human)
+  // MEL 15 = +0, MEL 20 = +1.6, MEL 25 = +3.3, MEL 30 = +5
+  const isMeleeWeapon = weapon.range <= 2;
+  if (isMeleeWeapon && attacker.stats.MEL) {
+    const meleeBonus = Math.floor((attacker.stats.MEL - 15) / 3);
+    damage += Math.max(0, meleeBonus);
+  }
+
+  return damage;
 }
 
 /**
@@ -1095,6 +1155,405 @@ export function getMovementRange(unit: SimUnit): number {
  */
 export function getDashRange(unit: SimUnit): number {
   return getMaxSpeed(unit);
+}
+
+// ============ CONCEALMENT / EXPLORATION PHASE ============
+
+/**
+ * Calculate movement AP cost based on combat phase.
+ * In exploration: 0 AP (free movement)
+ * In combat: distance * 1 AP per tile
+ */
+export function getMovementCostByPhase(distance: number, phase: CombatPhase): number {
+  const config = PHASE_CONFIGS[phase];
+  return Math.ceil(distance * config.movementCostMultiplier);
+}
+
+/**
+ * Check if two units can see each other based on distance.
+ * Simple Euclidean distance check - LoS blocking handled separately.
+ */
+export function canSeeEnemyByRange(
+  unit: SimUnit,
+  enemy: SimUnit,
+  visionRange: number = 15
+): boolean {
+  if (!unit.position || !enemy.position) return false;
+  const dx = unit.position.x - enemy.position.x;
+  const dy = unit.position.y - enemy.position.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+  return distance <= visionRange;
+}
+
+/**
+ * Check if moving to a position would trigger combat.
+ * Returns the new phase and whether combat was triggered.
+ */
+export function checkCombatTrigger(
+  unit: SimUnit,
+  newPosition: { x: number; y: number },
+  enemies: SimUnit[],
+  currentPhase: CombatPhase,
+  visionRange: number = 15
+): { newPhase: CombatPhase; apCost: number; triggered: boolean } {
+  // Calculate movement distance
+  const dx = newPosition.x - (unit.position?.x || 0);
+  const dy = newPosition.y - (unit.position?.y || 0);
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  // Calculate AP cost based on current phase
+  const apCost = getMovementCostByPhase(distance, currentPhase);
+
+  // Check if any enemy would be visible from new position
+  let triggered = false;
+  if (currentPhase === 'exploration') {
+    const movedUnit = { ...unit, position: newPosition };
+    for (const enemy of enemies) {
+      if (canSeeEnemyByRange(movedUnit, enemy, visionRange)) {
+        triggered = true;
+        break;
+      }
+    }
+  }
+
+  // Determine new phase
+  const newPhase = triggered ? 'combat' : currentPhase;
+
+  return { newPhase, apCost, triggered };
+}
+
+// ============ POD ACTIVATION SYSTEM ============
+
+/**
+ * Create a new enemy pod from a group of units.
+ */
+export function createPod(
+  units: SimUnit[],
+  patrolPath?: { x: number; y: number }[]
+): EnemyPod {
+  return {
+    id: `pod_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    unitIds: units.map(u => u.id),
+    state: 'inactive',
+    patrolPath,
+    patrolIndex: 0,
+  };
+}
+
+/**
+ * Get the vision range for a pod based on its state.
+ */
+export function getPodVisionRange(pod: EnemyPod): number {
+  switch (pod.state) {
+    case 'inactive': return POD_CONFIG.inactiveVisionRange;
+    case 'alerted': return POD_CONFIG.alertedVisionRange;
+    case 'activated': return POD_CONFIG.activatedVisionRange;
+  }
+}
+
+/**
+ * Check if a pod can see a target unit.
+ * Uses the pod's center of mass for distance calculation.
+ */
+export function canPodSeeUnit(
+  pod: EnemyPod,
+  podUnits: SimUnit[],
+  target: SimUnit
+): boolean {
+  const visionRange = getPodVisionRange(pod);
+
+  // Any unit in the pod seeing the target activates the pod
+  for (const unit of podUnits) {
+    if (canSeeEnemyByRange(unit, target, visionRange)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Activate a pod when spotted or when combat begins.
+ * Returns activation result with scatter positions.
+ */
+export function activatePod(
+  pod: EnemyPod,
+  podUnits: SimUnit[],
+  triggeredBy?: string,
+  currentTurn: number = 0
+): PodActivationResult {
+  const previousState = pod.state;
+  pod.state = 'activated';
+  pod.alertedBy = triggeredBy;
+  pod.activationTurn = currentTurn;
+
+  // Calculate scatter positions (move to nearby cover)
+  const scatterPositions: { unitId: string; position: { x: number; y: number } }[] = [];
+  for (const unit of podUnits) {
+    if (unit.position) {
+      // Scatter in random direction up to scatterDistance
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * POD_CONFIG.scatterDistance;
+      scatterPositions.push({
+        unitId: unit.id,
+        position: {
+          x: unit.position.x + Math.cos(angle) * distance,
+          y: unit.position.y + Math.sin(angle) * distance,
+        },
+      });
+    }
+  }
+
+  return {
+    podId: pod.id,
+    previousState,
+    newState: 'activated',
+    unitsRevealed: pod.unitIds,
+    scatterPositions,
+  };
+}
+
+/**
+ * Alert a pod (suspicious but not yet in combat).
+ * Alerted pods move toward last known player position.
+ */
+export function alertPod(
+  pod: EnemyPod,
+  alertSource: { x: number; y: number },
+  alertedBy?: string
+): void {
+  if (pod.state === 'inactive') {
+    pod.state = 'alerted';
+    pod.alertedBy = alertedBy;
+  }
+}
+
+/**
+ * Check if gunfire at a position would alert nearby pods.
+ * Returns list of pods that heard the gunfire.
+ */
+export function checkGunfireAlert(
+  firingPosition: { x: number; y: number },
+  pods: EnemyPod[],
+  podUnitsMap: Map<string, SimUnit[]>
+): EnemyPod[] {
+  const alertedPods: EnemyPod[] = [];
+
+  for (const pod of pods) {
+    if (pod.state === 'activated') continue; // Already in combat
+
+    const podUnits = podUnitsMap.get(pod.id) || [];
+    for (const unit of podUnits) {
+      if (!unit.position) continue;
+
+      const dx = unit.position.x - firingPosition.x;
+      const dy = unit.position.y - firingPosition.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance <= POD_CONFIG.alertOtherPodsRadius) {
+        alertPod(pod, firingPosition);
+        alertedPods.push(pod);
+        break;
+      }
+    }
+  }
+
+  return alertedPods;
+}
+
+/**
+ * Process pod patrol movement (for inactive/alerted pods).
+ */
+export function processPatrolMovement(
+  pod: EnemyPod,
+  podUnits: SimUnit[]
+): void {
+  if (pod.state === 'activated') return;
+  if (!pod.patrolPath || pod.patrolPath.length === 0) return;
+
+  const moveSpeed = pod.state === 'inactive'
+    ? POD_CONFIG.inactiveMovementPerTurn
+    : POD_CONFIG.alertedMovementPerTurn;
+
+  // Move toward next patrol point
+  const targetPoint = pod.patrolPath[pod.patrolIndex || 0];
+
+  for (const unit of podUnits) {
+    if (!unit.position) continue;
+
+    const dx = targetPoint.x - unit.position.x;
+    const dy = targetPoint.y - unit.position.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance <= moveSpeed) {
+      // Reached patrol point, move to next
+      unit.position = { ...targetPoint };
+      pod.patrolIndex = ((pod.patrolIndex || 0) + 1) % pod.patrolPath.length;
+    } else {
+      // Move toward patrol point
+      const ratio = moveSpeed / distance;
+      unit.position.x += dx * ratio;
+      unit.position.y += dy * ratio;
+    }
+  }
+}
+
+// ============ COMBAT BOND SYSTEM ============
+
+/**
+ * Get MBTI compatibility between two personality types.
+ * Used to determine how fast bonds form and combat synergy.
+ */
+export function getMBTICompatibility(mbti1: string, mbti2: string): MBTICompatibility {
+  // Same type = excellent
+  if (mbti1 === mbti2) return 'excellent';
+
+  // Check direct key
+  const key1 = `${mbti1}_${mbti2}`;
+  const key2 = `${mbti2}_${mbti1}`;
+
+  if (MBTI_COMPATIBILITY_RULES[key1]) return MBTI_COMPATIBILITY_RULES[key1];
+  if (MBTI_COMPATIBILITY_RULES[key2]) return MBTI_COMPATIBILITY_RULES[key2];
+
+  // Default to neutral
+  return 'neutral';
+}
+
+/**
+ * Create a new combat bond between two units.
+ */
+export function createBond(unit1: SimUnit, unit2: SimUnit, mbti1?: string, mbti2?: string): CombatBond {
+  const compatibility = getMBTICompatibility(mbti1 || 'ISTJ', mbti2 || 'ISTJ');
+
+  return {
+    unitId1: unit1.id,
+    unitId2: unit2.id,
+    bondLevel: 0,
+    missionsTogether: 0,
+    compatibility,
+    xpToNextLevel: BOND_THRESHOLDS.level1,
+  };
+}
+
+/**
+ * Calculate bond level based on missions together and compatibility.
+ */
+export function calculateBondLevel(bond: CombatBond): BondLevel {
+  const missions = bond.missionsTogether;
+  const multiplier = MBTI_COMPATIBILITY_MULTIPLIER[bond.compatibility];
+  const effectiveMissions = Math.floor(missions * multiplier);
+
+  if (effectiveMissions >= BOND_THRESHOLDS.level3) return 3;
+  if (effectiveMissions >= BOND_THRESHOLDS.level2) return 2;
+  if (effectiveMissions >= BOND_THRESHOLDS.level1) return 1;
+  return 0;
+}
+
+/**
+ * Update bond after a mission together.
+ * Returns the updated bond and whether level increased.
+ */
+export function progressBond(bond: CombatBond): { bond: CombatBond; leveledUp: boolean } {
+  const oldLevel = bond.bondLevel;
+
+  bond.missionsTogether++;
+  bond.bondLevel = calculateBondLevel(bond);
+
+  // Update XP to next level
+  const multiplier = MBTI_COMPATIBILITY_MULTIPLIER[bond.compatibility];
+  const effectiveMissions = bond.missionsTogether * multiplier;
+
+  if (bond.bondLevel < 3) {
+    const thresholds = [0, BOND_THRESHOLDS.level1, BOND_THRESHOLDS.level2, BOND_THRESHOLDS.level3];
+    const nextThreshold = thresholds[bond.bondLevel + 1];
+    bond.xpToNextLevel = Math.ceil((nextThreshold - effectiveMissions) / multiplier);
+  } else {
+    bond.xpToNextLevel = 0;
+  }
+
+  return {
+    bond,
+    leveledUp: bond.bondLevel > oldLevel,
+  };
+}
+
+/**
+ * Get combat bonuses for a unit based on adjacent bonded allies.
+ */
+export function getBondCombatBonuses(
+  unit: SimUnit,
+  allies: SimUnit[],
+  bonds: CombatBond[],
+  adjacencyRange: number = 3
+): BondBonuses {
+  const result: BondBonuses = {
+    accuracyBonus: 0,
+    evasionBonus: 0,
+    willBonus: 0,
+    actionBonus: false,
+  };
+
+  if (!unit.position) return result;
+
+  // Find highest bond bonus from adjacent allies
+  for (const ally of allies) {
+    if (!ally.position || ally.id === unit.id) continue;
+
+    // Check distance
+    const dx = unit.position.x - ally.position.x;
+    const dy = unit.position.y - ally.position.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance > adjacencyRange) continue;
+
+    // Find bond between this unit and ally
+    const bond = bonds.find(b =>
+      (b.unitId1 === unit.id && b.unitId2 === ally.id) ||
+      (b.unitId1 === ally.id && b.unitId2 === unit.id)
+    );
+
+    if (!bond || bond.bondLevel === 0) continue;
+
+    // Apply highest bonus (don't stack from multiple allies)
+    const bonuses = BOND_LEVEL_BONUSES[bond.bondLevel];
+    result.accuracyBonus = Math.max(result.accuracyBonus, bonuses.accuracyBonus);
+    result.evasionBonus = Math.max(result.evasionBonus, bonuses.evasionBonus);
+    result.willBonus = Math.max(result.willBonus, bonuses.willBonus);
+    result.actionBonus = result.actionBonus || bonuses.actionBonus;
+  }
+
+  return result;
+}
+
+/**
+ * Check if bonded ally was killed - triggers revenge mode.
+ * Returns bonus accuracy if avenging a fallen bonded ally.
+ */
+export function checkRevengeMode(
+  unit: SimUnit,
+  killedUnitId: string,
+  bonds: CombatBond[],
+  currentTurn: number
+): { isAvenging: boolean; accuracyBonus: number; turnsRemaining: number } {
+  // Find bond with killed unit
+  const bond = bonds.find(b =>
+    (b.unitId1 === unit.id && b.unitId2 === killedUnitId) ||
+    (b.unitId1 === killedUnitId && b.unitId2 === unit.id)
+  );
+
+  if (!bond || bond.bondLevel < 2) {
+    return { isAvenging: false, accuracyBonus: 0, turnsRemaining: 0 };
+  }
+
+  // Level 2+ bond triggers revenge mode
+  // +15 accuracy for 2 turns, +20 accuracy at level 3 for 3 turns
+  const accuracyBonus = bond.bondLevel === 3 ? 20 : 15;
+  const turnsRemaining = bond.bondLevel === 3 ? 3 : 2;
+
+  return {
+    isAvenging: true,
+    accuracyBonus,
+    turnsRemaining,
+  };
 }
 
 // ============ ACTION MANAGEMENT ============

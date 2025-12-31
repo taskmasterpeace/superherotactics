@@ -80,6 +80,148 @@ export const COVER_BONUSES: Record<CoverType, CoverBonus> = {
   full: { evasionBonus: 16, drBonus: 0, accuracyPenalty: -8 },  // Net: +8 eva advantage, no DR
 };
 
+// ============ COMBAT PHASE TYPES (XCOM2-style concealment) ============
+export type CombatPhase = 'exploration' | 'combat';
+
+export interface PhaseConfig {
+  phase: CombatPhase;
+  movementCostMultiplier: number; // 0 for exploration (free movement), 1 for combat
+  turnOrder: boolean;              // false for exploration, true for combat
+  enemiesVisible: boolean;         // false until contact/trigger
+}
+
+// XCOM2 Concealment System:
+// - Exploration: Squad moves freely, no AP cost, no turn order, enemies don't see you
+// - Combat: Triggered when enemy spotted, normal AP costs, turn-based
+export const PHASE_CONFIGS: Record<CombatPhase, PhaseConfig> = {
+  exploration: {
+    phase: 'exploration',
+    movementCostMultiplier: 0,  // Free movement
+    turnOrder: false,            // No turn order during exploration
+    enemiesVisible: false,       // Enemies hidden until contact
+  },
+  combat: {
+    phase: 'combat',
+    movementCostMultiplier: 1,  // Normal AP cost
+    turnOrder: true,             // Turn-based combat
+    enemiesVisible: true,        // All enemies revealed
+  },
+};
+
+// ============ POD ACTIVATION SYSTEM (XCOM2-style encounters) ============
+export type PodState = 'inactive' | 'alerted' | 'activated';
+
+export interface EnemyPod {
+  id: string;
+  unitIds: string[];               // IDs of units in this pod
+  state: PodState;
+  patrolPath?: { x: number; y: number }[];  // Optional patrol route
+  patrolIndex?: number;            // Current position on patrol
+  alertedBy?: string;              // ID of unit that alerted this pod
+  activationTurn?: number;         // Turn number when activated
+}
+
+export interface PodActivationResult {
+  podId: string;
+  previousState: PodState;
+  newState: PodState;
+  unitsRevealed: string[];         // Unit IDs now visible
+  scatterPositions?: { unitId: string; position: { x: number; y: number } }[];
+}
+
+// Pod behavior configuration
+export const POD_CONFIG = {
+  // Inactive pods patrol slowly, not looking for player
+  inactiveVisionRange: 8,          // Limited awareness
+  inactiveMovementPerTurn: 2,      // Slow patrol
+
+  // Alerted pods are suspicious but haven't spotted player
+  alertedVisionRange: 12,          // Heightened awareness
+  alertedMovementPerTurn: 4,       // Moving to investigate
+
+  // Activated pods are in combat
+  activatedVisionRange: 15,        // Full awareness
+  scatterDistance: 3,              // Max distance to scatter to cover
+
+  // Activation rules
+  alertOtherPodsRadius: 10,        // Gunfire alerts pods within this range
+  freeActionsOnActivation: 1,      // Free actions when pod activates
+};
+
+// ============ COMBAT BOND SYSTEM (XCOM2-style soldier bonds) ============
+export type BondLevel = 0 | 1 | 2 | 3;
+export type MBTICompatibility = 'excellent' | 'good' | 'neutral' | 'poor';
+
+export interface CombatBond {
+  unitId1: string;
+  unitId2: string;
+  bondLevel: BondLevel;
+  missionsTogether: number;     // Missions fought side by side
+  compatibility: MBTICompatibility;
+  xpToNextLevel: number;        // XP needed for next bond level
+}
+
+export interface BondBonuses {
+  accuracyBonus: number;        // When adjacent to bonded ally
+  evasionBonus: number;         // When near bonded ally
+  willBonus: number;            // Morale boost from bond
+  actionBonus: boolean;         // Level 3: Free action to aid bonded ally
+}
+
+// Bond progression thresholds
+export const BOND_THRESHOLDS = {
+  level1: 3,   // 3 missions together
+  level2: 8,   // 8 missions together
+  level3: 15,  // 15 missions together
+};
+
+// Bond level bonuses
+export const BOND_LEVEL_BONUSES: Record<BondLevel, BondBonuses> = {
+  0: { accuracyBonus: 0, evasionBonus: 0, willBonus: 0, actionBonus: false },
+  1: { accuracyBonus: 5, evasionBonus: 0, willBonus: 2, actionBonus: false },
+  2: { accuracyBonus: 10, evasionBonus: 5, willBonus: 5, actionBonus: false },
+  3: { accuracyBonus: 15, evasionBonus: 10, willBonus: 10, actionBonus: true },
+};
+
+// MBTI compatibility affects bond formation speed
+export const MBTI_COMPATIBILITY_MULTIPLIER: Record<MBTICompatibility, number> = {
+  excellent: 1.5,  // Bonds form 50% faster
+  good: 1.2,       // Bonds form 20% faster
+  neutral: 1.0,    // Normal rate
+  poor: 0.5,       // Bonds form 50% slower
+};
+
+// MBTI compatibility matrix (function dimensions)
+// Same cognitive function stack = excellent
+// Similar temperament = good
+// Different but complementary = neutral
+// Conflicting = poor
+export const MBTI_COMPATIBILITY_RULES: Record<string, MBTICompatibility> = {
+  // SAME TYPE = excellent (understand each other perfectly)
+  'same': 'excellent',
+
+  // COGNITIVE MATCHES (share dominant function, opposite direction)
+  // Example: INTJ (Ni-Te) + INFJ (Ni-Fe) - both Ni dominant
+  'INTJ_INFJ': 'excellent', 'INTJ_ENTJ': 'excellent', 'INTJ_ENFJ': 'good',
+  'INTP_INFP': 'excellent', 'INTP_ENTP': 'excellent', 'INTP_ENFP': 'good',
+  'ENFJ_ENTJ': 'excellent', 'ENFJ_INFJ': 'excellent', 'ENFJ_INTJ': 'good',
+  'ENFP_ENTP': 'excellent', 'ENFP_INFP': 'excellent', 'ENFP_INTP': 'good',
+
+  // GUARDIAN BONDS (SJ types work well together)
+  'ISTJ_ISFJ': 'excellent', 'ISTJ_ESTJ': 'excellent', 'ISTJ_ESFJ': 'good',
+  'ISFJ_ESFJ': 'excellent', 'ISFJ_ESTJ': 'good',
+  'ESTJ_ESFJ': 'excellent',
+
+  // EXPLORER BONDS (SP types understand action)
+  'ISTP_ESTP': 'excellent', 'ISTP_ISFP': 'good', 'ISTP_ESFP': 'good',
+  'ESTP_ESFP': 'excellent', 'ESTP_ISTP': 'excellent',
+  'ISFP_ESFP': 'excellent', 'ISFP_ISTP': 'good',
+
+  // OPPOSITES (can clash)
+  'INTJ_ESFP': 'poor', 'INTP_ESFJ': 'poor', 'ENTJ_ISFP': 'poor', 'ENTP_ISFJ': 'poor',
+  'INFJ_ESTP': 'poor', 'INFP_ESTJ': 'poor', 'ENFJ_ISTP': 'poor', 'ENFP_ISTJ': 'poor',
+};
+
 // ============ ORIGIN TYPES ============
 export type OriginType = 'biological' | 'robotic' | 'energy' | 'undead' | 'construct';
 
@@ -217,11 +359,15 @@ export interface SimUnit {
   origin: OriginType;
 
   // Stats (human baseline ~15, soldier ~20, elite ~25)
+  // 7-stat system matching character sheet
   stats: {
-    MEL: number;  // Melee/strength for damage
-    AGL: number;  // Agility for initiative and hit chance
-    STR: number;  // Strength for knockback resistance
-    STA: number;  // Stamina for HP
+    MEL: number;  // Melee - close combat damage & defense
+    RNG: number;  // Ranged - shooting accuracy bonus
+    AGL: number;  // Agility - dodge, initiative, movement
+    CON: number;  // Constitution - HP pool, stamina
+    INS: number;  // Insight - interrupts, overwatch, awareness
+    WIL: number;  // Willpower - morale, panic resistance
+    INT: number;  // Intelligence - tactical options, hacking
   };
 
   // Vision & Facing
@@ -490,15 +636,22 @@ export interface UnitPreset {
   weapon: SimWeapon;
 }
 
-// Standard human baseline stats
+// 7-stat baseline profiles
+// MEL = Melee combat, RNG = Ranged accuracy, AGL = Agility/dodge
+// CON = Constitution (HP), INS = Insight (interrupts), WIL = Willpower, INT = Intelligence
 export const HUMAN_BASELINE_STATS = {
-  average: { MEL: 15, AGL: 15, STR: 15, STA: 15 },
-  trained: { MEL: 20, AGL: 20, STR: 20, STA: 20 },
-  elite: { MEL: 25, AGL: 25, STR: 25, STA: 25 },
-  peak: { MEL: 35, AGL: 35, STR: 35, STA: 35 },
+  average: { MEL: 15, RNG: 15, AGL: 15, CON: 15, INS: 15, WIL: 15, INT: 15 },
+  trained: { MEL: 20, RNG: 20, AGL: 20, CON: 20, INS: 20, WIL: 20, INT: 20 },
+  elite: { MEL: 25, RNG: 25, AGL: 25, CON: 25, INS: 25, WIL: 25, INT: 25 },
+  peak: { MEL: 35, RNG: 35, AGL: 35, CON: 35, INS: 35, WIL: 35, INT: 35 },
 };
 
-// HP calculation: MEL + AGL + STA + STR
+// HP calculation: CON is primary, AGL and WIL provide minor bonus
 export function calculateHP(stats: SimUnit['stats']): number {
-  return stats.MEL + stats.AGL + stats.STA + stats.STR;
+  // CON is the main HP stat (like JA2's Health)
+  // Base 50 HP + 2 per CON point + minor bonuses from AGL/WIL
+  const conBonus = (stats.CON || 15) * 2;
+  const aglBonus = Math.floor((stats.AGL || 15) / 5);
+  const wilBonus = Math.floor((stats.WIL || 15) / 5);
+  return 50 + conBonus + aglBonus + wilBonus;
 }

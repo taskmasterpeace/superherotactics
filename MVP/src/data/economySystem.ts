@@ -34,6 +34,8 @@ export type TransactionCategory =
   | 'bounty_collected'
   | 'insurance_payout'
   | 'gift'
+  | 'country_funding'     // JA2 style - country pays for operations
+  | 'country_bonus'       // Performance bonus from country
 
   // Expenses
   | 'base_upkeep'
@@ -45,6 +47,7 @@ export type TransactionCategory =
   | 'fine'
   | 'salary_payment'  // Paying team members
   | 'insurance_premium'
+  | 'merc_salary'     // JA2 style - paying mercenaries
 
   // Purchases & Sales
   | 'equipment_purchase'
@@ -54,6 +57,7 @@ export type TransactionCategory =
   | 'property_purchase'
   | 'property_sale'
   | 'service_purchase'
+  | 'merc_hire'       // JA2 style - hiring mercenaries
 
   // Other
   | 'other';
@@ -733,4 +737,183 @@ export function payDebt(
       debt: newState.debt - paymentAmount,
     },
   };
+}
+
+// ============================================================================
+// COUNTRY FUNDING SYSTEM (JA2 Style)
+// ============================================================================
+
+/**
+ * Country funding configuration.
+ * Each country provides different funding based on their stats.
+ */
+export interface CountryFundingConfig {
+  countryCode: string;
+  countryName: string;
+  baseFunding: number;           // Weekly base funding amount
+  reputationThreshold: number;   // Min reputation to maintain funding (-100 to 100)
+  corruptionTax: number;         // % of funding lost to corruption (0-100)
+  performanceBonus: number;      // Bonus per successful mission
+  fundingLevel: 'minimal' | 'standard' | 'generous' | 'lavish';
+}
+
+/**
+ * Calculate country funding based on country stats.
+ * Uses GDP, military budget, and intelligence budget.
+ *
+ * JA2-style: Different countries provide different resources.
+ * - Rich democracies: High funding, low corruption
+ * - Poor authoritarian: Low funding, high corruption
+ */
+export function calculateCountryFunding(country: {
+  gdpNational?: number;
+  gdpPerCapita?: number;
+  militaryBudget?: number;
+  intelligenceBudget?: number;
+  governmentCorruption?: number;
+  governmentPerception?: string;
+}): CountryFundingConfig {
+  // Base funding from GDP (scale: $5k-$200k per week)
+  const gdpFactor = (country.gdpPerCapita || 50) / 100;
+  const baseFunding = Math.floor(5000 + (gdpFactor * 195000));
+
+  // Military + Intelligence budget affects total resources
+  const milBudget = country.militaryBudget || 50;
+  const intelBudget = country.intelligenceBudget || 50;
+  const resourceMultiplier = 0.5 + ((milBudget + intelBudget) / 200);
+  const adjustedFunding = Math.floor(baseFunding * resourceMultiplier);
+
+  // Corruption reduces actual funding received
+  const corruption = country.governmentCorruption || 50;
+  const corruptionTax = Math.min(50, Math.floor(corruption * 0.5)); // Max 50% lost
+
+  // Government type affects reputation tolerance
+  const perception = country.governmentPerception || 'Flawed Democracy';
+  let reputationThreshold = 0;
+  switch (perception) {
+    case 'Full Democracy':
+      reputationThreshold = -25;  // Democratic countries are patient
+      break;
+    case 'Flawed Democracy':
+      reputationThreshold = -10;
+      break;
+    case 'Hybrid Regime':
+      reputationThreshold = 10;   // Expect results quickly
+      break;
+    case 'Authoritarian Regime':
+      reputationThreshold = 25;   // Very demanding
+      break;
+  }
+
+  // Performance bonus (higher for poorer countries - they need results)
+  const performanceBonus = Math.floor(2000 + ((100 - gdpFactor * 100) * 50));
+
+  // Funding level label
+  let fundingLevel: CountryFundingConfig['fundingLevel'];
+  if (adjustedFunding < 20000) fundingLevel = 'minimal';
+  else if (adjustedFunding < 50000) fundingLevel = 'standard';
+  else if (adjustedFunding < 100000) fundingLevel = 'generous';
+  else fundingLevel = 'lavish';
+
+  return {
+    countryCode: '',  // Caller should set this
+    countryName: '',  // Caller should set this
+    baseFunding: adjustedFunding,
+    reputationThreshold,
+    corruptionTax,
+    performanceBonus,
+    fundingLevel,
+  };
+}
+
+/**
+ * Process weekly country funding deposit.
+ * Called every Monday (payday) - JA2 style.
+ */
+export function processCountryFunding(
+  state: EconomyState,
+  config: CountryFundingConfig,
+  currentReputation: number,
+  gameTime: GameTime
+): { newState: EconomyState; fundingReceived: number; message: string } {
+  // Check if reputation is too low
+  if (currentReputation < config.reputationThreshold) {
+    return {
+      newState: state,
+      fundingReceived: 0,
+      message: `${config.countryName} has suspended funding due to poor reputation (${currentReputation} < ${config.reputationThreshold})`,
+    };
+  }
+
+  // Calculate actual funding after corruption
+  const corruptionLoss = Math.floor(config.baseFunding * (config.corruptionTax / 100));
+  const actualFunding = config.baseFunding - corruptionLoss;
+
+  // Create transaction
+  const transaction = createTransaction(
+    'income',
+    'country_funding',
+    actualFunding,
+    corruptionLoss > 0
+      ? `Weekly funding from ${config.countryName} ($${corruptionLoss.toLocaleString()} lost to corruption)`
+      : `Weekly funding from ${config.countryName}`,
+    state.cash,
+    gameTime
+  );
+
+  return {
+    newState: processTransaction(state, transaction),
+    fundingReceived: actualFunding,
+    message: `Received $${actualFunding.toLocaleString()} from ${config.countryName}${corruptionLoss > 0 ? ` (${config.corruptionTax}% lost to corruption)` : ''}`,
+  };
+}
+
+/**
+ * Process performance bonus from country.
+ * Called after successful missions.
+ */
+export function processPerformanceBonus(
+  state: EconomyState,
+  config: CountryFundingConfig,
+  missionType: string,
+  gameTime: GameTime
+): EconomyState {
+  const transaction = createTransaction(
+    'income',
+    'country_bonus',
+    config.performanceBonus,
+    `Performance bonus: ${missionType}`,
+    state.cash,
+    gameTime
+  );
+
+  return processTransaction(state, transaction);
+}
+
+/**
+ * Check if player is bankrupt (game over condition).
+ * JA2 style: If cash hits 0 and no country will fund you, game over.
+ */
+export function checkBankruptcy(
+  state: EconomyState,
+  countryReputation: number,
+  fundingConfig: CountryFundingConfig
+): { isBankrupt: boolean; warning: string | null } {
+  // Warning threshold
+  if (state.cash < 5000) {
+    return {
+      isBankrupt: false,
+      warning: `Low funds warning: $${state.cash.toLocaleString()} remaining`,
+    };
+  }
+
+  // Bankruptcy check
+  if (state.cash <= 0 && countryReputation < fundingConfig.reputationThreshold) {
+    return {
+      isBankrupt: true,
+      warning: `BANKRUPT: No funds and ${fundingConfig.countryName} has withdrawn support`,
+    };
+  }
+
+  return { isBankrupt: false, warning: null };
 }

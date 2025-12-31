@@ -54,6 +54,25 @@ export {
   canPerformAction,
   spendAction,
   isTurnComplete,
+  // XCOM2-style concealment/exploration phase
+  getMovementCostByPhase,
+  canSeeEnemyByRange,
+  checkCombatTrigger,
+  // XCOM2-style pod activation system
+  createPod,
+  getPodVisionRange,
+  canPodSeeUnit,
+  activatePod,
+  alertPod,
+  checkGunfireAlert,
+  processPatrolMovement,
+  // XCOM2-style combat bond system
+  getMBTICompatibility,
+  createBond,
+  calculateBondLevel,
+  progressBond,
+  getBondCombatBonuses,
+  checkRevengeMode,
 } from './core';
 
 // Status effects
@@ -127,6 +146,10 @@ export {
   checkOverwatchTrigger,
   resolveOverwatchShot,
   attemptSuppression,
+  // Morale/Panic system
+  checkMorale,
+  getPanicModifiers,
+  attemptRally,
 } from './advancedMechanics';
 
 export type {
@@ -138,6 +161,10 @@ export type {
   AimedShotResult,
   OverwatchState,
   SuppressionResult,
+  // Morale types
+  PanicLevel,
+  MoraleCheckResult,
+  MoraleTrigger,
 } from './advancedMechanics';
 
 // Combat scenarios
