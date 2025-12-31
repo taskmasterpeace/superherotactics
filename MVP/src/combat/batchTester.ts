@@ -8,6 +8,7 @@ import {
   SimUnit,
   BatchResult,
   BattleConfig,
+  DEFAULT_BATTLE_CONFIG,
 } from './types';
 
 import { runQuickBattle, runBattle } from './battleRunner';
@@ -40,11 +41,15 @@ export function runBatch(
 
   const weaponStats: BatchResult['weaponStats'] = {};
 
+  // Merge config with defaults
+  const apPerRound = config.apPerRound ?? DEFAULT_BATTLE_CONFIG.apPerRound;
+  const maxRounds = config.maxRounds ?? DEFAULT_BATTLE_CONFIG.maxRounds;
+
   // Run battles
   for (let i = 0; i < iterations; i++) {
     // Use quick battle for large batches, full battle for small
     if (iterations > 100) {
-      const result = runQuickBattle(blueTeam, redTeam, config.maxRounds);
+      const result = runQuickBattle(blueTeam, redTeam, maxRounds, apPerRound);
       if (result.winner === 'blue') blueWins++;
       else if (result.winner === 'red') redWins++;
       else draws++;

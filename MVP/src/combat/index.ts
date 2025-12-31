@@ -46,6 +46,14 @@ export {
   // Grenades
   resolveGrenade,
   applyGrenadeResult,
+  // XCOM-style 2-action movement system
+  getMaxSpeed,
+  getMovementRange,
+  getDashRange,
+  resetTurnState,
+  canPerformAction,
+  spendAction,
+  isTurnComplete,
 } from './core';
 
 // Status effects
@@ -108,3 +116,47 @@ export {
   createKickboxerVsBoxerTest,
   resetUnitIds,
 } from './humanPresets';
+
+// Advanced combat mechanics
+export {
+  ATTACK_MODES,
+  BODY_PARTS,
+  resolveBurstFire,
+  resolveAimedShot,
+  setOverwatch,
+  checkOverwatchTrigger,
+  resolveOverwatchShot,
+  attemptSuppression,
+} from './advancedMechanics';
+
+export type {
+  AttackMode,
+  AttackModeConfig,
+  BodyPart,
+  BodyPartTarget,
+  BurstFireResult,
+  AimedShotResult,
+  OverwatchState,
+  SuppressionResult,
+} from './advancedMechanics';
+
+// Combat scenarios
+export {
+  ALL_SCENARIOS,
+  STREET_SCENARIOS,
+  MILITARY_SCENARIOS,
+  CORPORATE_SCENARIOS,
+  SUPERHUMAN_SCENARIOS,
+  BOSS_SCENARIOS,
+  getScenariosByDifficulty,
+  getScenariosByType,
+  getRandomScenario,
+  runScenario,
+  testScenarioDifficulty,
+} from './scenarios';
+
+export type {
+  ScenarioDifficulty,
+  ScenarioType,
+  CombatScenario,
+} from './scenarios';

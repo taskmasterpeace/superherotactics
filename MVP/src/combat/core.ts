@@ -24,12 +24,15 @@ import {
   GrenadeExplosionResult,
   TurnState,
   ActionType,
+  FireMode,
+  FireModeConfig,
   STANCES,
   COVER_BONUSES,
   FIST_WEAPON,
   FLANKING_BONUSES,
   DEFAULT_VISION,
   GRENADES as SIM_GRENADES,
+  FIRE_MODES,
 } from './types';
 
 import {
@@ -515,30 +518,61 @@ export function calculateFinalDamage(
  * @param target - Target unit
  * @param distance - Distance (optional, uses optimal if not provided)
  * @param roll - Random roll 0-100 (optional, generates if not provided)
+ * @param fireMode - Fire mode override (optional, uses weapon's currentFireMode or 'single')
  * @returns Full attack result with all details
  */
 export function resolveAttack(
   attacker: SimUnit,
   target: SimUnit,
   distance?: number,
-  roll?: number
+  roll?: number,
+  fireMode?: FireMode
 ): AttackResult {
   const weapon = attacker.weapon;
-  const actualRoll = roll ?? Math.random() * 100;
 
-  // Calculate accuracy
-  const accuracy = calculateAccuracy(attacker, target, distance);
+  // Determine fire mode: explicit param > weapon setting > single
+  const mode = fireMode || weapon.currentFireMode || 'single';
+  const modeConfig = FIRE_MODES[mode];
 
-  // Get hit result
-  const hitResult = getHitResult(actualRoll, accuracy);
+  // Calculate base accuracy with fire mode penalty
+  const baseAccuracy = calculateAccuracy(attacker, target, distance);
+  const accuracy = Math.max(5, Math.min(95, baseAccuracy + modeConfig.accuracyPenalty));
 
-  // Calculate damage
+  // Fire multiple shots based on fire mode
+  let totalDamage = 0;
+  let hits = 0;
+  let crits = 0;
+  let grazes = 0;
+  let bestHitResult: HitResult = 'miss';
   const baseDamage = getBaseDamage(weapon, attacker);
-  const damageAfterHit = applyHitMultiplier(baseDamage, hitResult);
 
-  // Apply damage pipeline
+  // Calculate per-shot damage with fire mode multiplier
+  const shotDamage = baseDamage * modeConfig.damagePerShot;
+
+  for (let shot = 0; shot < modeConfig.shotsPerAttack; shot++) {
+    const shotRoll = roll !== undefined && shot === 0 ? roll : Math.random() * 100;
+    const hitResult = getHitResult(shotRoll, accuracy);
+
+    if (hitResult === 'crit') {
+      crits++;
+      hits++;
+      totalDamage += applyHitMultiplier(shotDamage, 'crit');
+      bestHitResult = 'crit';
+    } else if (hitResult === 'hit') {
+      hits++;
+      totalDamage += applyHitMultiplier(shotDamage, 'hit');
+      if (bestHitResult !== 'crit') bestHitResult = 'hit';
+    } else if (hitResult === 'graze') {
+      grazes++;
+      totalDamage += applyHitMultiplier(shotDamage, 'graze');
+      if (bestHitResult === 'miss') bestHitResult = 'graze';
+    }
+    // Miss adds no damage
+  }
+
+  // Apply damage pipeline to total damage
   const damageResult = calculateFinalDamage(
-    damageAfterHit,
+    totalDamage,
     weapon.damageType,
     target
   );
@@ -554,12 +588,27 @@ export function resolveAttack(
   const targetStance = STANCES[target.stance] || STANCES.normal;
 
   // Generate status effects based on damage type and hit result
-  // Uses damageSystem.ts definitions (bleeding, burning, frozen, poison, stun)
   const statusEffects = getStatusEffectsForDamage(
     weapon.damageType,
-    hitResult,
+    bestHitResult,
     target.origin
   );
+
+  // Add suppression effect if burst/auto fire hit
+  if (hits > 0 && modeConfig.suppressionChance > 0) {
+    const suppressionRoll = Math.random() * 100;
+    // Suppression chance scales with hits: more hits = higher chance
+    const effectiveChance = modeConfig.suppressionChance * (1 + (hits - 1) * 0.1);
+    if (suppressionRoll < effectiveChance) {
+      statusEffects.push({
+        id: 'suppressed',
+        duration: 2,
+        accuracyPenalty: -20,
+        source: `${mode}_fire`,
+      });
+    }
+  }
+
   const effectIds = statusEffects.map(e => e.id);
 
   return {
@@ -567,12 +616,12 @@ export function resolveAttack(
     target: target.id,
     weapon: weapon.name,
 
-    roll: actualRoll,
+    roll: roll ?? 0,
     accuracy,
-    hitResult,
+    hitResult: bestHitResult,
 
-    rawDamage: baseDamage,
-    critMultiplier: hitResult === 'crit' ? 1.5 : 1.0,
+    rawDamage: baseDamage * modeConfig.shotsPerAttack,
+    critMultiplier: crits > 0 ? 1.5 : 1.0,
     originMultiplier: damageResult.originMultiplier,
     shieldAbsorbed: damageResult.shieldAbsorbed,
     armorBlocked: damageResult.armorBlocked,
@@ -589,8 +638,8 @@ export function resolveAttack(
     effectsApplied: effectIds,
     // Calculate knockback: weapon force vs target STR (weight)
     // Only applies on successful hit with weapons that have knockback
-    knockbackTiles: hitResult !== 'miss' && weapon.knockbackForce
-      ? calculateKnockback(weapon.knockbackForce, target.str).spaces
+    knockbackTiles: hits > 0 && weapon.knockbackForce
+      ? calculateKnockback(weapon.knockbackForce, target.stats.STR).spaces
       : 0,
 
     stanceAccuracyMod: attackerStance.accuracyMod,

@@ -22,7 +22,8 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 70,
     damageType: 'GUNFIRE_BULLET',
     range: 10,
-    apCost: 2,
+    apCost: 3,   // Was 2 - quick pistol shots
+    isLightAttack: true,  // Quick shot - can move after
     rangeBrackets: {
       pointBlank: 2, pointBlankMod: 10,
       short: 5, shortMod: 5,
@@ -37,7 +38,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 70,
     damageType: 'GUNFIRE_BULLET',
     range: 12,
-    apCost: 2,
+    apCost: 4,   // Was 2 - aimed shots
     rangeBrackets: {
       pointBlank: 2, pointBlankMod: 10,
       short: 5, shortMod: 5,
@@ -52,7 +53,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 65,
     damageType: 'GUNFIRE_BULLET',
     range: 10,
-    apCost: 3,
+    apCost: 5,   // Was 3 - heavy recoil recovery
     knockbackForce: 60,
     rangeBrackets: {
       pointBlank: 2, pointBlankMod: 15,
@@ -70,7 +71,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 70,
     damageType: 'GUNFIRE_BULLET',
     range: 20,
-    apCost: 3,
+    apCost: 5,   // Was 3 - burst fire
     rangeBrackets: {
       pointBlank: 2, pointBlankMod: -25,  // Was -10, rifles are clunky in CQB
       short: 6, shortMod: 5,
@@ -85,7 +86,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 65,
     damageType: 'GUNFIRE_BULLET',
     range: 25,
-    apCost: 3,
+    apCost: 6,   // Was 3 - heavy semi-auto
     knockbackForce: 80,
     rangeBrackets: {
       pointBlank: 3, pointBlankMod: -15,
@@ -101,7 +102,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 60,
     damageType: 'GUNFIRE_BULLET',
     range: 40,
-    apCost: 4,
+    apCost: 8,   // Was 4 - full turn to aim and fire
     rangeBrackets: {
       pointBlank: 3, pointBlankMod: -30,
       short: 8, shortMod: -15,
@@ -118,7 +119,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 60,
     damageType: 'GUNFIRE_BUCKSHOT',
     range: 8,
-    apCost: 3,
+    apCost: 5,   // Was 3 - pump action cycle
     knockbackForce: 90,
     rangeBrackets: {
       pointBlank: 2, pointBlankMod: 30,
@@ -134,7 +135,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 65,
     damageType: 'GUNFIRE_BUCKSHOT',
     range: 10,
-    apCost: 2,
+    apCost: 4,   // Was 2 - semi-auto shotgun
     knockbackForce: 80,
     rangeBrackets: {
       pointBlank: 2, pointBlankMod: 25,
@@ -152,7 +153,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 65,
     damageType: 'GUNFIRE_BULLET',
     range: 12,
-    apCost: 2,
+    apCost: 3,   // Was 2 - quick burst
     rangeBrackets: {
       pointBlank: 2, pointBlankMod: 15,
       short: 5, shortMod: 10,
@@ -165,11 +166,12 @@ export const WEAPONS: Record<string, SimWeapon> = {
   // Melee - Blades
   knife: {
     name: 'Combat Knife',
-    damage: 10,
+    damage: 12,  // Increased from 10 - lethal blade
     accuracy: 80,
     damageType: 'EDGED_SLASHING',
     range: 1,
-    apCost: 1,
+    apCost: 3,   // Increased from 2 - proper attack, not a jab
+    isLightAttack: true,  // Quick stab - can move after
   },
   machete: {
     name: 'Machete',
@@ -177,7 +179,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 75,
     damageType: 'EDGED_SLASHING',
     range: 1,
-    apCost: 2,
+    apCost: 4,   // Was 2 - heavier blade
   },
 
   // ============ UNARMED ATTACKS ============
@@ -186,64 +188,66 @@ export const WEAPONS: Record<string, SimWeapon> = {
 
   fist: {
     name: 'Fist',
-    damage: 10,  // Was 8 - trained punch
+    damage: 10,  // Trained punch
     accuracy: 88,
     damageType: 'IMPACT_BLUNT',
     range: 1,
-    apCost: 1,
+    apCost: 2,   // Was 1 - scaled for 8 AP budget
+    isLightAttack: true,  // Quick punch - can combo into heavy or move
   },
   jab: {
     name: 'Jab',
-    damage: 6,   // Was 5 - quick setup punch
+    damage: 3,   // Was 6 - setup punch, not damage dealer
     accuracy: 95,
     damageType: 'IMPACT_BLUNT',
     range: 1,
-    apCost: 1,
+    apCost: 2,   // Was 1 - quick but still takes time
     knockbackForce: 10,
+    isLightAttack: true,  // Setup punch - combo into cross/hook
   },
   cross: {
     name: 'Cross',
-    damage: 14,  // Was 10 - power punch, should hurt
+    damage: 14,  // Power punch
     accuracy: 85,
     damageType: 'IMPACT_BLUNT',
     range: 1,
-    apCost: 1,
+    apCost: 3,   // Was 1 - power punch takes wind-up
     knockbackForce: 40,
   },
   hook: {
     name: 'Hook',
-    damage: 16,  // Was 12 - devastating when it lands
+    damage: 16,  // Devastating when it lands
     accuracy: 78,
     damageType: 'IMPACT_BLUNT',
     range: 1,
-    apCost: 2,
+    apCost: 4,   // Was 2 - big commitment
     knockbackForce: 60,
   },
   uppercut: {
     name: 'Uppercut',
-    damage: 20,  // Was 15 - knockout punch
+    damage: 20,  // Knockout punch
     accuracy: 72,
     damageType: 'IMPACT_BLUNT',
     range: 1,
-    apCost: 2,
+    apCost: 4,   // Was 2 - big commitment
     knockbackForce: 80,
   },
   kick: {
     name: 'Kick',
-    damage: 15,  // Was 12 - legs are stronger than arms
+    damage: 15,  // Legs are stronger than arms
     accuracy: 80,
     damageType: 'IMPACT_BLUNT',
     range: 1,
-    apCost: 2,
+    apCost: 4,   // Was 2 - balance + power
     knockbackForce: 70,
   },
   roundhouseKick: {
     name: 'Roundhouse Kick',
-    damage: 22,  // Was 18 - devastating spinning kick
+    damage: 22,  // Devastating spinning kick
     accuracy: 68,
     damageType: 'IMPACT_BLUNT',
     range: 1,
-    apCost: 3,
+    apCost: 6,   // Was 3 - full spin commitment
     knockbackForce: 100,
   },
 
@@ -252,11 +256,11 @@ export const WEAPONS: Record<string, SimWeapon> = {
 
   nunchucks: {
     name: 'Nunchucks',
-    damage: 12,
+    damage: 15,  // Increased from 12 - heavy swinging weapon
     accuracy: 75,
     damageType: 'IMPACT_BLUNT',
     range: 1,
-    apCost: 2,
+    apCost: 4,   // Heavy swing commitment
     knockbackForce: 40,
     special: { disarmBonus: 25 },  // Excellent at disarming!
   },
@@ -266,7 +270,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 80,
     damageType: 'IMPACT_BLUNT',
     range: 2,  // Extra reach!
-    apCost: 2,
+    apCost: 4,   // Was 2 - sweeping motion
     knockbackForce: 70,
     special: { knockdownChance: 30 },  // Good at sweeping legs
   },
@@ -276,9 +280,10 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 85,
     damageType: 'IMPACT_BLUNT',
     range: 1,
-    apCost: 1,
+    apCost: 2,   // Was 1 - quick defensive strikes
     knockbackForce: 30,
     special: { blockBonus: 15 },  // Defensive weapon
+    isLightAttack: true,  // Quick defensive strike - can reposition after
   },
   sai: {
     name: 'Sai',
@@ -286,18 +291,19 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 80,
     damageType: 'EDGED_PIERCING',
     range: 1,
-    apCost: 2,
+    apCost: 4,   // Was 2 - trapping technique
     knockbackForce: 20,
     special: { bladeTrapping: true, disarmBonus: 15 },  // Blade-catching
   },
   brassKnuckles: {
     name: 'Brass Knuckles',
-    damage: 12,
+    damage: 10,  // Reduced from 12 - enhanced fist, not power weapon
     accuracy: 90,
     damageType: 'IMPACT_BLUNT',
     range: 1,
-    apCost: 1,
+    apCost: 2,   // Quick punches like fist
     knockbackForce: 40,
+    isLightAttack: true,  // Enhanced fist - quick strike
   },
   katana: {
     name: 'Katana',
@@ -305,7 +311,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 70,
     damageType: 'EDGED_SLASHING',
     range: 2,
-    apCost: 3,
+    apCost: 6,   // Was 3 - full sword swing
     knockbackForce: 30,
   },
 
@@ -339,6 +345,200 @@ export const WEAPONS: Record<string, SimWeapon> = {
       long: 18, longMod: -5,
       max: 25, extremeMod: -20,
     },
+  },
+
+  // ============ HEAVY WEAPONS ============
+
+  lmg: {
+    name: 'Light Machine Gun',
+    damage: 28,
+    accuracy: 55,
+    damageType: 'GUNFIRE_BULLET',
+    range: 25,
+    apCost: 6,   // Full turn to fire
+    knockbackForce: 40,
+    rangeBrackets: {
+      pointBlank: 3, pointBlankMod: -20,  // Too unwieldy up close
+      short: 8, shortMod: 0,
+      optimal: 18, optimalMod: 10,
+      long: 30, longMod: 0,
+      max: 40, extremeMod: -15,
+    },
+  },
+  minigun: {
+    name: 'Minigun',
+    damage: 45,  // Devastating sustained fire
+    accuracy: 60,
+    damageType: 'GUNFIRE_BULLET',
+    range: 20,
+    apCost: 5,   // Fast fire rate
+    knockbackForce: 60,
+    rangeBrackets: {
+      pointBlank: 3, pointBlankMod: -10,
+      short: 8, shortMod: 5,
+      optimal: 15, optimalMod: 10,
+      long: 25, longMod: -10,
+      max: 35, extremeMod: -30,
+    },
+  },
+  rocketLauncher: {
+    name: 'Rocket Launcher',
+    damage: 80,
+    accuracy: 60,
+    damageType: 'EXPLOSIVE_BLAST',
+    range: 25,
+    apCost: 8,   // Full turn to fire
+    knockbackForce: 200,
+    rangeBrackets: {
+      pointBlank: 5, pointBlankMod: -50,  // Danger close!
+      short: 10, shortMod: 0,
+      optimal: 20, optimalMod: 10,
+      long: 30, longMod: -10,
+      max: 40, extremeMod: -25,
+    },
+  },
+  grenadeLauncher: {
+    name: 'Grenade Launcher',
+    damage: 45,
+    accuracy: 65,
+    damageType: 'EXPLOSIVE_BLAST',
+    range: 20,
+    apCost: 5,
+    knockbackForce: 120,
+    rangeBrackets: {
+      pointBlank: 3, pointBlankMod: -40,
+      short: 8, shortMod: 0,
+      optimal: 15, optimalMod: 10,
+      long: 25, longMod: -5,
+      max: 30, extremeMod: -20,
+    },
+  },
+
+  // ============ EXOTIC WEAPONS ============
+
+  flamethrower: {
+    name: 'Flamethrower',
+    damage: 25,
+    accuracy: 80,  // Easy to hit with flames
+    damageType: 'THERMAL_FIRE',
+    range: 6,      // Short range
+    apCost: 4,
+    knockbackForce: 20,
+    rangeBrackets: {
+      pointBlank: 1, pointBlankMod: 20,
+      short: 3, shortMod: 10,
+      optimal: 5, optimalMod: 0,
+      long: 7, longMod: -20,
+      max: 10, extremeMod: -50,
+    },
+  },
+  plasmaPistol: {
+    name: 'Plasma Pistol',
+    damage: 30,
+    accuracy: 70,
+    damageType: 'ENERGY_PLASMA',
+    range: 12,
+    apCost: 4,
+    knockbackForce: 50,
+    rangeBrackets: {
+      pointBlank: 2, pointBlankMod: 10,
+      short: 5, shortMod: 5,
+      optimal: 10, optimalMod: 0,
+      long: 15, longMod: -15,
+      max: 20, extremeMod: -30,
+    },
+  },
+  plasmaRifle: {
+    name: 'Plasma Rifle',
+    damage: 40,  // Reduced for balance
+    accuracy: 60,
+    damageType: 'ENERGY_PLASMA',
+    range: 25,
+    apCost: 5,   // Faster but less damage
+    knockbackForce: 80,
+    rangeBrackets: {
+      pointBlank: 3, pointBlankMod: 0,
+      short: 8, shortMod: 5,
+      optimal: 20, optimalMod: 10,
+      long: 30, longMod: -5,
+      max: 40, extremeMod: -20,
+    },
+  },
+  railgun: {
+    name: 'Railgun',
+    damage: 100,
+    accuracy: 55,
+    damageType: 'ENERGY_KINETIC',
+    range: 50,
+    apCost: 8,   // Full turn - massive weapon
+    knockbackForce: 150,
+    rangeBrackets: {
+      pointBlank: 5, pointBlankMod: -30,
+      short: 15, shortMod: -10,
+      optimal: 35, optimalMod: 15,
+      long: 50, longMod: 5,
+      max: 70, extremeMod: -10,
+    },
+  },
+
+  // ============ MELEE - POWERED ============
+
+  shockBaton: {
+    name: 'Shock Baton',
+    damage: 12,
+    accuracy: 85,
+    damageType: 'ELECTROMAGNETIC_BOLT',
+    range: 1,
+    apCost: 3,
+    knockbackForce: 30,
+  },
+  chainsaw: {
+    name: 'Chainsaw',
+    damage: 35,
+    accuracy: 60,
+    damageType: 'EDGED_SLASHING',
+    range: 1,
+    apCost: 5,
+    knockbackForce: 40,
+  },
+  powerFist: {
+    name: 'Power Fist',
+    damage: 40,
+    accuracy: 70,
+    damageType: 'IMPACT_BLUNT',
+    range: 1,
+    apCost: 5,
+    knockbackForce: 120,
+  },
+  vibroblade: {
+    name: 'Vibroblade',
+    damage: 30,
+    accuracy: 75,
+    damageType: 'EDGED_SLASHING',
+    range: 1,
+    apCost: 4,
+    knockbackForce: 20,
+  },
+
+  // ============ SPECIAL ============
+
+  tazer: {
+    name: 'Tazer',
+    damage: 5,
+    accuracy: 75,
+    damageType: 'ELECTROMAGNETIC_BOLT',
+    range: 3,
+    apCost: 3,
+    knockbackForce: 10,
+  },
+  netGun: {
+    name: 'Net Gun',
+    damage: 0,
+    accuracy: 70,
+    damageType: 'SPECIAL',
+    range: 10,
+    apCost: 4,
+    knockbackForce: 0,
   },
 };
 
@@ -377,11 +577,11 @@ export const UNIT_PRESETS: Record<string, UnitPreset> = {
   },
   soldierPistol: {
     name: 'Soldier (Pistol)',
-    description: 'Trained soldier with pistol and kevlar',
+    description: 'Trained soldier with sidearm and light vest',
     stats: HUMAN_BASELINE_STATS.trained,
     hp: 80,
-    dr: 10,
-    stoppingPower: 5,
+    dr: 5,           // Light vest, not tactical armor
+    stoppingPower: 2, // Minimal stopping power
     weapon: WEAPONS.standardPistol,
   },
 
@@ -472,6 +672,192 @@ export const UNIT_PRESETS: Record<string, UnitPreset> = {
     dr: 5,  // Light armor
     stoppingPower: 0,
     weapon: WEAPONS.katana,
+  },
+
+  // ============ STREET ENEMIES ============
+
+  thug: {
+    name: 'Street Thug',
+    description: 'Low-level criminal with a knife',
+    stats: HUMAN_BASELINE_STATS.average,
+    hp: 50,
+    dr: 0,
+    stoppingPower: 0,
+    weapon: WEAPONS.knife,
+  },
+  thugPistol: {
+    name: 'Armed Thug',
+    description: 'Criminal with a cheap pistol',
+    stats: HUMAN_BASELINE_STATS.average,
+    hp: 50,
+    dr: 0,
+    stoppingPower: 0,
+    weapon: WEAPONS.lightPistol,
+  },
+  gangEnforcer: {
+    name: 'Gang Enforcer',
+    description: 'Experienced street fighter with brass knuckles',
+    stats: { MEL: 20, AGL: 18, STR: 22, STA: 20 },
+    hp: 70,
+    dr: 2,
+    stoppingPower: 0,
+    weapon: WEAPONS.brassKnuckles,
+  },
+  gangLeader: {
+    name: 'Gang Leader',
+    description: 'Hardened criminal with SMG',
+    stats: { MEL: 22, AGL: 22, STR: 20, STA: 22 },
+    hp: 85,
+    dr: 5,
+    stoppingPower: 2,
+    weapon: WEAPONS.smg,
+  },
+
+  // ============ HEAVY UNITS ============
+
+  heavyGunner: {
+    name: 'Heavy Gunner',
+    description: 'Soldier with LMG and heavy armor',
+    stats: { MEL: 15, AGL: 12, STR: 28, STA: 25 },
+    hp: 120,
+    dr: 12,             // Reduced for balance
+    stoppingPower: 8,   // Blocks weak pistols
+    weapon: WEAPONS.lmg,
+  },
+  rocketTrooper: {
+    name: 'Rocket Trooper',
+    description: 'Anti-vehicle specialist with rocket launcher',
+    stats: { MEL: 15, AGL: 15, STR: 25, STA: 22 },
+    hp: 100,
+    dr: 15,
+    stoppingPower: 8,
+    weapon: WEAPONS.rocketLauncher,
+  },
+  flametrooper: {
+    name: 'Flametrooper',
+    description: 'Close-range specialist with flamethrower',
+    stats: { MEL: 18, AGL: 15, STR: 22, STA: 25 },
+    hp: 110,
+    dr: 18,
+    stoppingPower: 8,
+    weapon: WEAPONS.flamethrower,
+  },
+
+  // ============ ROBOTS ============
+
+  securityBot: {
+    name: 'Security Bot',
+    description: 'Basic security robot with built-in tazer',
+    stats: { MEL: 15, AGL: 15, STR: 18, STA: 18 },
+    hp: 70,
+    dr: 8,
+    stoppingPower: 3,
+    weapon: WEAPONS.tazer,
+  },
+  combatDrone: {
+    name: 'Combat Drone',
+    description: 'Armed drone with electric rifle',
+    stats: { MEL: 10, AGL: 25, STR: 15, STA: 15 },
+    hp: 50,
+    dr: 6,
+    stoppingPower: 2,
+    weapon: WEAPONS.electricRifle,  // Less damage than plasma
+  },
+  warBot: {
+    name: 'War Bot',
+    description: 'Heavy combat robot with plasma rifle',
+    stats: { MEL: 20, AGL: 12, STR: 28, STA: 28 },
+    hp: 120,
+    dr: 12,             // Reduced for balance
+    stoppingPower: 6,   // Allows rifles through
+    weapon: WEAPONS.plasmaRifle,
+  },
+  terminatorBot: {
+    name: 'Terminator',
+    description: 'Advanced war machine with minigun',
+    stats: { MEL: 25, AGL: 18, STR: 35, STA: 35 },
+    hp: 180,
+    dr: 18,             // Reduced for balance
+    stoppingPower: 10,  // Blocks weak weapons
+    weapon: WEAPONS.minigun,
+  },
+
+  // ============ SUPERHUMANS ============
+
+  mutantBruiser: {
+    name: 'Mutant Bruiser',
+    description: 'Enhanced strength and durability',
+    stats: { MEL: 35, AGL: 20, STR: 40, STA: 35 },
+    hp: 180,
+    dr: 15,
+    stoppingPower: 10,
+    weapon: WEAPONS.powerFist,
+  },
+  psychicAgent: {
+    name: 'Psychic Agent',
+    description: 'Mind-enhanced operative with railgun',
+    stats: { MEL: 20, AGL: 30, STR: 18, STA: 22 },
+    hp: 90,
+    dr: 8,
+    stoppingPower: 5,
+    weapon: WEAPONS.railgun,
+  },
+  cyborgSoldier: {
+    name: 'Cyborg Soldier',
+    description: 'Human-machine hybrid with plasma rifle',
+    stats: { MEL: 28, AGL: 25, STR: 30, STA: 28 },
+    hp: 140,
+    dr: 22,
+    stoppingPower: 12,
+    weapon: WEAPONS.plasmaRifle,
+  },
+  superSpeedster: {
+    name: 'Speedster',
+    description: 'Super-fast combatant with vibroblade',
+    stats: { MEL: 30, AGL: 40, STR: 20, STA: 25 },  // Still fast but not absurd
+    hp: 100,
+    dr: 5,
+    stoppingPower: 0,
+    weapon: WEAPONS.vibroblade,
+  },
+
+  // ============ BOSSES ============
+
+  bossJuggernaut: {
+    name: 'Juggernaut',
+    description: 'Unstoppable brute with minigun',
+    stats: { MEL: 35, AGL: 20, STR: 45, STA: 45 },  // More agile
+    hp: 280,
+    dr: 12,             // Rifles do ~5 damage
+    stoppingPower: 8,   // Blocks pistols
+    weapon: WEAPONS.minigun,
+  },
+  bossAssassin: {
+    name: 'Shadow Assassin',
+    description: 'Deadly silent killer with vibroblade',
+    stats: { MEL: 40, AGL: 45, STR: 25, STA: 30 },
+    hp: 150,
+    dr: 10,
+    stoppingPower: 5,
+    weapon: WEAPONS.vibroblade,
+  },
+  bossMechsuit: {
+    name: 'Mech Pilot',
+    description: 'Power armor with rocket launcher',
+    stats: { MEL: 25, AGL: 20, STR: 40, STA: 40 },
+    hp: 200,
+    dr: 22,             // Reduced for balance
+    stoppingPower: 15,  // Heavy armor
+    weapon: WEAPONS.rocketLauncher,
+  },
+  bossWarlord: {
+    name: 'Warlord',
+    description: 'Elite commander with railgun',
+    stats: { MEL: 35, AGL: 30, STR: 35, STA: 35 },
+    hp: 200,
+    dr: 25,
+    stoppingPower: 15,
+    weapon: WEAPONS.railgun,
   },
 };
 
@@ -585,17 +971,35 @@ export function createSoldierTest(): {
 }
 
 /**
- * Rifle vs Pistol test (rifles should win ~70%).
+ * Rifle vs Pistol test - WEAPON ROLE comparison with equal armor.
+ * Tests weapon effectiveness, not armor differences.
+ * At "optimal range" (no range mods), rifles should have slight edge
+ * due to higher single-shot damage, but pistols get more attacks.
  */
 export function createRifleVsPistolTest(): {
   blue: SimUnit[];
   red: SimUnit[];
   description: string;
 } {
+  // Use same armor on both sides to test pure weapon performance
+  const stats = HUMAN_BASELINE_STATS.trained;
+  const lightArmor = { dr: 5, stoppingPower: 2 };  // Light armor for both
+
+  const rifleTeam = [
+    createCustomUnit('blue', 'Rifle 1', stats, WEAPONS.assaultRifle, lightArmor),
+    createCustomUnit('blue', 'Rifle 2', stats, WEAPONS.assaultRifle, lightArmor),
+    createCustomUnit('blue', 'Rifle 3', stats, WEAPONS.assaultRifle, lightArmor),
+  ];
+  const pistolTeam = [
+    createCustomUnit('red', 'Pistol 1', stats, WEAPONS.standardPistol, lightArmor),
+    createCustomUnit('red', 'Pistol 2', stats, WEAPONS.standardPistol, lightArmor),
+    createCustomUnit('red', 'Pistol 3', stats, WEAPONS.standardPistol, lightArmor),
+  ];
+
   return {
-    blue: createTeam(UNIT_PRESETS.soldierRifle, 'blue', 3, 'Rifle'),
-    red: createTeam(UNIT_PRESETS.soldierPistol, 'red', 3, 'Pistol'),
-    description: '3 Rifles vs 3 Pistols (rifles should win ~70%)',
+    blue: rifleTeam,
+    red: pistolTeam,
+    description: '3 Rifles vs 3 Pistols (equal armor, rifles ~55-65%)',
   };
 }
 
@@ -780,8 +1184,20 @@ export function createPistolCloseRangeTest(): {
   distance: number;
   description: string;
 } {
-  const blue = createTeam(UNIT_PRESETS.soldierPistol, 'blue', 3, 'Pistol');
-  const red = createTeam(UNIT_PRESETS.soldierRifle, 'red', 3, 'Rifle');
+  // Use equal armor for fair weapon comparison at close range
+  const stats = HUMAN_BASELINE_STATS.trained;
+  const lightArmor = { dr: 5, stoppingPower: 2 };
+
+  const blue = [
+    createCustomUnit('blue', 'Pistol 1', stats, WEAPONS.standardPistol, lightArmor),
+    createCustomUnit('blue', 'Pistol 2', stats, WEAPONS.standardPistol, lightArmor),
+    createCustomUnit('blue', 'Pistol 3', stats, WEAPONS.standardPistol, lightArmor),
+  ];
+  const red = [
+    createCustomUnit('red', 'Rifle 1', stats, WEAPONS.assaultRifle, lightArmor),
+    createCustomUnit('red', 'Rifle 2', stats, WEAPONS.assaultRifle, lightArmor),
+    createCustomUnit('red', 'Rifle 3', stats, WEAPONS.assaultRifle, lightArmor),
+  ];
 
   // All at same Y to ensure exactly 2 tiles distance for every attack
   blue.forEach((u, i) => u.position = { x: 0, y: 5 });

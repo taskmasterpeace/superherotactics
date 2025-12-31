@@ -5,6 +5,36 @@
  * NO Phaser dependencies - pure TypeScript interfaces.
  */
 
+// ============ FIRE MODE TYPES ============
+export type FireMode = 'single' | 'burst' | 'auto';
+
+export interface FireModeConfig {
+  mode: FireMode;
+  shotsPerAttack: number;      // 1 for single, 3 for burst, 5 for auto
+  damagePerShot: number;       // Damage multiplier per shot (1.0 = full, 0.5 = half)
+  accuracyPenalty: number;     // 0 for single, -15 for burst, -25 for auto
+  apMultiplier: number;        // 1x for single, 1.5x for burst, 2x for auto
+  suppressionChance: number;   // 0 for single, 30 for burst, 60 for auto
+}
+
+// Fire mode configurations - balance targets from JA2/XCOM:
+// - Single: Precise, efficient AP, no suppression (baseline)
+// - Burst: Moderate DPS boost, accuracy penalty, some suppression
+// - Auto: High DPS, significant penalty, heavy suppression
+//
+// Balance math (effective DPS multiplier):
+// - Single: 1 shot * 1.0 dmg * 70% acc = 0.70 effective
+// - Burst:  3 shots * 0.5 dmg * 55% acc = 0.83 effective (1.2x single)
+// - Auto:   5 shots * 0.4 dmg * 45% acc = 0.90 effective (1.3x single)
+//
+// At close range (higher hit %), burst/auto shine.
+// At long range, accuracy penalties hurt burst/auto more.
+export const FIRE_MODES: Record<FireMode, FireModeConfig> = {
+  single: { mode: 'single', shotsPerAttack: 1, damagePerShot: 1.0, accuracyPenalty: 0, apMultiplier: 1, suppressionChance: 0 },
+  burst: { mode: 'burst', shotsPerAttack: 3, damagePerShot: 0.5, accuracyPenalty: -15, apMultiplier: 1.5, suppressionChance: 30 },
+  auto: { mode: 'auto', shotsPerAttack: 5, damagePerShot: 0.4, accuracyPenalty: -25, apMultiplier: 2, suppressionChance: 60 },
+};
+
 // ============ STANCE TYPES ============
 export type StanceType = 'normal' | 'aggressive' | 'defensive' | 'overwatch' | 'sneaking';
 
@@ -124,6 +154,12 @@ export interface SimWeapon {
     blockBonus?: number;       // Evasion bonus when defensive (tonfa +15)
     bladeTrapping?: boolean;   // Can catch blades (sai)
   };
+  // Light attack property - if true, attack uses 1 action but doesn't end turn
+  // Allows combos like: jab + cross, knife stab + move away
+  isLightAttack?: boolean;
+  // Fire mode support - for weapons capable of burst/auto fire
+  availableFireModes?: FireMode[];  // e.g., ['single', 'burst'] for SMG
+  currentFireMode?: FireMode;       // Currently selected mode
 }
 
 // ============ DISARM TYPES ============
@@ -208,6 +244,9 @@ export interface SimUnit {
   // Tracking
   alive: boolean;
   acted: boolean;
+
+  // XCOM-style action system (optional, for new 2-action system)
+  turnState?: TurnState;
 }
 
 // ============ GRENADE TYPES ============
@@ -353,6 +392,7 @@ export interface BattleConfig {
   allowDraw: boolean;      // If true, draw after maxRounds
   includeRange: boolean;   // If false, use optimal range for all attacks
   includeMovement: boolean;// If false, skip movement phase
+  apPerRound: number;      // AP budget per unit per round (default 4)
   seed?: number;           // For deterministic battles
 }
 
@@ -362,6 +402,7 @@ export const DEFAULT_BATTLE_CONFIG: BattleConfig = {
   allowDraw: true,
   includeRange: false,  // Instant Combat skips range
   includeMovement: false,
+  apPerRound: 8,        // Each unit gets 8 AP per round (scaled up for granularity)
   seed: undefined,
 };
 
@@ -423,6 +464,19 @@ export interface BatchResult {
   // Performance
   totalDurationMs: number;
   fightsPerSecond: number;
+}
+
+// ============ ACTION SYSTEM (XCOM-STYLE) ============
+// Replaces AP-based system with 2-action turn structure
+
+export type ActionType = 'move' | 'attack' | 'reload' | 'overwatch' | 'use_item' | 'dash';
+
+export interface TurnState {
+  actionsRemaining: 2 | 1 | 0;
+  hasMoved: boolean;
+  hasAttacked: boolean;  // Attacking ends turn immediately
+  isDashing: boolean;    // Using both actions for movement
+  isOnOverwatch: boolean;
 }
 
 // ============ HUMAN PRESETS ============

@@ -21,6 +21,14 @@ import {
   calculateDistance,
   canCounterAttack,
   resolveCounterAttack,
+  faceToward,
+  // New 2-action system
+  resetTurnState,
+  canPerformAction,
+  spendAction,
+  isTurnComplete,
+  getMovementRange,
+  getDashRange,
 } from './core';
 
 import {
@@ -56,6 +64,58 @@ function isTeamEliminated(units: SimUnit[]): boolean {
 }
 
 /**
+ * Initialize unit facing at battle start.
+ * Each unit faces the nearest enemy to prevent flanking bias
+ * from default facing direction (all units face right by default).
+ */
+function initializeUnitFacing(blue: SimUnit[], red: SimUnit[]): void {
+  // Only initialize if any units have positions
+  const hasPositions = [...blue, ...red].some(u => u.position);
+  if (!hasPositions) return;
+
+  // Make each blue unit face the nearest red unit
+  for (const unit of blue) {
+    if (!unit.position) continue;
+    const nearestEnemy = findNearestEnemy(unit, red);
+    if (nearestEnemy?.position) {
+      faceToward(unit, nearestEnemy.position.x, nearestEnemy.position.y);
+    }
+  }
+
+  // Make each red unit face the nearest blue unit
+  for (const unit of red) {
+    if (!unit.position) continue;
+    const nearestEnemy = findNearestEnemy(unit, blue);
+    if (nearestEnemy?.position) {
+      faceToward(unit, nearestEnemy.position.x, nearestEnemy.position.y);
+    }
+  }
+}
+
+/**
+ * Find the nearest enemy with a position.
+ */
+function findNearestEnemy(unit: SimUnit, enemies: SimUnit[]): SimUnit | null {
+  if (!unit.position) return null;
+
+  let nearest: SimUnit | null = null;
+  let nearestDist = Infinity;
+
+  for (const enemy of enemies) {
+    if (!enemy.position || !enemy.alive) continue;
+    const dx = unit.position.x - enemy.position.x;
+    const dy = unit.position.y - enemy.position.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < nearestDist) {
+      nearestDist = dist;
+      nearest = enemy;
+    }
+  }
+
+  return nearest;
+}
+
+/**
  * Run a single battle between two teams.
  *
  * @param blueTeam - Blue team units (will be cloned)
@@ -75,6 +135,11 @@ export function runBattle(
   const blue = cloneTeam(blueTeam);
   const red = cloneTeam(redTeam);
   const allUnits = [...blue, ...red];
+
+  // Initialize unit facing to prevent flanking bias
+  // Without this, all units default to facing right, giving
+  // the left-side team a massive flanking advantage.
+  initializeUnitFacing(blue, red);
 
   const log: AttackResult[] = [];
   let rounds = 0;
@@ -114,37 +179,55 @@ export function runBattle(
       // Find enemies
       const enemies = unit.team === 'blue' ? red : blue;
 
-      // Select target
-      const target = selectTarget(unit, enemies);
-      if (!target) continue;
+      // XCOM-STYLE 2-ACTION SYSTEM
+      // Each unit gets 2 actions: Move + Attack, Dash, or Overwatch
+      resetTurnState(unit);
 
-      // Calculate distance if positions exist
-      const distance = calculateDistance(unit, target);
+      while (!isTurnComplete(unit) && unit.alive) {
+        // Select target
+        const target = selectTarget(unit, enemies);
+        if (!target) break;
 
-      // Resolve attack
-      const result = resolveAttack(unit, target, distance);
-      log.push(result);
+        // Calculate distance if positions exist
+        const distance = calculateDistance(unit, target);
+        const weaponRange = unit.weapon.range || 1;
 
-      // Apply result (includes applying new status effects)
-      applyAttackResult(target, result);
+        // AI Decision: If in range, attack. Otherwise, move closer.
+        const inRange = distance === undefined || distance <= weaponRange;
 
-      // COUNTER-ATTACK CHECK
-      // If a trained unarmed fighter dodges a melee attack, they may counter
-      if (canCounterAttack(target, unit, result)) {
-        const counterResult = resolveCounterAttack(target, unit);
-        if (counterResult) {
-          log.push(counterResult);
-          applyAttackResult(unit, counterResult);
+        if (inRange && canPerformAction(unit, 'attack')) {
+          // Attack (ends turn)
+          const result = resolveAttack(unit, target, distance);
+          log.push(result);
+          applyAttackResult(target, result);
+          spendAction(unit, 'attack'); // Ends turn
 
-          // Check if counter killed the attacker
-          if (!unit.alive) {
-            // Don't check for victory yet, let the loop continue
+          // COUNTER-ATTACK CHECK
+          if (canCounterAttack(target, unit, result)) {
+            const counterResult = resolveCounterAttack(target, unit);
+            if (counterResult) {
+              log.push(counterResult);
+              applyAttackResult(unit, counterResult);
+            }
           }
+        } else if (canPerformAction(unit, 'move')) {
+          // Move closer (uses 1 action, can still attack after)
+          spendAction(unit, 'move');
+          // Note: In headless sim, we don't actually move positions
+          // Just simulate the action economy
+        } else {
+          // No valid actions, end turn
+          break;
+        }
+
+        // Check for victory after each action
+        if (isTeamEliminated(enemies)) {
+          break;
         }
       }
 
       // Check for victory
-      if (isTeamEliminated(enemies)) {
+      if (isTeamEliminated(blue) || isTeamEliminated(red)) {
         break;
       }
     }
@@ -210,15 +293,23 @@ export function runBattle(
 /**
  * Run a quick battle without detailed logging.
  * Faster for batch testing.
+ *
+ * Uses XCOM-style 2-action system:
+ * - Each unit gets 2 actions per turn
+ * - Move = 1 action, Attack = 1 action (ends turn)
+ * - Attack ends turn immediately (no multi-attack spam)
  */
 export function runQuickBattle(
   blueTeam: SimUnit[],
   redTeam: SimUnit[],
-  maxRounds: number = 50
+  maxRounds: number = DEFAULT_BATTLE_CONFIG.maxRounds
 ): { winner: 'blue' | 'red' | 'draw'; rounds: number } {
   const blue = cloneTeam(blueTeam);
   const red = cloneTeam(redTeam);
   const allUnits = [...blue, ...red];
+
+  // Initialize unit facing to prevent flanking bias
+  initializeUnitFacing(blue, red);
 
   let rounds = 0;
 
@@ -239,15 +330,39 @@ export function runQuickBattle(
       if (statusResult.turnSkipped || !canUnitAct(unit)) continue;
 
       const enemies = unit.team === 'blue' ? red : blue;
-      const target = selectTarget(unit, enemies);
-      if (!target) continue;
 
-      const distance = calculateDistance(unit, target);
-      const result = resolveAttack(unit, target, distance);
-      applyAttackResult(target, result);
+      // XCOM-STYLE 2-ACTION SYSTEM
+      resetTurnState(unit);
 
-      if (isTeamEliminated(enemies)) {
-        return { winner: unit.team, rounds };
+      while (!isTurnComplete(unit) && unit.alive) {
+        const target = selectTarget(unit, enemies);
+        if (!target) break;
+
+        const distance = calculateDistance(unit, target);
+        const weaponRange = unit.weapon.range || 1;
+        const inRange = distance === undefined || distance <= weaponRange;
+
+        if (inRange && canPerformAction(unit, 'attack')) {
+          // Attack (ends turn)
+          const result = resolveAttack(unit, target, distance);
+          applyAttackResult(target, result);
+          spendAction(unit, 'attack');
+
+          if (isTeamEliminated(enemies)) {
+            return { winner: unit.team, rounds };
+          }
+        } else if (canPerformAction(unit, 'move')) {
+          // Move closer
+          spendAction(unit, 'move');
+        } else {
+          break;
+        }
+      }
+
+      // Check if enemy team was eliminated
+      if (isTeamEliminated(blue) || isTeamEliminated(red)) {
+        const winner = isTeamEliminated(red) ? 'blue' : 'red';
+        return { winner, rounds };
       }
     }
   }
