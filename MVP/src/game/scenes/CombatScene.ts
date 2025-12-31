@@ -2173,8 +2173,25 @@ export class CombatScene extends Phaser.Scene {
     const pixelX = unit.sprite.x - barWidth / 2;
     // Position above sprite head
     const spriteHeight = unit.sprite.displayHeight;
-    const pixelY = unit.sprite.y - spriteHeight - 10;
+    let pixelY = unit.sprite.y - spriteHeight - 10;
 
+    // Draw shield bar above health bar (if unit has shields)
+    if (unit.shieldMaxHp > 0) {
+      const shieldPercent = unit.shieldHp / unit.shieldMaxHp;
+      const shieldColor = shieldPercent > 0.25 ? COLORS.SHIELD_FULL : COLORS.SHIELD_LOW;
+
+      // Shield bar background (dark outline)
+      unit.healthBar.fillStyle(0x003344, 0.8);
+      unit.healthBar.fillRect(pixelX - 1, pixelY - 5, barWidth + 2, 5);
+
+      // Shield bar fill
+      if (unit.shieldHp > 0) {
+        unit.healthBar.fillStyle(shieldColor, 1);
+        unit.healthBar.fillRect(pixelX, pixelY - 4, barWidth * shieldPercent, 3);
+      }
+    }
+
+    // Health bar
     const healthPercent = unit.hp / unit.maxHp;
     let healthColor = COLORS.HEALTH_FULL;
     if (healthPercent < 0.25) healthColor = COLORS.HEALTH_LOW;

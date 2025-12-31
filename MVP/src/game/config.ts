@@ -79,6 +79,8 @@ export const COLORS = {
   HEALTH_FULL: 0x4ad94a,
   HEALTH_HALF: 0xd9d94a,
   HEALTH_LOW: 0xd94a4a,
+  SHIELD_FULL: 0x00ffff,  // Cyan shield bar
+  SHIELD_LOW: 0x0088aa,   // Darker when low
 
   // UI Colors
   BORDER: 0x4a4a6a,
