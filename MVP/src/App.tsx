@@ -43,6 +43,8 @@ import WorldDataEditor from './tools/WorldDataEditor'
 import NewsBrowser from './components/NewsBrowser'
 import HospitalScreen from './components/HospitalScreen'
 import EquipmentShop from './components/EquipmentShop'
+import TrainingCenter from './components/TrainingCenter'
+import BaseManager from './components/BaseManager'
 
 // News Generator - subscribes to EventBus for automatic news generation
 import { initNewsGenerator, cleanupNewsGenerator } from './data/newsGenerator'
@@ -391,6 +393,8 @@ function App() {
             {currentView === 'loadout-editor' && <LoadoutEditor />}
             {currentView === 'sector-editor' && <SectorEditor onClose={() => setCurrentView('world-map')} />}
             {currentView === 'world-data' && <WorldDataEditor onClose={() => setCurrentView('world-map')} />}
+            {currentView === 'training' && <TrainingCenter />}
+            {currentView === 'base' && <BaseManager />}
           </div>
         </>
       )}

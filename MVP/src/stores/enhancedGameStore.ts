@@ -218,7 +218,7 @@ interface EnhancedGameStore {
   selectedCity: string
 
   // Game State
-  currentView: 'world-map' | 'tactical-combat' | 'investigation' | 'investigation-board' | 'characters' | 'combat-lab' | 'news' | 'encyclopedia' | 'balance' | 'world-map-grid' | 'database' | 'data-viewer' | 'sound-config' | 'loadout-editor' | 'sector-editor' | 'world-data' | 'almanac' | 'hospital' | 'equipment-shop'
+  currentView: 'world-map' | 'tactical-combat' | 'investigation' | 'investigation-board' | 'characters' | 'combat-lab' | 'news' | 'encyclopedia' | 'balance' | 'world-map-grid' | 'database' | 'data-viewer' | 'sound-config' | 'loadout-editor' | 'sector-editor' | 'world-data' | 'almanac' | 'hospital' | 'equipment-shop' | 'training' | 'base'
   budget: number
   day: number  // Legacy - use gameTime.day instead
 
