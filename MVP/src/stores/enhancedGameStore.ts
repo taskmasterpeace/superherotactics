@@ -96,6 +96,7 @@ import {
   toggleBookmark,
   getArticlesWithLeads,
   cleanExpiredArticles,
+  createNewsArticle,
 } from '../data/newsSystem'
 import {
   generateMissionNews as genMissionNews,
@@ -209,6 +210,23 @@ export interface FleetVehicle {
   maintenanceNeeded: boolean
 }
 
+// Training/Education Enrollment
+export interface TrainingEnrollment {
+  id: string
+  characterId: string
+  characterName: string
+  fieldId: string
+  institutionId: string
+  degreeLevel: 'associate' | 'bachelor' | 'master' | 'doctorate' | 'certificate'
+  startDay: number        // Game day when training started
+  endDay: number          // Game day when training completes
+  progress: number        // 0-100%
+  cost: number            // Total cost paid
+  status: 'active' | 'completed' | 'dropped'
+  statBonuses?: Record<string, number>  // Stats to apply on completion
+  skillsUnlocked?: string[]  // Skills to unlock on completion
+}
+
 // Enhanced game store with injury system
 interface EnhancedGameStore {
   // Game Setup
@@ -266,6 +284,9 @@ interface EnhancedGameStore {
   pendingActivityRequests: ActivityRequest[]
   completedActivityReports: DailyActivityReport[]
   lastDayProcessed: number  // Track which day was last processed to avoid duplicates
+
+  // Training/Education System
+  trainingEnrollments: TrainingEnrollment[]
 
   // Inventory System
   inventory: {
@@ -433,6 +454,15 @@ interface EnhancedGameStore {
   updateCharacterFamiliarity: (characterId: string, cityId: string, change: number) => void
   getPendingRequests: () => ActivityRequest[]
   getCharacterActivityDesires: (characterId: string) => ActivityDesires | null
+
+  // Training/Education System Actions
+  enrollCharacter: (enrollment: Omit<TrainingEnrollment, 'id' | 'status'>) => void
+  updateEnrollmentProgress: (enrollmentId: string, progress: number) => void
+  completeTraining: (enrollmentId: string) => void
+  dropTraining: (enrollmentId: string) => void
+  getActiveEnrollments: () => TrainingEnrollment[]
+  getEnrollmentByCharacter: (characterId: string) => TrainingEnrollment | null
+  processTrainingProgress: () => void  // Called on time advancement
 }
 
 export const useGameStore = create<EnhancedGameStore>((set, get) => ({
@@ -673,6 +703,9 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   pendingActivityRequests: [] as ActivityRequest[],
   completedActivityReports: [] as DailyActivityReport[],
   lastDayProcessed: 0,
+
+  // Training/Education System - Initial State
+  trainingEnrollments: [] as TrainingEnrollment[],
 
   // Inventory System - Initial State
   inventory: {
@@ -1383,9 +1416,14 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       })
     }
 
+    // Adjust reputation based on mission outcome
     if (success) {
+      get().adjustReputationAxis('heroic', 5, 'Mission success')
+      get().adjustReputationAxis('public', 3, 'Mission success')
       toast.success(`Mission complete! +$${reward.toLocaleString()}`)
     } else {
+      get().adjustReputationAxis('heroic', -3, 'Mission failed')
+      get().adjustReputationAxis('public', -2, 'Mission failed')
       toast.error('Mission failed. Squad returning to base.')
     }
   },
@@ -2293,6 +2331,9 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
         dayOfWeek: dayOfWeekNames[(newDay - 1) % 7],
         isWeekend: dayOfWeekNames[(newDay - 1) % 7] === 'saturday' || dayOfWeekNames[(newDay - 1) % 7] === 'sunday'
       })
+
+      // Process training progress when day changes
+      get().processTrainingProgress()
     }
 
     // Check if we crossed a week boundary - trigger underworld simulation
@@ -2496,6 +2537,25 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       return
     }
 
+    // Check education requirements from template
+    const template = INVESTIGATION_TEMPLATES.find(t => t.title === lead.title)
+    if (template?.requiredEducation && template.requiredEducation.length > 0) {
+      // Get character's completed education fields
+      const completedEducation = state.trainingEnrollments
+        .filter(e => e.characterId === characterId && e.status === 'completed')
+        .map(e => e.fieldId.toLowerCase())
+
+      // Check if character has any required education
+      const hasRequired = template.requiredEducation.some(req =>
+        completedEducation.some(edu => edu.includes(req.toLowerCase()))
+      )
+
+      if (!hasRequired) {
+        toast.error(`This investigation requires ${template.requiredEducation.join(' or ')} training`)
+        return
+      }
+    }
+
     // Move from leads to active
     const updatedInvestigation: Investigation = {
       ...lead,
@@ -2543,6 +2603,27 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
     // Perform the investigation action
     const result = advanceInvestigation(investigation, character, approach)
+
+    // Apply education bonuses to progress gained
+    const template = INVESTIGATION_TEMPLATES.find(t => t.title === investigation.title)
+    if (template?.educationBonuses) {
+      // Get character's completed education fields
+      const completedEducation = state.trainingEnrollments
+        .filter(e => e.characterId === characterId && e.status === 'completed')
+        .map(e => e.fieldId.toLowerCase())
+
+      // Find matching education bonus for this approach
+      for (const [eduField, bonus] of Object.entries(template.educationBonuses)) {
+        if (bonus.approach === approach) {
+          // Check if character has this education
+          if (completedEducation.some(edu => edu.includes(eduField.toLowerCase()))) {
+            // Apply bonus to progress (e.g., +25% means multiply by 1.25)
+            result.progressGained = Math.round(result.progressGained * (1 + bonus.bonus / 100))
+            break  // Apply only one bonus per action
+          }
+        }
+      }
+    }
 
     // Create decision log entry
     const decision: any = {
@@ -3345,6 +3426,20 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       }))
     }
 
+    // If 'growth_class' activity and character has active enrollment, boost progress
+    if (activity.id === 'growth_class') {
+      const enrollment = get().getEnrollmentByCharacter(request.characterId)
+      if (enrollment) {
+        // Attending class accelerates training by 5% (personality modifiers could apply here)
+        const personality = character?.personality
+        const disciplineBonus = (personality?.volatility ?? 5) < 4 ? 1.1 : 1.0  // Low volatility = more disciplined
+        const progressBoost = Math.round(5 * disciplineBonus)
+
+        get().updateEnrollmentProgress(enrollment.id, enrollment.progress + progressBoost)
+        toast.success(`${character?.name}'s training accelerated by ${progressBoost}%`)
+      }
+    }
+
     toast.success(`${character?.name} completed: ${activity.name}`)
     return result
   },
@@ -3423,5 +3518,350 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       character.health?.current || 100,
       character.morale || 80
     )
+  },
+
+  // ===== Training/Education System Actions =====
+
+  enrollCharacter: (enrollment: Omit<TrainingEnrollment, 'id' | 'status'>) => {
+    const state = get()
+
+    // Check if character is already training
+    const existingEnrollment = state.trainingEnrollments.find(
+      e => e.characterId === enrollment.characterId && e.status === 'active'
+    )
+    if (existingEnrollment) {
+      toast.error('Character is already enrolled in training')
+      return
+    }
+
+    // Check budget
+    if (state.budget < enrollment.cost) {
+      toast.error('Insufficient funds for training')
+      return
+    }
+
+    // Check reputation gating for special programs
+    const fieldLower = enrollment.fieldId.toLowerCase()
+    const institutionLower = enrollment.institutionId.toLowerCase()
+
+    // Government/Military programs require positive government reputation
+    const governmentFields = ['government', 'military', 'intelligence', 'law_enforcement', 'federal']
+    const isGovernmentProgram = governmentFields.some(f => fieldLower.includes(f) || institutionLower.includes(f))
+    if (isGovernmentProgram && state.reputation.government < 25) {
+      toast.error('Government programs require Government reputation ≥ 25')
+      return
+    }
+
+    // Criminal programs require criminal reputation
+    const criminalFields = ['underground', 'criminal', 'black_market', 'assassination', 'smuggling']
+    const isCriminalProgram = criminalFields.some(f => fieldLower.includes(f))
+    if (isCriminalProgram && state.reputation.criminal < 50) {
+      toast.error('Criminal training requires Criminal reputation ≥ 50')
+      return
+    }
+
+    // Elite military programs require higher government standing
+    const eliteMilitary = ['elite', 'command', 'special_forces', 'black_ops']
+    const isEliteMilitary = eliteMilitary.some(f => fieldLower.includes(f) || enrollment.degreeLevel === 'elite' || enrollment.degreeLevel === 'command')
+    if (isEliteMilitary && state.reputation.government < 50) {
+      toast.error('Elite military programs require Government reputation ≥ 50')
+      return
+    }
+
+    // Check facility availability (warning, not blocking)
+    // Fields that benefit from specific facilities
+    const facilityRequirements: Record<string, string> = {
+      'combat_sciences': 'Training Room',
+      'martial_arts': 'Training Room',
+      'military_tactics': 'Training Room',
+      'weapons_systems': 'Armory',
+      'demolitions': 'Armory',
+      'hacking': 'Comms Center',
+      'cryptography': 'Comms Center',
+      'medicine': 'Medical Bay',
+      'trauma_surgery': 'Medical Bay',
+      'vehicle_combat': 'Simulator',
+      'vehicle_engineering': 'Garage',
+      'technical_engineering': 'Workshop',
+      'robotics': 'Workshop',
+    }
+
+    const baseBonuses = get().getBaseBonuses()
+    const requiredFacility = Object.entries(facilityRequirements)
+      .find(([field]) => fieldLower.includes(field))?.[1]
+
+    if (requiredFacility && baseBonuses.education === 0) {
+      // Warn but don't block - training will just be slower
+      toast(`No ${requiredFacility} facility - training will be slower`, { icon: '⚠️' })
+    }
+
+    const newEnrollment: TrainingEnrollment = {
+      ...enrollment,
+      id: `enroll-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      status: 'active'
+    }
+
+    set({
+      trainingEnrollments: [...state.trainingEnrollments, newEnrollment],
+      budget: state.budget - enrollment.cost
+    })
+
+    // Record the transaction for financial tracking
+    get().recordTransaction(
+      'expense',
+      'education_tuition',
+      enrollment.cost,
+      `${enrollment.characterName} enrolled in ${enrollment.degreeLevel} ${enrollment.fieldId} at ${enrollment.institutionId}`
+    )
+
+    // Set character status to training
+    const updatedCharacters = state.characters.map((c: any) =>
+      c.id === enrollment.characterId ? { ...c, status: 'training' } : c
+    )
+    set({ characters: updatedCharacters })
+
+    toast.success(`${enrollment.characterName} enrolled in ${enrollment.fieldId}`)
+  },
+
+  updateEnrollmentProgress: (enrollmentId: string, progress: number) => {
+    const state = get()
+    set({
+      trainingEnrollments: state.trainingEnrollments.map(e =>
+        e.id === enrollmentId ? { ...e, progress: Math.min(100, Math.max(0, progress)) } : e
+      )
+    })
+  },
+
+  completeTraining: (enrollmentId: string) => {
+    const state = get()
+    const enrollment = state.trainingEnrollments.find(e => e.id === enrollmentId)
+    if (!enrollment) return
+
+    // Apply stat bonuses to character
+    const updatedCharacters = state.characters.map((c: any) => {
+      if (c.id !== enrollment.characterId) return c
+
+      const updates: any = {
+        ...c,
+        status: 'ready',
+        educationLevel: enrollment.degreeLevel
+      }
+
+      // Apply stat bonuses
+      if (enrollment.statBonuses) {
+        for (const [stat, bonus] of Object.entries(enrollment.statBonuses)) {
+          if (typeof updates[stat] === 'number') {
+            updates[stat] = Math.min(100, updates[stat] + bonus)
+          }
+        }
+      }
+
+      // Add unlocked skills
+      if (enrollment.skillsUnlocked && enrollment.skillsUnlocked.length > 0) {
+        updates.skills = [...(c.skills || []), ...enrollment.skillsUnlocked]
+      }
+
+      return updates
+    })
+
+    // Mark enrollment as completed
+    set({
+      characters: updatedCharacters,
+      trainingEnrollments: state.trainingEnrollments.map(e =>
+        e.id === enrollmentId ? { ...e, status: 'completed', progress: 100 } : e
+      )
+    })
+
+    toast.success(`${enrollment.characterName} completed training in ${enrollment.fieldId}!`)
+
+    // Add notification
+    get().addNotification({
+      type: 'success' as NotificationType,
+      title: 'Training Complete',
+      message: `${enrollment.characterName} has completed their ${enrollment.degreeLevel} in ${enrollment.fieldId}`,
+      category: 'character',
+      priority: 'medium' as NotificationPriority,
+      gameTime: state.gameTime
+    })
+
+    // Apply reputation changes based on degree level
+    const degreeToAction: Record<string, keyof typeof ACTION_REPUTATION_CHANGES> = {
+      'certificate': 'education_certificate',
+      'associate': 'education_associate',
+      'bachelor': 'education_bachelor',
+      'master': 'education_master',
+      'doctorate': 'education_doctorate',
+      // Military tracks
+      'basic': 'education_military',
+      'advanced': 'education_military',
+      'specialist': 'education_military',
+      'elite': 'education_military',
+      'command': 'education_military',
+    }
+
+    const reputationAction = degreeToAction[enrollment.degreeLevel] || 'education_certificate'
+    const repChanges = ACTION_REPUTATION_CHANGES[reputationAction]
+
+    // Check if this is a criminal field
+    const criminalFields = ['underground', 'criminal', 'black_market', 'assassination']
+    const isCriminalField = criminalFields.some(f => enrollment.fieldId.toLowerCase().includes(f))
+
+    if (isCriminalField) {
+      // Criminal training has different reputation effects
+      const criminalRep = ACTION_REPUTATION_CHANGES['education_criminal']
+      get().adjustReputationAxis('public', criminalRep.public, `Criminal training: ${enrollment.fieldId}`)
+      get().adjustReputationAxis('government', criminalRep.government, `Criminal training: ${enrollment.fieldId}`)
+      get().adjustReputationAxis('criminal', criminalRep.criminal, `Criminal training: ${enrollment.fieldId}`)
+      get().adjustReputationAxis('heroic', criminalRep.heroic, `Criminal training: ${enrollment.fieldId}`)
+    } else {
+      // Normal education reputation gains
+      get().adjustReputationAxis('public', repChanges.public, `Education: ${enrollment.degreeLevel} in ${enrollment.fieldId}`)
+      get().adjustReputationAxis('government', repChanges.government, `Education: ${enrollment.degreeLevel}`)
+      get().adjustReputationAxis('heroic', repChanges.heroic, `Education: ${enrollment.degreeLevel}`)
+    }
+
+    // Generate news article for training completion
+    // Higher degree levels get more important news coverage
+    const degreeImportance: Record<string, 'local' | 'regional' | 'national'> = {
+      'certificate': 'local',
+      'associate': 'local',
+      'bachelor': 'local',
+      'master': 'regional',
+      'doctorate': 'regional',
+      'basic': 'local',
+      'advanced': 'local',
+      'specialist': 'regional',
+      'elite': 'regional',
+      'command': 'national',
+    }
+
+    const importance = degreeImportance[enrollment.degreeLevel] || 'local'
+    const character = state.characters.find(c => c.id === enrollment.characterId)
+    const characterName = character?.name || enrollment.characterName
+
+    // Don't publicize criminal training
+    if (!isCriminalField) {
+      const headline = enrollment.degreeLevel === 'doctorate'
+        ? `${characterName} Earns Doctorate in ${enrollment.fieldId}`
+        : enrollment.degreeLevel === 'master'
+          ? `${characterName} Completes Master's in ${enrollment.fieldId}`
+          : `Local Agent Advances Training in ${enrollment.fieldId}`
+
+      const body = `${characterName} has successfully completed their ${enrollment.degreeLevel} training in ${enrollment.fieldId}. ` +
+        (enrollment.degreeLevel === 'doctorate'
+          ? 'This achievement represents years of dedicated study and positions them as an expert in their field.'
+          : enrollment.degreeLevel === 'master'
+            ? 'This advanced credential will enhance their operational capabilities.'
+            : 'The additional training will improve their effectiveness in the field.')
+
+      const newsArticle = createNewsArticle(
+        headline,
+        body,
+        'local' as NewsCategory,
+        importance,
+        state.gameTime,
+        {
+          relatedCharacters: [characterName],
+          city: state.selectedCity,
+        }
+      )
+
+      get().addNewsArticle(newsArticle)
+    }
+  },
+
+  dropTraining: (enrollmentId: string) => {
+    const state = get()
+    const enrollment = state.trainingEnrollments.find(e => e.id === enrollmentId)
+    if (!enrollment) return
+
+    // Calculate partial refund: 50% of remaining progress
+    const remainingProgress = 1 - (enrollment.progress / 100)
+    const refundAmount = Math.floor(enrollment.cost * remainingProgress * 0.5)
+
+    // Set character status back to ready
+    const updatedCharacters = state.characters.map((c: any) =>
+      c.id === enrollment.characterId ? { ...c, status: 'ready' } : c
+    )
+
+    set({
+      characters: updatedCharacters,
+      budget: state.budget + refundAmount,  // Add refund
+      trainingEnrollments: state.trainingEnrollments.map(e =>
+        e.id === enrollmentId ? { ...e, status: 'dropped' } : e
+      )
+    })
+
+    // Record the refund transaction
+    if (refundAmount > 0) {
+      get().recordTransaction(
+        'income',
+        'education_tuition',
+        refundAmount,
+        `Partial refund for ${enrollment.characterName} dropping ${enrollment.fieldId} (${enrollment.progress}% completed)`
+      )
+    }
+
+    // Apply dropout reputation penalty
+    const dropoutRep = ACTION_REPUTATION_CHANGES['education_dropout']
+    get().adjustReputationAxis('public', dropoutRep.public, `Dropped out: ${enrollment.fieldId}`)
+    get().adjustReputationAxis('heroic', dropoutRep.heroic, `Dropped out: ${enrollment.fieldId}`)
+
+    // Generate minor negative news for high-profile dropout (masters/doctorate only)
+    if (['master', 'doctorate'].includes(enrollment.degreeLevel)) {
+      const dropoutNews = createNewsArticle(
+        `Training Program Sees Early Departure`,
+        `A candidate has withdrawn from an advanced ${enrollment.fieldId} training program. Sources suggest personal circumstances led to the decision.`,
+        'local' as NewsCategory,
+        'local',
+        state.gameTime,
+        {
+          city: state.selectedCity,
+        }
+      )
+      get().addNewsArticle(dropoutNews)
+    }
+
+    toast(`${enrollment.characterName} dropped out of training`, { icon: '⚠️' })
+  },
+
+  getActiveEnrollments: () => {
+    return get().trainingEnrollments.filter(e => e.status === 'active')
+  },
+
+  getEnrollmentByCharacter: (characterId: string) => {
+    return get().trainingEnrollments.find(
+      e => e.characterId === characterId && e.status === 'active'
+    ) || null
+  },
+
+  processTrainingProgress: () => {
+    const state = get()
+    const currentDay = state.gameTime.day
+
+    // Get facility bonus for training
+    const facilityBonus = get().getBaseBonuses().education / 100  // 0-0.75 range
+
+    state.trainingEnrollments.forEach(enrollment => {
+      if (enrollment.status !== 'active') return
+
+      // Calculate base progress
+      const totalDays = enrollment.endDay - enrollment.startDay
+      const daysElapsed = currentDay - enrollment.startDay
+
+      // Apply facility bonus to accelerate progress
+      // With max facility bonus (75%), training completes ~43% faster
+      const acceleratedProgress = daysElapsed * (1 + facilityBonus)
+      const newProgress = Math.min(100, Math.max(0, (acceleratedProgress / totalDays) * 100))
+
+      if (newProgress !== enrollment.progress) {
+        get().updateEnrollmentProgress(enrollment.id, newProgress)
+      }
+
+      // Check if training is complete (either via progress or time)
+      if (newProgress >= 100 || currentDay >= enrollment.endDay) {
+        get().completeTraining(enrollment.id)
+      }
+    })
   },
 }))

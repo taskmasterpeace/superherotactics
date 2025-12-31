@@ -822,6 +822,8 @@ interface Unit {
     styleId: string;
     beltLevel: number; // 1-10
   }[];
+  // Education skills (from completed training)
+  skills?: string[];
   // Choke tracking for submission holds
   chokeState?: {
     turnsInChoke: number;
@@ -1677,6 +1679,8 @@ export class CombatScene extends Phaser.Scene {
       personality: 'aggressive',
       str: 45,
       agl: 40,
+      dr: 5,              // Light tactical armor
+      stoppingPower: 8,   // Can stop pistol rounds
       acted: false,
       visible: true,
       spriteId: 'soldier_01', // Standard rifleman
@@ -1698,6 +1702,8 @@ export class CombatScene extends Phaser.Scene {
       personality: 'berserker',
       str: 65,
       agl: 35,
+      dr: 12,             // Heavy ballistic armor
+      stoppingPower: 15,  // Can stop rifle rounds
       acted: false,
       visible: true,
       spriteId: 'soldier_04', // Heavy with LMG
@@ -1719,6 +1725,8 @@ export class CombatScene extends Phaser.Scene {
       personality: 'sniper',
       str: 50,
       agl: 45,
+      dr: 8,              // Medium EOD armor
+      stoppingPower: 10,  // Blast-resistant padding
       acted: false,
       visible: true,
       spriteId: 'soldier_07', // Rocket launcher soldier
@@ -4012,6 +4020,58 @@ export class CombatScene extends Phaser.Scene {
     // Front: +0%, Side: +10%, Rear: +25%, Blindspot: +40%
     const flankingBonus = this.getFlankingBonusForUnits(attacker, target);
     hitChance += flankingBonus;
+
+    // === EDUCATION SKILL BONUSES ===
+    // Skills from completed training provide tactical advantages
+    if (attacker.skills && attacker.skills.length > 0) {
+      // 'tactical_assessment': +5% accuracy when flanking
+      if (attacker.skills.includes('tactical_assessment') && flankingBonus > 0) {
+        hitChance += 5;
+      }
+    }
+
+    // Check if any ally with 'squad_command' skill is nearby (within 4 tiles)
+    // Allies get +3% accuracy when near a squad commander
+    const nearbyCommander = this.units.find(u =>
+      u.team === attacker.team &&
+      u.id !== attacker.id &&
+      u.hp > 0 &&
+      u.skills?.includes('squad_command') &&
+      Math.abs(u.position.x - attacker.position.x) <= 4 &&
+      Math.abs(u.position.y - attacker.position.y) <= 4
+    );
+    if (nearbyCommander) {
+      hitChance += 3;
+    }
+
+    if (attacker.skills && attacker.skills.length > 0) {
+
+      // 'marksmanship': +3% base accuracy for ranged weapons
+      if (attacker.skills.includes('marksmanship') && distance > 1) {
+        hitChance += 3;
+      }
+
+      // 'combat_focus': +4% accuracy when target is in cover (overcoming cover)
+      if (attacker.skills.includes('combat_focus') && targetTile) {
+        const coverType = TERRAIN_TYPES[targetTile.terrain].cover as CoverType;
+        if (coverType === 'half' || coverType === 'full') {
+          hitChance += 4;
+        }
+      }
+
+      // 'room_clearing': +10% accuracy vs multiple enemies in close quarters
+      // (simplified: +5% if there are 3+ enemies within 3 tiles of target)
+      if (attacker.skills.includes('room_clearing')) {
+        const nearbyEnemies = this.units.filter(u =>
+          u.team !== attacker.team && u.hp > 0 &&
+          Math.abs(u.position.x - target.position.x) <= 2 &&
+          Math.abs(u.position.y - target.position.y) <= 2
+        ).length;
+        if (nearbyEnemies >= 3) {
+          hitChance += 10;
+        }
+      }
+    }
 
     return Math.max(5, Math.min(95, hitChance));
   }

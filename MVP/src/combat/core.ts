@@ -22,6 +22,8 @@ import {
   VisionCone,
   SimGrenade,
   GrenadeExplosionResult,
+  TurnState,
+  ActionType,
   STANCES,
   COVER_BONUSES,
   FIST_WEAPON,
@@ -42,6 +44,8 @@ import {
   applyStatusEffects,
   getAccuracyPenalty,
 } from './statusEffects';
+
+import { calculateKnockback } from '../data/knockbackSystem';
 
 // ============ DISTANCE CALCULATION ============
 
@@ -583,7 +587,11 @@ export function resolveAttack(
     killed: targetHpAfter <= 0,
 
     effectsApplied: effectIds,
-    knockbackTiles: 0,  // TODO: Knockback calculation
+    // Calculate knockback: weapon force vs target STR (weight)
+    // Only applies on successful hit with weapons that have knockback
+    knockbackTiles: hitResult !== 'miss' && weapon.knockbackForce
+      ? calculateKnockback(weapon.knockbackForce, target.str).spaces
+      : 0,
 
     stanceAccuracyMod: attackerStance.accuracyMod,
     stanceEvasionMod: targetStance.evasionMod,
@@ -898,8 +906,8 @@ const COUNTER_STRIKE: SimWeapon = {
 /**
  * Check if a unit can counter-attack after dodging a melee attack.
  * Requires:
- * - Target is an unarmed fighter (fists, not a weapon)
  * - Target has MEL 18+ (trained in close combat)
+ * - Target is unarmed OR using a martial arts weapon
  * - The incoming attack was melee (range <= 2)
  * - The incoming attack missed
  */
@@ -920,14 +928,35 @@ export function canCounterAttack(
   // Target must be trained in melee (MEL 18+)
   if (target.stats.MEL < 18) return false;
 
-  // Target must be unarmed (fists, not martial arts weapon)
-  const isUnarmed = target.weapon.range <= 1 &&
-    (target.weapon.name === 'Fist' ||
-     target.weapon.name === 'Fists' ||
-     target.weapon.damageType === 'SMASHING_MELEE' ||
-     target.weapon.damageType === 'IMPACT_BLUNT');
+  // Target must be unarmed OR using a martial arts weapon
+  const weapon = target.weapon;
+  const isMartialArts = weapon.range <= 2 && (
+    // Unarmed strikes
+    weapon.name === 'Fist' ||
+    weapon.name === 'Fists' ||
+    weapon.name === 'Jab' ||
+    weapon.name === 'Cross' ||
+    weapon.name === 'Hook' ||
+    weapon.name === 'Uppercut' ||
+    weapon.name === 'Kick' ||
+    weapon.name === 'Roundhouse' ||
+    weapon.damageType === 'SMASHING_MELEE' ||
+    weapon.damageType === 'IMPACT_BLUNT' ||
+    // Martial arts weapons
+    weapon.name === 'Nunchucks' ||
+    weapon.name === 'Tonfa' ||
+    weapon.name === 'Bo Staff' ||
+    weapon.name === 'Sai' ||
+    weapon.name === 'Knife' ||
+    weapon.name === 'Combat Knife' ||
+    weapon.name === 'Escrima Sticks' ||
+    // Weapons with martial arts properties can counter
+    weapon.special?.disarmBonus !== undefined ||
+    weapon.special?.blockBonus !== undefined ||
+    weapon.special?.bladeTrapping !== undefined
+  );
 
-  return isUnarmed;
+  return isMartialArts;
 }
 
 /**
@@ -973,4 +1002,203 @@ export function resolveCounterAttack(
   counterResult.weapon = 'Counter Strike';
 
   return counterResult;
+}
+
+// ============ XCOM-STYLE MOVEMENT SYSTEM ============
+// Movement based on AGL stat with 2-action turn structure
+
+/**
+ * Get max speed based on AGL (dash distance).
+ * This is the unit's top speed when sprinting.
+ *
+ * Formula: 4 + floor((AGL - 10) / 5)
+ *
+ * Examples:
+ *   AGL 10 (elderly): 4 tiles
+ *   AGL 15 (soccer dad): 5 tiles
+ *   AGL 20 (trained): 6 tiles
+ *   AGL 25 (elite): 7 tiles
+ *   AGL 30 (pro athlete): 8 tiles
+ *   AGL 35 (olympic): 9 tiles
+ */
+export function getMaxSpeed(unit: SimUnit): number {
+  const agl = unit.stats.AGL;
+  return 4 + Math.floor((agl - 10) / 5);
+}
+
+/**
+ * Get movement range for a single move action.
+ * This is half max speed (careful tactical movement).
+ *
+ * Move = cautious movement with awareness of surroundings.
+ * After moving, you can still attack.
+ */
+export function getMovementRange(unit: SimUnit): number {
+  return Math.floor(getMaxSpeed(unit) / 2);
+}
+
+/**
+ * Get dash range (uses both actions).
+ * This is your actual top speed - full sprint.
+ *
+ * Dash = sprinting, no attack possible.
+ * Triggers more overwatch shots from enemies.
+ */
+export function getDashRange(unit: SimUnit): number {
+  return getMaxSpeed(unit);
+}
+
+// ============ ACTION MANAGEMENT ============
+
+/**
+ * Reset turn state at start of unit's turn.
+ * Each unit gets 2 actions per turn.
+ */
+export function resetTurnState(unit: SimUnit): void {
+  unit.turnState = {
+    actionsRemaining: 2,
+    hasMoved: false,
+    hasAttacked: false,
+    isDashing: false,
+    isOnOverwatch: false,
+  };
+}
+
+/**
+ * Check if unit can perform a specific action.
+ * Returns false if turn is over or action is invalid.
+ */
+export function canPerformAction(unit: SimUnit, action: ActionType): boolean {
+  const state = unit.turnState;
+  if (!state || state.actionsRemaining === 0) return false;
+
+  // If on overwatch, turn is over
+  if (state.isOnOverwatch) return false;
+
+  // LIGHT ATTACK EXCEPTION:
+  // After a light attack (jab, knife), if actions remain, can still act
+  // This enables martial arts combos: jab + cross, jab + jab, knife + move
+  if (state.hasAttacked && state.actionsRemaining > 0) {
+    // After light attack, can do certain follow-up actions:
+    switch (action) {
+      case 'move':
+        // Can retreat/reposition after quick strike
+        return true;
+      case 'reload':
+      case 'use_item':
+        return true;
+      case 'attack':
+        // Can do any attack after light attack (including another light)
+        // Light + Light = holding back (jab-jab = 6 dmg vs jab-cross = 17 dmg)
+        // Light + Heavy = combo finisher
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  // Heavy attack ends turn - can't do anything after
+  if (state.hasAttacked) return false;
+
+  // Specific action checks
+  switch (action) {
+    case 'move':
+      // Can always move if have actions (first move or second move = dash)
+      return true;
+
+    case 'dash':
+      // Dash requires 2 actions (haven't done anything yet)
+      return state.actionsRemaining === 2 && !state.hasMoved;
+
+    case 'attack':
+      // Can attack if have at least 1 action
+      return true;
+
+    case 'overwatch':
+      // Overwatch requires 2 actions (full turn commitment)
+      return state.actionsRemaining === 2 && !state.hasMoved;
+
+    case 'reload':
+      // Can reload if have actions
+      return true;
+
+    case 'use_item':
+      // Can use item if have actions
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+/**
+ * Spend an action and update turn state.
+ * Call this after performing an action.
+ */
+export function spendAction(unit: SimUnit, action: ActionType): void {
+  if (!unit.turnState) {
+    resetTurnState(unit);
+  }
+
+  const state = unit.turnState!;
+
+  switch (action) {
+    case 'move':
+      state.actionsRemaining = (state.actionsRemaining - 1) as 0 | 1 | 2;
+      if (!state.hasMoved) {
+        state.hasMoved = true;
+      } else {
+        // Second move = dash
+        state.isDashing = true;
+      }
+      break;
+
+    case 'dash':
+      // Dash uses both actions
+      state.actionsRemaining = 0;
+      state.hasMoved = true;
+      state.isDashing = true;
+      break;
+
+    case 'attack':
+      // Check if weapon is a light attack (jab, knife, etc.)
+      const isLight = unit.weapon.isLightAttack === true;
+      if (isLight) {
+        // Light attack uses 1 action but doesn't end turn
+        // Allows combos like: jab + cross, knife stab + move away
+        state.actionsRemaining = (state.actionsRemaining - 1) as 0 | 1 | 2;
+        state.hasAttacked = true;
+        // Note: hasAttacked is true, but actionsRemaining may still be 1
+        // This allows: jab (1 action) + move (1 action)
+        // Or: jab (1 action) + heavy punch (1 action, ends turn)
+      } else {
+        // Heavy attack ends turn immediately
+        state.actionsRemaining = 0;
+        state.hasAttacked = true;
+      }
+      break;
+
+    case 'overwatch':
+      // Overwatch uses both actions and ends turn
+      state.actionsRemaining = 0;
+      state.isOnOverwatch = true;
+      break;
+
+    case 'reload':
+      state.actionsRemaining = (state.actionsRemaining - 1) as 0 | 1 | 2;
+      break;
+
+    case 'use_item':
+      state.actionsRemaining = (state.actionsRemaining - 1) as 0 | 1 | 2;
+      break;
+  }
+}
+
+/**
+ * Check if unit's turn is complete.
+ */
+export function isTurnComplete(unit: SimUnit): boolean {
+  const state = unit.turnState;
+  if (!state) return true;
+  return state.actionsRemaining === 0;
 }
