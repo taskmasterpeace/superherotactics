@@ -77,6 +77,11 @@ import {
   applyReputationDecay,
   ACTION_REPUTATION_CHANGES,
 } from '../data/reputationSystem'
+import {
+  getVehicleById,
+  getVehicleTravelSpeed,
+  Vehicle,
+} from '../data/vehicleSystem'
 
 // EventBus for game-wide event emission
 import { EventBus } from '../data/eventBus'
@@ -99,6 +104,7 @@ import {
   generateFillerNews,
 } from '../data/newsTemplates'
 import { getCityByName } from '../data/cities'
+import { getArmorById } from '../data/armor'
 import { generateNewspaperName } from '../data/newspaperExpansion'
 import {
   BaseState,
@@ -1419,22 +1425,44 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     // Calculate travel time based on distance and vehicle speed
     // Using GAMEPLAY time: base ~5 seconds per sector on foot, faster with vehicles
     const distance = Math.sqrt(dx * dx + dy * dy)
-    let secondsPerSector = 5  // Base: 5 seconds per sector on foot
+    let secondsPerSector = 5  // Base: 5 seconds per sector on foot (walking)
     let vehicleType: 'ground' | 'air' | 'water' | undefined
 
     if (vehicleId) {
-      const vehicle = state.fleetVehicles.find(v => v.id === vehicleId)
-      if (vehicle) {
-        // Faster vehicles = fewer seconds per sector
-        // Aircraft: ~1-2 sec/sector, Ground: ~2-3 sec/sector, Sea: ~3-4 sec/sector
-        if (vehicle.type === 'aircraft') {
-          secondsPerSector = vehicle.speed > 300 ? 1 : 2  // Jets are fastest
-        } else if (vehicle.type === 'ground') {
-          secondsPerSector = vehicle.speed > 60 ? 2.5 : 3
+      const fleetVehicle = state.fleetVehicles.find(v => v.id === vehicleId)
+      if (fleetVehicle) {
+        // Lookup full vehicle data from database for accurate speed
+        const vehicleData = getVehicleById(fleetVehicle.vehicleTemplateId)
+        if (vehicleData) {
+          // Get actual speed in km/h from database
+          const speedKmH = getVehicleTravelSpeed(vehicleData)
+          // Convert to gameplay seconds per sector (500km = 1 sector)
+          // Formula: At 500 km/h, 1 sector takes 1 hour = 3600 seconds
+          // But we scale down for gameplay: 3600 / 720 = 5 (walking speed baseline)
+          // So vehicle speed ratio: speedKmH / 40 (walking = 40 km/day ~= 1.7 km/h)
+          // Faster speed = fewer seconds per sector
+          const speedRatio = speedKmH / 100  // 100 km/h baseline
+          secondsPerSector = Math.max(0.5, 5 / speedRatio)  // Min 0.5s for supersonic
+
+          // Map travel mode
+          if (vehicleData.travelMode === 'air') {
+            vehicleType = 'aircraft' as any
+          } else if (vehicleData.travelMode === 'water') {
+            vehicleType = 'sea' as any
+          } else {
+            vehicleType = 'ground'
+          }
         } else {
-          secondsPerSector = 3.5
+          // Fallback to fleet vehicle data if template not found
+          if (fleetVehicle.type === 'aircraft') {
+            secondsPerSector = fleetVehicle.speed > 300 ? 1 : 2
+          } else if (fleetVehicle.type === 'ground') {
+            secondsPerSector = fleetVehicle.speed > 60 ? 2.5 : 3
+          } else {
+            secondsPerSector = 3.5
+          }
+          vehicleType = fleetVehicle.type
         }
-        vehicleType = vehicle.type
       }
     }
 
@@ -1990,6 +2018,13 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       return
     }
 
+    // Look up armor in database
+    const armorData = getArmorById(armorId)
+    if (!armorData) {
+      toast.error('Armor not found in database')
+      return
+    }
+
     // Check if armor is in inventory
     const armorIndex = state.inventory.armor.indexOf(armorId)
     if (armorIndex === -1) {
@@ -2004,10 +2039,29 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     // If character has armor equipped, put it back in inventory
     const oldArmor = character.equippedArmor
 
+    // Calculate DR from armor (use physical DR as main DR)
+    // Add energy DR as separate property if available
+    const newDR = armorData.drPhysical || 0
+    const stoppingPower = armorData.stoppingPower || 0
+
     set({
       characters: state.characters.map(char =>
         char.id === characterId
-          ? { ...char, equippedArmor: armorId }
+          ? {
+              ...char,
+              equippedArmor: armorId,
+              dr: newDR,
+              stoppingPower,  // Wire stopping power from armor
+              // Store full armor data for reference
+              armorData: {
+                drPhysical: armorData.drPhysical,
+                drEnergy: armorData.drEnergy,
+                drMental: armorData.drMental,
+                coverage: armorData.coverage,
+                movementPenalty: armorData.movementPenalty,
+                stealthPenalty: armorData.stealthPenalty,
+              }
+            }
           : char
       ),
       inventory: {
@@ -2016,7 +2070,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       }
     })
 
-    toast.success('Armor equipped')
+    toast.success(`${armorData.name} equipped (DR: ${newDR}, SP: ${stoppingPower})`)
   },
 
   unequipFromCharacter: (characterId, slot) => {
