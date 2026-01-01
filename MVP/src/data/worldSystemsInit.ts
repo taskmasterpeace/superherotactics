@@ -30,6 +30,7 @@ import { getContactManager } from './contactSystem';
 import { getMercenaryPoolManager } from './mercenaryPool';
 import { getLifeEventManager } from './npcLifeEvents';
 import { getDeathConsequencesManager } from './deathConsequences';
+import { getCharacterRegistryManager } from './worldSystems/characterRegistry';
 // Note: factionSystem exports utility functions, not a manager
 import { getFameManager } from './fameSystem';
 import { getHeatManager } from './heatSystem';
@@ -65,6 +66,11 @@ export function initWorldSystems(): void {
     const npcManager = getNPCManager();
     npcManager.start();
     console.log('[WORLD SYSTEMS] NPC Manager started');
+
+    // 2b. Character Registry - global character tracking
+    const charRegistry = getCharacterRegistryManager();
+    charRegistry.start();
+    console.log('[WORLD SYSTEMS] Character Registry started');
 
     // 3. Contact System - relationships
     const contactManager = getContactManager();

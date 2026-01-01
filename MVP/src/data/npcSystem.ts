@@ -27,6 +27,7 @@ import { Country } from './countries';
 import { City } from './cities';
 import { getTimeEngine } from './timeEngine';
 import { generateName } from './nameDatabase';
+import { getCharacterRegistryManager, CharacterFaction } from './worldSystems/characterRegistry';
 
 // =============================================================================
 // NPC TYPES
@@ -642,6 +643,34 @@ export class NPCManager {
 
   addNPC(npc: NPCEntity): void {
     this.npcs.set(npc.id, npc);
+
+    // Also register in the global character registry
+    const charRegistry = getCharacterRegistryManager();
+    charRegistry.register({
+      name: npc.name,
+      codename: npc.nickname,
+      faction: this.mapRoleToFaction(npc.role),
+      status: npc.isAlive ? (npc.isHospitalized ? 'injured' : 'alive') : 'dead',
+      lastKnownLocation: npc.currentCity,
+      homeBase: npc.homeCountry,
+      isImportant: npc.threatLevel === 'legendary' || npc.threatLevel === 'elite',
+    });
+  }
+
+  /**
+   * Map NPC role to character registry faction
+   */
+  private mapRoleToFaction(role: NPCRole): CharacterFaction {
+    switch (role) {
+      case 'mercenary': return 'ally';
+      case 'contact': return 'neutral';
+      case 'enemy': return 'hostile';
+      case 'civilian': return 'neutral';
+      case 'authority': return 'government';
+      case 'criminal': return 'criminal';
+      case 'superhuman': return 'neutral';
+      default: return 'neutral';
+    }
   }
 
   getNPC(id: string): NPCEntity | undefined {

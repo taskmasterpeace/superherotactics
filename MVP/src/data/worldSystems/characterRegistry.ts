@@ -314,3 +314,214 @@ export function modifyRelationship(
     );
   }
 }
+
+// =============================================================================
+// CHARACTER REGISTRY MANAGER (Singleton)
+// =============================================================================
+
+let characterRegistryManagerInstance: CharacterRegistryManager | null = null;
+
+/**
+ * Manager wrapper for the character registry.
+ * Provides singleton access and wires to other game systems.
+ */
+export class CharacterRegistryManager {
+  private registry: CharacterRegistryState;
+  private started: boolean = false;
+
+  constructor() {
+    this.registry = createCharacterRegistry();
+  }
+
+  start(): void {
+    if (this.started) return;
+    this.started = true;
+    console.log('[CHARACTER REGISTRY] Started');
+  }
+
+  // =========================================================================
+  // REGISTRATION
+  // =========================================================================
+
+  /**
+   * Register a new character in the game world
+   */
+  register(
+    character: Omit<RegisteredCharacter, 'id' | 'createdDate' | 'lastSeenDate' | 'notes'>
+  ): RegisteredCharacter {
+    return registerCharacter(this.registry, character);
+  }
+
+  /**
+   * Get a character by ID
+   */
+  getCharacter(id: string): RegisteredCharacter | undefined {
+    return this.registry.characters.get(id);
+  }
+
+  /**
+   * Get all characters
+   */
+  getAllCharacters(): RegisteredCharacter[] {
+    return Array.from(this.registry.characters.values());
+  }
+
+  // =========================================================================
+  // STATUS UPDATES
+  // =========================================================================
+
+  /**
+   * Update a character's status (alive, injured, dead, etc.)
+   */
+  updateStatus(
+    characterId: string,
+    status: CharacterStatus,
+    details?: {
+      causeOfDeath?: string;
+      killedBy?: string;
+      location?: string;
+    }
+  ): void {
+    updateCharacterStatus(this.registry, characterId, status, details);
+  }
+
+  /**
+   * Record a character's death
+   */
+  recordDeath(
+    characterId: string,
+    cause: string,
+    location: string,
+    killedBy?: string,
+    witnessed: boolean = false
+  ): void {
+    const character = this.registry.characters.get(characterId);
+    if (!character) return;
+
+    updateCharacterStatus(this.registry, characterId, 'dead', {
+      causeOfDeath: cause,
+      killedBy,
+      location,
+    });
+
+    // Update witnessed flag
+    const deathEntry = this.registry.deathLog.find(d => d.characterId === characterId);
+    if (deathEntry) {
+      deathEntry.witnessed = witnessed;
+    }
+  }
+
+  // =========================================================================
+  // RELATIONSHIPS
+  // =========================================================================
+
+  /**
+   * Create a relationship between two characters
+   */
+  createRelationship(
+    characterA: string,
+    characterB: string,
+    type: RelationshipType,
+    strength: number = 50,
+    isMutual: boolean = true
+  ): CharacterRelationship {
+    return addRelationship(this.registry, characterA, characterB, type, strength, isMutual);
+  }
+
+  /**
+   * Modify a relationship based on an event
+   */
+  applyRelationshipEvent(
+    characterA: string,
+    characterB: string,
+    event: keyof typeof RELATIONSHIP_EVENTS
+  ): void {
+    modifyRelationship(this.registry, characterA, characterB, event);
+  }
+
+  /**
+   * Get all relationships for a character
+   */
+  getRelationships(characterId: string): CharacterRelationship[] {
+    return getCharacterRelationships(this.registry, characterId);
+  }
+
+  // =========================================================================
+  // QUERIES
+  // =========================================================================
+
+  /**
+   * Get all living characters, optionally filtered by faction
+   */
+  getLivingCharacters(faction?: CharacterFaction): RegisteredCharacter[] {
+    return getAliveCharacters(this.registry, faction);
+  }
+
+  /**
+   * Get all dead characters, optionally filtered by faction
+   */
+  getDeceasedCharacters(faction?: CharacterFaction): RegisteredCharacter[] {
+    return getDeadCharacters(this.registry, faction);
+  }
+
+  /**
+   * Get the death log
+   */
+  getDeathLog(): DeathLogEntry[] {
+    return [...this.registry.deathLog];
+  }
+
+  /**
+   * Get a character's full history
+   */
+  getHistory(characterId: string) {
+    return getCharacterHistory(this.registry, characterId);
+  }
+
+  /**
+   * Get kill count for a character
+   */
+  getKills(characterId: string): number {
+    return getKillCount(this.registry, characterId);
+  }
+
+  // =========================================================================
+  // SERIALIZATION
+  // =========================================================================
+
+  /**
+   * Serialize state for saving
+   */
+  serialize(): object {
+    return {
+      characters: Array.from(this.registry.characters.entries()),
+      relationships: this.registry.relationships,
+      deathLog: this.registry.deathLog,
+    };
+  }
+
+  /**
+   * Deserialize state from save
+   */
+  deserialize(data: any): void {
+    if (data.characters) {
+      this.registry.characters = new Map(data.characters);
+    }
+    if (data.relationships) {
+      this.registry.relationships = data.relationships;
+    }
+    if (data.deathLog) {
+      this.registry.deathLog = data.deathLog;
+    }
+  }
+}
+
+/**
+ * Get the singleton character registry manager
+ */
+export function getCharacterRegistryManager(): CharacterRegistryManager {
+  if (!characterRegistryManagerInstance) {
+    characterRegistryManagerInstance = new CharacterRegistryManager();
+  }
+  return characterRegistryManagerInstance;
+}

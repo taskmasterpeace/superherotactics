@@ -16,6 +16,7 @@ import { getMercenaryPoolManager, MercenaryContract } from './mercenaryPool';
 import { getTimeEngine } from './timeEngine';
 import { getCountryByCode } from './countries';
 import { getLifeEventManager } from './npcLifeEvents';
+import { getCharacterRegistryManager } from './worldSystems/characterRegistry';
 
 // ============================================================================
 // TYPES
@@ -574,6 +575,16 @@ export class DeathConsequencesManager {
   ): { record: DeathRecord; notification: DeathNotification } {
     const record = processCharacterDeath(npcId, cause, location, killedBy, weapon, witnesses);
     this.deathRecords.push(record);
+
+    // Also record in the character registry for global tracking
+    const charRegistry = getCharacterRegistryManager();
+    charRegistry.recordDeath(
+      npcId,
+      `${cause}${weapon ? ` (${weapon})` : ''}`,
+      `${location.city}, ${location.country}`,
+      killedBy,
+      witnesses.length > 0  // witnessed
+    );
 
     const notification = generateDeathNotification(record);
     this.pendingNotifications.push(notification);
