@@ -1,12 +1,12 @@
 {
   "version": 3,
-  "lastUpdated": "2025-01-01T19:00:00Z",
+  "lastUpdated": "2025-01-01T20:00:00Z",
   "config": {
     "maxIterations": 999,
     "autoContinue": true,
     "commitAfterSystem": true
   },
-  "currentSystem": "NPC-LIVES",
+  "currentSystem": "ECONOMY-LIVE",
   "systems": [
     {
       "id": "TIME-ALIVE",
@@ -71,21 +71,22 @@
     {
       "id": "NPC-LIVES",
       "name": "NPCs With Lives",
-      "status": "pending",
+      "status": "completed",
       "priority": 33,
       "phase": 7,
       "tasks": [
-        {"id": "NL-001", "task": "Create NPC entity system with persistent state", "status": "pending"},
-        {"id": "NL-002", "task": "Implement country-locked mercenary pools (can only recruit from home country)", "status": "pending"},
-        {"id": "NL-003", "task": "Create contact relationship system (friendship, trust levels)", "status": "pending"},
-        {"id": "NL-004", "task": "Implement contact life events (move cities, get arrested, die)", "status": "pending"},
-        {"id": "NL-005", "task": "Implement enemy leveling (enemies you spare come back stronger)", "status": "pending"},
-        {"id": "NL-006", "task": "Create informant staleness (intel expires after time)", "status": "pending"},
-        {"id": "NL-007", "task": "Wire NPC events to news system", "status": "pending"},
-        {"id": "NL-008", "task": "Add NPC status tracking to contacts screen", "status": "pending"}
+        {"id": "NL-001", "task": "Create NPC entity system with persistent state", "status": "completed"},
+        {"id": "NL-002", "task": "Implement country-locked mercenary pools (can only recruit from home country)", "status": "completed"},
+        {"id": "NL-003", "task": "Create contact relationship system (friendship, trust levels)", "status": "completed"},
+        {"id": "NL-004", "task": "Implement contact life events (move cities, get arrested, die)", "status": "completed"},
+        {"id": "NL-005", "task": "Implement enemy leveling (enemies you spare come back stronger)", "status": "completed"},
+        {"id": "NL-006", "task": "Create informant staleness (intel expires after time)", "status": "completed"},
+        {"id": "NL-007", "task": "Wire NPC events to news system", "status": "completed"},
+        {"id": "NL-008", "task": "Add NPC status tracking to contacts screen", "status": "completed"}
       ],
       "triggers": ["ECONOMY-LIVE"],
-      "files": ["MVP/src/data/npcSystem.ts", "MVP/src/data/mercenaryPool.ts", "MVP/src/stores/npcStore.ts"]
+      "files": ["MVP/src/data/npcSystem.ts", "MVP/src/data/mercenaryPool.ts", "MVP/src/data/contactSystem.ts", "MVP/src/data/npcLifeEvents.ts", "MVP/src/data/npcNewsIntegration.ts", "MVP/src/components/ContactsScreen.tsx"],
+      "completedAt": "2025-01-01T20:00:00.000Z"
     },
     {
       "id": "ECONOMY-LIVE",
@@ -128,12 +129,12 @@
       "completedAt": "2025-01-01T05:30:00.000Z"
     }
   ],
-  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI", "INVESTIGATION", "TIME-EVENTS", "ECONOMY", "SHIELD-SYS", "CALLING-BONUS", "PENETRATION-DR", "VISUAL-EFFECTS", "ENEMY-GEN-V2", "CITY-SERVICES", "VEHICLE-INT", "TERRITORY", "EMAIL-SYS", "TRAINING-UI", "BASE-UI", "GAME-LOOP", "BALANCE-FIX", "TIME-ALIVE", "WORLD-EVENTS", "FACTION-MEMORY"],
+  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI", "INVESTIGATION", "TIME-EVENTS", "ECONOMY", "SHIELD-SYS", "CALLING-BONUS", "PENETRATION-DR", "VISUAL-EFFECTS", "ENEMY-GEN-V2", "CITY-SERVICES", "VEHICLE-INT", "TERRITORY", "EMAIL-SYS", "TRAINING-UI", "BASE-UI", "GAME-LOOP", "BALANCE-FIX", "TIME-ALIVE", "WORLD-EVENTS", "FACTION-MEMORY", "NPC-LIVES"],
   "statistics": {
     "totalSystems": 31,
-    "completedSystems": 29,
+    "completedSystems": 30,
     "totalTasks": 178,
-    "completedTasks": 162,
+    "completedTasks": 170,
     "totalIterations": 0,
     "startedAt": "2024-12-30T00:00:00.000Z"
   }
