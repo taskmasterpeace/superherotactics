@@ -18,8 +18,8 @@ import {
   getNPCManager,
   processNPCCombat,
 } from './npcSystem';
-import { Country, getCountries } from './countries';
-import { City, getCitiesInCountry } from './cities';
+import { Country, ALL_COUNTRIES } from './countries';
+import { City, getCitiesByCountryCode } from './cities';
 import { ThreatLevel } from './characterSheet';
 import { getTimeEngine } from './timeEngine';
 
@@ -233,7 +233,7 @@ export class MercenaryPoolManager {
    */
   initializePool(country: Country): void {
     const poolSize = calculatePoolSize(country);
-    const cities = getCitiesInCountry(country.code);
+    const cities = getCitiesByCountryCode(country.code);
     const distribution = getThreatDistribution(country);
 
     const listings: MercenaryListing[] = [];
@@ -293,7 +293,7 @@ export class MercenaryPoolManager {
 
     // Initialize pool if doesn't exist
     if (!pool) {
-      const countries = getCountries();
+      const countries = ALL_COUNTRIES;
       const country = countries.find(c => c.code === countryCode);
       if (country) {
         this.initializePool(country);
@@ -490,7 +490,7 @@ export class MercenaryPoolManager {
       );
 
       // Check if we need to add new mercs
-      const countries = getCountries();
+      const countries = ALL_COUNTRIES;
       const country = countries.find(c => c.code === countryCode);
       if (country) {
         const targetSize = calculatePoolSize(country);
@@ -499,7 +499,7 @@ export class MercenaryPoolManager {
         // Add new mercs if pool is depleted
         if (availableCount < targetSize * 0.5) {
           const newCount = Math.min(3, targetSize - availableCount);
-          const cities = getCitiesInCountry(countryCode);
+          const cities = getCitiesByCountryCode(countryCode);
 
           for (let i = 0; i < newCount; i++) {
             const city = cities[Math.floor(Math.random() * cities.length)];
@@ -533,7 +533,7 @@ export class MercenaryPoolManager {
    * Get hiring cost for a country (reflects local economy)
    */
   getHiringBonus(countryCode: string): number {
-    const countries = getCountries();
+    const countries = ALL_COUNTRIES;
     const country = countries.find(c => c.code === countryCode);
     if (!country) return 0;
 

@@ -8,16 +8,21 @@
  */
 
 import toast from 'react-hot-toast'
-import { EnhancedCombatResult, CombatResult } from '../game/EventBridge'
+import { EnhancedCombatResult, CombatResult, MercDeathEvent } from '../game/EventBridge'
 import { EventBridge } from '../game/EventBridge'
 import { useGameStore } from './enhancedGameStore'
 import { getWeaponsByAvailability, getWeaponsByCost } from '../data/weapons'
 import { ALL_ARMOR } from '../data/armor'
 import { Weapon, Armor } from '../data/equipmentTypes'
 import { EventBus, createCombatEndedEvent } from '../data/eventBus'
+import { getDeathConsequencesManager } from '../data/deathConsequences'
 
 // Unsubscribe function for cleanup
 let unsubscribeCombatEnded: (() => void) | null = null
+let unsubscribeMercDied: (() => void) | null = null
+
+// Track pending death notifications for funeral UI
+export const pendingDeathNotifications: MercDeathEvent[] = []
 
 export interface ProcessedCombatResult {
   experienceGained: Array<{
@@ -510,8 +515,89 @@ function convertToEnhancedResult(basicResult: CombatResult): EnhancedCombatResul
 }
 
 /**
+ * Handle mercenary death - triggers funeral/family system
+ */
+function handleMercDied(data: MercDeathEvent): void {
+  console.log('[COMBAT RESULTS] Mercenary died:', data.unitName, 'killed by', data.killedBy)
+
+  // Store pending death notification for UI
+  pendingDeathNotifications.push(data)
+
+  // Process through death consequences system
+  const deathManager = getDeathConsequencesManager()
+
+  // If we have an NPC ID, record the death properly
+  if (data.npcId) {
+    const result = deathManager.recordDeath(
+      data.npcId,
+      `killed_in_combat_${data.weapon}`,
+      data.location?.cityName || 'unknown location',
+      data.killedBy,
+      data.weapon,
+      data.witnesses
+    )
+
+    if (result) {
+      console.log('[COMBAT RESULTS] Death recorded:', result.record.id)
+      console.log('[COMBAT RESULTS] Notification:', result.notification.headline)
+
+      // Show toast notification
+      toast.error(`${data.unitName} has fallen in combat`, {
+        duration: 5000,
+        icon: '💀',
+      })
+    }
+  } else {
+    // No NPC ID - still show notification but can't track funeral
+    console.warn('[COMBAT RESULTS] No npcId for', data.unitName, '- death consequences limited')
+
+    toast.error(`${data.unitName} has fallen in combat`, {
+      duration: 5000,
+      icon: '💀',
+    })
+  }
+
+  // Emit event for other systems (morale, news, etc.)
+  EventBus.emit({
+    type: 'merc_died',
+    payload: {
+      npcId: data.npcId,
+      unitName: data.unitName,
+      killedBy: data.killedBy,
+      weapon: data.weapon,
+      location: data.location,
+      witnesses: data.witnesses,
+    },
+  })
+}
+
+/**
+ * Get pending death notifications for funeral UI
+ */
+export function getPendingDeathNotifications(): MercDeathEvent[] {
+  return [...pendingDeathNotifications]
+}
+
+/**
+ * Clear a death notification after it's been handled
+ */
+export function clearDeathNotification(unitId: string): void {
+  const index = pendingDeathNotifications.findIndex(n => n.unitId === unitId)
+  if (index >= 0) {
+    pendingDeathNotifications.splice(index, 1)
+  }
+}
+
+/**
+ * Check if there are pending death notifications
+ */
+export function hasPendingDeathNotifications(): boolean {
+  return pendingDeathNotifications.length > 0
+}
+
+/**
  * Initialize combat results handler
- * Subscribes to EventBridge 'combat-ended' events and processes them
+ * Subscribes to EventBridge 'combat-ended' and 'merc-died' events
  */
 export function initCombatResultsHandler(): void {
   console.log('[COMBAT RESULTS] Initializing handler...')
@@ -527,7 +613,13 @@ export function initCombatResultsHandler(): void {
     handleCombatComplete(enhancedResult)
   })
 
-  console.log('[COMBAT RESULTS] Handler initialized and subscribed to combat-ended events')
+  // Subscribe to merc-died events for funeral/family system
+  unsubscribeMercDied = EventBridge.on('merc-died', (data: MercDeathEvent) => {
+    console.log('[COMBAT RESULTS] Received merc-died event:', data)
+    handleMercDied(data)
+  })
+
+  console.log('[COMBAT RESULTS] Handler initialized and subscribed to combat events')
 }
 
 /**
@@ -538,6 +630,10 @@ export function cleanupCombatResultsHandler(): void {
   if (unsubscribeCombatEnded) {
     unsubscribeCombatEnded()
     unsubscribeCombatEnded = null
-    console.log('[COMBAT RESULTS] Handler cleaned up')
   }
+  if (unsubscribeMercDied) {
+    unsubscribeMercDied()
+    unsubscribeMercDied = null
+  }
+  console.log('[COMBAT RESULTS] Handler cleaned up')
 }

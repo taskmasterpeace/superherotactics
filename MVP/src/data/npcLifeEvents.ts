@@ -10,8 +10,8 @@ import { NPCEntity, getNPCManager } from './npcSystem';
 import { Contact, getContactManager } from './contactSystem';
 import { getMercenaryPoolManager } from './mercenaryPool';
 import { getTimeEngine } from './timeEngine';
-import { Country, getCountries } from './countries';
-import { City, getCitiesInCountry } from './cities';
+import { Country, ALL_COUNTRIES } from './countries';
+import { City, getCitiesByCountryCode } from './cities';
 import { WorldEvent, getWorldSimulation } from './worldSimulation';
 
 // =============================================================================
@@ -206,7 +206,7 @@ function generateLifeEvent(
 
   switch (type) {
     case 'relocated': {
-      const cities = getCitiesInCountry(npc.homeCountry);
+      const cities = getCitiesByCountryCode(npc.homeCountry);
       const newCity = cities[Math.floor(Math.random() * cities.length)];
       if (!newCity || newCity.name === npc.currentCity) return null;
 
@@ -217,11 +217,11 @@ function generateLifeEvent(
     }
 
     case 'left_country': {
-      const countries = getCountries();
+      const countries = ALL_COUNTRIES;
       const newCountry = countries[Math.floor(Math.random() * countries.length)];
       if (newCountry.code === npc.currentCountry) return null;
 
-      const newCities = getCitiesInCountry(newCountry.code);
+      const newCities = getCitiesByCountryCode(newCountry.code);
       const newCity = newCities[Math.floor(Math.random() * newCities.length)];
       if (!newCity) return null;
 

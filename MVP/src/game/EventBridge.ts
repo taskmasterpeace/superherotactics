@@ -114,6 +114,10 @@ export interface CombatCharacter {
   equippedShield?: string;
   // Character calling (motivation) - affects combat bonuses
   calling?: string;
+  // NPC System Integration - links combat unit to NPC registry
+  npcId?: string;  // Links to NPC/merc system for death consequences
+  isMercenary?: boolean;  // True if this is a hired mercenary
+  homeCountry?: string;  // Country code for mercenary
   // EG2-003/EG2-004: Faction AI behavior flags
   tacticsLevel?: 'untrained' | 'street' | 'trained' | 'professional' | 'elite';
   behavior?: {
@@ -159,6 +163,8 @@ export interface CombatEvents {
   'attack-resolved': AttackResult;
   'unit-damaged': { unitId: string; damage: number; newHp: number };
   'unit-died': { unitId: string; killedBy: string };
+  // Death consequences event - fired for blue team deaths with NPC data
+  'merc-died': MercDeathEvent;
   'turn-changed': { team: string; round: number };
   'tile-clicked': { x: number; y: number; terrain: string; occupant: string | null };
   'action-cancelled': void;
@@ -219,6 +225,26 @@ export interface AttackResult {
   damage: number;
   criticalHit: boolean;
   statusApplied: string[];
+}
+
+// Death event for mercenary/team member deaths - triggers funeral system
+export interface MercDeathEvent {
+  unitId: string;
+  unitName: string;
+  npcId?: string;           // Links to NPC system for funeral/family
+  isMercenary: boolean;     // True if hired merc, false if main character/contact
+  homeCountry?: string;     // For sending body home
+  killedBy: string;         // Name of killer
+  killerTeam: 'blue' | 'red' | 'neutral';
+  weapon: string;           // What weapon killed them
+  damage: number;           // Final damage dealt
+  overkill: number;         // Damage beyond 0 HP
+  round: number;            // What round they died
+  location?: {              // Where combat took place
+    countryCode?: string;
+    cityName?: string;
+  };
+  witnesses: string[];      // Other units who saw the death (for morale/trauma)
 }
 
 export interface CombatResult {

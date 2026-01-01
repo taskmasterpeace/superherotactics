@@ -851,6 +851,10 @@ interface Unit {
   };
   // Character calling (motivation) - affects combat bonuses
   calling?: string;
+  // NPC System Integration - links combat unit to NPC registry
+  npcId?: string;         // Links to NPC/merc system for death consequences
+  isMercenary?: boolean;  // True if this is a hired mercenary
+  homeCountry?: string;   // Country code for mercenary
   // EG2-003/EG2-004: Faction AI behavior flags
   tacticsLevel?: 'untrained' | 'street' | 'trained' | 'professional' | 'elite';
   behavior?: {
@@ -915,6 +919,7 @@ export class CombatScene extends Phaser.Scene {
   private aiSpeed: number = 600;
   private animating: boolean = false;
   private verboseLog: boolean = true; // Toggle detailed combat log
+  private locationContext?: LocationContext; // Stored for death event location info
 
   // Visual layers
   private tileLayer!: Phaser.GameObjects.Container;
@@ -1341,6 +1346,9 @@ export class CombatScene extends Phaser.Scene {
       locationContext?: LocationContext;
     }) => {
       console.log('[COMBAT] Received load-combat with blue team:', data.blueTeam.length);
+
+      // Store location context for death event location info
+      this.locationContext = data.locationContext;
 
       // Set blue team
       this.pendingBlueTeam = data.blueTeam;
@@ -2151,6 +2159,10 @@ export class CombatScene extends Phaser.Scene {
         acted: false,
         visible: true,
         spriteId,
+        // NPC System Integration
+        npcId: char.npcId,
+        isMercenary: char.isMercenary,
+        homeCountry: char.homeCountry,
       });
     });
 
@@ -6529,6 +6541,35 @@ export class CombatScene extends Phaser.Scene {
     }
 
     EventBridge.emit('unit-died', { unitId, killedBy });
+
+    // Emit merc-died event for blue team deaths (triggers funeral/family system)
+    if (unit.team === 'blue') {
+      // Get witnesses - other blue team units who might be affected by this death
+      const witnesses = Array.from(this.units.values())
+        .filter(u => u.team === 'blue' && u.id !== unitId)
+        .map(u => u.name);
+
+      const overkillAmount = Math.max(0, damage - unit.hp);
+
+      EventBridge.emit('merc-died', {
+        unitId: unit.id,
+        unitName: unit.name,
+        npcId: unit.npcId,
+        isMercenary: unit.isMercenary || false,
+        homeCountry: unit.homeCountry,
+        killedBy: killer?.name || 'unknown',
+        killerTeam: (killer?.team || 'red') as 'blue' | 'red' | 'neutral',
+        weapon: weapon,
+        damage: damage,
+        overkill: overkillAmount,
+        round: this.roundNumber,
+        location: this.locationContext ? {
+          countryCode: this.locationContext.country?.code,
+          cityName: this.locationContext.city?.name,
+        } : undefined,
+        witnesses,
+      });
+    }
 
     EventBridge.emit('log-entry', {
       id: `death_${Date.now()}`,
