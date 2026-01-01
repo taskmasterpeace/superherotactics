@@ -1,12 +1,12 @@
 {
-  "version": 1,
-  "lastUpdated": "2024-12-30T00:00:00Z",
+  "version": 2,
+  "lastUpdated": "2024-12-31T00:00:00Z",
   "config": {
-    "maxIterations": 50,
+    "maxIterations": 999,
     "autoContinue": true,
     "commitAfterSystem": true
   },
-  "currentSystem": null,
+  "currentSystem": "PENETRATION-DR",
   "systems": [
     {
       "id": "HOOK-INFRA",
@@ -279,35 +279,234 @@
     {
       "id": "SHIELD-SYS",
       "name": "Shield System",
-      "status": "pending",
+      "status": "completed",
       "priority": 6,
       "phase": 2,
       "tasks": [
         {
           "id": "SS-001",
           "task": "Wire shield absorption before health",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "SS-002",
           "task": "Implement shield regeneration",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "SS-003",
           "task": "Wire energy shield power",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "SS-004",
           "task": "Add shield UI indicators",
+          "status": "completed"
+        }
+      ],
+      "triggers": ["CALLING-BONUS"],
+      "files": [
+        "MVP/src/game/scenes/CombatScene.ts",
+        "MVP/src/data/shieldItems.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "CALLING-BONUS",
+      "name": "Calling Combat Bonuses",
+      "status": "completed",
+      "priority": 6.5,
+      "phase": 2,
+      "tasks": [
+        {
+          "id": "CB-001",
+          "task": "Add calling field to CombatCharacter interface",
+          "status": "completed"
+        },
+        {
+          "id": "CB-002",
+          "task": "Create callingCombatBonuses.ts evaluation module",
+          "status": "completed"
+        },
+        {
+          "id": "CB-003",
+          "task": "Wire accuracy bonus in calculateHitChance()",
+          "status": "completed"
+        },
+        {
+          "id": "CB-004",
+          "task": "Wire damage bonus in attack resolution",
+          "status": "completed"
+        },
+        {
+          "id": "CB-005",
+          "task": "Wire evasion bonus for defender callings",
+          "status": "completed"
+        },
+        {
+          "id": "CB-006",
+          "task": "Add combat log messages for calling activation",
+          "status": "completed"
+        }
+      ],
+      "triggers": ["PENETRATION-DR"],
+      "files": [
+        "MVP/src/game/scenes/CombatScene.ts",
+        "MVP/src/combat/callingCombatBonuses.ts",
+        "MVP/src/game/EventBridge.ts",
+        "MVP/src/data/callingSystem.ts"
+      ],
+      "completedAt": "2025-01-01T00:25:00.000Z"
+    },
+    {
+      "id": "PENETRATION-DR",
+      "name": "Armor DR and Penetration",
+      "status": "pending",
+      "priority": 6.6,
+      "phase": 2,
+      "tasks": [
+        {
+          "id": "PD-001",
+          "task": "Add getArmorDRValues() helper to armor.ts",
+          "status": "pending"
+        },
+        {
+          "id": "PD-002",
+          "task": "Populate DR from equipped armor when spawning units",
+          "status": "pending"
+        },
+        {
+          "id": "PD-003",
+          "task": "Apply penetrationMult to reduce effective DR",
+          "status": "pending"
+        },
+        {
+          "id": "PD-004",
+          "task": "Add combat log messages for DR absorption",
+          "status": "pending"
+        }
+      ],
+      "triggers": ["VISUAL-EFFECTS"],
+      "files": [
+        "MVP/src/game/scenes/CombatScene.ts",
+        "MVP/src/data/armor.ts",
+        "MVP/src/combat/enemyGeneration.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "VISUAL-EFFECTS",
+      "name": "Weapon Visual Effects",
+      "status": "pending",
+      "priority": 6.7,
+      "phase": 2,
+      "tasks": [
+        {
+          "id": "VE-001",
+          "task": "Create damageSubType to color mapping for all 23 types",
+          "status": "pending"
+        },
+        {
+          "id": "VE-002",
+          "task": "Create sound mapping from weapon category/noise",
+          "status": "pending"
+        },
+        {
+          "id": "VE-003",
+          "task": "Extend WEAPON_DAMAGE_TYPES for database weapons",
+          "status": "pending"
+        },
+        {
+          "id": "VE-004",
+          "task": "Test all 70+ weapons have proper visuals",
+          "status": "pending"
+        }
+      ],
+      "triggers": ["ENEMY-GEN-V2"],
+      "files": [
+        "MVP/src/game/scenes/weaponIntegration.ts",
+        "MVP/src/game/scenes/CombatScene.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "ENEMY-GEN-V2",
+      "name": "Enemy Generation Enhancements",
+      "status": "pending",
+      "priority": 6.8,
+      "phase": 2,
+      "tasks": [
+        {
+          "id": "EG2-001",
+          "task": "Add armor selection to generateEnemy() based on tier",
+          "status": "pending"
+        },
+        {
+          "id": "EG2-002",
+          "task": "Wire armor DR to convertToCombatCharacters()",
+          "status": "pending"
+        },
+        {
+          "id": "EG2-003",
+          "task": "Add faction-specific behavior flags to enemies",
+          "status": "pending"
+        },
+        {
+          "id": "EG2-004",
+          "task": "Implement tactics level affecting AI behavior",
+          "status": "pending"
+        },
+        {
+          "id": "EG2-005",
+          "task": "Test enemies in 5 different countries",
+          "status": "pending"
+        }
+      ],
+      "triggers": ["CITY-SERVICES"],
+      "files": [
+        "MVP/src/combat/enemyGeneration.ts",
+        "MVP/src/combat/enemyFactions.ts"
+      ],
+      "completedAt": null
+    },
+    {
+      "id": "CITY-SERVICES",
+      "name": "City Services Pipeline",
+      "status": "pending",
+      "priority": 7.5,
+      "phase": 3,
+      "tasks": [
+        {
+          "id": "CS-001",
+          "task": "Add SHOP_CITY_TYPE_REQUIREMENTS mapping",
+          "status": "pending"
+        },
+        {
+          "id": "CS-002",
+          "task": "Modify getShopsForCity() to check city type",
+          "status": "pending"
+        },
+        {
+          "id": "CS-003",
+          "task": "Create unified price modifiers from country stats",
+          "status": "pending"
+        },
+        {
+          "id": "CS-004",
+          "task": "Wire black market to calculateBlackMarket() combined effect",
+          "status": "pending"
+        },
+        {
+          "id": "CS-005",
+          "task": "Create Special Services panel for combined effects",
           "status": "pending"
         }
       ],
       "triggers": [],
       "files": [
-        "MVP/src/game/scenes/CombatScene.ts",
-        "MVP/src/data/shieldItems.ts"
+        "MVP/src/data/shopSystem.ts",
+        "MVP/src/data/combinedEffects.ts",
+        "MVP/src/components/EquipmentShop.tsx"
       ],
       "completedAt": null
     },
@@ -852,12 +1051,12 @@
       "completedAt": null
     }
   ],
-  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI", "INVESTIGATION", "TIME-EVENTS", "ECONOMY"],
+  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI", "INVESTIGATION", "TIME-EVENTS", "ECONOMY", "SHIELD-SYS", "CALLING-BONUS"],
   "statistics": {
-    "totalSystems": 20,
-    "completedSystems": 13,
-    "totalTasks": 105,
-    "completedTasks": 73,
+    "totalSystems": 25,
+    "completedSystems": 15,
+    "totalTasks": 129,
+    "completedTasks": 83,
     "totalIterations": 0,
     "startedAt": "2024-12-30T00:00:00.000Z"
   }

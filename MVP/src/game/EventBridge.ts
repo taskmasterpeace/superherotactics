@@ -6,7 +6,24 @@
  * - Phaser → React: EventBridge.on('event-name', callback)
  */
 
+import { Country } from '../data/countries';
+import { City } from '../data/cities';
+
 type EventCallback = (data: any) => void;
+
+// ============================================================================
+// LOCATION CONTEXT - Used for enemy generation
+// ============================================================================
+
+/**
+ * Location context for combat generation.
+ * Passed from strategic layer to tactical layer.
+ */
+export interface LocationContext {
+  country: Country;
+  city: City;
+  missionType: 'investigation' | 'assault' | 'defense' | 'rescue' | 'sabotage' | 'extraction';
+}
 
 class EventBridgeClass {
   private listeners: Map<string, Set<EventCallback>> = new Map();
@@ -95,12 +112,22 @@ export interface CombatCharacter {
   // Equipped armor info
   equippedArmor?: string;
   equippedShield?: string;
+  // Character calling (motivation) - affects combat bonuses
+  calling?: string;
 }
 
 // Event type definitions for TypeScript
 export interface CombatEvents {
   // React → Phaser
-  'load-combat': { blueTeam: CombatCharacter[]; redTeam: CombatCharacter[]; mapId?: string };
+  'load-combat': {
+    blueTeam: CombatCharacter[];
+    // redTeam is now optional - enemies can be generated from locationContext
+    redTeam?: CombatCharacter[];
+    mapId?: string;
+    cityType?: string;
+    // NEW: Location context for enemy generation
+    locationContext?: LocationContext;
+  };
   'select-unit': { unitId: string };
   'start-move-mode': { unitId: string };
   'start-attack-mode': { unitId: string; weaponId: string };

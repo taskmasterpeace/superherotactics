@@ -11,7 +11,7 @@
  */
 
 import Phaser from 'phaser';
-import { EventBridge, Position, UnitData, ActionPayload, CombatCharacter } from '../EventBridge';
+import { EventBridge, Position, UnitData, ActionPayload, CombatCharacter, LocationContext } from '../EventBridge';
 import {
   TILE_SIZE, TILE_WIDTH, TILE_HEIGHT,
   COLORS, TERRAIN_TYPES, TerrainType,
@@ -24,6 +24,8 @@ import {
   DEFAULT_RANGE_BRACKETS,
 } from '../../data/equipmentTypes';
 import { lookupWeaponInDatabase, getDamageSystemType, getDamageTypeByKey } from './weaponIntegration';
+import { MapTemplate, parseMapLayout, getMapForCityType, getSpawnPositions } from '../../data/mapTemplates';
+import { generateEnemySquad, convertToCombatCharacters, debugGenerateReport } from '../../combat/enemyGeneration';
 import {
   getFlankingResult,
   getFlankingBonus,
@@ -58,6 +60,10 @@ import {
   PROJECTILE_FORCES,
   KnockbackResult,
 } from '../../data/knockbackSystem';
+import {
+  evaluateCallingBonuses,
+  CallingBonusResult,
+} from '../../combat/callingCombatBonuses';
 
 // Combat statistics tracking interface
 interface UnitStats {
@@ -843,6 +849,8 @@ interface Unit {
     angle: number;    // Field of view degrees (120 for human, 360 for superhuman)
     range: number;    // Vision range in tiles
   };
+  // Character calling (motivation) - affects combat bonuses
+  calling?: string;
 }
 
 // Environmental effect types for tiles
@@ -927,6 +935,10 @@ export class CombatScene extends Phaser.Scene {
   private pendingRedTeam: CombatCharacter[] = [];
   private useCustomTeams: boolean = false;
   private pendingGrenade: { id: string; name: string } | null = null;
+
+  // Map template system - for city-type based maps
+  private currentMapTemplate: MapTemplate | null = null;
+  private pendingCityType: string | null = null;
 
   // Sound system
   private soundManager: SoundManager | null = null;
@@ -1013,7 +1025,14 @@ export class CombatScene extends Phaser.Scene {
     this.setupCamera();
     this.setupInput();
     this.setupEventBridge();
-    this.generateTestMap();
+
+    // Generate map based on city type or use test map
+    if (this.pendingCityType) {
+      this.generateMapFromCityType(this.pendingCityType);
+    } else {
+      this.generateTestMap();
+    }
+
     this.spawnTestUnits();
 
     // Initialize sound system
@@ -1021,7 +1040,9 @@ export class CombatScene extends Phaser.Scene {
 
     // Notify combat started
     EventBridge.emit('combat-started', {
-      mapId: 'test_map',
+      mapId: this.currentMapTemplate?.id || 'test_map',
+      mapName: this.currentMapTemplate?.name || 'Test Arena',
+      cityType: this.pendingCityType || undefined,
       teams: ['blue', 'red'],
     });
 
@@ -1301,16 +1322,69 @@ export class CombatScene extends Phaser.Scene {
 
   private setupEventBridge(): void {
     // Listen for combat load with characters from game store
-    EventBridge.on('load-combat', (data: { blueTeam: CombatCharacter[]; redTeam: CombatCharacter[]; mapId?: string }) => {
-      console.log('[COMBAT] Received load-combat with teams:', data.blueTeam.length, 'blue,', data.redTeam.length, 'red');
+    // Now supports cityType for map template selection AND locationContext for enemy generation
+    EventBridge.on('load-combat', (data: {
+      blueTeam: CombatCharacter[];
+      redTeam?: CombatCharacter[];
+      mapId?: string;
+      cityType?: string;
+      locationContext?: LocationContext;
+    }) => {
+      console.log('[COMBAT] Received load-combat with blue team:', data.blueTeam.length);
+
+      // Set blue team
       this.pendingBlueTeam = data.blueTeam;
-      this.pendingRedTeam = data.redTeam;
+
+      // RED TEAM: Generate from location context OR use provided redTeam
+      if (data.locationContext && !data.redTeam) {
+        // Generate enemies based on location!
+        console.log('[COMBAT] Generating enemies from location:', data.locationContext.city.name, data.locationContext.country.name);
+        console.log(debugGenerateReport(data.locationContext));
+
+        const squad = generateEnemySquad(data.locationContext, 4);
+        this.pendingRedTeam = convertToCombatCharacters(squad);
+
+        console.log('[COMBAT] Generated', this.pendingRedTeam.length, squad.faction, 'enemies');
+
+        // Use city type from location context for map
+        if (!data.cityType && data.locationContext.city.cityType1) {
+          data.cityType = data.locationContext.city.cityType1;
+        }
+      } else if (data.redTeam) {
+        // Use provided red team
+        this.pendingRedTeam = data.redTeam;
+        console.log('[COMBAT] Using provided red team:', data.redTeam.length);
+      } else {
+        // Fallback: empty red team (shouldn't happen)
+        console.warn('[COMBAT] No red team provided and no location context!');
+        this.pendingRedTeam = [];
+      }
+
       this.useCustomTeams = true;
 
-      // Clear existing units and respawn with new teams
+      // Clear existing units
       this.clearAllUnits();
+
+      // If city type is provided, regenerate map with appropriate template
+      if (data.cityType) {
+        console.log('[COMBAT] City type:', data.cityType);
+        this.pendingCityType = data.cityType;
+        this.generateMapFromCityType(data.cityType);
+      }
+
+      // Spawn units from game store
       this.spawnFromGameStore();
       this.emitAllUnitsData();
+
+      // Notify map change if using template
+      if (this.currentMapTemplate) {
+        EventBridge.emit('map-changed', {
+          mapId: this.currentMapTemplate.id,
+          mapName: this.currentMapTemplate.name,
+          description: this.currentMapTemplate.description,
+          cityType: data.cityType,
+        });
+      }
     });
 
     // Listen for React commands
@@ -1439,6 +1513,7 @@ export class CombatScene extends Phaser.Scene {
         equipment: character.equipment || [],
         threatLevel: character.threatLevel || 'THREAT_1',
         origin: character.origin || 'Test',
+        calling: character.calling, // Character calling for combat bonuses
       }, { x: baseX, y: baseY }, weaponName as any);
 
       // Update UI
@@ -1451,6 +1526,75 @@ export class CombatScene extends Phaser.Scene {
         actor: 'System',
         message: `⚖️ Test unit spawned: ${character.name} with ${weaponName}`,
       });
+    });
+  }
+
+  /**
+   * Create a unit from CombatCharacter format (used by Combat Lab and game store).
+   * Bridges the gap between CombatCharacter (game data) and Unit (combat engine).
+   * Uses weapon database for weapon stats instead of hardcoded WEAPONS object.
+   */
+  private createUnit(
+    characterData: {
+      id: string;
+      name: string;
+      team: 'blue' | 'red' | 'green';
+      health: number;
+      shield?: number;
+      maxShield?: number;
+      shieldRegen?: number;
+      dr?: number;
+      stoppingPower?: number;
+      stats?: { AGI?: number; STR?: number; INT?: number; WIL?: number; PER?: number; CON?: number; MEL?: number; RNG?: number; SPD?: number };
+      powers?: string[];
+      equipment?: string[];
+      threatLevel?: string;
+      origin?: string;
+      calling?: string;
+    },
+    position: { x: number; y: number },
+    weaponKey: string
+  ): void {
+    // Get weapon from database (falls back to internal WEAPONS if not found)
+    const weaponData = getWeaponData(weaponKey);
+
+    // Map CombatCharacter stats to Unit flat properties
+    // CombatCharacter uses: AGI, STR, INT, WIL, PER, CON, MEL, RNG, SPD
+    // Unit uses: str, agl, int, sta, ins, con, mel, evasion
+    const stats = characterData.stats || {};
+
+    this.spawnUnit({
+      id: characterData.id,
+      name: characterData.name,
+      team: characterData.team,
+      hp: characterData.health,
+      maxHp: characterData.health,
+      ap: 6 + Math.floor((stats.SPD || 50) / 25), // SPD affects AP (50 = 6 AP, 100 = 10 AP)
+      maxAp: 6 + Math.floor((stats.SPD || 50) / 25),
+      position,
+      facing: characterData.team === 'blue' ? 90 : 270, // Face enemy side
+      statusEffects: [],
+      weapon: weaponKey as WeaponType,
+      fireMode: 'single' as FireMode,
+      personality: 'tactical',
+      // Map stats from character sheet to combat unit
+      str: stats.STR || 50,
+      agl: stats.AGI || 50,
+      int: stats.INT || 50,
+      sta: stats.CON || 50, // CON -> stamina for recovery
+      ins: stats.PER || 50, // PER -> instinct for detection
+      con: stats.WIL || 50, // WIL -> concentration for fear resistance
+      mel: stats.MEL || 50,
+      evasion: Math.floor((stats.AGI || 50) / 2) + 10, // AGI-based evasion
+      dr: characterData.dr || 0,
+      stoppingPower: characterData.stoppingPower || 0,
+      shieldHp: characterData.shield || 0,
+      shieldMaxHp: characterData.maxShield || 0,
+      shieldRegenRate: characterData.shieldRegen || 0,
+      acted: false,
+      visible: true,
+      powers: characterData.powers || [],
+      calling: characterData.calling,
     });
   }
 
@@ -1490,6 +1634,49 @@ export class CombatScene extends Phaser.Scene {
 
     // Render tiles
     this.renderMap();
+  }
+
+  /**
+   * Generate tactical map based on city type
+   * Uses map templates that provide thematic layouts with multiple tactical options
+   */
+  private generateMapFromCityType(cityType: string): void {
+    // Get a random template for this city type
+    const template = getMapForCityType(cityType);
+    this.currentMapTemplate = template;
+
+    // Parse the layout string into terrain array
+    const terrainGrid = parseMapLayout(template.layout);
+
+    // Initialize tiles from template
+    for (let y = 0; y < this.mapHeight; y++) {
+      this.tiles[y] = [];
+      for (let x = 0; x < this.mapWidth; x++) {
+        // Get terrain from template, or default to FLOOR if out of bounds
+        const terrain = (terrainGrid[y] && terrainGrid[y][x]) || 'FLOOR';
+        this.tiles[y][x] = {
+          x,
+          y,
+          terrain: terrain as TerrainType,
+        };
+      }
+    }
+
+    // Log map info for debugging
+    console.log(`[COMBAT] Generated map: ${template.name} (${template.id})`);
+    console.log(`[COMBAT] Description: ${template.description}`);
+    console.log(`[COMBAT] Entry points: ${template.entryPoints.length}`);
+
+    // Render tiles
+    this.renderMap();
+  }
+
+  /**
+   * Get spawn positions from current map template
+   */
+  public getTemplateSpawnPositions(team: 'blue' | 'red'): { x: number; y: number }[] {
+    if (!this.currentMapTemplate) return [];
+    return getSpawnPositions(this.currentMapTemplate, team);
   }
 
   private setTerrain(x: number, y: number, terrain: TerrainType): void {
@@ -4111,6 +4298,36 @@ export class CombatScene extends Phaser.Scene {
       }
     }
 
+    // === CALLING BONUS ===
+    // Character calling (motivation) affects accuracy and evasion
+    if (attacker.calling || target.calling) {
+      // Count team sizes for outnumbered calculation
+      const blueCount = this.units.filter(u => u.team === 'blue' && u.hp > 0).length;
+      const redCount = this.units.filter(u => u.team === 'red' && u.hp > 0).length;
+
+      const callingResult = evaluateCallingBonuses(
+        attacker.calling,
+        target.calling,
+        attacker.hp / attacker.maxHp,
+        target.hp / target.maxHp,
+        {
+          blueTeamSize: blueCount,
+          redTeamSize: redCount,
+          attackerTeam: attacker.team as 'blue' | 'red',
+        }
+      );
+
+      // Apply attacker's accuracy bonus
+      if (callingResult.attackerBonus.activated) {
+        hitChance += callingResult.attackerBonus.accuracyMod;
+      }
+
+      // Apply defender's evasion bonus
+      if (callingResult.defenderBonus.activated) {
+        hitChance -= callingResult.defenderBonus.evasionMod;
+      }
+    }
+
     return Math.max(5, Math.min(95, hitChance));
   }
 
@@ -5348,6 +5565,38 @@ export class CombatScene extends Phaser.Scene {
       const didHit = finalHitResult !== 'miss';
       const isCrit = finalHitResult === 'crit';
       const isGraze = finalHitResult === 'graze';
+
+      // === CALLING DAMAGE BONUS ===
+      // Character calling (motivation) can boost damage output
+      if (didHit && damage > 0 && attacker.calling) {
+        const blueCount = this.units.filter(u => u.team === 'blue' && u.hp > 0).length;
+        const redCount = this.units.filter(u => u.team === 'red' && u.hp > 0).length;
+
+        const callingResult = evaluateCallingBonuses(
+          attacker.calling,
+          target.calling,
+          attacker.hp / attacker.maxHp,
+          target.hp / target.maxHp,
+          {
+            blueTeamSize: blueCount,
+            redTeamSize: redCount,
+            attackerTeam: attacker.team as 'blue' | 'red',
+          }
+        );
+
+        if (callingResult.attackerBonus.activated && callingResult.attackerBonus.damageMod > 0) {
+          const callingDamageBonus = Math.floor(damage * callingResult.attackerBonus.damageMod / 100);
+          damage += callingDamageBonus;
+
+          // Combat log for calling activation (CB-006)
+          if (callingResult.attackerBonus.message) {
+            this.emitToUI('combat-log', {
+              message: `🔥 ${attacker.name}: ${callingResult.attackerBonus.message} (+${callingResult.attackerBonus.damageMod}% damage)`,
+              type: 'status'
+            });
+          }
+        }
+      }
 
       // === ORIGIN MODIFIERS: Damage multipliers based on target type ===
       // Electricity does 2x to robots, Poison does 0x to robots, etc.
