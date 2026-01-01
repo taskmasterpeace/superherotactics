@@ -383,7 +383,7 @@ export const TrainingCenter: React.FC = () => {
             <div className="mb-4 p-3 bg-gray-700 rounded">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-400">Estimated Cost:</span>
-                <span className={money >= estimatedCost ? 'text-green-400' : 'text-red-400'}>
+                <span className={budget >= estimatedCost ? 'text-green-400' : 'text-red-400'}>
                   ${estimatedCost.toLocaleString()}
                 </span>
               </div>
@@ -393,7 +393,7 @@ export const TrainingCenter: React.FC = () => {
               </div>
               <div className="flex justify-between text-sm mt-1">
                 <span className="text-gray-400">Your Funds:</span>
-                <span className="text-yellow-400">${money.toLocaleString()}</span>
+                <span className="text-yellow-400">${budget.toLocaleString()}</span>
               </div>
             </div>
           )}
@@ -405,7 +405,7 @@ export const TrainingCenter: React.FC = () => {
               !selectedField ||
               !selectedInstitution ||
               !selectedCharacter ||
-              money < estimatedCost
+              budget < estimatedCost
             }
             className={`w-full py-3 rounded font-semibold ${
               selectedField && selectedInstitution && selectedCharacter && money >= estimatedCost
@@ -413,7 +413,7 @@ export const TrainingCenter: React.FC = () => {
                 : 'bg-gray-600 text-gray-400 cursor-not-allowed'
             }`}
           >
-            {money < estimatedCost
+            {budget < estimatedCost
               ? 'Insufficient Funds'
               : !selectedCharacter
               ? 'Select Character'
