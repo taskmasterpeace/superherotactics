@@ -12,6 +12,7 @@ import {
   CombatEndedEvent,
   MissionCompletedEvent,
   TimePassedEvent,
+  NewsArticleReadEvent,
   GameEvent
 } from './eventBus'
 import {
@@ -210,6 +211,66 @@ function handleDayPassed(event: TimePassedEvent): void {
   )
 }
 
+
+/**
+ * Handle news article read events - reading news can trigger investigation leads
+ * Higher chance for articles with explicit investigation leads
+ */
+function handleNewsArticleRead(event: NewsArticleReadEvent): void {
+  const store = useGameStore.getState()
+  const { headline, category, hasInvestigationLead, investigationType } = event.data
+  const location = event.location
+
+  // 60% chance if article has explicit lead, 20% otherwise
+  const discoveryChance = hasInvestigationLead ? 0.60 : 0.20
+  if (Math.random() > discoveryChance) {
+    console.log('[InvestigationGenerator] No investigation discovered from news article')
+    return
+  }
+
+  // Check max leads
+  if (store.investigationLeads.length >= state.maxLeads) {
+    console.log('[InvestigationGenerator] Max leads reached, skipping discovery')
+    return
+  }
+
+  // Map news category to investigation types
+  let types: InvestigationType[]
+  if (investigationType) {
+    types = [investigationType as InvestigationType]
+  } else {
+    switch (category) {
+      case 'crime':
+        types = ['crime', 'underworld']
+        break
+      case 'politics':
+        types = ['conspiracy', 'espionage']
+        break
+      case 'business':
+        types = ['corporate', 'conspiracy']
+        break
+      case 'terror':
+        types = ['terrorism', 'conspiracy']
+        break
+      default:
+        types = ['crime', 'underworld', 'conspiracy']
+    }
+  }
+
+  // News-derived investigations tend to be moderate difficulty
+  const template = getRandomTemplate(types, 3, 7)
+  if (!template) return
+
+  discoverInvestigationWithCooldown(
+    template,
+    location?.city || 'Unknown City',
+    location?.country || 'Unknown Country',
+    location?.sector || 'A1'
+  )
+
+  console.log('[InvestigationGenerator] Investigation lead discovered from news:', headline)
+}
+
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
@@ -337,6 +398,11 @@ export function initInvestigationGenerator(): void {
   // Subscribe to daily time events
   state.subscriptionIds.push(
     EventBus.on<TimePassedEvent>('time:day-passed', handleDayPassed, { priority: 1 })
+  )
+
+  // Subscribe to news article read events
+  state.subscriptionIds.push(
+    EventBus.on<NewsArticleReadEvent>('news:article-read', handleNewsArticleRead, { priority: 5 })
   )
 
   state.initialized = true

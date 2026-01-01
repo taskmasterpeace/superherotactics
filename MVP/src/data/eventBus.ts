@@ -78,6 +78,7 @@ export type GameEventType =
 
   // News events
   | 'news:article-generated'
+  | 'news:article-read'
   | 'news:headline-published'
   | 'news:opinion-shifted'
 
@@ -191,6 +192,18 @@ export interface NewsGeneratedEvent extends GameEventBase {
   };
 }
 
+export interface NewsArticleReadEvent extends GameEventBase {
+  type: 'news:article-read';
+  category: 'news';
+  data: {
+    articleId: string;
+    headline: string;
+    category: string;
+    hasInvestigationLead: boolean;
+    investigationType?: string;
+  };
+}
+
 export interface ReputationChangedEvent extends GameEventBase {
   type: 'reputation:fame-changed' | 'reputation:notoriety-changed';
   category: 'reputation';
@@ -210,6 +223,7 @@ export type GameEvent =
   | TimePassedEvent
   | CharacterHospitalizedEvent
   | NewsGeneratedEvent
+  | NewsArticleReadEvent
   | ReputationChangedEvent
   | (GameEventBase & { data?: any });
 

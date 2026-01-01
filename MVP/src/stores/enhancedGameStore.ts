@@ -476,6 +476,7 @@ interface EnhancedGameStore {
 
   // News System
   addNewsArticle: (article: NewsArticle) => void
+  markArticleRead: (articleId: string) => void
   generateMissionNews: (missionResult: {
     success: boolean
     collateralDamage: number
@@ -2691,6 +2692,39 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     const state = get()
     set({
       newsArticles: [article, ...state.newsArticles].slice(0, 100)  // Keep last 100 articles
+    })
+  },
+
+  markArticleRead: (articleId) => {
+    const state = get()
+    const article = state.newsArticles.find(a => a.id === articleId)
+    if (!article || article.isRead) return
+
+    // Mark article as read
+    set({
+      newsArticles: state.newsArticles.map(a =>
+        a.id === articleId ? { ...a, isRead: true } : a
+      )
+    })
+
+    // Emit event for investigation generation
+    const { EventBus } = require('../data/eventBus')
+    EventBus.emit({
+      id: `news-read-${Date.now()}`,
+      type: 'news:article-read',
+      category: 'news',
+      timestamp: Date.now(),
+      location: {
+        city: article.location || 'Unknown',
+        country: article.country || 'Unknown'
+      },
+      data: {
+        articleId: article.id,
+        headline: article.headline,
+        category: article.category || 'general',
+        hasInvestigationLead: article.hasLead || false,
+        investigationType: article.investigationType
+      }
     })
   },
 
