@@ -6,7 +6,7 @@
     "autoContinue": true,
     "commitAfterSystem": true
   },
-  "currentSystem": "PENETRATION-DR",
+  "currentSystem": "VISUAL-EFFECTS",
   "systems": [
     {
       "id": "HOOK-INFRA",
@@ -361,29 +361,29 @@
     {
       "id": "PENETRATION-DR",
       "name": "Armor DR and Penetration",
-      "status": "pending",
+      "status": "completed",
       "priority": 6.6,
       "phase": 2,
       "tasks": [
         {
           "id": "PD-001",
           "task": "Add getArmorDRValues() helper to armor.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "PD-002",
           "task": "Populate DR from equipped armor when spawning units",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "PD-003",
           "task": "Apply penetrationMult to reduce effective DR",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "PD-004",
           "task": "Add combat log messages for DR absorption",
-          "status": "pending"
+          "status": "completed"
         }
       ],
       "triggers": ["VISUAL-EFFECTS"],
@@ -392,7 +392,7 @@
         "MVP/src/data/armor.ts",
         "MVP/src/combat/enemyGeneration.ts"
       ],
-      "completedAt": null
+      "completedAt": "2025-01-01T00:45:00.000Z"
     },
     {
       "id": "VISUAL-EFFECTS",
@@ -1051,12 +1051,12 @@
       "completedAt": null
     }
   ],
-  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI", "INVESTIGATION", "TIME-EVENTS", "ECONOMY", "SHIELD-SYS", "CALLING-BONUS"],
+  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI", "INVESTIGATION", "TIME-EVENTS", "ECONOMY", "SHIELD-SYS", "CALLING-BONUS", "PENETRATION-DR"],
   "statistics": {
     "totalSystems": 25,
-    "completedSystems": 15,
+    "completedSystems": 16,
     "totalTasks": 129,
-    "completedTasks": 83,
+    "completedTasks": 87,
     "totalIterations": 0,
     "startedAt": "2024-12-30T00:00:00.000Z"
   }

@@ -5680,8 +5680,30 @@ export class CombatScene extends Phaser.Scene {
         const totalDR = target.dr + coverDRBonus;
 
         if (didHit && damage > 0 && totalDR > 0) {
-          const effectiveDR = Math.floor(totalDR * armorEffectiveness);
+          // === WEAPON PENETRATION (PD-003) ===
+          // Weapon penetrationMult reduces effective DR
+          // penetrationMult 0.5 = DR is 2x effective (poor at penetrating)
+          // penetrationMult 1.0 = normal
+          // penetrationMult 1.5+ = DR reduced (AP rounds)
+          const weaponPenetration = weapon.penetrationMult || 1.0;
+          const effectiveDR = Math.floor(totalDR * armorEffectiveness / weaponPenetration);
+          const drAbsorbed = Math.min(effectiveDR, damage - 1);
           damage = Math.max(1, damage - effectiveDR);
+
+          // Combat log for DR absorption (PD-004)
+          if (drAbsorbed > 0) {
+            if (weaponPenetration > 1.0) {
+              this.emitToUI('combat-log', {
+                message: `🔫 ${weapon.name} penetrates armor! (DR ${totalDR}→${effectiveDR})`,
+                type: 'status'
+              });
+            } else if (drAbsorbed >= 5) {
+              this.emitToUI('combat-log', {
+                message: `🛡️ ${target.name}'s armor absorbs ${drAbsorbed} damage`,
+                type: 'status'
+              });
+            }
+          }
         }
       } else {
         // Armor-piercing damage - log it

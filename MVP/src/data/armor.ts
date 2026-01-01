@@ -1571,3 +1571,85 @@ export function addComponent(
     researchRequired: component.researchRequired || baseArmor.researchRequired,
   };
 }
+
+/**
+ * Get armor DR values for combat calculations.
+ * Used by CombatScene to apply damage reduction.
+ *
+ * @param armorNameOrId - Armor name (e.g., "Kevlar Vest") or ID (e.g., "ARM_LGT_002")
+ * @returns Object with DR values and stopping power, or defaults if not found
+ */
+export interface ArmorDRValues {
+  drPhysical: number;
+  drEnergy: number;
+  drMental: number;
+  stoppingPower: number;
+  armorName: string | null;
+}
+
+export function getArmorDRValues(armorNameOrId: string | undefined): ArmorDRValues {
+  if (!armorNameOrId) {
+    return {
+      drPhysical: 0,
+      drEnergy: 0,
+      drMental: 0,
+      stoppingPower: 0,
+      armorName: null,
+    };
+  }
+
+  // Try to find by ID first, then by name
+  const armor = getArmorById(armorNameOrId) || getArmorByName(armorNameOrId);
+
+  if (!armor) {
+    return {
+      drPhysical: 0,
+      drEnergy: 0,
+      drMental: 0,
+      stoppingPower: 0,
+      armorName: null,
+    };
+  }
+
+  return {
+    drPhysical: armor.drPhysical,
+    drEnergy: armor.drEnergy,
+    drMental: armor.drMental,
+    stoppingPower: armor.stoppingPower || 0,
+    armorName: armor.name,
+  };
+}
+
+/**
+ * Get combined armor DR from multiple equipped pieces.
+ * Handles separate armor pieces like torso armor + helmet.
+ *
+ * @param equippedArmor - Array of armor names/IDs (e.g., ["Kevlar Vest", "Combat Helmet"])
+ * @returns Combined DR values (stacks additively)
+ */
+export function getCombinedArmorDR(equippedArmor: string[]): ArmorDRValues {
+  const result: ArmorDRValues = {
+    drPhysical: 0,
+    drEnergy: 0,
+    drMental: 0,
+    stoppingPower: 0,
+    armorName: null,
+  };
+
+  const armorNames: string[] = [];
+
+  for (const armorItem of equippedArmor) {
+    const values = getArmorDRValues(armorItem);
+    if (values.armorName) {
+      result.drPhysical += values.drPhysical;
+      result.drEnergy += values.drEnergy;
+      result.drMental += values.drMental;
+      // Stopping power uses highest value (doesn't stack)
+      result.stoppingPower = Math.max(result.stoppingPower, values.stoppingPower);
+      armorNames.push(values.armorName);
+    }
+  }
+
+  result.armorName = armorNames.length > 0 ? armorNames.join(' + ') : null;
+  return result;
+}

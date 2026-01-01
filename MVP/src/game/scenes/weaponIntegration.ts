@@ -27,6 +27,7 @@ type CombatWeapon = {
   rangeBrackets: any;
   knockback?: number;
   blastRadius?: number;
+  penetrationMult?: number; // 0-2: multiplier to reduce effective armor DR (1.0 = normal, 2.0 = AP rounds)
 };
 
 /**
@@ -112,6 +113,7 @@ export function convertWeaponToCombatFormat(weapon: Weapon): CombatWeapon {
       baseRange: weapon.range > 50 ? 30 : weapon.range > 25 ? 25 : 20
     },
     rangeBrackets,
+    penetrationMult: weapon.penetrationMult || 1.0, // Armor penetration from weapon database
     ...(weapon.name.toLowerCase().includes('shotgun') && { knockback: 2 }),
     ...(weapon.name.toLowerCase().includes('rocket') || weapon.name.toLowerCase().includes('rpg')) && {
       knockback: 5,
