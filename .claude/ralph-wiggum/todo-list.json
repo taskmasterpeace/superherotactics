@@ -6,7 +6,7 @@
     "autoContinue": true,
     "commitAfterSystem": true
   },
-  "currentSystem": "VISUAL-EFFECTS",
+  "currentSystem": "ENEMY-GEN-V2",
   "systems": [
     {
       "id": "HOOK-INFRA",
@@ -397,29 +397,29 @@
     {
       "id": "VISUAL-EFFECTS",
       "name": "Weapon Visual Effects",
-      "status": "pending",
+      "status": "completed",
       "priority": 6.7,
       "phase": 2,
       "tasks": [
         {
           "id": "VE-001",
           "task": "Create damageSubType to color mapping for all 23 types",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "VE-002",
           "task": "Create sound mapping from weapon category/noise",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "VE-003",
           "task": "Extend WEAPON_DAMAGE_TYPES for database weapons",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "VE-004",
           "task": "Test all 70+ weapons have proper visuals",
-          "status": "pending"
+          "status": "completed"
         }
       ],
       "triggers": ["ENEMY-GEN-V2"],
@@ -427,7 +427,7 @@
         "MVP/src/game/scenes/weaponIntegration.ts",
         "MVP/src/game/scenes/CombatScene.ts"
       ],
-      "completedAt": null
+      "completedAt": "2025-01-01T01:15:00.000Z"
     },
     {
       "id": "ENEMY-GEN-V2",
@@ -1051,12 +1051,12 @@
       "completedAt": null
     }
   ],
-  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI", "INVESTIGATION", "TIME-EVENTS", "ECONOMY", "SHIELD-SYS", "CALLING-BONUS", "PENETRATION-DR"],
+  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI", "INVESTIGATION", "TIME-EVENTS", "ECONOMY", "SHIELD-SYS", "CALLING-BONUS", "PENETRATION-DR", "VISUAL-EFFECTS"],
   "statistics": {
     "totalSystems": 25,
-    "completedSystems": 16,
+    "completedSystems": 17,
     "totalTasks": 129,
-    "completedTasks": 87,
+    "completedTasks": 91,
     "totalIterations": 0,
     "startedAt": "2024-12-30T00:00:00.000Z"
   }

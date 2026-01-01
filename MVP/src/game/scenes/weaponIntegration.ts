@@ -31,6 +31,63 @@ type CombatWeapon = {
 };
 
 /**
+ * Get sound profile based on weapon category and properties (VE-002)
+ * Maps weapon categories to appropriate decibel levels and sound ranges
+ */
+function getSoundProfile(weapon: Weapon): { decibels: number; baseRange: number } {
+  const category = weapon.category;
+  const name = weapon.name.toLowerCase();
+
+  // Sound profiles by category
+  const soundProfiles: Record<string, { decibels: number; baseRange: number }> = {
+    // Melee - quiet
+    'Melee_Regular': { decibels: 40, baseRange: 3 },
+    'Melee_Skill': { decibels: 50, baseRange: 4 },
+
+    // Pistols - medium
+    'Pistol_Standard': { decibels: 140, baseRange: 20 },
+    'Pistol_Heavy': { decibels: 150, baseRange: 25 },
+
+    // Rifles - loud
+    'Rifle_Assault': { decibels: 160, baseRange: 30 },
+    'Rifle_Sniper': { decibels: 155, baseRange: 35 },
+    'Rifle_Battle': { decibels: 165, baseRange: 30 },
+
+    // SMGs - medium-loud
+    'SMG': { decibels: 145, baseRange: 22 },
+
+    // Shotguns - very loud
+    'Shotgun': { decibels: 160, baseRange: 25 },
+
+    // Machine guns - very loud
+    'Machine_Gun': { decibels: 170, baseRange: 35 },
+
+    // Energy weapons - medium (lower mechanical noise)
+    'Energy_Weapons': { decibels: 70, baseRange: 15 },
+
+    // Explosives - extremely loud
+    'Explosive': { decibels: 180, baseRange: 50 },
+    'Heavy_Weapons': { decibels: 175, baseRange: 45 },
+
+    // Special
+    'Thrown': { decibels: 30, baseRange: 5 },
+    'Natural': { decibels: 60, baseRange: 10 },
+  };
+
+  // Check for suppressed weapons
+  const isSuppressed = name.includes('suppressed') || name.includes('silenced');
+  const suppressorMod = isSuppressed ? 0.6 : 1.0;
+
+  // Get base profile or default
+  const profile = soundProfiles[category] || { decibels: 100, baseRange: 20 };
+
+  return {
+    decibels: Math.round(profile.decibels * suppressorMod),
+    baseRange: Math.round(profile.baseRange * suppressorMod),
+  };
+}
+
+/**
  * Convert a weapon from weapons.ts database to CombatScene format
  * This allows us to use the full 70+ weapon database in combat
  */
@@ -60,23 +117,84 @@ export function convertWeaponToCombatFormat(weapon: Weapon): CombatWeapon {
     return 'projectile';
   };
 
-  // Determine visual color based on damage type
+  // Determine visual color based on damage subtype (VE-001)
+  // Complete mapping for all 31 damage subtypes
   const getVisualColor = (weapon: Weapon): number => {
     switch (weapon.damageSubType) {
-      case 'LASER':
-      case 'ELECTRICAL':
-        return 0x00ffff; // Cyan for electric/laser
-      case 'PLASMA':
-      case 'FIRE':
-        return 0xff00ff; // Magenta/pink for plasma
-      case 'THERMAL':
-        return 0xff4400; // Orange for heat
-      case 'ICE':
-        return 0x88ccff; // Light blue for ice
-      case 'BUCKSHOT':
-        return 0xff8800; // Orange for shotgun blast
-      default:
+      // PHYSICAL - Yellow/Orange family
+      case 'SMASHING_MELEE':
+      case 'SMASHING_PROJECTILE':
+      case 'BLUNT_WEAPON':
+      case 'IMPACT':
+        return 0xffaa00; // Orange for blunt impact
+      case 'GUNFIRE_BUCKSHOT':
+        return 0xff8800; // Orange for shotgun
+      case 'GUNFIRE_BULLET':
+      case 'GUNFIRE_AP':
         return 0xffff00; // Yellow for bullets
+      case 'EXPLOSION_CONCUSSION':
+        return 0xffcc00; // Golden for explosions
+      case 'SOUND_ULTRASONIC':
+      case 'SOUND_SONIC':
+        return 0x8844ff; // Purple for sonic
+
+      // BLEED - Red family
+      case 'EXPLOSION_SHRAPNEL':
+        return 0xff4400; // Red-orange for shrapnel
+      case 'PIERCING_PROJECTILE':
+      case 'EDGED_PIERCING':
+        return 0xff2222; // Red for piercing
+      case 'EDGED_SLASHING':
+        return 0xcc0000; // Dark red for slashing
+
+      // ENERGY - Cyan/Magenta family
+      case 'ENERGY_THERMAL':
+        return 0xff6600; // Orange for thermal
+      case 'ENERGY_PLASMA':
+        return 0xff00ff; // Magenta for plasma
+      case 'ENERGY_ICE':
+        return 0x88ccff; // Light blue for ice
+      case 'ELECTROMAGNETIC':
+      case 'ELECTROMAGNETIC_BOLT':
+        return 0x0088ff; // Blue for EM
+      case 'ELECTROMAGNETIC_RADIATION':
+        return 0x00ff88; // Green for radiation
+      case 'ELECTROMAGNETIC_LASER':
+        return 0x00ffff; // Cyan for laser
+
+      // BIOLOGICAL - Green family
+      case 'TOXIN_POISON':
+      case 'TOXIN_VENOM':
+        return 0x00ff00; // Green for poison
+      case 'TOXIN_ACID':
+        return 0x88ff00; // Yellow-green for acid
+      case 'BIOTOXIN_VIRUS':
+      case 'BIOTOXIN_DISEASE':
+        return 0x668800; // Dark green for disease
+
+      // MENTAL - Purple family
+      case 'MENTAL_CONTROL':
+        return 0x8800ff; // Purple for mind control
+      case 'MENTAL_BLAST':
+        return 0xff00ff; // Magenta for psychic blast
+
+      // OTHER - Special
+      case 'DISINTEGRATION':
+        return 0xffffff; // White for disintegration
+      case 'SPIRITUAL':
+        return 0x00ffcc; // Teal for spiritual
+      case 'ASPHYXIATION':
+      case 'EBULLISM':
+        return 0x4444ff; // Blue for suffocation
+      case 'SIPHON':
+        return 0xff0088; // Pink for siphon
+      case 'DECOMPOSITION':
+        return 0x444400; // Brown for decay
+      case 'SICK_NAUSEATED':
+        return 0x88aa00; // Sickly green
+
+      default:
+        return 0xffff00; // Yellow default
     }
   };
 
@@ -107,11 +225,7 @@ export function convertWeaponToCombatFormat(weapon: Weapon): CombatWeapon {
       color: visualColor,
       ...(visualType === 'cone' && { spread: 30 })
     },
-    sound: {
-      decibels: weapon.category.includes('Melee') ? 40 :
-                weapon.category === 'Energy_Weapons' ? 70 : 160,
-      baseRange: weapon.range > 50 ? 30 : weapon.range > 25 ? 25 : 20
-    },
+    sound: getSoundProfile(weapon),
     rangeBrackets,
     penetrationMult: weapon.penetrationMult || 1.0, // Armor penetration from weapon database
     ...(weapon.name.toLowerCase().includes('shotgun') && { knockback: 2 }),
