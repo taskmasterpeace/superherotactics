@@ -20,6 +20,7 @@ import {
   WantedPoster,
   LetterToEditor,
 } from '../data/newspaperExpansion';
+import type { GeneratedMission } from '../data/missionSystem';
 
 // =============================================================================
 // TYPES
@@ -28,7 +29,138 @@ import {
 type SortOption = 'newest' | 'oldest' | 'most-impactful';
 type MainSection = 'news' | 'classifieds' | 'wanted' | 'letters';
 
-// Demo data for expanded sections
+// =============================================================================
+// MISSION-TO-CLASSIFIED CONVERSION
+// =============================================================================
+
+const MISSION_TYPE_TO_CATEGORY: Record<string, ClassifiedAd['category']> = {
+  extract: 'retrieval',
+  escort: 'security',
+  protect: 'security',
+  rescue: 'retrieval',
+  assassinate: 'services',
+  infiltrate: 'investigation',
+  investigate: 'investigation',
+  sabotage: 'services',
+  capture_hold: 'security',
+  skirmish: 'security',
+  patrol: 'security',
+};
+
+const MISSION_SOURCE_TO_LEGALITY: Record<string, ClassifiedAd['legality']> = {
+  police: 'legal',
+  military: 'legal',
+  special_forces: 'gray',
+  handler: 'gray',
+  private: 'legal',
+  underworld: 'illegal',
+  terrorism: 'illegal',
+};
+
+function missionToClassified(mission: GeneratedMission, gameDay: number): ClassifiedAd {
+  const category = MISSION_TYPE_TO_CATEGORY[mission.template.type] || 'services';
+  const legality = MISSION_SOURCE_TO_LEGALITY[mission.template.source] || 'gray';
+
+  // Generate cryptic contact info for illegal/gray jobs
+  const contactInfo = legality === 'illegal'
+    ? `Leave message at dead drop #${Math.floor(Math.random() * 999) + 100}`
+    : legality === 'gray'
+    ? `Reply to Box #${Math.floor(Math.random() * 9999) + 1000}`
+    : `Contact: ${mission.city || 'Local Office'}`;
+
+  return {
+    id: `cl_${mission.id}`,
+    category,
+    legality,
+    title: mission.template.name,
+    description: mission.briefing || mission.template.description,
+    contactInfo,
+    isCodedMessage: legality !== 'legal',
+    payment: mission.reward,
+    paymentType: 'cash',
+    isRead: false,
+    respondedTo: false,
+    publishedDay: gameDay,
+    publishedHour: Math.floor(Math.random() * 24),
+    missionId: mission.id,
+  };
+}
+
+function generateWantedFromPlayerHeat(
+  playerFame: number,
+  playerName: string = 'Unknown Vigilante',
+  gameDay: number
+): WantedPoster | null {
+  // Only generate wanted poster if player has significant negative fame or heat
+  if (playerFame >= -50) return null;
+
+  const reward = Math.abs(playerFame) * 100;
+  const dangerLevel = Math.min(5, Math.floor(Math.abs(playerFame) / 50) + 1);
+
+  return {
+    id: `w_player_${gameDay}`,
+    status: 'active',
+    targetName: playerName,
+    targetAlias: 'The Vigilante',
+    targetDescription: 'Individual involved in unauthorized superhuman activity. Consider armed and dangerous.',
+    isPlayerCharacter: true,
+    reward,
+    rewardCurrency: 'usd',
+    issuer: 'government',
+    deadOrAlive: 'alive',
+    crimes: ['Vigilante Activity', 'Unauthorized Use of Powers'],
+    dangerLevel,
+    powersKnown: ['Unknown'],
+    jurisdictions: ['NATIONAL'],
+    publishedDay: gameDay,
+  };
+}
+
+function generateLettersFromArticles(
+  articles: NewsArticle[],
+  count: number = 5
+): LetterToEditor[] {
+  const letters: LetterToEditor[] = [];
+  const recentArticles = articles
+    .filter(a => a.fameImpact !== 0 || a.publicOpinionShift)
+    .slice(0, 10);
+
+  const AUTHOR_TYPES: LetterToEditor['authorType'][] = ['citizen', 'business_owner', 'official', 'anonymous'];
+  const LOCATIONS = ['Downtown', 'Suburbs', 'Industrial District', 'Market District', 'Residential Area'];
+  const FIRST_NAMES = ['J.', 'M.', 'R.', 'A.', 'S.', 'D.', 'K.', 'T.', 'L.'];
+  const LAST_NAMES = ['Smith', 'Johnson', 'Williams', 'Martinez', 'Chen', 'Kim', 'Davis', 'Wilson'];
+
+  for (let i = 0; i < Math.min(count, recentArticles.length); i++) {
+    const article = recentArticles[i];
+    const isPositive = (article.fameImpact || 0) > 0;
+    const authorType = AUTHOR_TYPES[Math.floor(Math.random() * AUTHOR_TYPES.length)];
+
+    letters.push({
+      id: `lt_gen_${i}_${Date.now()}`,
+      authorName: authorType === 'anonymous'
+        ? 'Anonymous'
+        : `${FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)]} ${LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)]}`,
+      authorLocation: LOCATIONS[Math.floor(Math.random() * LOCATIONS.length)],
+      authorType,
+      subject: isPositive
+        ? `Re: ${article.headline.slice(0, 30)}... - Thank You!`
+        : `Re: ${article.headline.slice(0, 30)}... - Concerned Citizen`,
+      body: isPositive
+        ? `After reading about the recent events, I wanted to express my gratitude. It's reassuring to know there are those willing to stand up for what's right.`
+        : `I read with concern the recent article. When will our leaders address these issues? The current situation is unacceptable.`,
+      sentiment: isPositive ? 'positive' : 'negative',
+      topic: isPositive ? 'hero_praise' : 'hero_criticism',
+      agreedCount: Math.floor(Math.random() * 500) + 100,
+      disagreedCount: Math.floor(Math.random() * 200) + 50,
+      publishedDay: article.timestamp ? Math.floor(article.timestamp / 24) : 1,
+      publishedHour: Math.floor(Math.random() * 24),
+    });
+  }
+
+  return letters;
+}
+
+// Demo data for expanded sections (fallback)
 const DEMO_CLASSIFIEDS: ClassifiedAd[] = [
   {
     id: 'cl_1',
@@ -375,6 +507,8 @@ export default function NewsBrowser() {
   const playerFame = useGameStore(state => state.playerFame);
   const publicOpinion = useGameStore(state => state.publicOpinion);
   const markArticleRead = useGameStore(state => state.markArticleRead);
+  const availableMissions = useGameStore(state => state.availableMissions);
+  const gameTime = useGameStore(state => state.gameTime);
 
   // Handler to select and mark article as read
   const handleArticleClick = (article: NewsArticle) => {
@@ -391,10 +525,47 @@ export default function NewsBrowser() {
   const [selectedWanted, setSelectedWanted] = useState<WantedPoster | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('newest');
 
-  // Demo data (would come from store in production)
-  const classifieds = DEMO_CLASSIFIEDS;
-  const wantedPosters = DEMO_WANTED;
-  const letters = DEMO_LETTERS;
+  // Generate classifieds from real missions
+  const classifieds = useMemo(() => {
+    const gameDay = gameTime?.day || 1;
+    const missionClassifieds: ClassifiedAd[] = [];
+
+    // Convert available missions to classified ads
+    if (availableMissions) {
+      availableMissions.forEach((missions) => {
+        missions.forEach(mission => {
+          if (mission.status === 'available') {
+            missionClassifieds.push(missionToClassified(mission, gameDay));
+          }
+        });
+      });
+    }
+
+    // If no missions, show demo classifieds as fallback
+    return missionClassifieds.length > 0 ? missionClassifieds : DEMO_CLASSIFIEDS;
+  }, [availableMissions, gameTime?.day]);
+
+  // Generate wanted posters from player heat/fame
+  const wantedPosters = useMemo(() => {
+    const gameDay = gameTime?.day || 1;
+    const posters: WantedPoster[] = [];
+
+    // Generate player wanted poster if they have negative fame
+    const playerPoster = generateWantedFromPlayerHeat(playerFame || 0, 'The Player', gameDay);
+    if (playerPoster) {
+      posters.push(playerPoster);
+    }
+
+    // Add demo wanted posters for other targets
+    return [...posters, ...DEMO_WANTED];
+  }, [playerFame, gameTime?.day]);
+
+  // Generate letters from news articles
+  const letters = useMemo(() => {
+    const generated = generateLettersFromArticles(newsArticles, 5);
+    // If no articles generated letters, use demo data
+    return generated.length > 0 ? generated : DEMO_LETTERS;
+  }, [newsArticles]);
 
   // =============================================================================
   // FILTERING AND SORTING
