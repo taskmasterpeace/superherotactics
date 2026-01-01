@@ -1653,3 +1653,88 @@ export function getCombinedArmorDR(equippedArmor: string[]): ArmorDRValues {
   result.armorName = armorNames.length > 0 ? armorNames.join(' + ') : null;
   return result;
 }
+
+/**
+ * Get armor pieces by cost level for enemy generation.
+ * Filters out Natural armor (powers only) and shields (separate system).
+ *
+ * @param costLevel - Cost level to filter by (Free, Low, Medium, High, Very_High, Ultra_High)
+ * @returns Array of armor pieces at the specified cost level
+ */
+export function getArmorByCostLevel(
+  costLevel: 'Free' | 'Low' | 'Medium' | 'High' | 'Very_High' | 'Ultra_High'
+): Armor[] {
+  return ALL_ARMOR.filter(
+    (a) =>
+      a.costLevel === costLevel &&
+      a.category !== 'Natural' &&
+      a.category !== 'Shield'
+  );
+}
+
+/**
+ * Convert equipment tier (1-6) to cost level for armor selection.
+ * Tier 1-2: Low/Medium, Tier 3-4: Medium/High, Tier 5-6: High/Very_High
+ */
+export function tierToArmorCostLevel(
+  tier: number
+): 'Free' | 'Low' | 'Medium' | 'High' | 'Very_High' | 'Ultra_High' {
+  if (tier <= 1) return 'Free';
+  if (tier <= 2) return 'Low';
+  if (tier <= 3) return 'Medium';
+  if (tier <= 4) return 'High';
+  if (tier <= 5) return 'Very_High';
+  return 'Ultra_High';
+}
+
+/**
+ * Select appropriate armor for enemy generation based on equipment tier.
+ * Returns null for tier 1-2 (unarmed/street criminals) with probability.
+ *
+ * @param tier - Equipment tier (1-6) from country military budget
+ * @param role - Enemy role affects armor selection
+ * @returns Armor ID or null
+ */
+export function selectArmorForEnemy(
+  tier: number,
+  role: 'leader' | 'heavy' | 'standard' | 'specialist'
+): string | null {
+  // Lower tiers often have no armor
+  if (tier <= 1 && Math.random() > 0.2) return null;
+  if (tier <= 2 && Math.random() > 0.5) return null;
+
+  // Heavy units always try to get armor
+  const effectiveTier = role === 'heavy' ? Math.min(6, tier + 1) : tier;
+  // Specialists prefer lighter armor for mobility
+  const preferLight = role === 'specialist';
+
+  const costLevel = tierToArmorCostLevel(effectiveTier);
+  let armorPool = getArmorByCostLevel(costLevel);
+
+  // If no armor at this level, try one level down
+  if (armorPool.length === 0 && tier > 1) {
+    armorPool = getArmorByCostLevel(tierToArmorCostLevel(tier - 1));
+  }
+
+  // Filter for specialist preference (light/medium)
+  if (preferLight && armorPool.length > 0) {
+    const lightArmor = armorPool.filter(
+      (a) => a.category === 'Light' || a.category === 'Medium'
+    );
+    if (lightArmor.length > 0) armorPool = lightArmor;
+  }
+
+  // Heavy prefer heavier armor
+  if (role === 'heavy' && armorPool.length > 0) {
+    const heavyArmor = armorPool.filter(
+      (a) => a.category === 'Heavy' || a.category === 'Full_Body'
+    );
+    if (heavyArmor.length > 0) armorPool = heavyArmor;
+  }
+
+  if (armorPool.length === 0) return null;
+
+  // Random selection from pool
+  const selected = armorPool[Math.floor(Math.random() * armorPool.length)];
+  return selected.id;
+}

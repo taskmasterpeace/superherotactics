@@ -16,7 +16,7 @@
 import { Country } from '../data/countries';
 import { City } from '../data/cities';
 import { ALL_WEAPONS, getWeaponsByBudget, getWeaponsByCostLevel } from '../data/weapons';
-import { getArmorDRValues } from '../data/armor';
+import { getArmorDRValues, selectArmorForEnemy } from '../data/armor';
 import { CombatCharacter } from '../game/EventBridge';
 import {
   FactionId,
@@ -24,6 +24,7 @@ import {
   FACTION_PROFILES,
   determineFaction,
   tierToCostLevel,
+  TacticsLevel,
 } from './enemyFactions';
 
 // ============================================================================
@@ -58,6 +59,16 @@ export interface GeneratedEnemy {
   health: number;
   shield?: number;
   maxShield?: number;
+  // EG2-003: Faction behavior flags for AI
+  tacticsLevel: TacticsLevel;
+  behavior: {
+    usesGrenades: boolean;
+    usesFlanking: boolean;
+    usesOverwatch: boolean;
+    retreatsWhenOutnumbered: boolean;
+    executesWounded: boolean;
+    takesHostages: boolean;
+  };
 }
 
 export interface EnemySquad {
@@ -308,6 +319,9 @@ function generateEnemy(
 
   const primaryWeapon = selectWeapon(weaponPool, equipmentTier, corruption);
 
+  // Select armor based on equipment tier and role (EG2-001)
+  const selectedArmor = selectArmorForEnemy(equipmentTier, role);
+
   // Calculate health
   const health = calculateHealth(stats, role);
 
@@ -319,8 +333,11 @@ function generateEnemy(
     skillLevel: baseSkill,
     stats,
     equipment: [primaryWeapon],
-    armor: null, // TODO: Wire armor system
+    armor: selectedArmor,
     health,
+    // EG2-003: Faction behavior flags
+    tacticsLevel: profile.tacticsLevel,
+    behavior: { ...profile.behavior },
   };
 }
 
@@ -411,6 +428,9 @@ export function convertToCombatCharacters(squad: EnemySquad): CombatCharacter[] 
       // Include shield if enemy has it
       shield: enemy.shield || 0,
       maxShield: enemy.maxShield || 0,
+      // EG2-003/EG2-004: Faction AI behavior flags
+      tacticsLevel: enemy.tacticsLevel,
+      behavior: enemy.behavior,
     };
   });
 }
@@ -447,10 +467,16 @@ export function debugGenerateReport(context: LocationContext): string {
 
   for (const enemy of squad.enemies) {
     lines.push(`  [${enemy.role.toUpperCase()}] ${enemy.name}`);
-    lines.push(`    Skill: ${enemy.skillLevel}`);
+    lines.push(`    Skill: ${enemy.skillLevel} | Tactics: ${enemy.tacticsLevel}`);
     lines.push(`    Stats: AGI=${enemy.stats.AGI} RNG=${enemy.stats.RNG} STR=${enemy.stats.STR}`);
     lines.push(`    Weapon: ${enemy.equipment[0]}`);
+    lines.push(`    Armor: ${enemy.armor || 'None'}`);
     lines.push(`    Health: ${enemy.health}`);
+    const behaviors = Object.entries(enemy.behavior)
+      .filter(([, v]) => v)
+      .map(([k]) => k)
+      .join(', ');
+    if (behaviors) lines.push(`    Behaviors: ${behaviors}`);
   }
 
   return lines.join('\n');

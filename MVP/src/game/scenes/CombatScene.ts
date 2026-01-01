@@ -851,6 +851,16 @@ interface Unit {
   };
   // Character calling (motivation) - affects combat bonuses
   calling?: string;
+  // EG2-003/EG2-004: Faction AI behavior flags
+  tacticsLevel?: 'untrained' | 'street' | 'trained' | 'professional' | 'elite';
+  behavior?: {
+    usesGrenades: boolean;
+    usesFlanking: boolean;
+    usesOverwatch: boolean;
+    retreatsWhenOutnumbered: boolean;
+    executesWounded: boolean;
+    takesHostages: boolean;
+  };
 }
 
 // Environmental effect types for tiles
@@ -1514,6 +1524,8 @@ export class CombatScene extends Phaser.Scene {
         threatLevel: character.threatLevel || 'THREAT_1',
         origin: character.origin || 'Test',
         calling: character.calling, // Character calling for combat bonuses
+        tacticsLevel: character.tacticsLevel,
+        behavior: character.behavior,
       }, { x: baseX, y: baseY }, weaponName as any);
 
       // Update UI
@@ -1595,6 +1607,8 @@ export class CombatScene extends Phaser.Scene {
       visible: true,
       powers: characterData.powers || [],
       calling: characterData.calling,
+      tacticsLevel: characterData.tacticsLevel,
+      behavior: characterData.behavior,
     });
   }
 
@@ -7046,8 +7060,9 @@ export class CombatScene extends Phaser.Scene {
     if (enemies.length === 0) return null;
 
     const personality = PERSONALITIES[unit.personality];
+    const tacticsLevel = unit.tacticsLevel || 'trained'; // Default to trained
 
-    // Score enemies based on personality
+    // Score enemies based on personality and tactics level (EG2-004)
     const scored = enemies.map(enemy => {
       let score = 100;
       const dist = Math.sqrt(
@@ -7061,22 +7076,56 @@ export class CombatScene extends Phaser.Scene {
       // Health-based scoring
       const healthPercent = enemy.hp / enemy.maxHp;
 
+      // === TACTICS LEVEL MODIFIERS (EG2-004) ===
+      switch (tacticsLevel) {
+        case 'untrained':
+          // Random, poor target selection - add noise
+          score += (Math.random() - 0.5) * 60;
+          break;
+        case 'street':
+          // Aggressive, prefer closest wounded targets
+          score += (1 - healthPercent) * 40;
+          score += (10 - dist) * 5;
+          break;
+        case 'trained':
+          // Standard tactics - balanced approach
+          score += (1 - healthPercent) * 25;
+          break;
+        case 'professional':
+          // Smart target selection - prioritize wounded, consider cover
+          score += (1 - healthPercent) * 35;
+          // Prefer targets not in cover
+          if (enemy.stance === 'standing') score += 15;
+          // Prefer targets with LOS
+          if (this.hasLineOfSight(unit.position.x, unit.position.y, enemy.position.x, enemy.position.y)) {
+            score += 20;
+          }
+          break;
+        case 'elite':
+          // Elite tactics - surgical target selection
+          score += (1 - healthPercent) * 40;
+          // Heavily penalize targets in cover
+          if (enemy.stance === 'crouching' || enemy.stance === 'prone') score -= 20;
+          // Prioritize high-value targets (leaders, specialists)
+          if (enemy.threatLevel === 'high') score += 30;
+          // Check for flanking opportunity
+          if (this.isFlankingTarget(unit, enemy)) score += 25;
+          break;
+      }
+
+      // Original personality-based scoring (additive)
       switch (personality.aiStyle) {
         case 'rush':
-          // Prefer closest enemy
           score += (10 - dist) * 10;
           break;
         case 'defensive':
-          // Prefer wounded enemies
           score += (1 - healthPercent) * 50;
           break;
         case 'ranged':
-          // Prefer wounded from distance
           score += (1 - healthPercent) * 30;
           if (dist > 3) score += 20;
           break;
         case 'balanced':
-          // Balanced approach
           score += (1 - healthPercent) * 20;
           break;
       }
@@ -7087,6 +7136,27 @@ export class CombatScene extends Phaser.Scene {
     // Sort by score and pick best
     scored.sort((a, b) => b.score - a.score);
     return scored[0]?.enemy || null;
+  }
+
+  /**
+   * Check if attacker is flanking the target (behind or to the side).
+   * Used by elite AI for tactical positioning.
+   */
+  private isFlankingTarget(attacker: Unit, target: Unit): boolean {
+    // Calculate angle from target to attacker
+    const dx = attacker.position.x - target.position.x;
+    const dy = attacker.position.y - target.position.y;
+    const angleToAttacker = Math.atan2(-dy, dx) * (180 / Math.PI);
+
+    // Get target's facing direction (default to 0 if not set)
+    const targetFacing = target.vision?.facing ?? target.facing ?? 0;
+
+    // Calculate angle difference
+    let angleDiff = Math.abs(angleToAttacker - targetFacing);
+    if (angleDiff > 180) angleDiff = 360 - angleDiff;
+
+    // Flanking if attacker is more than 90 degrees from target's facing
+    return angleDiff > 90;
   }
 
   private findMoveTowardsTarget(unit: Unit, target: Unit): Position | null {

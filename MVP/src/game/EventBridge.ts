@@ -114,6 +114,16 @@ export interface CombatCharacter {
   equippedShield?: string;
   // Character calling (motivation) - affects combat bonuses
   calling?: string;
+  // EG2-003/EG2-004: Faction AI behavior flags
+  tacticsLevel?: 'untrained' | 'street' | 'trained' | 'professional' | 'elite';
+  behavior?: {
+    usesGrenades: boolean;
+    usesFlanking: boolean;
+    usesOverwatch: boolean;
+    retreatsWhenOutnumbered: boolean;
+    executesWounded: boolean;
+    takesHostages: boolean;
+  };
 }
 
 // Event type definitions for TypeScript

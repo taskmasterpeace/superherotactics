@@ -6,7 +6,7 @@
     "autoContinue": true,
     "commitAfterSystem": true
   },
-  "currentSystem": "ENEMY-GEN-V2",
+  "currentSystem": "CITY-SERVICES",
   "systems": [
     {
       "id": "HOOK-INFRA",
@@ -432,34 +432,34 @@
     {
       "id": "ENEMY-GEN-V2",
       "name": "Enemy Generation Enhancements",
-      "status": "pending",
+      "status": "completed",
       "priority": 6.8,
       "phase": 2,
       "tasks": [
         {
           "id": "EG2-001",
           "task": "Add armor selection to generateEnemy() based on tier",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "EG2-002",
           "task": "Wire armor DR to convertToCombatCharacters()",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "EG2-003",
           "task": "Add faction-specific behavior flags to enemies",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "EG2-004",
           "task": "Implement tactics level affecting AI behavior",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "EG2-005",
           "task": "Test enemies in 5 different countries",
-          "status": "pending"
+          "status": "completed"
         }
       ],
       "triggers": ["CITY-SERVICES"],
@@ -467,7 +467,7 @@
         "MVP/src/combat/enemyGeneration.ts",
         "MVP/src/combat/enemyFactions.ts"
       ],
-      "completedAt": null
+      "completedAt": "2025-01-01T01:45:00.000Z"
     },
     {
       "id": "CITY-SERVICES",
@@ -1051,12 +1051,12 @@
       "completedAt": null
     }
   ],
-  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI", "INVESTIGATION", "TIME-EVENTS", "ECONOMY", "SHIELD-SYS", "CALLING-BONUS", "PENETRATION-DR", "VISUAL-EFFECTS"],
+  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI", "INVESTIGATION", "TIME-EVENTS", "ECONOMY", "SHIELD-SYS", "CALLING-BONUS", "PENETRATION-DR", "VISUAL-EFFECTS", "ENEMY-GEN-V2"],
   "statistics": {
     "totalSystems": 25,
-    "completedSystems": 17,
+    "completedSystems": 18,
     "totalTasks": 129,
-    "completedTasks": 91,
+    "completedTasks": 96,
     "totalIterations": 0,
     "startedAt": "2024-12-30T00:00:00.000Z"
   }
