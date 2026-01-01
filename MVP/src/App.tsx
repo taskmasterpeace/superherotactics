@@ -76,6 +76,12 @@ function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const [assetManagerOpen, setAssetManagerOpen] = useState(false)
   const [quickCombatOpen, setQuickCombatOpen] = useState(false)
+
+  // Check if dev mode is enabled via URL parameter (?dev=true)
+  const devModeEnabled = useMemo(() => {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('dev') === 'true'
+  }, [])
   const [instantCombatOpen, setInstantCombatOpen] = useState(false)
 
   // Get the idle check function from the store
@@ -113,9 +119,9 @@ function App() {
     const handleResize = () => setIsMobile(window.innerWidth <= 768)
     window.addEventListener('resize', handleResize)
 
-    // Dev mode keyboard shortcut (F2)
+    // Dev mode keyboard shortcut (F2) - only works if ?dev=true
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'F2') {
+      if (e.key === 'F2' && devModeEnabled) {
         e.preventDefault()
         setDevMode(d => !d)
       }
@@ -165,8 +171,8 @@ function App() {
       {/* Background Effects */}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/5 to-yellow-500/10 animate-pulse pointer-events-none"></div>
 
-      {/* Dev Mode Panel - F2 to toggle */}
-      {devMode && (
+      {/* Dev Mode Panel - F2 to toggle (only if ?dev=true in URL) */}
+      {devModeEnabled && devMode && (
         <div className="fixed top-0 left-0 z-50 bg-black/90 text-white p-4 rounded-br-lg border-r border-b border-yellow-500">
           <div className="text-yellow-500 font-bold mb-2">DEV MODE (F2)</div>
           <div className="text-xs text-gray-400 mb-3">Quick Jump:</div>

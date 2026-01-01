@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '../stores/enhancedGameStore'
 import {
@@ -6,12 +6,19 @@ import {
   DollarSign,
   Users,
   Map,
-  FlaskConical,
   Monitor,
   Settings,
   GraduationCap,
-  Building2
+  Building2,
+  Home
 } from 'lucide-react'
+
+// Check if dev mode is enabled via URL parameter
+function isDevModeEnabled(): boolean {
+  if (typeof window === 'undefined') return false
+  const params = new URLSearchParams(window.location.search)
+  return params.get('dev') === 'true'
+}
 
 export default function GameHUD() {
   const {
@@ -20,11 +27,13 @@ export default function GameHUD() {
     characters,
     currentView,
     setCurrentView,
+    setGamePhase,
     selectedFaction,
     selectedCountry
   } = useGameStore()
 
   const [showDevTools, setShowDevTools] = useState(false)
+  const devModeEnabled = useMemo(() => isDevModeEnabled(), [])
 
   return (
     <>
@@ -96,16 +105,28 @@ export default function GameHUD() {
             />
           </div>
 
-          {/* Right Side - Country & Dev Tools */}
+          {/* Right Side - Main Menu, Country & Dev Tools */}
           <div className="flex items-center gap-3">
-            {/* Dev Tools Toggle */}
+            {/* Main Menu Button */}
             <button
-              onClick={() => setShowDevTools(!showDevTools)}
-              className={`p-2 rounded-lg transition-colors ${showDevTools ? 'bg-yellow-600 text-black' : 'hover:bg-gray-800 text-gray-400'}`}
-              title="Dev Tools"
+              onClick={() => setGamePhase('faction-selection')}
+              className="flex items-center gap-1 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-colors"
+              title="Return to Main Menu"
             >
-              <Settings size={18} />
+              <Home size={16} />
+              <span className="text-xs font-medium">Menu</span>
             </button>
+
+            {/* Dev Tools Toggle - Only show if ?dev=true */}
+            {devModeEnabled && (
+              <button
+                onClick={() => setShowDevTools(!showDevTools)}
+                className={`p-2 rounded-lg transition-colors ${showDevTools ? 'bg-yellow-600 text-black' : 'hover:bg-gray-800 text-gray-400'}`}
+                title="Dev Tools (F2 for full menu)"
+              >
+                <Settings size={18} />
+              </button>
+            )}
 
             <div className="text-right">
               <div className="text-sm font-bold text-sht-primary-400">
@@ -119,9 +140,9 @@ export default function GameHUD() {
         </div>
       </motion.div>
 
-      {/* Dev Tools Dropdown */}
+      {/* Dev Tools Dropdown - Only visible in dev mode */}
       <AnimatePresence>
-        {showDevTools && (
+        {devModeEnabled && showDevTools && (
           <motion.div
             className="fixed top-14 right-4 z-40 w-64"
             initial={{ opacity: 0, y: -10 }}
