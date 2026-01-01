@@ -1376,9 +1376,17 @@ export const WorldMapGrid: React.FC = () => {
                           onMouseEnter={() => setHoveredCell(cell)}
                           onMouseLeave={() => setHoveredCell(null)}
                         >
-                          {/* City indicator */}
-                          {cell.cities.length > 0 && !hoveredCell && selectedCell?.id !== cell.id && (
-                            <div className="absolute top-1 right-1 w-2 h-2 bg-success rounded-full shadow-lg shadow-success/50" />
+                          {/* City indicator - always visible when cities exist */}
+                          {cell.cities.length > 0 && (
+                            <div className={cn(
+                              "absolute top-0.5 right-0.5 flex items-center justify-center rounded-sm text-[8px] font-bold shadow-md",
+                              cell.cities.length === 1
+                                ? "w-3 h-3 bg-emerald-500 text-white"
+                                : "min-w-3 h-3 px-0.5 bg-amber-500 text-black",
+                              selectedCell?.id === cell.id && "ring-1 ring-white"
+                            )}>
+                              {cell.cities.length > 1 ? cell.cities.length : ''}
+                            </div>
                           )}
                           {/* TC-004: Contested territory indicator */}
                           {territoryControl?.contestedBy && (
