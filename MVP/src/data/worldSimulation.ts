@@ -14,7 +14,7 @@
 
 import { getTimeEngine, TimeEvent, WhileYouWereGoneEvent } from './timeEngine';
 import { GameTime } from './timeSystem';
-import { City, getAllCities, getCityByName } from './cities';
+import { City, cities as ALL_CITIES, getCityByName } from './cities';
 import { Country, getCountryByCode } from './countries';
 
 // ============================================================================
@@ -692,8 +692,7 @@ export class WorldSimulation {
   }
 
   private getRandomCity(): City {
-    const cities = getAllCities();
-    return cities[Math.floor(Math.random() * cities.length)];
+    return ALL_CITIES[Math.floor(Math.random() * ALL_CITIES.length)];
   }
 
   private getRandomCountry(): Country {

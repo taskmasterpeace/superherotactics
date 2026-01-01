@@ -67,6 +67,9 @@ import { initEmailSystem, cleanupEmailSystem } from './data/emailSystem'
 // Combat Results Handler - processes combat completion for XP, loot, fame, injuries
 import { initCombatResultsHandler, cleanupCombatResultsHandler } from './stores/combatResultsHandler'
 
+// World Systems - central initialization for all simulation systems
+import { initWorldSystems, cleanupWorldSystems } from './data/worldSystemsInit'
+
 function App() {
   const { gamePhase, currentView, setCurrentView, setGamePhase } = useGameStore()
   const [devMode, setDevMode] = useState(false)
@@ -80,6 +83,10 @@ function App() {
 
   useEffect(() => {
     console.log('🎮 SuperHero Tactics MVP initialized')
+
+    // Initialize world systems (NPCs, economy, factions, life events, etc.)
+    // This must be called first as other systems depend on it
+    initWorldSystems()
 
     // Initialize news generator (subscribes to EventBus for automatic news)
     initNewsGenerator()
@@ -135,6 +142,7 @@ function App() {
       cleanupTerritorySystem()
       cleanupEmailSystem()
       cleanupCombatResultsHandler()
+      cleanupWorldSystems()
     }
   }, [checkIdleCharacters])
 
