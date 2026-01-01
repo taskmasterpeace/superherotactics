@@ -1,1063 +1,137 @@
 {
-  "version": 2,
-  "lastUpdated": "2024-12-31T00:00:00Z",
+  "version": 3,
+  "lastUpdated": "2025-01-01T17:00:00Z",
   "config": {
     "maxIterations": 999,
     "autoContinue": true,
     "commitAfterSystem": true
   },
-  "currentSystem": "COMPLETE",
+  "currentSystem": "WORLD-EVENTS",
   "systems": [
     {
-      "id": "HOOK-INFRA",
-      "name": "Hook Infrastructure",
+      "id": "TIME-ALIVE",
+      "name": "Living Time System",
       "status": "completed",
-      "priority": 0,
-      "phase": 0,
+      "priority": 30,
+      "phase": 7,
       "tasks": [
-        {
-          "id": "HI-001",
-          "task": "Create todo-list.json schema",
-          "status": "completed"
-        },
-        {
-          "id": "HI-002",
-          "task": "Create system-links.json",
-          "status": "completed"
-        },
-        {
-          "id": "HI-003",
-          "task": "Enhance ralph-loop.bat",
-          "status": "completed"
-        },
-        {
-          "id": "HI-004",
-          "task": "Create completion-check.js",
-          "status": "completed"
-        }
+        {"id": "TA-001", "task": "Create TimeEngine class with tick-based progression (1 tick = 10 minutes)", "status": "completed"},
+        {"id": "TA-002", "task": "Implement day/night cycle (6am-6pm day, 6pm-6am night)", "status": "completed"},
+        {"id": "TA-003", "task": "Create calendar system with real dates (day, month, year)", "status": "completed"},
+        {"id": "TA-004", "task": "Wire shop hours to day/night (black market only at night)", "status": "completed"},
+        {"id": "TA-005", "task": "Wire crime rates to time of day (higher at night)", "status": "completed"},
+        {"id": "TA-006", "task": "Implement healing over time (HP recovery per day)", "status": "completed"},
+        {"id": "TA-007", "task": "Create 'While you were gone' event generator for time jumps", "status": "completed"},
+        {"id": "TA-008", "task": "Add TimeDisplay component showing current date/time", "status": "completed"}
       ],
-      "triggers": [
-        "EVENT-GEN"
-      ],
-      "completedAt": null
+      "triggers": ["WORLD-EVENTS"],
+      "files": ["MVP/src/data/timeEngine.ts", "MVP/src/components/TimeDisplay.tsx", "MVP/src/stores/enhancedGameStore.ts"],
+      "completedAt": "2025-01-01T18:00:00.000Z"
     },
     {
-      "id": "EVENT-GEN",
-      "name": "Event Generation System",
-      "status": "completed",
-      "priority": 1,
-      "phase": 1,
+      "id": "WORLD-EVENTS",
+      "name": "World Events Simulation",
+      "status": "pending",
+      "priority": 31,
+      "phase": 7,
       "tasks": [
-        {
-          "id": "EG-001",
-          "task": "Create EventBus class with pub/sub",
-          "status": "completed"
-        },
-        {
-          "id": "EG-002",
-          "task": "Define GameEvent types",
-          "status": "completed"
-        },
-        {
-          "id": "EG-003",
-          "task": "Wire combat results to EventBus",
-          "status": "completed"
-        },
-        {
-          "id": "EG-004",
-          "task": "Wire time progression to EventBus",
-          "status": "completed"
-        },
-        {
-          "id": "EG-005",
-          "task": "Wire player actions to EventBus",
-          "status": "completed"
-        },
-        {
-          "id": "EG-006",
-          "task": "Create event persistence layer",
-          "status": "completed"
-        }
+        {"id": "WE-001", "task": "Create WorldSimulation class that runs on time ticks", "status": "pending"},
+        {"id": "WE-002", "task": "Implement gang territory changes (factions gain/lose sectors)", "status": "pending"},
+        {"id": "WE-003", "task": "Implement political events (coups, elections) that change country stats", "status": "pending"},
+        {"id": "WE-004", "task": "Implement economic events (crashes, booms) affecting prices", "status": "pending"},
+        {"id": "WE-005", "task": "Implement crime waves that temporarily change city crimeIndex", "status": "pending"},
+        {"id": "WE-006", "task": "Implement superhuman incidents that generate news and missions", "status": "pending"},
+        {"id": "WE-007", "task": "Wire world events to news generation system", "status": "pending"},
+        {"id": "WE-008", "task": "Create event log showing recent world changes", "status": "pending"}
       ],
-      "triggers": [
-        "WEAPON-DB",
-        "NEWS-GEN",
-        "MISSION-GEN"
-      ],
-      "files": [
-        "MVP/src/data/eventBus.ts",
-        "MVP/src/stores/enhancedGameStore.ts"
-      ],
-      "completedAt": "2024-12-30T00:30:00.000Z"
+      "triggers": ["FACTION-MEMORY"],
+      "files": ["MVP/src/data/worldSimulation.ts", "MVP/src/data/worldEvents.ts", "MVP/src/stores/worldStore.ts"]
     },
     {
-      "id": "WEAPON-DB",
-      "name": "Weapon Database Integration",
-      "status": "completed",
-      "priority": 2,
-      "phase": 1,
+      "id": "FACTION-MEMORY",
+      "name": "Faction Memory & Reputation",
+      "status": "pending",
+      "priority": 32,
+      "phase": 7,
       "tasks": [
-        {
-          "id": "WD-001",
-          "task": "Create weapon loader from weapons.ts",
-          "status": "completed"
-        },
-        {
-          "id": "WD-002",
-          "task": "Update CombatScene to use database",
-          "status": "completed"
-        },
-        {
-          "id": "WD-003",
-          "task": "Wire range brackets to hit calculation",
-          "status": "completed"
-        },
-        {
-          "id": "WD-004",
-          "task": "Wire damage types to resolution",
-          "status": "completed"
-        },
-        {
-          "id": "WD-005",
-          "task": "Wire sound effects per weapon",
-          "status": "completed"
-        },
-        {
-          "id": "WD-006",
-          "task": "Test all 70+ weapons in combat",
-          "status": "completed"
-        }
+        {"id": "FM-001", "task": "Create FactionRelations system tracking player standing with each faction", "status": "pending"},
+        {"id": "FM-002", "task": "Wire combat results to faction hostility (fight gangs = they remember)", "status": "pending"},
+        {"id": "FM-003", "task": "Implement government heat tracking per country", "status": "pending"},
+        {"id": "FM-004", "task": "Wire surveillance system to heat decay rate", "status": "pending"},
+        {"id": "FM-005", "task": "Implement civilian reaction (fame = recognized, infamy = feared)", "status": "pending"},
+        {"id": "FM-006", "task": "Create faction hunt missions (hostile factions send squads after you)", "status": "pending"},
+        {"id": "FM-007", "task": "Implement faction allies that offer help when reputation high", "status": "pending"},
+        {"id": "FM-008", "task": "Add reputation display to character sheet", "status": "pending"}
       ],
-      "triggers": [
-        "ARMOR-DB"
-      ],
-      "files": [
-        "MVP/src/game/scenes/CombatScene.ts",
-        "MVP/src/data/weapons.ts",
-        "MVP/src/game/scenes/weaponIntegration.ts"
-      ],
-      "completedAt": "2024-12-30T00:45:00.000Z"
+      "triggers": ["NPC-LIVES"],
+      "files": ["MVP/src/data/factionRelations.ts", "MVP/src/data/heatSystem.ts", "MVP/src/stores/factionStore.ts"]
     },
     {
-      "id": "ARMOR-DB",
-      "name": "Armor Database Integration",
-      "status": "completed",
-      "priority": 3,
-      "phase": 1,
+      "id": "NPC-LIVES",
+      "name": "NPCs With Lives",
+      "status": "pending",
+      "priority": 33,
+      "phase": 7,
       "tasks": [
-        {
-          "id": "AD-001",
-          "task": "Create armor loader from armor.ts",
-          "status": "completed"
-        },
-        {
-          "id": "AD-002",
-          "task": "Wire DR to damage calculation",
-          "status": "completed"
-        },
-        {
-          "id": "AD-003",
-          "task": "Implement stopping power vs penetration",
-          "status": "completed"
-        },
-        {
-          "id": "AD-004",
-          "task": "Wire armor damage degradation",
-          "status": "completed"
-        },
-        {
-          "id": "AD-005",
-          "task": "Test DR against all damage types",
-          "status": "completed"
-        }
+        {"id": "NL-001", "task": "Create NPC entity system with persistent state", "status": "pending"},
+        {"id": "NL-002", "task": "Implement country-locked mercenary pools (can only recruit from home country)", "status": "pending"},
+        {"id": "NL-003", "task": "Create contact relationship system (friendship, trust levels)", "status": "pending"},
+        {"id": "NL-004", "task": "Implement contact life events (move cities, get arrested, die)", "status": "pending"},
+        {"id": "NL-005", "task": "Implement enemy leveling (enemies you spare come back stronger)", "status": "pending"},
+        {"id": "NL-006", "task": "Create informant staleness (intel expires after time)", "status": "pending"},
+        {"id": "NL-007", "task": "Wire NPC events to news system", "status": "pending"},
+        {"id": "NL-008", "task": "Add NPC status tracking to contacts screen", "status": "pending"}
       ],
-      "triggers": [
-        "STAT-INT"
-      ],
-      "files": [
-        "MVP/src/game/scenes/CombatScene.ts",
-        "MVP/src/data/armor.ts",
-        "MVP/src/game/EventBridge.ts",
-        "MVP/src/stores/enhancedGameStore.ts"
-      ],
-      "completedAt": "2024-12-30T01:00:00.000Z"
+      "triggers": ["ECONOMY-LIVE"],
+      "files": ["MVP/src/data/npcSystem.ts", "MVP/src/data/mercenaryPool.ts", "MVP/src/stores/npcStore.ts"]
     },
     {
-      "id": "STAT-INT",
-      "name": "Character Stat Integration",
-      "status": "completed",
-      "priority": 4,
-      "phase": 2,
+      "id": "ECONOMY-LIVE",
+      "name": "Living Economy",
+      "status": "pending",
+      "priority": 34,
+      "phase": 7,
       "tasks": [
-        {
-          "id": "SI-001",
-          "task": "Wire STR to melee damage bonus",
-          "status": "completed"
-        },
-        {
-          "id": "SI-002",
-          "task": "Wire AGL to dodge and initiative",
-          "status": "completed"
-        },
-        {
-          "id": "SI-003",
-          "task": "Wire INT to accuracy",
-          "status": "completed"
-        },
-        {
-          "id": "SI-004",
-          "task": "Wire STA to AP pool",
-          "status": "completed"
-        },
-        {
-          "id": "SI-005",
-          "task": "Wire CON to fear/morale resistance",
-          "status": "completed"
-        },
-        {
-          "id": "SI-006",
-          "task": "Wire INS to detection and perception",
-          "status": "completed"
-        },
-        {
-          "id": "SI-007",
-          "task": "Wire MEL to melee hit chance",
-          "status": "completed"
-        }
-      ],
-      "triggers": [
-        "COMBAT-RESULTS"
-      ],
-      "files": [
-        "MVP/src/game/scenes/CombatScene.ts",
-        "MVP/src/data/characterSheet.ts"
-      ],
-      "completedAt": "2024-12-30T01:30:00.000Z"
-    },
-    {
-      "id": "COMBAT-RESULTS",
-      "name": "Combat Results Processing",
-      "status": "completed",
-      "priority": 5,
-      "phase": 2,
-      "tasks": [
-        {
-          "id": "CR-001",
-          "task": "Process results to EventBus",
-          "status": "completed"
-        },
-        {
-          "id": "CR-002",
-          "task": "Wire injuries to character health",
-          "status": "completed"
-        },
-        {
-          "id": "CR-003",
-          "task": "Wire loot to inventory",
-          "status": "completed"
-        },
-        {
-          "id": "CR-004",
-          "task": "Generate combat summary events",
-          "status": "completed"
-        },
-        {
-          "id": "CR-005",
-          "task": "Update fame/reputation from combat",
-          "status": "completed"
-        }
-      ],
-      "triggers": [
-        "HOSPITAL"
-      ],
-      "files": [
-        "MVP/src/stores/combatResultsHandler.ts",
-        "MVP/src/game/EventBridge.ts"
-      ],
-      "completedAt": "2024-12-30T01:45:00.000Z"
-    },
-    {
-      "id": "SHIELD-SYS",
-      "name": "Shield System",
-      "status": "completed",
-      "priority": 6,
-      "phase": 2,
-      "tasks": [
-        {
-          "id": "SS-001",
-          "task": "Wire shield absorption before health",
-          "status": "completed"
-        },
-        {
-          "id": "SS-002",
-          "task": "Implement shield regeneration",
-          "status": "completed"
-        },
-        {
-          "id": "SS-003",
-          "task": "Wire energy shield power",
-          "status": "completed"
-        },
-        {
-          "id": "SS-004",
-          "task": "Add shield UI indicators",
-          "status": "completed"
-        }
-      ],
-      "triggers": ["CALLING-BONUS"],
-      "files": [
-        "MVP/src/game/scenes/CombatScene.ts",
-        "MVP/src/data/shieldItems.ts"
-      ],
-      "completedAt": null
-    },
-    {
-      "id": "CALLING-BONUS",
-      "name": "Calling Combat Bonuses",
-      "status": "completed",
-      "priority": 6.5,
-      "phase": 2,
-      "tasks": [
-        {
-          "id": "CB-001",
-          "task": "Add calling field to CombatCharacter interface",
-          "status": "completed"
-        },
-        {
-          "id": "CB-002",
-          "task": "Create callingCombatBonuses.ts evaluation module",
-          "status": "completed"
-        },
-        {
-          "id": "CB-003",
-          "task": "Wire accuracy bonus in calculateHitChance()",
-          "status": "completed"
-        },
-        {
-          "id": "CB-004",
-          "task": "Wire damage bonus in attack resolution",
-          "status": "completed"
-        },
-        {
-          "id": "CB-005",
-          "task": "Wire evasion bonus for defender callings",
-          "status": "completed"
-        },
-        {
-          "id": "CB-006",
-          "task": "Add combat log messages for calling activation",
-          "status": "completed"
-        }
-      ],
-      "triggers": ["PENETRATION-DR"],
-      "files": [
-        "MVP/src/game/scenes/CombatScene.ts",
-        "MVP/src/combat/callingCombatBonuses.ts",
-        "MVP/src/game/EventBridge.ts",
-        "MVP/src/data/callingSystem.ts"
-      ],
-      "completedAt": "2025-01-01T00:25:00.000Z"
-    },
-    {
-      "id": "PENETRATION-DR",
-      "name": "Armor DR and Penetration",
-      "status": "completed",
-      "priority": 6.6,
-      "phase": 2,
-      "tasks": [
-        {
-          "id": "PD-001",
-          "task": "Add getArmorDRValues() helper to armor.ts",
-          "status": "completed"
-        },
-        {
-          "id": "PD-002",
-          "task": "Populate DR from equipped armor when spawning units",
-          "status": "completed"
-        },
-        {
-          "id": "PD-003",
-          "task": "Apply penetrationMult to reduce effective DR",
-          "status": "completed"
-        },
-        {
-          "id": "PD-004",
-          "task": "Add combat log messages for DR absorption",
-          "status": "completed"
-        }
-      ],
-      "triggers": ["VISUAL-EFFECTS"],
-      "files": [
-        "MVP/src/game/scenes/CombatScene.ts",
-        "MVP/src/data/armor.ts",
-        "MVP/src/combat/enemyGeneration.ts"
-      ],
-      "completedAt": "2025-01-01T00:45:00.000Z"
-    },
-    {
-      "id": "VISUAL-EFFECTS",
-      "name": "Weapon Visual Effects",
-      "status": "completed",
-      "priority": 6.7,
-      "phase": 2,
-      "tasks": [
-        {
-          "id": "VE-001",
-          "task": "Create damageSubType to color mapping for all 23 types",
-          "status": "completed"
-        },
-        {
-          "id": "VE-002",
-          "task": "Create sound mapping from weapon category/noise",
-          "status": "completed"
-        },
-        {
-          "id": "VE-003",
-          "task": "Extend WEAPON_DAMAGE_TYPES for database weapons",
-          "status": "completed"
-        },
-        {
-          "id": "VE-004",
-          "task": "Test all 70+ weapons have proper visuals",
-          "status": "completed"
-        }
-      ],
-      "triggers": ["ENEMY-GEN-V2"],
-      "files": [
-        "MVP/src/game/scenes/weaponIntegration.ts",
-        "MVP/src/game/scenes/CombatScene.ts"
-      ],
-      "completedAt": "2025-01-01T01:15:00.000Z"
-    },
-    {
-      "id": "ENEMY-GEN-V2",
-      "name": "Enemy Generation Enhancements",
-      "status": "completed",
-      "priority": 6.8,
-      "phase": 2,
-      "tasks": [
-        {
-          "id": "EG2-001",
-          "task": "Add armor selection to generateEnemy() based on tier",
-          "status": "completed"
-        },
-        {
-          "id": "EG2-002",
-          "task": "Wire armor DR to convertToCombatCharacters()",
-          "status": "completed"
-        },
-        {
-          "id": "EG2-003",
-          "task": "Add faction-specific behavior flags to enemies",
-          "status": "completed"
-        },
-        {
-          "id": "EG2-004",
-          "task": "Implement tactics level affecting AI behavior",
-          "status": "completed"
-        },
-        {
-          "id": "EG2-005",
-          "task": "Test enemies in 5 different countries",
-          "status": "completed"
-        }
-      ],
-      "triggers": ["CITY-SERVICES"],
-      "files": [
-        "MVP/src/combat/enemyGeneration.ts",
-        "MVP/src/combat/enemyFactions.ts"
-      ],
-      "completedAt": "2025-01-01T01:45:00.000Z"
-    },
-    {
-      "id": "CITY-SERVICES",
-      "name": "City Services Pipeline",
-      "status": "completed",
-      "priority": 7.5,
-      "phase": 3,
-      "tasks": [
-        {
-          "id": "CS-001",
-          "task": "Add SHOP_CITY_TYPE_REQUIREMENTS mapping",
-          "status": "completed"
-        },
-        {
-          "id": "CS-002",
-          "task": "Modify getShopsForCity() to check city type",
-          "status": "completed"
-        },
-        {
-          "id": "CS-003",
-          "task": "Create unified price modifiers from country stats",
-          "status": "completed"
-        },
-        {
-          "id": "CS-004",
-          "task": "Wire black market to calculateBlackMarket() combined effect",
-          "status": "completed"
-        },
-        {
-          "id": "CS-005",
-          "task": "Create Special Services panel for combined effects",
-          "status": "completed"
-        }
-      ],
-      "triggers": ["VEHICLE-INT"],
-      "files": [
-        "MVP/src/data/shopSystem.ts",
-        "MVP/src/data/combinedEffects.ts",
-        "MVP/src/components/EquipmentShop.tsx"
-      ],
-      "completedAt": "2025-01-01T02:00:00.000Z"
-    },
-    {
-      "id": "NEWS-GEN",
-      "name": "News Generation System",
-      "status": "completed",
-      "priority": 7,
-      "phase": 3,
-      "tasks": [
-        {
-          "id": "NG-001",
-          "task": "Subscribe to EventBus for game events",
-          "status": "completed"
-        },
-        {
-          "id": "NG-002",
-          "task": "Create news generator from templates",
-          "status": "completed"
-        },
-        {
-          "id": "NG-003",
-          "task": "Wire newsTemplates.ts to generator",
-          "status": "completed"
-        },
-        {
-          "id": "NG-004",
-          "task": "Implement fame tracking",
-          "status": "completed"
-        },
-        {
-          "id": "NG-005",
-          "task": "Implement public opinion system",
-          "status": "completed"
-        },
-        {
-          "id": "NG-006",
-          "task": "Test event to news flow",
-          "status": "completed"
-        }
-      ],
-      "triggers": [
-        "LAPTOP-UI"
-      ],
-      "files": [
-        "MVP/src/data/newsSystem.ts",
-        "MVP/src/data/newsTemplates.ts",
-        "MVP/src/data/newsGenerator.ts",
-        "MVP/src/stores/enhancedGameStore.ts"
-      ],
-      "completedAt": "2024-12-30T02:30:00.000Z"
-    },
-    {
-      "id": "MISSION-GEN",
-      "name": "Mission Generation System",
-      "status": "completed",
-      "priority": 8,
-      "phase": 3,
-      "tasks": [
-        {
-          "id": "MG-001",
-          "task": "Generate missions from city stats",
-          "status": "completed"
-        },
-        {
-          "id": "MG-002",
-          "task": "Generate missions from country stats",
-          "status": "completed"
-        },
-        {
-          "id": "MG-003",
-          "task": "Wire to world map display",
-          "status": "completed"
-        },
-        {
-          "id": "MG-004",
-          "task": "Implement mission difficulty scaling",
-          "status": "completed"
-        },
-        {
-          "id": "MG-005",
-          "task": "Create mission reward system",
-          "status": "completed"
-        }
-      ],
-      "triggers": [
-        "INVESTIGATION"
-      ],
-      "files": [
-        "MVP/src/data/missionGeneration.ts",
-        "MVP/src/stores/missionStore.ts",
-        "MVP/src/components/WorldMap/WorldMapGrid.tsx"
-      ],
-      "completedAt": "2024-12-30T02:35:00.000Z"
-    },
-    {
-      "id": "INVESTIGATION",
-      "name": "Investigation System",
-      "status": "completed",
-      "priority": 9,
-      "phase": 3,
-      "tasks": [
-        {
-          "id": "IV-001",
-          "task": "Wire investigation backend",
-          "status": "completed"
-        },
-        {
-          "id": "IV-002",
-          "task": "Implement clue generation",
-          "status": "completed"
-        },
-        {
-          "id": "IV-003",
-          "task": "Create case resolution mechanics",
-          "status": "completed"
-        },
-        {
-          "id": "IV-004",
-          "task": "Wire to InvestigationCenter UI",
-          "status": "completed"
-        },
-        {
-          "id": "IV-005",
-          "task": "Create investigation events for EventBus",
-          "status": "completed"
-        }
-      ],
-      "triggers": [
-        "LAPTOP-UI"
-      ],
-      "files": [
-        "MVP/src/data/investigationSystem.ts",
-        "MVP/src/data/investigationGenerator.ts",
-        "MVP/src/components/InvestigationCenter.tsx"
-      ],
-      "completedAt": "2024-12-30T03:00:00.000Z"
-    },
-    {
-      "id": "TIME-EVENTS",
-      "name": "Time Event System",
-      "status": "completed",
-      "priority": 10,
-      "phase": 3,
-      "tasks": [
-        {
-          "id": "TE-001",
-          "task": "Fire events on time passage",
-          "status": "completed"
-        },
-        {
-          "id": "TE-002",
-          "task": "Implement day/night effects",
-          "status": "completed"
-        },
-        {
-          "id": "TE-003",
-          "task": "Create NPC schedule system",
-          "status": "completed"
-        },
-        {
-          "id": "TE-004",
-          "task": "Wire time-gated activities",
-          "status": "completed"
-        },
-        {
-          "id": "TE-005",
-          "task": "Create random encounter triggers",
-          "status": "completed"
-        }
-      ],
-      "triggers": [
-        "ECONOMY"
-      ],
-      "files": [
-        "MVP/src/data/timeSystem.ts",
-        "MVP/src/data/timeEventGenerator.ts",
-        "MVP/src/stores/enhancedGameStore.ts"
-      ],
-      "completedAt": "2024-12-30T03:15:00.000Z"
-    },
-    {
-      "id": "ECONOMY",
-      "name": "Economy System",
-      "status": "completed",
-      "priority": 11,
-      "phase": 3,
-      "tasks": [
-        {
-          "id": "EC-001",
-          "task": "Implement income system",
-          "status": "completed"
-        },
-        {
-          "id": "EC-002",
-          "task": "Implement expense tracking",
-          "status": "completed"
-        },
-        {
-          "id": "EC-003",
-          "task": "Wire prices to location stats",
-          "status": "completed"
-        },
-        {
-          "id": "EC-004",
-          "task": "Create budget management UI",
-          "status": "completed"
-        },
-        {
-          "id": "EC-005",
-          "task": "Implement payday/billing cycles",
-          "status": "completed"
-        }
+        {"id": "EL-001", "task": "Create dynamic price system that fluctuates over time", "status": "pending"},
+        {"id": "EL-002", "task": "Implement supply/demand (your buying affects local prices)", "status": "pending"},
+        {"id": "EL-003", "task": "Wire political events to price changes (coup = weapons cheap)", "status": "pending"},
+        {"id": "EL-004", "task": "Implement scarcity events (disaster = medical supplies expensive)", "status": "pending"},
+        {"id": "EL-005", "task": "Create currency exchange rates between countries", "status": "pending"},
+        {"id": "EL-006", "task": "Wire black market floods (military coup = weapons flood market)", "status": "pending"},
+        {"id": "EL-007", "task": "Add price trend indicators to shop UI", "status": "pending"},
+        {"id": "EL-008", "task": "Create economic news events for price changes", "status": "pending"}
       ],
       "triggers": [],
-      "files": [
-        "MVP/src/data/economySystem.ts",
-        "MVP/src/data/economyEventHandler.ts",
-        "MVP/src/stores/enhancedGameStore.ts"
-      ],
-      "completedAt": "2024-12-30T03:30:00.000Z"
+      "files": ["MVP/src/data/dynamicEconomy.ts", "MVP/src/data/priceFluctuation.ts", "MVP/src/data/shopSystem.ts"]
     },
     {
-      "id": "VEHICLE-INT",
-      "name": "Vehicle Integration",
+      "id": "BALANCE-FIX",
+      "name": "Combat Balance Fixes",
       "status": "completed",
-      "priority": 12,
-      "phase": 4,
+      "priority": 20,
+      "phase": 6,
       "tasks": [
-        {
-          "id": "VI-001",
-          "task": "Wire vehicles to travel system",
-          "status": "completed"
-        },
-        {
-          "id": "VI-002",
-          "task": "Implement speed modifiers",
-          "status": "completed"
-        },
-        {
-          "id": "VI-003",
-          "task": "Implement fuel consumption",
-          "status": "completed"
-        },
-        {
-          "id": "VI-004",
-          "task": "Create vehicle selection UI",
-          "status": "completed"
-        },
-        {
-          "id": "VI-005",
-          "task": "Wire vehicle HP and damage",
-          "status": "completed"
-        }
-      ],
-      "triggers": [
-        "TERRITORY"
-      ],
-      "files": [
-        "MVP/src/data/vehicleSystem.ts",
-        "MVP/src/components/WorldMap/WorldMapGrid.tsx",
-        "MVP/src/stores/enhancedGameStore.ts"
-      ],
-      "completedAt": "2025-01-01T02:30:00.000Z"
-    },
-    {
-      "id": "TERRITORY",
-      "name": "Territory Control System",
-      "status": "completed",
-      "priority": 13,
-      "phase": 4,
-      "tasks": [
-        {
-          "id": "TC-001",
-          "task": "Implement sector control mechanics",
-          "status": "completed"
-        },
-        {
-          "id": "TC-002",
-          "task": "Create militia training system",
-          "status": "completed"
-        },
-        {
-          "id": "TC-003",
-          "task": "Implement faction ownership",
-          "status": "completed"
-        },
-        {
-          "id": "TC-004",
-          "task": "Display territory on world map",
-          "status": "completed"
-        },
-        {
-          "id": "TC-005",
-          "task": "Create territory defense missions",
-          "status": "completed"
-        }
+        {"id": "BF-001", "task": "Reduce pistol AP cost from 3 to 2 for better CQB viability", "status": "completed"},
+        {"id": "BF-002", "task": "Add pistol accuracy bonus at close range (0-5 tiles)", "status": "completed"},
+        {"id": "BF-003", "task": "Reduce defensive stance bonus from +20% to +12% accuracy", "status": "completed"},
+        {"id": "BF-004", "task": "Reduce shotgun close-range dominance (95% -> 80%)", "status": "completed"},
+        {"id": "BF-005", "task": "Tune Gang Patrol scenario - add 1 enemy or better weapons", "status": "completed"},
+        {"id": "BF-006", "task": "Tune Checkpoint Assault - reduce from 5 to 4 enemies", "status": "completed"},
+        {"id": "BF-007", "task": "Add boss weakness mechanics for Terminator/Juggernaut", "status": "completed"},
+        {"id": "BF-008", "task": "Wire remaining 17+ damage types to status effects", "status": "completed"},
+        {"id": "BF-009", "task": "Run full test suite and verify all tests pass", "status": "completed"}
       ],
       "triggers": [],
-      "files": [
-        "MVP/src/data/territorySystem.ts",
-        "MVP/src/components/WorldMap/WorldMapGrid.tsx"
-      ],
-      "completedAt": "2025-01-01T03:00:00.000Z"
-    },
-    {
-      "id": "EMAIL-SYS",
-      "name": "Email System",
-      "status": "completed",
-      "priority": 14,
-      "phase": 4,
-      "tasks": [
-        {
-          "id": "ES-001",
-          "task": "Create email component",
-          "status": "completed"
-        },
-        {
-          "id": "ES-002",
-          "task": "Implement mission briefing delivery",
-          "status": "completed"
-        },
-        {
-          "id": "ES-003",
-          "task": "Create contact message system",
-          "status": "completed"
-        },
-        {
-          "id": "ES-004",
-          "task": "Implement reply system",
-          "status": "completed"
-        },
-        {
-          "id": "ES-005",
-          "task": "Wire to MobilePhone component",
-          "status": "completed"
-        }
-      ],
-      "triggers": [
-        "LAPTOP-UI"
-      ],
-      "files": [
-        "MVP/src/components/MobilePhone.tsx",
-        "MVP/src/data/emailSystem.ts"
-      ],
-      "completedAt": "2025-01-01T03:15:00.000Z"
-    },
-    {
-      "id": "HOSPITAL",
-      "name": "Hospital System",
-      "status": "completed",
-      "priority": 15,
-      "phase": 3,
-      "tasks": [
-        {
-          "id": "HS-001",
-          "task": "Wire combat injuries to hospital",
-          "status": "completed"
-        },
-        {
-          "id": "HS-002",
-          "task": "Implement recovery mechanics",
-          "status": "completed"
-        },
-        {
-          "id": "HS-003",
-          "task": "Wire hospital quality by country",
-          "status": "completed"
-        },
-        {
-          "id": "HS-004",
-          "task": "Create discharge notifications",
-          "status": "completed"
-        }
-      ],
-      "triggers": [
-        "LAPTOP-UI"
-      ],
-      "files": [
-        "MVP/src/components/HospitalScreen.tsx",
-        "MVP/src/data/originHealingSystem.ts",
-        "MVP/src/stores/enhancedGameStore.ts"
-      ],
-      "completedAt": "2024-12-30T02:00:00.000Z"
-    },
-    {
-      "id": "LAPTOP-UI",
-      "name": "Laptop UI Integration",
-      "status": "completed",
-      "priority": 16,
-      "phase": 5,
-      "tasks": [
-        {
-          "id": "LU-001",
-          "task": "Wire NewsBrowser to news backend",
-          "status": "completed"
-        },
-        {
-          "id": "LU-002",
-          "task": "Wire InvestigationCenter to backend",
-          "status": "completed"
-        },
-        {
-          "id": "LU-003",
-          "task": "Wire HospitalScreen to backend",
-          "status": "completed"
-        },
-        {
-          "id": "LU-004",
-          "task": "Create unified navigation",
-          "status": "completed"
-        }
-      ],
-      "triggers": [
-        "TRAINING-UI"
-      ],
-      "files": [
-        "MVP/src/components/NewsBrowser.tsx",
-        "MVP/src/components/InvestigationCenter.tsx",
-        "MVP/src/components/HospitalScreen.tsx"
-      ],
-      "completedAt": "2024-12-30T02:40:00.000Z"
-    },
-    {
-      "id": "TRAINING-UI",
-      "name": "Training UI",
-      "status": "completed",
-      "priority": 17,
-      "phase": 5,
-      "tasks": [
-        {
-          "id": "TU-001",
-          "task": "Create education enrollment UI",
-          "status": "completed"
-        },
-        {
-          "id": "TU-002",
-          "task": "Wire to educationSystem.ts",
-          "status": "completed"
-        },
-        {
-          "id": "TU-003",
-          "task": "Show skill progression",
-          "status": "completed"
-        },
-        {
-          "id": "TU-004",
-          "task": "Implement training schedules",
-          "status": "completed"
-        }
-      ],
-      "triggers": [
-        "BASE-UI"
-      ],
-      "files": [
-        "MVP/src/components/TrainingCenter.tsx",
-        "MVP/src/data/educationSystem.ts"
-      ],
-      "completedAt": "2025-01-01T03:30:00.000Z"
-    },
-    {
-      "id": "BASE-UI",
-      "name": "Base Building UI",
-      "status": "completed",
-      "priority": 18,
-      "phase": 5,
-      "tasks": [
-        {
-          "id": "BU-001",
-          "task": "Create base management screen",
-          "status": "completed"
-        },
-        {
-          "id": "BU-002",
-          "task": "Wire to baseSystem.ts",
-          "status": "completed"
-        },
-        {
-          "id": "BU-003",
-          "task": "Implement facility upgrades",
-          "status": "completed"
-        },
-        {
-          "id": "BU-004",
-          "task": "Show facility bonuses",
-          "status": "completed"
-        }
-      ],
-      "triggers": [
-        "GAME-LOOP"
-      ],
-      "files": [
-        "MVP/src/components/BaseManager.tsx",
-        "MVP/src/data/baseSystem.ts"
-      ],
-      "completedAt": "2025-01-01T03:45:00.000Z"
-    },
-    {
-      "id": "GAME-LOOP",
-      "name": "Complete Game Loop",
-      "status": "completed",
-      "priority": 19,
-      "phase": 5,
-      "tasks": [
-        {
-          "id": "GL-001",
-          "task": "Verify Recruit flow",
-          "status": "completed"
-        },
-        {
-          "id": "GL-002",
-          "task": "Verify Equip flow",
-          "status": "completed"
-        },
-        {
-          "id": "GL-003",
-          "task": "Verify Deploy flow",
-          "status": "completed"
-        },
-        {
-          "id": "GL-004",
-          "task": "Verify Combat flow",
-          "status": "completed"
-        },
-        {
-          "id": "GL-005",
-          "task": "Verify Results flow",
-          "status": "completed"
-        },
-        {
-          "id": "GL-006",
-          "task": "Verify News generation",
-          "status": "completed"
-        },
-        {
-          "id": "GL-007",
-          "task": "End-to-end playtest",
-          "status": "completed"
-        }
-      ],
-      "triggers": [],
-      "files": [],
-      "completedAt": "2025-01-01T04:00:00.000Z"
+      "files": ["MVP/src/combat/core.ts", "MVP/src/combat/scenarios.ts", "MVP/src/data/weapons.ts", "MVP/src/data/damageSystem.ts"],
+      "completedAt": "2025-01-01T05:30:00.000Z"
     }
   ],
-  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI", "INVESTIGATION", "TIME-EVENTS", "ECONOMY", "SHIELD-SYS", "CALLING-BONUS", "PENETRATION-DR", "VISUAL-EFFECTS", "ENEMY-GEN-V2", "CITY-SERVICES", "VEHICLE-INT", "TERRITORY", "EMAIL-SYS", "TRAINING-UI", "BASE-UI", "GAME-LOOP"],
+  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI", "INVESTIGATION", "TIME-EVENTS", "ECONOMY", "SHIELD-SYS", "CALLING-BONUS", "PENETRATION-DR", "VISUAL-EFFECTS", "ENEMY-GEN-V2", "CITY-SERVICES", "VEHICLE-INT", "TERRITORY", "EMAIL-SYS", "TRAINING-UI", "BASE-UI", "GAME-LOOP", "BALANCE-FIX"],
   "statistics": {
-    "totalSystems": 25,
-    "completedSystems": 25,
-    "totalTasks": 129,
-    "completedTasks": 129,
+    "totalSystems": 31,
+    "completedSystems": 26,
+    "totalTasks": 178,
+    "completedTasks": 138,
     "totalIterations": 0,
     "startedAt": "2024-12-30T00:00:00.000Z"
   }

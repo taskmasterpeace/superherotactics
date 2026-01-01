@@ -12,6 +12,7 @@ import { Country } from './allCountries';
 import { getCountryByCity } from './countries';
 import { City, getCityByName } from './cities';
 import { calculateBlackMarket, BlackMarketSystem } from './combinedEffects';
+import { getTimeEngine, areShopsOpen as checkShopHours, TimeOfDay } from './timeEngine';
 
 // ==================== SHOP TYPES ====================
 
@@ -567,6 +568,163 @@ export function formatPrice(amount: number): string {
     return `$${(amount / 1000).toFixed(1)}K`;
   }
   return `$${amount}`;
+}
+
+// ==================== SHOP HOURS (TA-004) ====================
+
+/**
+ * Shop operating hours configuration
+ * Different shop types have different hours
+ */
+export const SHOP_HOURS: Record<ShopType, { open: number; close: number; weekend: boolean }> = {
+  general: { open: 8, close: 20, weekend: true },      // 8am-8pm, open weekends
+  military: { open: 9, close: 17, weekend: false },     // 9am-5pm, closed weekends
+  blackmarket: { open: 18, close: 4, weekend: true },   // 6pm-4am (night hours), open weekends
+  tech: { open: 10, close: 19, weekend: true },         // 10am-7pm, open weekends
+  police: { open: 8, close: 18, weekend: false },       // 8am-6pm, closed weekends
+  medical: { open: 0, close: 24, weekend: true },       // 24/7 emergency services
+};
+
+/**
+ * Check if a shop is currently open based on game time
+ * Uses TimeEngine for current time
+ */
+export function isShopOpen(shop: Shop): boolean {
+  const timeEngine = getTimeEngine();
+  const timeOfDay = timeEngine.getTimeOfDay();
+  const hour = timeEngine.getHour();
+  const isWeekend = timeEngine.isWeekend();
+
+  return isShopOpenAt(shop.type, hour, isWeekend);
+}
+
+/**
+ * Check if a shop type is open at a specific hour
+ */
+export function isShopOpenAt(shopType: ShopType, hour: number, isWeekend: boolean): boolean {
+  const hours = SHOP_HOURS[shopType];
+
+  // Check weekend closure
+  if (isWeekend && !hours.weekend) {
+    return false;
+  }
+
+  // Special handling for night-time shops (close > open wraps around midnight)
+  if (hours.close < hours.open) {
+    // Shop open from evening to early morning (e.g., 18-4)
+    return hour >= hours.open || hour < hours.close;
+  }
+
+  // Normal hours
+  return hour >= hours.open && hour < hours.close;
+}
+
+/**
+ * Get shop status with opening info
+ */
+export interface ShopStatus {
+  isOpen: boolean;
+  shopType: ShopType;
+  currentHour: number;
+  opensAt: number;
+  closesAt: number;
+  nextOpenIn: number; // Hours until open (0 if open now)
+  closingIn: number;  // Hours until close (0 if closed)
+  reason?: string;    // Why closed (e.g., "Closed on weekends")
+}
+
+/**
+ * Get detailed shop status
+ */
+export function getShopStatus(shop: Shop): ShopStatus {
+  const timeEngine = getTimeEngine();
+  const hour = timeEngine.getHour();
+  const isWeekend = timeEngine.isWeekend();
+  const hours = SHOP_HOURS[shop.type];
+
+  const isOpen = isShopOpenAt(shop.type, hour, isWeekend);
+
+  let nextOpenIn = 0;
+  let closingIn = 0;
+  let reason: string | undefined;
+
+  if (!isOpen) {
+    // Calculate when shop opens
+    if (isWeekend && !hours.weekend) {
+      // Closed for weekend - calculate hours until Monday 00:00
+      const hoursLeftToday = 24 - hour;
+      const sundayHours = isWeekend ? 24 : 0; // Simple approximation
+      nextOpenIn = hoursLeftToday + sundayHours + hours.open;
+      reason = 'Closed on weekends';
+    } else if (hour < hours.open) {
+      nextOpenIn = hours.open - hour;
+      reason = `Opens at ${formatHourTime(hours.open)}`;
+    } else {
+      // Past closing time, opens tomorrow
+      nextOpenIn = (24 - hour) + hours.open;
+      reason = `Opens at ${formatHourTime(hours.open)} tomorrow`;
+    }
+  } else {
+    // Calculate when shop closes
+    if (hours.close > hours.open) {
+      closingIn = hours.close - hour;
+    } else {
+      // Night shop (wraps around midnight)
+      if (hour >= hours.open) {
+        closingIn = (24 - hour) + hours.close;
+      } else {
+        closingIn = hours.close - hour;
+      }
+    }
+  }
+
+  return {
+    isOpen,
+    shopType: shop.type,
+    currentHour: hour,
+    opensAt: hours.open,
+    closesAt: hours.close,
+    nextOpenIn,
+    closingIn,
+    reason,
+  };
+}
+
+/**
+ * Format hour as 12-hour time string
+ */
+function formatHourTime(hour: number): string {
+  if (hour === 0 || hour === 24) return '12:00 AM';
+  if (hour === 12) return '12:00 PM';
+  if (hour < 12) return `${hour}:00 AM`;
+  return `${hour - 12}:00 PM`;
+}
+
+/**
+ * Get all shops filtered by open/closed status
+ */
+export function getOpenShops(shops: Shop[]): Shop[] {
+  return shops.filter(shop => isShopOpen(shop));
+}
+
+/**
+ * Get shop hours as display string
+ */
+export function getShopHoursDisplay(shopType: ShopType): string {
+  const hours = SHOP_HOURS[shopType];
+  const openStr = formatHourTime(hours.open);
+  const closeStr = formatHourTime(hours.close === 24 ? 0 : hours.close);
+
+  if (hours.open === 0 && hours.close === 24) {
+    return '24 Hours';
+  }
+
+  if (hours.close < hours.open) {
+    return `${openStr} - ${closeStr} (Night)`;
+  }
+
+  const weekendNote = hours.weekend ? '' : ' (Weekdays only)';
+  return `${openStr} - ${closeStr}${weekendNote}`;
 }
 
 // ==================== DEBUG / TESTING ====================
