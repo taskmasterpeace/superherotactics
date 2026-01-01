@@ -197,6 +197,7 @@ const MessagesPanel: React.FC<{
   onVehicleSelect: (vehicleId: string) => void;
   onStartTravel: () => void;
   onCancelTravel: (unitId: string) => void;
+  sectorMissions: any[];
 }> = ({
   characters,
   selectedCell,
@@ -227,6 +228,7 @@ const MessagesPanel: React.FC<{
   onVehicleSelect,
   onStartTravel,
   onCancelTravel,
+  sectorMissions,
 }) => {
   const [isMessagesExpanded, setIsMessagesExpanded] = useState(true);
   const [expandedVehicleId, setExpandedVehicleId] = useState<string | null>(null);
@@ -1749,6 +1751,7 @@ export const WorldMapGrid: React.FC = () => {
             onVehicleSelect={handleVehicleSelect}
             onStartTravel={handleStartTravel}
             onCancelTravel={cancelTravel}
+            sectorMissions={sectorMissions}
           />
         </div>
       </div>
