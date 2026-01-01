@@ -19,7 +19,7 @@ import {
   advanceInvestigation,
   INVESTIGATION_TEMPLATES
 } from '../data/investigationSystem'
-import { GeneratedMission } from '../data/missionSystem'
+import { GeneratedMission, MISSION_TEMPLATES, generateMission } from '../data/missionSystem'
 import {
   createMissionActions,
   shouldRefreshMissions,
@@ -38,6 +38,18 @@ import {
 import { simulateWeek, SimulationEvent, SimulationResult } from '../data/criminalSimulation'
 import { generateWeeklyNews } from '../data/criminalNewsBridge'
 import { getCitiesByCountry } from '../data/cities'
+
+// Territory System Imports
+import {
+  createMilitia,
+  trainMilitia,
+  getSectorControl,
+  getSectorMilitia,
+  getFactionMilitia,
+  TerritoryControl,
+  MilitiaUnit,
+  FactionId,
+} from '../data/territorySystem'
 
 // New World Systems Imports
 import {
@@ -81,6 +93,13 @@ import {
   getVehicleById,
   getVehicleTravelSpeed,
   Vehicle,
+  calculateFuelForSectors,
+  calculateRefuelCost,
+  hasEnoughFuel,
+  getTravelIncidentChance,
+  generateTravelIncident,
+  TravelDamageEvent,
+  KM_PER_SECTOR,
 } from '../data/vehicleSystem'
 
 // EventBus for game-wide event emission
@@ -411,6 +430,13 @@ interface EnhancedGameStore {
   expireInvestigation: (investigationId: string) => void
   getAvailableInvestigations: () => Investigation[]
   getActiveInvestigations: () => Investigation[]
+
+  // Territory & Militia system
+  recruitMilitia: (sectorId: string, size: number, equipment: 'light' | 'medium' | 'heavy') => MilitiaUnit | null
+  trainSectorMilitia: (sectorId: string, trainingDays: number) => void
+  getSectorMilitiaList: (sectorId: string) => MilitiaUnit[]
+  getPlayerMilitia: () => MilitiaUnit[]
+  getSectorControlStatus: (sectorId: string) => TerritoryControl | null
 
   // Medical system
   addInjury: (characterId: string, injury: any) => void
@@ -1551,12 +1577,27 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     let secondsPerSector = 5  // Base: 5 seconds per sector on foot (walking)
     let vehicleType: 'ground' | 'air' | 'water' | undefined
 
+    // Track fuel consumption for this trip
+    let fuelConsumed = 0
+    let vehicleDataRef: Vehicle | null = null
+
     if (vehicleId) {
       const fleetVehicle = state.fleetVehicles.find(v => v.id === vehicleId)
       if (fleetVehicle) {
         // Lookup full vehicle data from database for accurate speed
         const vehicleData = getVehicleById(fleetVehicle.vehicleTemplateId)
         if (vehicleData) {
+          vehicleDataRef = vehicleData
+
+          // VI-003: Calculate fuel consumption for this trip
+          fuelConsumed = calculateFuelForSectors(vehicleData, distance)
+
+          // Check if vehicle has enough fuel
+          if (!hasEnoughFuel(fleetVehicle.currentFuel, fuelConsumed)) {
+            toast.error(`Not enough fuel! Need ${fuelConsumed.toFixed(1)}%, have ${fleetVehicle.currentFuel.toFixed(1)}%`)
+            return
+          }
+
           // Get actual speed in km/h from database
           const speedKmH = getVehicleTravelSpeed(vehicleData)
           // Convert to gameplay seconds per sector (500km = 1 sector)
@@ -1611,7 +1652,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       direction: angleDeg
     }
 
-    // Update state
+    // Update state - including fuel consumption (VI-003)
     set({
       travelingUnits: [...state.travelingUnits, travelUnit],
       characters: state.characters.map(char =>
@@ -1622,11 +1663,22 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       fleetVehicles: vehicleId
         ? state.fleetVehicles.map(v =>
             v.id === vehicleId
-              ? { ...v, status: 'traveling' as const, assignedCharacters: characterIds }
+              ? {
+                  ...v,
+                  status: 'traveling' as const,
+                  assignedCharacters: characterIds,
+                  // VI-003: Deduct fuel consumption
+                  currentFuel: Math.max(0, v.currentFuel - fuelConsumed)
+                }
               : v
           )
         : state.fleetVehicles
     })
+
+    // Log fuel consumption if significant
+    if (fuelConsumed > 0) {
+      console.log(`[VEHICLE] ${vehicleId}: Consumed ${fuelConsumed.toFixed(1)}% fuel for ${distance.toFixed(1)} sector travel`)
+    }
 
     const etaStr = travelTimeMinutes < 1
       ? `${Math.round(travelTimeSeconds)} seconds`
@@ -1715,6 +1767,48 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
     const arrivalTime = Date.now()
 
+    // VI-005: Check for travel incidents and apply vehicle damage
+    let incidentDamage = 0
+    let incidentDescription = ''
+
+    if (unit.vehicleId) {
+      const fleetVehicle = state.fleetVehicles.find(v => v.id === unit.vehicleId)
+      if (fleetVehicle) {
+        const vehicleData = getVehicleById(fleetVehicle.vehicleTemplateId)
+        if (vehicleData) {
+          // Calculate distance traveled
+          const ROW_LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWX'
+          const getRowCol = (sector: string) => {
+            const row = ROW_LABELS.indexOf(sector.charAt(0))
+            const col = parseInt(sector.slice(1)) - 1
+            return { row, col }
+          }
+          const origin = getRowCol(unit.originSector)
+          const dest = getRowCol(unit.destinationSector)
+          const distance = Math.sqrt(
+            Math.pow(dest.col - origin.col, 2) + Math.pow(dest.row - origin.row, 2)
+          )
+
+          // Roll for incident per sector traveled
+          const incidentChance = getTravelIncidentChance(
+            vehicleData.travelMode,
+            'rural' // Default terrain - could be enhanced with sector terrain data
+          )
+
+          // Check each sector for incidents
+          for (let i = 0; i < Math.ceil(distance); i++) {
+            if (Math.random() < incidentChance) {
+              const incident = generateTravelIncident(vehicleData, vehicleData.travelMode)
+              if (incident && incident.damage > 0) {
+                incidentDamage += incident.damage
+                incidentDescription = incident.description
+              }
+            }
+          }
+        }
+      }
+    }
+
     set({
       travelingUnits: state.travelingUnits.filter(u => u.id !== unitId),
       characters: state.characters.map(char =>
@@ -1725,26 +1819,45 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       fleetVehicles: unit.vehicleId
         ? state.fleetVehicles.map(v =>
             v.id === unit.vehicleId
-              ? { ...v, status: 'available' as const, currentSector: unit.destinationSector, assignedCharacters: [] }
+              ? {
+                  ...v,
+                  status: 'available' as const,
+                  currentSector: unit.destinationSector,
+                  assignedCharacters: [],
+                  // VI-005: Apply incident damage to vehicle HP
+                  currentHP: Math.max(0, v.currentHP - incidentDamage),
+                  // Flag for maintenance if HP drops below 50%
+                  maintenanceNeeded: v.maintenanceNeeded || ((v.currentHP - incidentDamage) < v.maxHP * 0.5)
+                }
               : v
           )
         : state.fleetVehicles
     })
 
     // Create arrival notification
+    let arrivalMessage = travelingCharacters.length === 1
+      ? `${firstCharacter?.name || 'Team'} has arrived and is awaiting orders.`
+      : `${characterNames} have arrived and are awaiting orders.`
+
+    // Add incident report if there was damage
+    if (incidentDamage > 0) {
+      arrivalMessage += ` Travel incident: ${incidentDescription} (${incidentDamage} damage to vehicle)`
+    }
+
     get().addNotification({
       type: 'arrival',
-      priority: 'medium',
+      priority: incidentDamage > 0 ? 'high' : 'medium',
       title: `Arrived at Sector ${unit.destinationSector}`,
-      message: travelingCharacters.length === 1
-        ? `${firstCharacter?.name || 'Team'} has arrived and is awaiting orders.`
-        : `${characterNames} have arrived and are awaiting orders.`,
+      message: arrivalMessage,
       characterId: firstCharacter?.id,
       characterName: firstCharacter?.name,
       location: `Sector ${unit.destinationSector}`,
-      timestamp: Date.now(), // Game time - should be replaced with actual game time later
+      timestamp: Date.now(),
     })
 
+    if (incidentDamage > 0) {
+      toast.error(`Travel incident: ${incidentDescription} (${incidentDamage} damage)`)
+    }
     toast.success(`${unit.name} arrived at ${unit.destinationSector}`)
   },
 
@@ -1827,6 +1940,97 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     const char = state.characters.find(c => c.id === characterId)
     const vehicle = state.fleetVehicles.find(v => v.id === vehicleId)
     toast.info(`${char?.name || 'Character'} removed from ${vehicle?.name || 'vehicle'}`)
+  },
+
+  // VI-003: Refuel vehicle
+  refuelVehicle: (vehicleId: string, fuelAmount?: number) => {
+    const state = get()
+    const vehicle = state.fleetVehicles.find(v => v.id === vehicleId)
+    if (!vehicle) {
+      toast.error('Vehicle not found')
+      return
+    }
+
+    const vehicleData = getVehicleById(vehicle.vehicleTemplateId)
+    if (!vehicleData) {
+      toast.error('Vehicle data not found')
+      return
+    }
+
+    // Calculate how much fuel is needed
+    const fuelNeeded = fuelAmount !== undefined
+      ? Math.min(fuelAmount, 100 - vehicle.currentFuel)
+      : 100 - vehicle.currentFuel
+
+    if (fuelNeeded <= 0) {
+      toast.info(`${vehicle.name} is already fully fueled`)
+      return
+    }
+
+    // Calculate cost using vehicleSystem helper
+    const cost = calculateRefuelCost(vehicleData, fuelNeeded)
+
+    // Check if player can afford
+    if (state.funds < cost) {
+      toast.error(`Not enough funds! Need $${cost.toLocaleString()}`)
+      return
+    }
+
+    set({
+      funds: state.funds - cost,
+      fleetVehicles: state.fleetVehicles.map(v =>
+        v.id === vehicleId
+          ? { ...v, currentFuel: Math.min(100, v.currentFuel + fuelNeeded) }
+          : v
+      )
+    })
+
+    toast.success(`${vehicle.name} refueled (+${fuelNeeded.toFixed(1)}%) for $${cost.toLocaleString()}`)
+  },
+
+  // VI-005: Repair vehicle
+  repairVehicle: (vehicleId: string, repairAmount?: number) => {
+    const state = get()
+    const vehicle = state.fleetVehicles.find(v => v.id === vehicleId)
+    if (!vehicle) {
+      toast.error('Vehicle not found')
+      return
+    }
+
+    // Calculate how much HP is needed
+    const hpNeeded = repairAmount !== undefined
+      ? Math.min(repairAmount, vehicle.maxHP - vehicle.currentHP)
+      : vehicle.maxHP - vehicle.currentHP
+
+    if (hpNeeded <= 0) {
+      toast.info(`${vehicle.name} is already at full health`)
+      return
+    }
+
+    // Calculate cost: $50 per HP for ground, $100 for air, $75 for sea
+    const repairCostPerHP = vehicle.type === 'aircraft' ? 100 : vehicle.type === 'sea' ? 75 : 50
+    const cost = Math.round(hpNeeded * repairCostPerHP)
+
+    // Check if player can afford
+    if (state.funds < cost) {
+      toast.error(`Not enough funds! Need $${cost.toLocaleString()}`)
+      return
+    }
+
+    set({
+      funds: state.funds - cost,
+      fleetVehicles: state.fleetVehicles.map(v =>
+        v.id === vehicleId
+          ? {
+              ...v,
+              currentHP: Math.min(v.maxHP, v.currentHP + hpNeeded),
+              maintenanceNeeded: false  // Clear maintenance flag after repair
+            }
+          : v
+      )
+    })
+
+    toast.success(`${vehicle.name} repaired (+${hpNeeded} HP) for $${cost.toLocaleString()}`)
   },
 
   // =============================================================================
@@ -2787,6 +2991,26 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       )
     })
 
+    // WIRE: Generate mission if investigation unlocks one
+    if (reward.missionUnlocked) {
+      const template = MISSION_TEMPLATES.find(t => t.id === reward.missionUnlocked)
+      if (template) {
+        const newMission = generateMission(
+          template,
+          investigation.sector,
+          investigation.city,
+          Math.floor(investigation.difficulty / 3)  // Scale difficulty from 1-10 to modifier
+        )
+        // Add to available missions for this sector
+        const currentState = get()
+        const sectorMissions = currentState.availableMissions.get(investigation.sector) || []
+        const updatedMissions = new Map(currentState.availableMissions)
+        updatedMissions.set(investigation.sector, [...sectorMissions, newMission])
+        set({ availableMissions: updatedMissions })
+        console.log(`[Investigation] Generated mission "${template.name}" in sector ${investigation.sector}`)
+      }
+    }
+
     get().addNotification({
       type: 'mission_complete',
       priority: 'high',
@@ -2865,6 +3089,77 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   getActiveInvestigations: () => {
     return get().activeInvestigations.filter(inv => inv.status === 'active')
+  },
+
+  // =====================================================================
+  // TERRITORY & MILITIA ACTIONS
+  // =====================================================================
+
+  recruitMilitia: (sectorId, size, equipment) => {
+    const state = get()
+
+    // Cost based on size and equipment
+    const baseCost = size * 100
+    const equipmentMultiplier = equipment === 'heavy' ? 3 : equipment === 'medium' ? 2 : 1
+    const totalCost = baseCost * equipmentMultiplier
+
+    if (state.budget < totalCost) {
+      toast.error(`Insufficient funds. Need $${totalCost.toLocaleString()}`)
+      return null
+    }
+
+    // Check if player controls this sector
+    const control = getSectorControl(sectorId)
+    if (!control || control.controllingFaction !== 'player') {
+      toast.error('You can only recruit militia in sectors you control')
+      return null
+    }
+
+    // Create militia unit
+    const militia = createMilitia(sectorId, 'player', size, equipment)
+    set({ budget: state.budget - totalCost })
+
+    toast.success(`Recruited ${size} militia in sector ${sectorId}`)
+    console.log(`[Militia] Created ${equipment} militia (${size} fighters) in ${sectorId}`)
+    return militia
+  },
+
+  trainSectorMilitia: (sectorId, trainingDays) => {
+    const state = get()
+    const trainingCost = trainingDays * 500 // $500 per day of training
+
+    if (state.budget < trainingCost) {
+      toast.error(`Insufficient funds. Need $${trainingCost.toLocaleString()}`)
+      return
+    }
+
+    // Get all player militia in sector
+    const militia = getSectorMilitia(sectorId).filter(m => m.faction === 'player')
+    if (militia.length === 0) {
+      toast.error('No militia in this sector to train')
+      return
+    }
+
+    // Train each militia unit
+    for (const unit of militia) {
+      trainMilitia(unit.id, trainingDays)
+    }
+
+    set({ budget: state.budget - trainingCost })
+    toast.success(`Trained ${militia.length} militia units for ${trainingDays} days`)
+    console.log(`[Militia] Trained ${militia.length} units in ${sectorId}`)
+  },
+
+  getSectorMilitiaList: (sectorId) => {
+    return getSectorMilitia(sectorId)
+  },
+
+  getPlayerMilitia: () => {
+    return getFactionMilitia('player')
+  },
+
+  getSectorControlStatus: (sectorId) => {
+    return getSectorControl(sectorId)
   },
 
   // =====================================================================
@@ -4099,17 +4394,23 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     const updatedCharacters = state.characters.map((c: any) => {
       if (c.id !== enrollment.characterId) return c
 
+      // Clone the character with updates
       const updates: any = {
         ...c,
         status: 'ready',
-        educationLevel: enrollment.degreeLevel
+        educationLevel: enrollment.degreeLevel,
+        // Clone stats object for mutation
+        stats: { ...c.stats }
       }
 
-      // Apply stat bonuses
+      // Apply stat bonuses to nested stats object
+      // Stats use 3-letter codes: MEL, RNG, AGL, CON, INS, WIL, INT
       if (enrollment.statBonuses) {
         for (const [stat, bonus] of Object.entries(enrollment.statBonuses)) {
-          if (typeof updates[stat] === 'number') {
-            updates[stat] = Math.min(100, updates[stat] + bonus)
+          const statKey = stat.toUpperCase()
+          if (updates.stats && typeof updates.stats[statKey] === 'number') {
+            updates.stats[statKey] = Math.min(100, updates.stats[statKey] + (bonus as number))
+            console.log(`[Training] ${c.name}: ${statKey} +${bonus} -> ${updates.stats[statKey]}`)
           }
         }
       }

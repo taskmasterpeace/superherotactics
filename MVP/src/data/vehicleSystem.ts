@@ -805,3 +805,222 @@ export function getVehicleTravelSpeed(vehicle: Vehicle): number {
 export function canFitSquad(vehicle: Vehicle, squadSize: number): boolean {
   return squadSize <= vehicle.passengers;
 }
+
+// =============================================================================
+// FUEL CONSUMPTION SYSTEM
+// =============================================================================
+
+/**
+ * Calculate fuel consumption for a travel distance.
+ * Returns fuel consumed as a percentage (0-100).
+ *
+ * @param vehicle - The vehicle being used
+ * @param distanceKm - Distance to travel in kilometers
+ * @returns Fuel consumed as percentage of tank
+ */
+export function calculateFuelConsumption(vehicle: Vehicle, distanceKm: number): number {
+  // Nuclear/none vehicles don't consume fuel
+  if (vehicle.fuelType === 'nuclear' || vehicle.fuelType === 'none') {
+    return 0;
+  }
+
+  // Infinite range = no fuel consumption
+  if (!isFinite(vehicle.rangeKm) || vehicle.rangeKm === 0) {
+    return 0;
+  }
+
+  // Calculate as percentage of total range
+  // 100% fuel = full range, so fuel% consumed = (distance / range) * 100
+  const fuelPercent = (distanceKm / vehicle.rangeKm) * 100;
+
+  return Math.min(100, fuelPercent);
+}
+
+/**
+ * Calculate distance traveled per sector (world map grid).
+ * Each sector represents ~500km.
+ */
+export const KM_PER_SECTOR = 500;
+
+/**
+ * Calculate fuel consumption for sector travel.
+ * @param vehicle - The vehicle being used
+ * @param sectorDistance - Distance in sectors (can be fractional)
+ * @returns Fuel consumed as percentage of tank
+ */
+export function calculateFuelForSectors(vehicle: Vehicle, sectorDistance: number): number {
+  const distanceKm = sectorDistance * KM_PER_SECTOR;
+  return calculateFuelConsumption(vehicle, distanceKm);
+}
+
+/**
+ * Check if vehicle has enough fuel for travel.
+ * @param currentFuelPercent - Current fuel level (0-100)
+ * @param requiredFuelPercent - Fuel needed for trip
+ * @returns true if vehicle can make the trip
+ */
+export function hasEnoughFuel(currentFuelPercent: number, requiredFuelPercent: number): boolean {
+  return currentFuelPercent >= requiredFuelPercent;
+}
+
+/**
+ * Calculate refuel cost based on vehicle and fuel needed.
+ * @param vehicle - The vehicle to refuel
+ * @param fuelNeeded - Fuel percentage to add (0-100)
+ * @returns Cost in dollars
+ */
+export function calculateRefuelCost(vehicle: Vehicle, fuelNeeded: number): number {
+  // Base cost per 1% of tank
+  const fuelPrices: Record<string, number> = {
+    gasoline: 5,    // $5 per 1% of tank
+    diesel: 4,      // $4 per 1%
+    jet: 15,        // $15 per 1% (expensive)
+    electric: 2,    // $2 per 1% (cheap)
+    nuclear: 0,     // Free (reactor)
+    none: 0,        // No fuel
+  };
+
+  const pricePerPercent = fuelPrices[vehicle.fuelType] || 5;
+
+  // Scale by vehicle range (larger tanks = more expensive)
+  const rangeFactor = Math.max(1, vehicle.rangeKm / 500);
+
+  return Math.round(pricePerPercent * fuelNeeded * rangeFactor);
+}
+
+// =============================================================================
+// VEHICLE DAMAGE SYSTEM
+// =============================================================================
+
+/**
+ * Random encounter damage during travel.
+ * Based on terrain and travel mode.
+ */
+export interface TravelDamageEvent {
+  type: 'accident' | 'attack' | 'mechanical' | 'weather';
+  damage: number;
+  description: string;
+}
+
+/**
+ * Calculate chance of travel incident per sector.
+ * @param travelMode - Vehicle travel mode
+ * @param terrain - Terrain type being crossed
+ * @returns Probability of incident (0-1)
+ */
+export function getTravelIncidentChance(
+  travelMode: TravelMode,
+  terrain: TerrainType | string
+): number {
+  // Base chances by travel mode
+  const baseChance: Record<TravelMode, number> = {
+    ground: 0.02,   // 2% per sector
+    air: 0.01,      // 1% per sector (safer)
+    water: 0.015,   // 1.5% per sector
+    foot: 0.03,     // 3% per sector (most dangerous)
+  };
+
+  const terrainModifiers: Record<string, number> = {
+    urban: 0.5,       // -50% in cities
+    rural: 1.0,       // Baseline
+    mountain: 2.0,    // +100% in mountains
+    jungle: 2.5,      // +150% in jungle
+    desert: 1.5,      // +50% in desert
+    ocean: 1.0,       // Baseline for water
+    arctic: 2.0,      // +100% in arctic
+    conflict: 3.0,    // +200% in conflict zones
+  };
+
+  const base = baseChance[travelMode] || 0.02;
+  const modifier = terrainModifiers[terrain] || 1.0;
+
+  return Math.min(0.25, base * modifier); // Cap at 25%
+}
+
+/**
+ * Generate a random travel incident.
+ * @param vehicle - The vehicle involved
+ * @param travelMode - How they're traveling
+ * @returns Damage event or null if no incident
+ */
+export function generateTravelIncident(
+  vehicle: Vehicle,
+  travelMode: TravelMode
+): TravelDamageEvent | null {
+  const incidentTypes = [
+    {
+      type: 'accident' as const,
+      weight: 40,
+      damageRange: [5, 20],
+      descriptions: {
+        ground: ['Minor collision with debris', 'Pothole damage', 'Swerved to avoid obstacle'],
+        air: ['Turbulence damage', 'Bird strike', 'Hard landing'],
+        water: ['Wave impact', 'Debris collision', 'Ran aground briefly'],
+        foot: ['Stumble and fall', 'Rough terrain injury', 'Equipment damage'],
+      },
+    },
+    {
+      type: 'attack' as const,
+      weight: 20,
+      damageRange: [15, 40],
+      descriptions: {
+        ground: ['Ambush by hostiles', 'Sniper fire', 'IED encounter'],
+        air: ['Anti-air fire', 'Hostile aircraft', 'Rocket attack'],
+        water: ['Pirate skirmish', 'Hostile patrol', 'Torpedo warning'],
+        foot: ['Hostile patrol', 'Bandit ambush', 'Wildlife attack'],
+      },
+    },
+    {
+      type: 'mechanical' as const,
+      weight: 30,
+      damageRange: [0, 10],
+      descriptions: {
+        ground: ['Engine trouble', 'Tire blowout', 'Brake failure'],
+        air: ['Engine stall', 'Hydraulic leak', 'Navigation failure'],
+        water: ['Propeller damage', 'Hull leak', 'Steering malfunction'],
+        foot: ['Equipment failure', 'Navigation error', 'Supply loss'],
+      },
+    },
+    {
+      type: 'weather' as const,
+      weight: 10,
+      damageRange: [5, 25],
+      descriptions: {
+        ground: ['Flash flood', 'Sandstorm damage', 'Ice road slip'],
+        air: ['Lightning strike', 'Severe turbulence', 'Icing conditions'],
+        water: ['Storm damage', 'Rogue wave', 'Hurricane winds'],
+        foot: ['Exposure damage', 'Flash flood', 'Avalanche near-miss'],
+      },
+    },
+  ];
+
+  // Weighted random selection
+  const totalWeight = incidentTypes.reduce((sum, t) => sum + t.weight, 0);
+  let roll = Math.random() * totalWeight;
+
+  let selected = incidentTypes[0];
+  for (const incident of incidentTypes) {
+    roll -= incident.weight;
+    if (roll <= 0) {
+      selected = incident;
+      break;
+    }
+  }
+
+  // Calculate damage
+  const [minDmg, maxDmg] = selected.damageRange;
+  let damage = Math.floor(Math.random() * (maxDmg - minDmg + 1)) + minDmg;
+
+  // Apply vehicle DR
+  damage = Math.max(0, damage - vehicle.dr);
+
+  // Get description
+  const descs = selected.descriptions[travelMode] || selected.descriptions.ground;
+  const description = descs[Math.floor(Math.random() * descs.length)];
+
+  return {
+    type: selected.type,
+    damage,
+    description,
+  };
+}
