@@ -150,19 +150,24 @@ export const SHOP_INFO: Record<ShopType, { name: string; emoji: string; descript
 // ==================== PRICING SYSTEM ====================
 
 /**
- * CS-003: Unified price modifiers from country stats
- * Calculates comprehensive price adjustments based on country conditions
+ * CS-003: Unified price modifiers from country AND city stats
+ * Calculates comprehensive price adjustments based on location conditions
  */
 export interface PriceModifiers {
   basePriceMultiplier: number;  // From GDP
   taxRate: number;              // From governmentCorruption (inverse)
   supplyChain: number;          // From infrastructure
   riskPremium: number;          // From instability
-  blackMarketDiscount: number;  // From corruption + crime
+  blackMarketDiscount: number;  // From corruption + crime + city crimeIndex
+  cityBonus: number;            // Additional modifier from city stats
   total: number;                // Combined multiplier
 }
 
-export function calculatePriceModifiers(country: Country, shopType: ShopType): PriceModifiers {
+/**
+ * Calculate price modifiers from country stats AND city crime/safety
+ * High crime cities = better black market deals
+ */
+export function calculatePriceModifiers(country: Country, shopType: ShopType, city?: City): PriceModifiers {
   // Base price from GDP (higher GDP = higher prices)
   const basePriceMultiplier = 0.7 + (country.gdpPerCapita / 250); // 0.7x to 1.1x
 
@@ -178,10 +183,18 @@ export function calculatePriceModifiers(country: Country, shopType: ShopType): P
   const crime = country.organizedCrime || 0;
   const riskPremium = (politicalInstability + crime) / 400; // 0 to 0.5
 
-  // Black market discount (corruption and crime reduce prices for illegal goods)
+  // Black market discount (corruption + crime + CITY crimeIndex reduce prices)
   let blackMarketDiscount = 0;
+  let cityBonus = 0;
   if (shopType === 'blackmarket') {
-    blackMarketDiscount = (country.governmentCorruption + crime) / 400; // 0 to 0.5
+    // Country-level discount (0 to 0.5)
+    blackMarketDiscount = (country.governmentCorruption + crime) / 400;
+
+    // CITY-LEVEL BONUS: High crime cities get additional discount (0 to 0.25)
+    if (city && city.crimeIndex !== undefined) {
+      cityBonus = city.crimeIndex / 400; // Crime 100 = 25% extra discount
+      blackMarketDiscount += cityBonus;
+    }
   }
 
   // Calculate total multiplier
@@ -193,19 +206,20 @@ export function calculatePriceModifiers(country: Country, shopType: ShopType): P
     supplyChain,
     riskPremium,
     blackMarketDiscount,
+    cityBonus,
     total: Math.round(total * 100) / 100, // Round to 2 decimal places
   };
 }
 
 /**
- * Get buy price for an item at a shop (CS-003: Now uses unified modifiers)
+ * Get buy price for an item at a shop (CS-003: Now uses unified modifiers with city crime)
  */
-export function getBuyPrice(item: { costValue: number }, shop: Shop, country?: Country): number {
+export function getBuyPrice(item: { costValue: number }, shop: Shop, country?: Country, city?: City): number {
   let finalMultiplier = shop.markupMultiplier;
 
   if (country) {
-    const modifiers = calculatePriceModifiers(country, shop.type);
-    // Combine shop markup with country modifiers (dampened effect)
+    const modifiers = calculatePriceModifiers(country, shop.type, city);
+    // Combine shop markup with country+city modifiers (dampened effect)
     finalMultiplier = shop.markupMultiplier * (0.5 + modifiers.total * 0.5);
   }
 
@@ -332,14 +346,28 @@ export function getShopsForCityWithCountry(cityName: string, country: Country, c
   const generalBonuses = applyBonuses('general', generalQuality, generalMarkup);
   shops.push(createShop('general', cityName, country.code, generalBonuses.quality, generalBonuses.markup));
 
-  // CS-004: Black market now uses calculateBlackMarket() combined effect
+  // CS-004: Black market now uses calculateBlackMarket() combined effect + city crime
   const blackMarketData = calculateBlackMarket(country);
   const bmCityAllowed = !city || cityMeetsShopRequirements(city, 'blackmarket');
   if (blackMarketData.available && bmCityAllowed) {
     // Quality from weapon quality range in combined effect
-    const bmQuality = blackMarketData.weaponQualityRange[1] as 1 | 2 | 3 | 4;
+    let bmQuality = blackMarketData.weaponQualityRange[1] as 1 | 2 | 3 | 4;
+
+    // CITY CRIME BONUS: High crime cities get +1 quality tier
+    // Crime 60+ = +1 tier (better weapons in dangerous cities)
+    if (city && city.crimeIndex !== undefined && city.crimeIndex >= 60) {
+      bmQuality = Math.min(4, bmQuality + 1) as 1 | 2 | 3 | 4;
+    }
+
     // Markup from combined effect price modifier
-    const bmMarkup = blackMarketData.weaponPriceModifier;
+    // CITY CRIME DISCOUNT: Reduce markup in high-crime cities (already in calculatePriceModifiers)
+    let bmMarkup = blackMarketData.weaponPriceModifier;
+    if (city && city.crimeIndex !== undefined) {
+      // Additional 10% discount for crime 50+, up to 20% for crime 80+
+      const cityDiscount = Math.min(0.2, Math.max(0, (city.crimeIndex - 40) / 200));
+      bmMarkup = Math.max(0.4, bmMarkup - cityDiscount);
+    }
+
     const bmBonuses = applyBonuses('blackmarket', bmQuality, bmMarkup);
     const shop = createShop('blackmarket', cityName, country.code, bmBonuses.quality, bmBonuses.markup);
     // Attach black market data for additional services
@@ -705,75 +733,150 @@ export function getSpecialServices(cityName: string): SpecialServicesPanel {
     }
   }
 
-  // Safe house services
-  if (effects.safeHouse) {
-    const safe = effects.safeHouse;
-    if (safe.available) {
+  // Safe house services (CS-005: Now uses city safetyIndex)
+  if (effects.safeHouses) {
+    const safe = effects.safeHouses;
+    if (safe.safeHousesAvailable) {
+      // Calculate security rating (1-10) from safehouseSecurity (0-100)
+      const securityRating = Math.round(safe.safehouseSecurity / 10);
+
+      // CITY SAFETY AFFECTS COMPROMISE RISK
+      // High safety = lower risk, low safety = higher risk
+      // Base risk from surveillance/intel (inverse of security)
+      let compromiseRisk = Math.max(0, 100 - safe.safehouseSecurity);
+      if (city && city.safetyIndex !== undefined) {
+        // High safety (60+) = reduce risk by up to 20%
+        // Low safety (40-) = increase risk by up to 30%
+        if (city.safetyIndex >= 60) {
+          compromiseRisk = Math.max(0, compromiseRisk - (city.safetyIndex - 60) * 0.5);
+        } else if (city.safetyIndex <= 40) {
+          compromiseRisk = Math.min(80, compromiseRisk + (40 - city.safetyIndex) * 0.75);
+        }
+      }
+
+      const hasWeaponStorage = safe.falseWallsAvailable;
+
       services.push({
         id: 'rent_safehouse',
         name: 'Rent Safe House',
         emoji: '🏚️',
         category: 'logistics',
-        description: `Security rating: ${safe.securityRating}/10. ${safe.weaponStorage ? 'Weapon storage.' : ''}`,
-        cost: safe.dailyCost * 7, // Weekly rental
+        description: `Security: ${securityRating}/10. ${hasWeaponStorage ? 'Hidden storage.' : ''} ${city?.safetyIndex !== undefined ? `City safety: ${Math.round(city.safetyIndex)}%` : ''}`,
+        cost: safe.safehouseCost, // Weekly cost
         available: true,
-        riskLevel: safe.compromiseRisk > 20 ? 'high' : safe.compromiseRisk > 10 ? 'medium' : 'low',
+        riskLevel: compromiseRisk > 30 ? 'high' : compromiseRisk > 15 ? 'medium' : 'low',
       });
 
-      if (safe.tunnelAccess) {
+      if (safe.tunnelNetworkAccess) {
         services.push({
           id: 'tunnel_access',
           name: 'Tunnel Network Access',
           emoji: '🚇',
           category: 'logistics',
           description: 'Underground escape routes',
-          cost: Math.round(safe.dailyCost * 30),
+          cost: Math.round(safe.safehouseCost * 4),
           available: true,
         });
       }
     }
   }
 
-  // Black market services
+  // Black market services (CS-005: City crime unlocks more services)
   if (effects.blackMarket) {
     const bm = effects.blackMarket;
+
+    // Get city crime level for service unlocks
+    const cityCrime = city?.crimeIndex ?? 50;
+
     if (bm.available) {
-      if (bm.hitmenAvailable) {
+      // Hitmen: Available from combined effects OR high city crime (60+)
+      const hitmenUnlocked = bm.hitmenAvailable || cityCrime >= 60;
+      if (hitmenUnlocked) {
+        // Cost reduced in high-crime cities (easier to find assassins)
+        const hitmanCostMod = cityCrime >= 70 ? 0.7 : cityCrime >= 50 ? 0.85 : 1.0;
         services.push({
           id: 'hire_hitman',
           name: 'Contract Killer',
           emoji: '☠️',
           category: 'criminal',
-          description: 'Eliminate a target',
-          cost: bm.hitmanCost,
+          description: `Eliminate a target. ${cityCrime >= 60 ? 'Local connections.' : ''}`,
+          cost: Math.round((bm.hitmanCost || 10000) * hitmanCostMod),
           available: true,
           riskLevel: 'high',
         });
       }
 
-      if (bm.forgedDocumentsAvailable) {
+      // Forged docs: Available from combined effects OR moderate city crime (50+)
+      const forgedDocsUnlocked = bm.forgedDocumentsAvailable || cityCrime >= 50;
+      if (forgedDocsUnlocked) {
         services.push({
           id: 'forged_docs',
           name: 'Forged Documents',
           emoji: '📄',
           category: 'criminal',
           description: 'Fake ID, passports, visas',
-          cost: 2000,
+          cost: cityCrime >= 60 ? 1500 : 2000, // Cheaper in high-crime cities
           available: true,
           riskLevel: 'medium',
         });
       }
 
-      if (bm.smugglingRoutes) {
+      // Smuggling: Available from combined effects OR city crime 55+
+      const smugglingUnlocked = bm.smugglingRoutes || cityCrime >= 55;
+      if (smugglingUnlocked) {
         services.push({
           id: 'smuggling',
           name: 'Smuggling Service',
           emoji: '📦',
           category: 'criminal',
           description: 'Move equipment across borders',
-          cost: 5000,
+          cost: cityCrime >= 65 ? 3500 : 5000,
           available: true,
           riskLevel: 'medium',
+        });
+      }
+
+      // NEW: Fence stolen goods - only in high-crime cities (65+)
+      if (cityCrime >= 65) {
+        services.push({
+          id: 'fence_goods',
+          name: 'Fence Stolen Goods',
+          emoji: '💎',
+          category: 'criminal',
+          description: 'Sell hot merchandise at 40% value',
+          cost: 0, // Free service, they take a cut
+          available: true,
+          riskLevel: 'medium',
+        });
+      }
+
+      // NEW: Underground clinic - only in high-crime cities (70+)
+      if (cityCrime >= 70) {
+        services.push({
+          id: 'underground_clinic',
+          name: 'Underground Clinic',
+          emoji: '🩺',
+          category: 'criminal',
+          description: 'No-questions-asked medical care',
+          cost: 800,
+          available: true,
+          riskLevel: 'medium',
+          requirements: 'High crime area',
+        });
+      }
+
+      // NEW: Weapons cache - only in very high crime cities (75+)
+      if (cityCrime >= 75) {
+        services.push({
+          id: 'weapons_cache',
+          name: 'Hidden Weapons Cache',
+          emoji: '🔫',
+          category: 'criminal',
+          description: 'Rent access to a stash of illegal weapons',
+          cost: 3000,
+          available: true,
+          riskLevel: 'high',
+          requirements: 'Very high crime area',
         });
       }
     }
