@@ -59,6 +59,33 @@ const COL_LABEL_HEIGHT = 20;
 const ROW_LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWX'.split('');
 const ZOOM_LEVELS = [1, 1.25, 1.5, 1.75, 2];
 
+/**
+ * Parse city sector code like "LJ5", "LD4", "GA4"
+ * Format: [Row Letter][Column Letter][SubSector Number]
+ * - Row: A-X (24 rows) maps to grid row 0-23
+ * - Col: A-Z (26 letters) scaled to 40 columns
+ * - SubSector: Optional numeric suffix (ignored for grid mapping)
+ */
+function parseCitySector(sector: string): { row: number; col: number } | null {
+  if (!sector || sector.length < 2) return null;
+
+  const rowLetter = sector.charAt(0).toUpperCase();
+  const colLetter = sector.charAt(1).toUpperCase();
+
+  // Row: A-X maps to 0-23
+  const rowIndex = ROW_LABELS.indexOf(rowLetter);
+  if (rowIndex < 0) return null;
+
+  // Column: A-Z (26 letters) scaled to 40 columns
+  const colLetterIndex = colLetter.charCodeAt(0) - 'A'.charCodeAt(0);
+  if (colLetterIndex < 0 || colLetterIndex > 25) return null;
+
+  // Scale 26 letters to 40 columns (A=0, Z≈39)
+  const colIndex = Math.round(colLetterIndex * (39 / 25));
+
+  return { row: rowIndex, col: colIndex };
+}
+
 interface GridCell {
   id: string;
   row: number;
@@ -946,15 +973,12 @@ export const WorldMapGrid: React.FC = () => {
         const id = `${ROW_LABELS[row]}${col + 1}`;
 
         // Find cities that might be in this sector
-        // Map our sector codes to the 40x24 grid
+        // Parse city sector codes (e.g., "LJ5" = Row L, Col J scaled to grid)
         const citiesInSector = cities.filter(city => {
-          // Simple mapping - adjust based on your sector system
-          if (!city.sector) return false;
-          const sectorLetter = city.sector.charAt(0);
-          const sectorNum = parseInt(city.sector.slice(1));
-          const mappedRow = ROW_LABELS.indexOf(sectorLetter);
-          const mappedCol = Math.floor(sectorNum * 2); // Scale up
-          return mappedRow === row && Math.abs(mappedCol - col) <= 1;
+          const parsed = parseCitySector(city.sector);
+          if (!parsed) return false;
+          // Match if city is in this row and within 1 column of this cell
+          return parsed.row === row && Math.abs(parsed.col - col) <= 1;
         });
 
         const countriesInSector = [...new Set(citiesInSector.map(c => c.country))];
