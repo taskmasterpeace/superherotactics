@@ -478,4 +478,219 @@ export function getPlayerTerritorySummary(): {
   }
 }
 
+// ============================================================================
+// TC-005: TERRITORY DEFENSE MISSIONS
+// ============================================================================
+
+export interface TerritoryDefenseMission {
+  id: string
+  type: 'defense' | 'liberation' | 'patrol' | 'raid'
+  sectorId: string
+  title: string
+  description: string
+  difficulty: 'easy' | 'medium' | 'hard' | 'extreme'
+  enemyFaction: FactionId
+  enemyCount: number
+  timeLimit?: number          // Hours before territory is lost
+  rewards: {
+    controlBonus: number      // % added to control
+    fame: number
+    money: number
+  }
+  expiresAt: number           // Timestamp when mission expires
+  triggered: boolean          // Whether mission was accepted
+}
+
+/**
+ * Generate defense missions for contested territories
+ */
+export function generateDefenseMissions(): TerritoryDefenseMission[] {
+  const missions: TerritoryDefenseMission[] = []
+  const now = Date.now()
+
+  // Check all territories for contested status
+  state.territoryControl.forEach((control, sectorId) => {
+    // Defense missions for player territories being contested
+    if (control.controllingFaction === 'player' && control.contestedBy) {
+      const urgency = control.liberationProgress > 75 ? 'extreme'
+        : control.liberationProgress > 50 ? 'hard'
+        : control.liberationProgress > 25 ? 'medium'
+        : 'easy'
+
+      missions.push({
+        id: `defense-${sectorId}-${now}`,
+        type: 'defense',
+        sectorId,
+        title: `Defend ${sectorId}`,
+        description: `Enemy forces (${control.contestedBy}) are contesting your territory in sector ${sectorId}. Liberation progress: ${control.liberationProgress}%`,
+        difficulty: urgency,
+        enemyFaction: control.contestedBy,
+        enemyCount: Math.max(3, Math.floor(control.liberationProgress / 15)),
+        timeLimit: Math.max(6, 48 - control.liberationProgress / 2), // 6-48 hours
+        rewards: {
+          controlBonus: 20,
+          fame: 10 + control.liberationProgress / 10,
+          money: 1000 + control.liberationProgress * 50,
+        },
+        expiresAt: now + (48 - control.liberationProgress / 2) * 60 * 60 * 1000,
+        triggered: false,
+      })
+    }
+
+    // Liberation missions for enemy territories
+    if (control.controllingFaction !== 'player' && control.controllingFaction !== 'neutral') {
+      const difficulty = control.controlPercent > 75 ? 'extreme'
+        : control.controlPercent > 50 ? 'hard'
+        : control.controlPercent > 25 ? 'medium'
+        : 'easy'
+
+      missions.push({
+        id: `liberation-${sectorId}-${now}`,
+        type: 'liberation',
+        sectorId,
+        title: `Liberate ${sectorId}`,
+        description: `Sector ${sectorId} is under ${control.controllingFaction} control (${control.controlPercent}%). Launch an attack to liberate the territory.`,
+        difficulty,
+        enemyFaction: control.controllingFaction,
+        enemyCount: Math.max(3, Math.floor(control.militiaStrength / 10)),
+        rewards: {
+          controlBonus: 50,  // Start with 50% control after liberation
+          fame: 20 + control.controlPercent / 5,
+          money: 2000 + control.controlPercent * 100,
+        },
+        expiresAt: now + 7 * 24 * 60 * 60 * 1000, // 1 week
+        triggered: false,
+      })
+    }
+  })
+
+  // Add patrol missions for player territories at risk of attack
+  const playerSectors = getFactionSectors('player')
+  for (const control of playerSectors) {
+    if (control.controlPercent < 75 && !control.contestedBy) {
+      // Vulnerable territory - patrol mission
+      missions.push({
+        id: `patrol-${control.sectorId}-${now}`,
+        type: 'patrol',
+        sectorId: control.sectorId,
+        title: `Patrol ${control.sectorId}`,
+        description: `Your control of sector ${control.sectorId} is weak (${control.controlPercent}%). Patrol the area to strengthen your hold.`,
+        difficulty: 'easy',
+        enemyFaction: 'criminal',
+        enemyCount: 2,
+        rewards: {
+          controlBonus: 10,
+          fame: 5,
+          money: 500,
+        },
+        expiresAt: now + 3 * 24 * 60 * 60 * 1000, // 3 days
+        triggered: false,
+      })
+    }
+  }
+
+  return missions
+}
+
+/**
+ * Get active defense missions
+ */
+export function getActiveDefenseMissions(): TerritoryDefenseMission[] {
+  return generateDefenseMissions().filter(m => Date.now() < m.expiresAt)
+}
+
+/**
+ * Complete a defense mission (called after combat)
+ */
+export function completeDefenseMission(
+  missionId: string,
+  success: boolean
+): void {
+  // Parse sector from mission ID
+  const match = missionId.match(/^(defense|liberation|patrol|raid)-([A-Z]\d+)-/)
+  if (!match) return
+
+  const [, missionType, sectorId] = match
+  const control = getSectorControl(sectorId)
+  if (!control) return
+
+  const store = useGameStore.getState()
+
+  if (success) {
+    if (missionType === 'defense') {
+      // Successfully defended - clear contested status
+      control.contestedBy = null
+      control.liberationProgress = 0
+      control.controlPercent = Math.min(100, control.controlPercent + 20)
+
+      store.addNotification({
+        type: 'mission',
+        priority: 'high',
+        title: 'Territory Defended!',
+        message: `${sectorId} is secure. Control increased to ${control.controlPercent}%`,
+        data: { sectorId }
+      })
+    } else if (missionType === 'liberation') {
+      // Successfully liberated
+      const oldFaction = control.controllingFaction
+      control.controllingFaction = 'player'
+      control.controlPercent = 50
+      control.contestedBy = null
+      control.liberationProgress = 0
+
+      store.addNotification({
+        type: 'mission',
+        priority: 'urgent',
+        title: 'Territory Liberated!',
+        message: `${sectorId} is now under your control!`,
+        data: { sectorId, previousController: oldFaction }
+      })
+
+      EventBus.emit<GameEvent>({
+        id: `territory-liberated-${sectorId}-${Date.now()}`,
+        type: 'territory:captured',
+        timestamp: Date.now(),
+        location: { sector: sectorId },
+        data: {
+          sectorId,
+          newController: 'player',
+          previousController: oldFaction
+        }
+      })
+    } else if (missionType === 'patrol') {
+      // Successful patrol - strengthen control
+      control.controlPercent = Math.min(100, control.controlPercent + 10)
+      control.militiaStrength = Math.min(100, control.militiaStrength + 5)
+
+      store.addNotification({
+        type: 'info',
+        priority: 'low',
+        title: 'Patrol Complete',
+        message: `Control of ${sectorId} strengthened to ${control.controlPercent}%`,
+        data: { sectorId }
+      })
+    }
+
+    // Update bonuses
+    control.bonuses = calculateSectorBonuses(sectorId)
+    state.territoryControl.set(sectorId, control)
+  } else {
+    // Failed mission
+    if (missionType === 'defense') {
+      // Failed defense - accelerate liberation
+      control.liberationProgress = Math.min(100, control.liberationProgress + 30)
+
+      store.addNotification({
+        type: 'alert',
+        priority: 'high',
+        title: 'Defense Failed!',
+        message: `${sectorId} is slipping from your control. Liberation progress: ${control.liberationProgress}%`,
+        data: { sectorId }
+      })
+    }
+
+    state.territoryControl.set(sectorId, control)
+  }
+}
+
 export default initTerritorySystem

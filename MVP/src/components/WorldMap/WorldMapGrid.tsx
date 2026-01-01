@@ -3,6 +3,14 @@ import { cities, City } from '../../data/cities';
 import { getCountryByName } from '../../data/countries';
 import { useGameStore, TravelingUnit, FleetVehicle, TIME_SPEEDS, TimeSpeed } from '../../stores/enhancedGameStore';
 import CityActionsPanel from './CityActionsPanel';
+// TC-004: Territory display imports
+import {
+  getSectorControl,
+  getControlLevel,
+  getControlColor,
+  TerritoryControl,
+  FactionId,
+} from '../../data/territorySystem';
 import {
   ChevronUp,
   ChevronDown,
@@ -1297,29 +1305,64 @@ export const WorldMapGrid: React.FC = () => {
                       height: `${MAP_HEIGHT}px`,
                     }}
                   >
-                    {gridData.map((cell) => (
-                      <div
-                        key={cell.id}
-                        className={cn(
-                          "border transition-colors pointer-events-auto",
-                          selectedCell?.id === cell.id
-                            ? 'bg-accent/30 border-accent border-2'
-                            : hoveredCell?.id === cell.id
-                              ? 'bg-primary/20 border-primary'
-                              : cell.cities.length > 0
-                                ? 'border-primary/40 hover:bg-primary/20'
-                                : 'border-primary/20 hover:bg-surface/50'
-                        )}
-                        onClick={() => handleCellClick(cell)}
-                        onMouseEnter={() => setHoveredCell(cell)}
-                        onMouseLeave={() => setHoveredCell(null)}
-                      >
-                        {/* City indicator */}
-                        {cell.cities.length > 0 && !hoveredCell && selectedCell?.id !== cell.id && (
-                          <div className="absolute top-1 right-1 w-2 h-2 bg-success rounded-full shadow-lg shadow-success/50" />
-                        )}
-                      </div>
-                    ))}
+                    {gridData.map((cell) => {
+                      // TC-004: Get territory control for this cell
+                      const territoryControl = getSectorControl(cell.id);
+                      const controlLevel = territoryControl ? getControlLevel(territoryControl.controlPercent) : 'none';
+                      const territoryColor = territoryControl && territoryControl.controllingFaction !== 'neutral'
+                        ? getControlColor(controlLevel)
+                        : null;
+
+                      // Faction-specific colors
+                      const factionColors: Record<FactionId, string> = {
+                        player: '#00ff00',      // Green
+                        criminal: '#ff0000',    // Red
+                        government: '#0066ff',  // Blue
+                        corporate: '#ffcc00',   // Gold
+                        rebel: '#ff6600',       // Orange
+                        neutral: 'transparent',
+                        contested: '#ffff00',   // Yellow
+                      };
+
+                      const bgColor = territoryControl && territoryControl.controllingFaction !== 'neutral'
+                        ? factionColors[territoryControl.controllingFaction]
+                        : null;
+                      const bgOpacity = territoryControl ? territoryControl.controlPercent / 400 : 0; // Max 25% opacity
+
+                      return (
+                        <div
+                          key={cell.id}
+                          className={cn(
+                            "border transition-colors pointer-events-auto relative",
+                            selectedCell?.id === cell.id
+                              ? 'bg-accent/30 border-accent border-2'
+                              : hoveredCell?.id === cell.id
+                                ? 'bg-primary/20 border-primary'
+                                : cell.cities.length > 0
+                                  ? 'border-primary/40 hover:bg-primary/20'
+                                  : 'border-primary/20 hover:bg-surface/50'
+                          )}
+                          style={{
+                            // TC-004: Territory control color overlay
+                            backgroundColor: bgColor
+                              ? `rgba(${parseInt(bgColor.slice(1, 3), 16)}, ${parseInt(bgColor.slice(3, 5), 16)}, ${parseInt(bgColor.slice(5, 7), 16)}, ${bgOpacity})`
+                              : undefined,
+                          }}
+                          onClick={() => handleCellClick(cell)}
+                          onMouseEnter={() => setHoveredCell(cell)}
+                          onMouseLeave={() => setHoveredCell(null)}
+                        >
+                          {/* City indicator */}
+                          {cell.cities.length > 0 && !hoveredCell && selectedCell?.id !== cell.id && (
+                            <div className="absolute top-1 right-1 w-2 h-2 bg-success rounded-full shadow-lg shadow-success/50" />
+                          )}
+                          {/* TC-004: Contested territory indicator */}
+                          {territoryControl?.contestedBy && (
+                            <div className="absolute bottom-1 left-1 w-2 h-2 bg-warning rounded-full animate-pulse" />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 

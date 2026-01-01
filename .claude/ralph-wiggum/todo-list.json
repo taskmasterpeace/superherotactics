@@ -6,7 +6,7 @@
     "autoContinue": true,
     "commitAfterSystem": true
   },
-  "currentSystem": "TERRITORY",
+  "currentSystem": "EMAIL-SYS",
   "systems": [
     {
       "id": "HOOK-INFRA",
@@ -775,42 +775,42 @@
     {
       "id": "TERRITORY",
       "name": "Territory Control System",
-      "status": "pending",
+      "status": "completed",
       "priority": 13,
       "phase": 4,
       "tasks": [
         {
           "id": "TC-001",
           "task": "Implement sector control mechanics",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "TC-002",
           "task": "Create militia training system",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "TC-003",
           "task": "Implement faction ownership",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "TC-004",
           "task": "Display territory on world map",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "TC-005",
           "task": "Create territory defense missions",
-          "status": "pending"
+          "status": "completed"
         }
       ],
       "triggers": [],
       "files": [
-        "MVP/src/data/sectors.ts",
-        "MVP/src/stores/enhancedGameStore.ts"
+        "MVP/src/data/territorySystem.ts",
+        "MVP/src/components/WorldMap/WorldMapGrid.tsx"
       ],
-      "completedAt": null
+      "completedAt": "2025-01-01T03:00:00.000Z"
     },
     {
       "id": "EMAIL-SYS",
