@@ -246,7 +246,7 @@ export const DAMAGE_TYPES: Record<string, DamageDefinition> = {
         },
         originModifiers: { biological: 1.0, robotic: 0.7, energy: 0.3, undead: 0.9, construct: 0.6 },
         armorInteraction: {
-            armorEffectiveness: 2.0,  // Armor HIGHLY effective
+            armorEffectiveness: 1.0,  // BF-004: Balanced for gameplay (was 2.0)
             ignoresArmor: false,
             damagesArmor: false,
             bypassesShields: false,
@@ -272,7 +272,7 @@ export const DAMAGE_TYPES: Record<string, DamageDefinition> = {
         description: 'Standard bullets',
         originModifiers: { biological: 1.0, robotic: 0.5, energy: 0.2, undead: 0.8, construct: 0.4 },
         armorInteraction: {
-            armorEffectiveness: 1.5,
+            armorEffectiveness: 1.0,  // BF-004: Balanced for gameplay (was 1.5)
             ignoresArmor: false,
             damagesArmor: false,
             bypassesShields: false,

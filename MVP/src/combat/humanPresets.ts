@@ -165,17 +165,18 @@ export function getWeaponsByCategory(category: 'melee' | 'ranged' | 'thrown' | '
 
 export const WEAPONS: Record<string, SimWeapon> = {
   // Pistols
+  // BF-001/BF-002: Pistols get lower AP cost and CQB bonus for viability
   lightPistol: {
     name: 'Light Pistol',
     damage: 15,
     accuracy: 70,
     damageType: 'GUNFIRE_BULLET',
     range: 10,
-    apCost: 3,   // Was 2 - quick pistol shots
+    apCost: 2,   // Restored to 2 - quick pistol shots
     isLightAttack: true,  // Quick shot - can move after
     rangeBrackets: {
-      pointBlank: 2, pointBlankMod: 10,
-      short: 5, shortMod: 5,
+      pointBlank: 2, pointBlankMod: 20,  // +20 at CQB (was +10)
+      short: 5, shortMod: 10,            // +10 short range (was +5)
       optimal: 10, optimalMod: 0,
       long: 15, longMod: -10,
       max: 20, extremeMod: -25,
@@ -187,10 +188,10 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 70,
     damageType: 'GUNFIRE_BULLET',
     range: 12,
-    apCost: 4,   // Was 2 - aimed shots
+    apCost: 3,   // Reduced from 4 to 3
     rangeBrackets: {
-      pointBlank: 2, pointBlankMod: 10,
-      short: 5, shortMod: 5,
+      pointBlank: 2, pointBlankMod: 20,  // +20 at CQB (was +10)
+      short: 5, shortMod: 10,            // +10 short range (was +5)
       optimal: 12, optimalMod: 0,
       long: 18, longMod: -10,
       max: 25, extremeMod: -25,
@@ -261,18 +262,19 @@ export const WEAPONS: Record<string, SimWeapon> = {
     },
   },
 
-  // Shotguns
+  // Shotguns - BF-004: CQB specialists (target 75-85% at close range)
+  // Balance: High damage, slow fire rate, poor at range
   pumpShotgun: {
     name: 'Pump Shotgun',
-    damage: 35,
+    damage: 32,               // Reduced from 35
     accuracy: 60,
     damageType: 'GUNFIRE_BUCKSHOT',
     range: 8,
-    apCost: 5,   // Was 3 - pump action cycle
-    knockbackForce: 90,
+    apCost: 3,   // Restored - pump action but strong
+    knockbackForce: 75,       // Good knockback for CQB control
     rangeBrackets: {
-      pointBlank: 2, pointBlankMod: 30,
-      short: 4, shortMod: 15,
+      pointBlank: 2, pointBlankMod: 25,  // Restored CQB dominance
+      short: 4, shortMod: 12,            // Good short range
       optimal: 6, optimalMod: 0,
       long: 10, longMod: -20,
       max: 15, extremeMod: -40,
@@ -280,15 +282,15 @@ export const WEAPONS: Record<string, SimWeapon> = {
   },
   combatShotgun: {
     name: 'Combat Shotgun',
-    damage: 30,
+    damage: 28,               // Reduced from 30
     accuracy: 65,
     damageType: 'GUNFIRE_BUCKSHOT',
     range: 10,
-    apCost: 4,   // Was 2 - semi-auto shotgun
-    knockbackForce: 80,
+    apCost: 2,   // Restored - semi-auto rapid fire
+    knockbackForce: 70,       // Good knockback
     rangeBrackets: {
-      pointBlank: 2, pointBlankMod: 25,
-      short: 5, shortMod: 10,
+      pointBlank: 2, pointBlankMod: 22,  // Restored CQB bonus
+      short: 5, shortMod: 10,            // Restored short range
       optimal: 8, optimalMod: 0,
       long: 12, longMod: -15,
       max: 18, extremeMod: -35,
@@ -735,22 +737,23 @@ export const UNIT_PRESETS: Record<string, UnitPreset> = {
   },
 
   // Elite operatives
+  // Reduced DR for nightmare scenario viability
   operativeSniper: {
     name: 'Operative (Sniper)',
     description: 'Elite sniper with tactical gear',
     stats: HUMAN_BASELINE_STATS.elite,
-    hp: 100,
-    dr: 15,
-    stoppingPower: 8,
+    hp: 90,             // Reduced from 100
+    dr: 10,             // Reduced from 15 - rifles work
+    stoppingPower: 5,   // Reduced from 8
     weapon: WEAPONS.sniperRifle,
   },
   operativeSMG: {
     name: 'Operative (SMG)',
     description: 'Elite operative with SMG and tactical gear',
     stats: HUMAN_BASELINE_STATS.elite,
-    hp: 100,
-    dr: 15,
-    stoppingPower: 8,
+    hp: 90,             // Reduced from 100
+    dr: 10,             // Reduced from 15 - rifles work
+    stoppingPower: 5,   // Reduced from 8
     weapon: WEAPONS.smg,
   },
 
@@ -836,21 +839,22 @@ export const UNIT_PRESETS: Record<string, UnitPreset> = {
   },
   thugPistol: {
     name: 'Armed Thug',
-    description: 'Criminal with a cheap pistol',
+    description: 'Criminal with a standard pistol',
     stats: HUMAN_BASELINE_STATS.average,
-    hp: 50,
-    dr: 0,
+    hp: 60,             // Increased from 50
+    dr: 2,              // Added light protection
     stoppingPower: 0,
-    weapon: WEAPONS.lightPistol,
+    weapon: WEAPONS.standardPistol,  // Upgraded from lightPistol
   },
   gangEnforcer: {
     name: 'Gang Enforcer',
-    description: 'Experienced street fighter with brass knuckles',
+    description: 'Experienced gang member with shotgun',
+    // BF-005: Changed from brass knuckles to shotgun for close-range dominance
     stats: { MEL: 20, AGL: 18, STR: 22, STA: 20 },
-    hp: 70,
-    dr: 2,
+    hp: 80,             // Increased from 70 - tougher
+    dr: 4,              // Increased from 2 - wearing leather
     stoppingPower: 0,
-    weapon: WEAPONS.brassKnuckles,
+    weapon: WEAPONS.pumpShotgun,
   },
   gangLeader: {
     name: 'Gang Leader',
@@ -868,27 +872,27 @@ export const UNIT_PRESETS: Record<string, UnitPreset> = {
     name: 'Heavy Gunner',
     description: 'Soldier with LMG and heavy armor',
     stats: { MEL: 15, AGL: 12, STR: 28, STA: 25 },
-    hp: 120,
-    dr: 12,             // Reduced for balance
-    stoppingPower: 8,   // Blocks weak pistols
+    hp: 100,            // Reduced from 120
+    dr: 10,             // Reduced from 12 - rifles work
+    stoppingPower: 5,   // Reduced from 8 - SMGs work
     weapon: WEAPONS.lmg,
   },
   rocketTrooper: {
     name: 'Rocket Trooper',
     description: 'Anti-vehicle specialist with rocket launcher',
     stats: { MEL: 15, AGL: 15, STR: 25, STA: 22 },
-    hp: 100,
-    dr: 15,
-    stoppingPower: 8,
+    hp: 90,             // Reduced from 100
+    dr: 10,             // Reduced from 15 - rifles work
+    stoppingPower: 5,   // Reduced from 8 - SMGs work
     weapon: WEAPONS.rocketLauncher,
   },
   flametrooper: {
     name: 'Flametrooper',
     description: 'Close-range specialist with flamethrower',
     stats: { MEL: 18, AGL: 15, STR: 22, STA: 25 },
-    hp: 110,
-    dr: 18,
-    stoppingPower: 8,
+    hp: 95,             // Reduced from 110
+    dr: 10,             // Reduced from 18 - rifles work
+    stoppingPower: 5,   // Reduced from 8 - SMGs work
     weapon: WEAPONS.flamethrower,
   },
 
@@ -916,48 +920,49 @@ export const UNIT_PRESETS: Record<string, UnitPreset> = {
     name: 'War Bot',
     description: 'Heavy combat robot with plasma rifle',
     stats: { MEL: 20, AGL: 12, STR: 28, STA: 28 },
-    hp: 120,
-    dr: 12,             // Reduced for balance
-    stoppingPower: 6,   // Allows rifles through
+    hp: 100,            // Reduced from 120 for nightmare viability
+    dr: 8,              // Reduced from 12 - rifles penetrate well
+    stoppingPower: 4,   // Reduced from 6 - SMGs work
     weapon: WEAPONS.plasmaRifle,
   },
   terminatorBot: {
     name: 'Terminator',
-    description: 'Advanced war machine with minigun',
-    stats: { MEL: 25, AGL: 18, STR: 35, STA: 35 },
-    hp: 180,
-    dr: 18,             // Reduced for balance
-    stoppingPower: 10,  // Blocks weak weapons
+    description: 'Advanced war machine with minigun - slow to turn (flanking weakness)',
+    stats: { MEL: 25, AGL: 14, STR: 35, STA: 35 },  // Slow AGL for flanking
+    hp: 120,            // Reduced from 140 - more beatable
+    dr: 8,              // Reduced from 10 - rifles do significant damage
+    stoppingPower: 4,   // Reduced from 6 - SMGs work
     weapon: WEAPONS.minigun,
   },
 
   // ============ SUPERHUMANS ============
+  // Target: Tough but beatable with tactics (30-50% player win rate)
 
   mutantBruiser: {
     name: 'Mutant Bruiser',
-    description: 'Enhanced strength and durability',
-    stats: { MEL: 35, AGL: 20, STR: 40, STA: 35 },
-    hp: 180,
-    dr: 15,
-    stoppingPower: 10,
+    description: 'Enhanced strength and durability - slow but hits hard',
+    stats: { MEL: 35, AGL: 15, STR: 40, STA: 35 },  // Slow for flanking
+    hp: 140,            // Reduced from 180
+    dr: 10,             // Reduced from 15
+    stoppingPower: 6,   // Reduced from 10
     weapon: WEAPONS.powerFist,
   },
   psychicAgent: {
     name: 'Psychic Agent',
-    description: 'Mind-enhanced operative with railgun',
+    description: 'Mind-enhanced operative with railgun - glass cannon',
     stats: { MEL: 20, AGL: 30, STR: 18, STA: 22 },
-    hp: 90,
-    dr: 8,
-    stoppingPower: 5,
+    hp: 80,             // Glass cannon - squishy
+    dr: 5,              // Reduced from 8
+    stoppingPower: 2,   // Reduced from 5
     weapon: WEAPONS.railgun,
   },
   cyborgSoldier: {
     name: 'Cyborg Soldier',
     description: 'Human-machine hybrid with plasma rifle',
-    stats: { MEL: 28, AGL: 25, STR: 30, STA: 28 },
-    hp: 140,
-    dr: 22,
-    stoppingPower: 12,
+    stats: { MEL: 28, AGL: 22, STR: 30, STA: 28 },  // Slightly slower
+    hp: 110,            // Reduced from 140
+    dr: 12,             // Reduced from 22
+    stoppingPower: 6,   // Reduced from 12
     weapon: WEAPONS.plasmaRifle,
   },
   superSpeedster: {
@@ -971,41 +976,43 @@ export const UNIT_PRESETS: Record<string, UnitPreset> = {
   },
 
   // ============ BOSSES ============
+  // BF-007: Reduced boss stats for beatable without powers
+  // Target: 20-40% player win rate with good tactics
 
   bossJuggernaut: {
     name: 'Juggernaut',
-    description: 'Unstoppable brute with minigun',
-    stats: { MEL: 35, AGL: 20, STR: 45, STA: 45 },  // More agile
-    hp: 280,
-    dr: 12,             // Rifles do ~5 damage
-    stoppingPower: 8,   // Blocks pistols
+    description: 'Heavy brute with minigun - slow to turn (flanking weakness)',
+    stats: { MEL: 30, AGL: 12, STR: 40, STA: 40 },  // Slow AGL = easy to flank
+    hp: 320,            // Very tanky - need sustained fire
+    dr: 16,             // Rifles do ~9 damage, needs concentrated fire
+    stoppingPower: 8,   // Resists weak weapons
     weapon: WEAPONS.minigun,
   },
   bossAssassin: {
     name: 'Shadow Assassin',
-    description: 'Deadly silent killer with vibroblade',
-    stats: { MEL: 40, AGL: 45, STR: 25, STA: 30 },
-    hp: 150,
-    dr: 10,
-    stoppingPower: 5,
+    description: 'Deadly killer - glass cannon (low HP)',
+    stats: { MEL: 40, AGL: 40, STR: 22, STA: 22 },
+    hp: 100,            // Reduced from 150 - glass cannon
+    dr: 5,              // Reduced from 10
+    stoppingPower: 2,
     weapon: WEAPONS.vibroblade,
   },
   bossMechsuit: {
     name: 'Mech Pilot',
-    description: 'Power armor with rocket launcher',
-    stats: { MEL: 25, AGL: 20, STR: 40, STA: 40 },
-    hp: 200,
-    dr: 22,             // Reduced for balance
-    stoppingPower: 15,  // Heavy armor
+    description: 'Power armor - weak joints (flanking hits harder)',
+    stats: { MEL: 20, AGL: 12, STR: 35, STA: 35 },  // Very slow - easy to flank
+    hp: 200,            // Tanky power armor
+    dr: 14,             // Heavy armor - rifles do moderate damage
+    stoppingPower: 7,   // Resists weak weapons
     weapon: WEAPONS.rocketLauncher,
   },
   bossWarlord: {
     name: 'Warlord',
-    description: 'Elite commander with railgun',
-    stats: { MEL: 35, AGL: 30, STR: 35, STA: 35 },
-    hp: 200,
-    dr: 25,
-    stoppingPower: 15,
+    description: 'Elite commander - overconfident (lower evasion)',
+    stats: { MEL: 30, AGL: 20, STR: 30, STA: 30 },  // Slower to allow flanking
+    hp: 180,            // Tough commander
+    dr: 14,             // Heavy tactical armor
+    stoppingPower: 7,   // High-grade gear
     weapon: WEAPONS.railgun,
   },
 };

@@ -44,14 +44,15 @@ export interface StanceModifiers {
   apCostMod: number;
 }
 
-// BALANCE NOTE: Defensive reduced from +25 to +20 evasion after 78% win rate vs normal.
+// BALANCE NOTE: BF-003 - Defensive reduced from +20 to +12 evasion.
+// Simulation showed +18% win rate, target is +5-15%.
 // Target: each stance should be situationally useful, not always defensive.
 export const STANCES: Record<StanceType, StanceModifiers> = {
   normal: { accuracyMod: 0, evasionMod: 0, apCostMod: 0 },
   aggressive: { accuracyMod: 15, evasionMod: -15, apCostMod: 0 },
-  defensive: { accuracyMod: -15, evasionMod: 20, apCostMod: 0 },  // Was 25
+  defensive: { accuracyMod: -10, evasionMod: 12, apCostMod: 0 },  // Reduced from 20 to 12
   overwatch: { accuracyMod: 10, evasionMod: -10, apCostMod: 0 },
-  sneaking: { accuracyMod: -10, evasionMod: 20, apCostMod: 1 },
+  sneaking: { accuracyMod: -10, evasionMod: 15, apCostMod: 1 },   // Reduced from 20 to 15
 };
 
 // ============ COVER TYPES ============
@@ -565,6 +566,9 @@ export interface SimUnit {
 
   // Night combat
   hasNightVision?: boolean;  // Unit has night vision equipment
+
+  // Morale/Panic system
+  panicLevel?: 'steady' | 'shaken' | 'panicked' | 'broken';
 }
 
 // ============ SHIELD REGENERATION ============
