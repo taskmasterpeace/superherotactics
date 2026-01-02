@@ -17,6 +17,7 @@ import { getTimeEngine } from './timeEngine';
 import { getCountryByCode } from './countries';
 import { getLifeEventManager } from './npcLifeEvents';
 import { getCharacterRegistryManager } from './worldSystems/characterRegistry';
+import { getPersonalityTraits } from './personalitySystem';
 
 // ============================================================================
 // TYPES
@@ -207,13 +208,45 @@ const LAST_WORDS: string[] = [
 ];
 
 /**
- * Generate last words based on character personality
+ * MBTI-specific last words for more personality-driven death scenes
+ */
+const MBTI_LAST_WORDS: Record<string, string[]> = {
+  // Analysts
+  'INTJ': ["The mission... complete it...", "I calculated... every variable..."],
+  'INTP': ["Fascinating... so this is...", "The theory was... sound..."],
+  'ENTJ': ["Command passes to you...", "Lead them... to victory..."],
+  'ENTP': ["Well, that's... unexpected...", "Should've... tried plan B..."],
+  // Diplomats
+  'INFJ': ["Remember what we... fought for...", "The cause... lives on..."],
+  'INFP': ["Stay true to... yourselves...", "My ideals... don't let them die..."],
+  'ENFJ': ["Take care of... each other...", "You were... all family..."],
+  'ENFP': ["What an... adventure...", "No regrets... none..."],
+  // Sentinels
+  'ISTJ': ["Duty... fulfilled...", "By the book... to the end..."],
+  'ISFJ': ["Protect them... for me...", "Tell my family... I'm sorry..."],
+  'ESTJ': ["Hold the line...", "Don't let them... breach..."],
+  'ESFJ': ["Everyone okay...?", "The team... comes first..."],
+  // Explorers
+  'ISTP': ["Not bad...", "Clean shot..."],
+  'ISFP': ["It's... beautiful...", "So peaceful... now..."],
+  'ESTP': ["Hell of a... ride...", "Go out... fighting..."],
+  'ESFP': ["Party's... over...", "What a way... to go..."],
+};
+
+/**
+ * Generate last words based on character personality (MBTI-driven)
  */
 function generateLastWords(npc: NPCEntity): string | undefined {
   // 60% chance of last words
   if (Math.random() > 0.6) return undefined;
 
-  // TODO: Could be MBTI-based for more personality
+  // Use MBTI-specific last words if available
+  if (npc.mbti && MBTI_LAST_WORDS[npc.mbti]) {
+    const words = MBTI_LAST_WORDS[npc.mbti];
+    return words[Math.floor(Math.random() * words.length)];
+  }
+
+  // Fallback to generic
   return LAST_WORDS[Math.floor(Math.random() * LAST_WORDS.length)];
 }
 
@@ -249,10 +282,22 @@ export function calculateMoraleImpact(
     // Funeral choice affects recovery
     impact += funeralOption.moraleRecovery;
 
-    // MBTI affects grief response
-    // Feelers (F) affected more than Thinkers (T)
-    if (survivor.mbti?.includes('F')) {
-      impact -= 10;
+    // MBTI affects grief response using personality traits
+    if (survivor.mbti) {
+      const traits = getPersonalityTraits(survivor.mbti);
+      if (traits) {
+        // Sociability: Higher sociability = more affected by team loss
+        impact -= Math.round((traits.sociability - 5) * 2);  // -8 to +8
+
+        // Volatility: Higher volatility = more emotional response
+        impact -= Math.round((traits.volatility - 5) * 1.5);  // -6 to +6
+
+        // Discipline: Higher discipline = better at compartmentalizing
+        impact += Math.round((traits.discipline - 5) * 1.5);  // -6 to +6
+
+        // Harm avoidance: Pacifists more affected by combat deaths
+        impact -= Math.round((traits.harmAvoidance - 5));  // -4 to +4
+      }
     }
 
     effects.push({

@@ -12,6 +12,8 @@ import {
   TimePassedEvent,
   GameEvent
 } from './eventBus'
+import { ALL_WEAPONS } from './weapons'
+import { ALL_ARMOR } from './armor'
 import {
   GameTime,
   TimeOfDay,
@@ -495,8 +497,34 @@ function calculateWeeklyExpenses(): number {
   // Base maintenance
   expenses += 200
 
-  // Equipment upkeep
-  // TODO: Calculate from equipment condition
+  // Equipment upkeep - calculate from equipped items
+  const characters = store.characters || []
+  let equipmentMaintenance = 0
+
+  for (const char of characters) {
+    // Weapon maintenance (2% of weapon cost per week)
+    if (char.equippedWeapon) {
+      const weapon = ALL_WEAPONS.find(w => w.id === char.equippedWeapon || w.name === char.equippedWeapon)
+      if (weapon?.costValue) {
+        equipmentMaintenance += Math.ceil(weapon.costValue * 0.02)
+      }
+    }
+
+    // Armor maintenance (1.5% of armor cost per week)
+    if (char.equippedArmor) {
+      const armor = ALL_ARMOR.find(a => a.id === char.equippedArmor || a.name === char.equippedArmor)
+      if (armor?.costValue) {
+        equipmentMaintenance += Math.ceil(armor.costValue * 0.015)
+      }
+    }
+  }
+
+  // Minimum maintenance cost if any equipment equipped
+  if (equipmentMaintenance > 0) {
+    equipmentMaintenance = Math.max(50, equipmentMaintenance)  // At least $50
+  }
+
+  expenses += equipmentMaintenance
 
   return expenses
 }

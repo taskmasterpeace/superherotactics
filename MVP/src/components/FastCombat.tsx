@@ -120,8 +120,8 @@ function combatReducer(state: CombatState, action: CombatAction): CombatState {
 function convertBattleLogToEntries(log: AttackResult[]): CombatLogEntry[] {
   return log.map((result, index) => ({
     id: index,
-    round: 1, // TODO: Track rounds in battleRunner
-    turn: index + 1,
+    round: result.round || 1,
+    turn: result.turn || index + 1,
     type: 'attack' as const,
     actorId: result.attacker,
     actorName: result.attacker,

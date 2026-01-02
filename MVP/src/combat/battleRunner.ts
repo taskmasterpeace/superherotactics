@@ -239,6 +239,8 @@ export function runBattle(
         if (inRange && canPerformAction(unit, 'attack')) {
           // Attack (ends turn)
           const result = resolveAttack(unit, target, distance);
+          result.round = rounds;
+          result.turn = totalTurns;
           log.push(result);
           applyAttackResult(target, result);
           spendAction(unit, 'attack'); // Ends turn
@@ -264,6 +266,8 @@ export function runBattle(
           if (canCounterAttack(target, unit, result)) {
             const counterResult = resolveCounterAttack(target, unit);
             if (counterResult) {
+              counterResult.round = rounds;
+              counterResult.turn = totalTurns;
               log.push(counterResult);
               applyAttackResult(unit, counterResult);
             }

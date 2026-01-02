@@ -766,6 +766,10 @@ export interface AttackResult {
 
   // Internal: full status effect instances for application
   _statusEffects?: StatusEffectInstance[];
+
+  // Combat tracking
+  round?: number;  // Combat round this attack occurred in
+  turn?: number;   // Turn number within the battle
 }
 
 // ============ BATTLE CONFIGURATION ============

@@ -220,8 +220,43 @@ export default function CompleteTacticalCombat() {
       if (attacker.stats.STR >= 40) {
         const knockbackDistance = Math.floor(attacker.stats.STR / 10) - 3
         if (knockbackDistance > 0) {
-          addLogEntry(`Knockback: ${target.name} knocked back ${knockbackDistance} squares`)
-          // TODO: Implement knockback movement
+          // Calculate direction away from attacker
+          const [attackerX, attackerY] = attacker.position
+          const dx = targetX - attackerX
+          const dy = targetY - attackerY
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          const dirX = dist > 0 ? Math.sign(dx) : 0
+          const dirY = dist > 0 ? Math.sign(dy) : 0
+
+          // Calculate new position
+          let newX = targetX
+          let newY = targetY
+          let actualKnockback = 0
+
+          for (let i = 0; i < knockbackDistance; i++) {
+            const nextX = newX + dirX
+            const nextY = newY + dirY
+
+            // Check bounds (15x15 grid)
+            if (nextX < 0 || nextX >= 15 || nextY < 0 || nextY >= 15) break
+            // Check for blocking unit
+            if (newGrid[nextY]?.[nextX]?.character) break
+
+            newX = nextX
+            newY = nextY
+            actualKnockback++
+          }
+
+          if (actualKnockback > 0) {
+            // Get updated target with new health
+            const updatedTarget = newGrid[targetY][targetX].character!
+            // Clear old position
+            newGrid[targetY][targetX] = { ...newGrid[targetY][targetX], character: undefined }
+            // Set new position with updated coordinates
+            const movedTarget = { ...updatedTarget, position: [newX, newY] as [number, number] }
+            newGrid[newY][newX] = { ...newGrid[newY][newX], character: movedTarget }
+            addLogEntry(`Knockback: ${target.name} knocked back ${actualKnockback} squares`)
+          }
         }
       }
       
