@@ -1,0 +1,26 @@
+diff --git a/MVP/src/game/scenes/CombatScene.ts b/MVP/src/game/scenes/CombatScene.ts
+index original..modified
+@@ -607,10 +607,13 @@ interface Unit {
+   codename: string;
+   team: 'blue' | 'red' | 'green';
+   hp: number;
+   maxHp: number;
++  shield: number; // Current shield HP
++  maxShield: number; // Maximum shield HP
++  shieldRegen: number; // Shield regeneration per turn
+   ap: number;
+   maxAp: number;
+   position: Position;
+   facing: number;
+   statusEffects: StatusEffectInstance[];
+@@ -635,10 +638,11 @@ interface Unit {
+   // Phaser objects
+   sprite?: Phaser.GameObjects.Sprite;
+   healthBar?: Phaser.GameObjects.Graphics;
+   healthBarBg?: Phaser.GameObjects.Rectangle;
++  shieldBar?: Phaser.GameObjects.Graphics; // Shield bar overlay
+   nameText?: Phaser.GameObjects.Text;
+   selectionTile?: Phaser.GameObjects.Graphics;
+   effectsContainer?: Phaser.GameObjects.Container;
+   statusIconsText?: Phaser.GameObjects.Text; // Emoji status icons
+   stanceText?: Phaser.GameObjects.Text; // Stance indicator

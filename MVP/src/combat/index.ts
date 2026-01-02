@@ -95,7 +95,48 @@ export {
 export {
   runBattle,
   runQuickBattle,
+  // Grid battle system
+  runGridBattle,
+  runQuickGridBattle,
 } from './battleRunner';
+
+export type { GridBattleConfig } from './battleRunner';
+
+// Grid engine
+export {
+  parseMapTemplate,
+  createOpenMap,
+  getTile,
+  isWalkable,
+  getMoveCost,
+  gridDistance,
+  manhattanDistance,
+  hasLineOfSight,
+  getCoverAtPosition,
+  findPath,
+  getReachableTiles,
+  placeUnit,
+  removeUnit,
+  moveUnit,
+  findUnitPosition,
+} from './gridEngine';
+
+export type { GridTile, GridMap, CoverType } from './gridEngine';
+
+// Map generator
+export {
+  getTemplateById,
+  loadMapTemplate,
+  getRandomTemplateForCity,
+  getTemplateIds,
+  generateMap,
+  generateQuickMap,
+} from './mapGenerator';
+
+export type { MapSize, MapTerrain, MapConfig } from './mapGenerator';
+
+// Grid battle test
+export { testGridCombat } from './gridBattleTest';
 
 // Batch testing
 export {

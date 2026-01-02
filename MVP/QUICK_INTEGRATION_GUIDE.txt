@@ -1,0 +1,173 @@
+================================================================================
+COMBAT RESULTS → STRATEGIC LAYER - QUICK INTEGRATION GUIDE
+================================================================================
+
+FILES CREATED:
+✓ C:\git\sht\MVP\src\game\EventBridge.ts                  [UPDATED]
+✓ C:\git\sht\MVP\src\stores\combatResultsHandler.ts       [NEW]
+✓ C:\git\sht\MVP\src\game\scenes\CombatResultsBuilder.ts  [NEW]
+✓ C:\git\sht\MVP\src\integration\README_COMBAT_INTEGRATION.md [FULL DOCS]
+
+MANUAL CHANGES NEEDED (3 files):
+================================================================================
+
+1. CombatScene.ts - Add Enhanced Result Emission
+   Location: C:\git\sht\MVP\src\game\scenes\CombatScene.ts
+
+   a) Add imports (line ~14):
+   ─────────────────────────────────────────────────────────────────────────
+   import { EventBridge, Position, UnitData, ActionPayload, CombatCharacter,
+            EnhancedCombatResult } from '../EventBridge';
+   import { buildEnhancedCombatResult, logCombatResultSummary }
+          from './CombatResultsBuilder';
+   ─────────────────────────────────────────────────────────────────────────
+
+   b) Add property (line ~700):
+   ─────────────────────────────────────────────────────────────────────────
+   private missionContext?: { sector: string; city: string; country: string };
+   ─────────────────────────────────────────────────────────────────────────
+
+   c) Capture context in create() (line ~1600):
+   ─────────────────────────────────────────────────────────────────────────
+   const gameStore = (window as any).__GAME_STORE__;
+   if (gameStore && gameStore.pendingMission) {
+     this.missionContext = {
+       sector: gameStore.currentSector || 'unknown',
+       city: gameStore.pendingMission.city || 'unknown',
+       country: gameStore.selectedCountry || 'unknown'
+     };
+   }
+   ─────────────────────────────────────────────────────────────────────────
+
+   d) Replace declareCombatEnd() method (line ~4711):
+   ─────────────────────────────────────────────────────────────────────────
+   private declareCombatEnd(winner: 'blue' | 'red'): void {
+     if (this.combatEnded) return;
+     this.combatEnded = true;
+
+     const winnerName = winner === 'blue' ? 'BLUE TEAM' : 'RED TEAM';
+     const emoji = winner === 'blue' ? '🔵' : '🔴';
+
+     // Build enhanced result
+     const enhancedResult: EnhancedCombatResult = buildEnhancedCombatResult(
+       winner,
+       this.roundNumber,
+       this.units,
+       this.combatStats,
+       this.missionContext
+     );
+
+     logCombatResultSummary(enhancedResult);
+
+     EventBridge.emit('log-entry', {
+       id: `victory_${Date.now()}`,
+       timestamp: Date.now(),
+       type: 'system',
+       actor: 'System',
+       message: `🏆 VICTORY! ${emoji} ${winnerName} WINS! 🏆`,
+     });
+
+     EventBridge.emit('combat-ended', { winner, round: this.roundNumber });
+     EventBridge.emit('combat-complete', enhancedResult);
+
+     // Show victory text (existing code)
+     const centerX = this.cameras.main.width / 2;
+     const centerY = this.cameras.main.height / 2;
+     const victoryText = this.add.text(centerX, centerY,
+       `${emoji} ${winnerName} WINS!`, {
+         fontSize: '48px',
+         color: winner === 'blue' ? '#4a90d9' : '#d94a4a',
+         fontStyle: 'bold',
+         stroke: '#000000',
+         strokeThickness: 6,
+       });
+     victoryText.setOrigin(0.5);
+     victoryText.setDepth(2000);
+     this.tweens.add({
+       targets: victoryText,
+       scale: 1.2,
+       duration: 500,
+       yoyo: true,
+       repeat: 2,
+     });
+
+     console.log(`[COMBAT] Combat ended! Winner: ${winner}`);
+   }
+   ─────────────────────────────────────────────────────────────────────────
+
+2. App.tsx - Wire Event Listener
+   Location: C:\git\sht\MVP\src\App.tsx
+
+   a) Add imports:
+   ─────────────────────────────────────────────────────────────────────────
+   import { EventBridge } from './game/EventBridge';
+   import { handleCombatComplete } from './stores/combatResultsHandler';
+   ─────────────────────────────────────────────────────────────────────────
+
+   b) Add useEffect hook:
+   ─────────────────────────────────────────────────────────────────────────
+   useEffect(() => {
+     const unsubscribe = EventBridge.on('combat-complete', handleCombatComplete);
+     return unsubscribe;
+   }, []);
+   ─────────────────────────────────────────────────────────────────────────
+
+3. enhancedGameStore.ts - Expose to Window
+   Location: C:\git\sht\MVP\src\stores\enhancedGameStore.ts
+
+   Add at END of file (after export):
+   ─────────────────────────────────────────────────────────────────────────
+   // Expose for Phaser scene access
+   if (typeof window !== 'undefined') {
+     (window as any).__GAME_STORE__ = useGameStore.getState();
+     useGameStore.subscribe(() => {
+       (window as any).__GAME_STORE__ = useGameStore.getState();
+     });
+   }
+   ─────────────────────────────────────────────────────────────────────────
+
+================================================================================
+TESTING
+================================================================================
+
+1. Start combat from world map
+2. Win/lose combat
+3. Check console for:
+   ============================================================
+   COMBAT RESULTS SUMMARY
+   ============================================================
+   Outcome: VICTORY (blue team wins)
+   Duration: 5 rounds (32 minutes)
+   ...
+
+4. Verify toasts appear:
+   🎉 VICTORY! 5 rounds
+   +12 Fame
+   Alpha Squad Leader: +45 XP (survival, 1 kill, damage dealt, victory)
+   ...
+
+5. Check characters updated:
+   window.__GAME_STORE__.characters.forEach(c => {
+     console.log(c.name, c.status, c.health, c.experience);
+   });
+
+================================================================================
+WHAT IT DOES
+================================================================================
+
+✓ Characters get XP (10 base + kills + damage + victory bonus)
+✓ Characters update HP from combat damage
+✓ Dead/injured characters marked with status
+✓ Injuries tracked (body part, severity, healing time)
+✓ Loot generated (weapons, armor, gadgets, medkits)
+✓ Fame changes based on victory/defeat/casualties/collateral
+✓ Game time advances (~5 min per combat round)
+✓ News article generated for mission
+✓ Victory bonus ($5000) added to budget
+✓ Toast notifications for all outcomes
+
+================================================================================
+
+For full documentation see:
+C:\git\sht\MVP\src\integration\README_COMBAT_INTEGRATION.md
+C:\git\sht\COMBAT_REWARDS_IMPLEMENTATION_SUMMARY.md

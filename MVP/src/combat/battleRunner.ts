@@ -46,6 +46,26 @@ import {
   PanicLevel,
 } from './advancedMechanics';
 
+import {
+  GridMap,
+  gridDistance,
+  hasLineOfSight,
+  getCoverAtPosition,
+  findPath,
+  placeUnit,
+  moveUnit,
+  findUnitPosition,
+  getReachableTiles,
+} from './gridEngine';
+
+import {
+  generateQuickMap,
+  loadMapTemplate,
+  generateMap,
+  MapConfig,
+  MapTerrain,
+} from './mapGenerator';
+
 /**
  * Process morale check for a unit when something bad happens.
  * Updates the unit's panicLevel in place.
@@ -432,4 +452,356 @@ export function runQuickBattle(
 
   // Draw
   return { winner: 'draw', rounds };
+}
+
+// =============================================================================
+// GRID BATTLE SYSTEM
+// =============================================================================
+
+export interface GridBattleConfig extends BattleConfig {
+  useGrid: true;
+  mapTemplate?: string;      // Use existing template ID
+  mapConfig?: MapConfig;     // Or generate procedural map
+  terrain?: MapTerrain;      // Quick terrain type for generateQuickMap
+}
+
+/**
+ * Run a grid-based battle with real positions, pathfinding, LOS, and cover.
+ * Units spawn at map entry points and must move to close distance.
+ */
+export function runGridBattle(
+  blueTeam: SimUnit[],
+  redTeam: SimUnit[],
+  config: Partial<GridBattleConfig> = {}
+): BattleResult {
+  const startTime = performance.now();
+  const fullConfig: GridBattleConfig = {
+    ...DEFAULT_BATTLE_CONFIG,
+    useGrid: true,
+    ...config,
+  };
+
+  // Clone units
+  const blue = cloneTeam(blueTeam);
+  const red = cloneTeam(redTeam);
+  const allUnits = [...blue, ...red];
+
+  // Create or load map
+  let map: GridMap;
+  if (fullConfig.mapTemplate) {
+    const loaded = loadMapTemplate(fullConfig.mapTemplate);
+    if (!loaded) {
+      // Fallback to quick map
+      map = generateQuickMap(blue.length, red.length, fullConfig.terrain || 'open');
+    } else {
+      map = loaded;
+    }
+  } else if (fullConfig.mapConfig) {
+    map = generateMap(fullConfig.mapConfig);
+  } else {
+    map = generateQuickMap(blue.length, red.length, fullConfig.terrain || 'open');
+  }
+
+  // Place units at entry points
+  placeUnitsAtEntryPoints(blue, red, map);
+
+  // Initialize facing
+  initializeUnitFacing(blue, red);
+
+  const log: AttackResult[] = [];
+  let rounds = 0;
+  let totalTurns = 0;
+
+  // Main battle loop
+  while (rounds < fullConfig.maxRounds) {
+    rounds++;
+    const turnOrder = getTurnOrder(allUnits);
+
+    for (const unit of turnOrder) {
+      if (!unit.alive) continue;
+      if (totalTurns >= fullConfig.maxTurnsPerRound * rounds) break;
+
+      totalTurns++;
+
+      // Shield regen
+      processShieldRegen(unit);
+
+      // Status effects
+      const statusResult = processStatusEffects(unit);
+      if (!unit.alive) continue;
+
+      // Panic check
+      const panicMods = getPanicModifiers(unit.panicLevel || 'steady');
+      if (statusResult.turnSkipped || !canUnitAct(unit) || !panicMods.canAct) {
+        unit.acted = true;
+        continue;
+      }
+
+      unit.acted = true;
+      const enemies = unit.team === 'blue' ? red : blue;
+
+      // 2-action system
+      resetTurnState(unit);
+
+      while (!isTurnComplete(unit) && unit.alive) {
+        const target = selectGridTarget(unit, enemies, map);
+        if (!target) break;
+
+        const unitPos = unit.position!;
+        const targetPos = target.position!;
+        const distance = gridDistance(unitPos.x, unitPos.y, targetPos.x, targetPos.y);
+        const weaponRange = unit.weapon.range || 1;
+
+        // Check LOS
+        const hasLOS = hasLineOfSight(map, unitPos.x, unitPos.y, targetPos.x, targetPos.y);
+
+        // In range AND has LOS?
+        const inRange = distance <= weaponRange && hasLOS;
+
+        if (inRange && canPerformAction(unit, 'attack')) {
+          // Get cover for accuracy modifier
+          const cover = getCoverAtPosition(map, targetPos.x, targetPos.y, unitPos.x, unitPos.y);
+
+          // Attack
+          const result = resolveAttack(unit, target, distance);
+          result.round = rounds;
+          result.turn = totalTurns;
+
+          // Apply cover evasion bonus
+          if (cover === 'half') {
+            result.hitChance = Math.max(5, result.hitChance - 12);
+          } else if (cover === 'full') {
+            result.hitChance = Math.max(5, result.hitChance - 16);
+          }
+
+          // Re-roll hit based on modified chance
+          if (cover !== 'none') {
+            const roll = Math.random() * 100;
+            if (roll > result.hitChance && result.hitResult !== 'miss') {
+              result.hitResult = 'miss';
+              result.finalDamage = 0;
+            }
+          }
+
+          log.push(result);
+          applyAttackResult(target, result);
+          spendAction(unit, 'attack');
+
+          // Morale checks
+          if (result.hitResult === 'crit' && target.alive) {
+            processMoraleCheck(target, 'critical_hit');
+          }
+          if (target.alive && target.hp < target.maxHp * 0.25) {
+            processMoraleCheck(target, 'health_low');
+          }
+          if (!target.alive) {
+            // Remove from map
+            moveUnit(map, target.id, -1, -1);
+            const targetAllies = target.team === 'blue' ? blue : red;
+            checkAllyDeathMorale(targetAllies, target);
+          }
+
+          // Counter-attack check
+          if (canCounterAttack(target, unit, result)) {
+            const counterResult = resolveCounterAttack(target, unit);
+            if (counterResult) {
+              counterResult.round = rounds;
+              counterResult.turn = totalTurns;
+              log.push(counterResult);
+              applyAttackResult(unit, counterResult);
+            }
+          }
+        } else if (canPerformAction(unit, 'move')) {
+          // Move toward target
+          const moved = aiGridMovement(unit, target, map);
+          spendAction(unit, 'move');
+
+          // Face target after moving
+          if (moved && unit.position && target.position) {
+            faceToward(unit, target.position.x, target.position.y);
+          }
+        } else {
+          break;
+        }
+
+        if (isTeamEliminated(enemies)) break;
+      }
+
+      if (isTeamEliminated(blue) || isTeamEliminated(red)) break;
+    }
+
+    allUnits.forEach(u => u.acted = false);
+
+    if (isTeamEliminated(blue) || isTeamEliminated(red)) break;
+  }
+
+  // Determine winner
+  const blueAlive = blue.filter(u => u.alive);
+  const redAlive = red.filter(u => u.alive);
+
+  let winner: 'blue' | 'red' | 'draw';
+  if (blueAlive.length > 0 && redAlive.length === 0) {
+    winner = 'blue';
+  } else if (redAlive.length > 0 && blueAlive.length === 0) {
+    winner = 'red';
+  } else if (fullConfig.allowDraw) {
+    winner = 'draw';
+  } else {
+    const blueHp = blueAlive.reduce((sum, u) => sum + u.hp, 0);
+    const redHp = redAlive.reduce((sum, u) => sum + u.hp, 0);
+    winner = blueHp >= redHp ? 'blue' : 'red';
+  }
+
+  // Calculate damage
+  const blueDamage = log
+    .filter(r => blue.some(u => u.id === r.attacker))
+    .reduce((sum, r) => sum + r.finalDamage, 0);
+  const redDamage = log
+    .filter(r => red.some(u => u.id === r.attacker))
+    .reduce((sum, r) => sum + r.finalDamage, 0);
+
+  const blueDeaths = blue.filter(u => !u.alive).map(u => u.name);
+  const redDeaths = red.filter(u => !u.alive).map(u => u.name);
+
+  const endTime = performance.now();
+
+  return {
+    winner,
+    rounds,
+    totalTurns,
+    blueUnitsStart: blueTeam.length,
+    blueSurvivors: blueAlive.length,
+    blueDeaths,
+    redUnitsStart: redTeam.length,
+    redSurvivors: redAlive.length,
+    redDeaths,
+    blueDamageDealt: blueDamage,
+    redDamageDealt: redDamage,
+    log,
+    durationMs: endTime - startTime,
+  };
+}
+
+/**
+ * Place units at map entry points
+ */
+function placeUnitsAtEntryPoints(blue: SimUnit[], red: SimUnit[], map: GridMap): void {
+  const blueEntries = map.entryPoints.filter(e => e.team === 'blue');
+  const redEntries = map.entryPoints.filter(e => e.team === 'red');
+
+  // Place blue units
+  for (let i = 0; i < blue.length; i++) {
+    const entry = blueEntries[i % blueEntries.length];
+    blue[i].position = { x: entry.x, y: entry.y };
+    placeUnit(map, blue[i].id, entry.x, entry.y);
+  }
+
+  // Place red units
+  for (let i = 0; i < red.length; i++) {
+    const entry = redEntries[i % redEntries.length];
+    red[i].position = { x: entry.x, y: entry.y };
+    placeUnit(map, red[i].id, entry.x, entry.y);
+  }
+}
+
+/**
+ * Select best target considering LOS
+ */
+function selectGridTarget(unit: SimUnit, enemies: SimUnit[], map: GridMap): SimUnit | null {
+  const aliveEnemies = enemies.filter(e => e.alive && e.position);
+  if (aliveEnemies.length === 0) return null;
+
+  const unitPos = unit.position;
+  if (!unitPos) return aliveEnemies[0];
+
+  // Prefer enemies with LOS, then by distance and HP
+  const scored = aliveEnemies.map(enemy => {
+    const enemyPos = enemy.position!;
+    const dist = gridDistance(unitPos.x, unitPos.y, enemyPos.x, enemyPos.y);
+    const hasLOS = hasLineOfSight(map, unitPos.x, unitPos.y, enemyPos.x, enemyPos.y);
+    const hpRatio = enemy.hp / enemy.maxHp;
+
+    // Score: LOS matters most, then low HP, then close distance
+    const losBonus = hasLOS ? 1000 : 0;
+    const hpScore = (1 - hpRatio) * 100;
+    const distScore = 100 - Math.min(dist * 5, 100);
+
+    return { enemy, score: losBonus + hpScore + distScore };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored[0].enemy;
+}
+
+/**
+ * AI movement on grid - move toward target
+ */
+function aiGridMovement(unit: SimUnit, target: SimUnit, map: GridMap): boolean {
+  if (!unit.position || !target.position) return false;
+
+  const moveRange = getMovementRange(unit);
+  const reachable = getReachableTiles(map, unit.position.x, unit.position.y, moveRange);
+
+  if (reachable.length === 0) return false;
+
+  const weaponRange = unit.weapon.range || 1;
+  const isRanged = weaponRange > 3;
+
+  // Find best tile to move to
+  let bestTile = reachable[0];
+  let bestScore = -Infinity;
+
+  for (const tile of reachable) {
+    const distToTarget = gridDistance(tile.x, tile.y, target.position.x, target.position.y);
+    const hasLOS = hasLineOfSight(map, tile.x, tile.y, target.position.x, target.position.y);
+
+    let score = 0;
+
+    // Melee: get as close as possible
+    if (!isRanged) {
+      score = 100 - distToTarget;
+      if (hasLOS) score += 50;
+    } else {
+      // Ranged: get to optimal range (weaponRange * 0.7)
+      const optimalDist = weaponRange * 0.7;
+      const distFromOptimal = Math.abs(distToTarget - optimalDist);
+      score = 100 - distFromOptimal * 5;
+
+      // Strong preference for LOS
+      if (hasLOS) score += 100;
+
+      // Prefer not being too close
+      if (distToTarget < 3) score -= 50;
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestTile = tile;
+    }
+  }
+
+  // Move unit
+  const oldPos = unit.position;
+  moveUnit(map, unit.id, bestTile.x, bestTile.y);
+  unit.position = { x: bestTile.x, y: bestTile.y };
+
+  return true;
+}
+
+/**
+ * Quick grid battle for batch testing
+ */
+export function runQuickGridBattle(
+  blueTeam: SimUnit[],
+  redTeam: SimUnit[],
+  terrain: MapTerrain = 'open',
+  maxRounds: number = DEFAULT_BATTLE_CONFIG.maxRounds
+): { winner: 'blue' | 'red' | 'draw'; rounds: number } {
+  const result = runGridBattle(blueTeam, redTeam, {
+    terrain,
+    maxRounds,
+    allowDraw: true,
+  });
+
+  return { winner: result.winner, rounds: result.rounds };
 }

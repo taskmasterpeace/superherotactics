@@ -1,25 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Read(/C:\\Users/**)",
-      "Bash(powershell:*)",
-      "Bash(npm install:*)",
-      "Bash(pip install:*)",
-      "WebSearch",
-      "WebFetch(domain:classicmarvelforever.com)",
-      "Bash(npm run dev:*)",
-      "WebFetch(domain:skywork.ai)",
-      "Bash(cat:*)",
-      "Bash(wc:*)",
-      "Bash(ls:*)",
-      "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(git clone:*)",
-      "Bash(npm run build:*)",
-      "Bash(git checkout:*)",
-      "Bash(python clean_mock_data.py:*)",
-      "Bash(git add:*)"
+      "mcp__ruv-swarm",
+      "mcp__claude-flow@alpha",
+      "mcp__flow-nexus",
+      "Bash(npm run build:*)"
     ],
-    "deny": [],
-    "ask": []
+    "deny": []
   }
 }

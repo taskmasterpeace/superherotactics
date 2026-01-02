@@ -1,0 +1,281 @@
+FREE MOVEMENT MODE IMPLEMENTATION PATCH
+=======================================
+
+This patch adds free movement until enemy contact to CombatScene.ts
+
+STEP 1: Add State Variable
+---------------------------
+After line 688 (after `private verboseLog: boolean = true;`), add:
+
+  private combatActive: boolean = false; // Free movement until enemy contact
+
+
+STEP 2: Modify Movement AP Cost
+--------------------------------
+Find the line (around 3253):
+    unit.ap -= distance;
+
+Replace with:
+    // Free movement until combat starts
+    if (this.combatActive) {
+      unit.ap -= distance;
+    }
+    // else: movement costs 0 AP during free movement phase
+
+
+STEP 3: Add Enemy Detection Trigger
+------------------------------------
+In moveUnitAnimated, in the onComplete callback (around line 3321), after:
+        if (wasSelected && unit.selectionTile) unit.selectionTile.setVisible(true);
+
+Add:
+        // Check for enemy contact during free movement phase
+        if (!this.combatActive) {
+          this.checkEnemyContact(unit);
+        }
+
+
+STEP 4: Add New Methods Section
+--------------------------------
+After the showLOSIndicator method (around line 3190), before // ==================== MOVEMENT ====================
+
+Add this entire section:
+
+  // ==================== ENEMY CONTACT & COMBAT INITIATION ====================
+
+  /**
+   * Check if a unit has spotted an enemy during free movement phase
+   * This is called after each movement completes
+   */
+  private checkEnemyContact(unit: Unit): void {
+    // Get enemy team
+    const enemyTeam = unit.team === 'blue' ? 'red' : unit.team === 'red' ? 'blue' : 'green';
+
+    // Find all living enemy units
+    const enemies = Array.from(this.units.values()).filter(
+      u => u.team === enemyTeam && u.hp > 0
+    );
+
+    // Check if this unit has line of sight to any enemy
+    for (const enemy of enemies) {
+      const hasLOS = this.hasLineOfSight(
+        unit.position.x,
+        unit.position.y,
+        enemy.position.x,
+        enemy.position.y
+      );
+
+      if (hasLOS) {
+        // CONTACT! Enemy spotted!
+        this.initiateCombat(unit, enemy);
+        return;
+      }
+    }
+
+    // Also check if any enemy can see this unit (reverse check)
+    for (const enemy of enemies) {
+      const hasLOS = this.hasLineOfSight(
+        enemy.position.x,
+        enemy.position.y,
+        unit.position.x,
+        unit.position.y
+      );
+
+      if (hasLOS) {
+        // CONTACT! This unit was spotted by enemy!
+        this.initiateCombat(enemy, unit);
+        return;
+      }
+    }
+  }
+
+  /**
+   * Initiates combat when enemies spot each other
+   * Shows CONTACT alert, rolls initiative, and starts turn-based combat
+   */
+  private initiateCombat(spotter: Unit, spotted: Unit): void {
+    // Already in combat, skip
+    if (this.combatActive) return;
+
+    console.log(`[CONTACT] ${spotter.name} spotted ${spotted.name}! Combat starting!`);
+
+    // Set combat active
+    this.combatActive = true;
+
+    // Show CONTACT! alert
+    this.showContactAlert(spotter, spotted);
+
+    // Roll initiative for all units
+    this.rollInitiative();
+
+    // Determine who goes first based on initiative
+    this.determineFirstTeam();
+
+    // Restore AP for all units now that combat has started
+    this.units.forEach(unit => {
+      unit.ap = unit.maxAp;
+      unit.acted = false;
+    });
+
+    // Update fog of war
+    this.updateFogOfWar();
+
+    // Emit combat started event
+    EventBridge.emit('log-entry', {
+      id: `contact_${Date.now()}`,
+      timestamp: Date.now(),
+      type: 'system',
+      actor: 'System',
+      message: `⚠️ CONTACT! ${spotter.name} spotted ${spotted.name}! Combat begins!`,
+    });
+
+    EventBridge.emit('combat-initiated', {
+      spotter: spotter.id,
+      spotted: spotted.id,
+      round: this.roundNumber,
+    });
+
+    // Select first unit of current team
+    const firstUnit = Array.from(this.units.values()).find(
+      u => u.team === this.currentTeam && u.hp > 0
+    );
+    if (firstUnit) {
+      this.selectUnit(firstUnit.id);
+    }
+
+    this.emitAllUnitsData();
+  }
+
+  /**
+   * Shows a visual CONTACT! alert on screen
+   */
+  private showContactAlert(spotter: Unit, spotted: Unit): void {
+    // Create large CONTACT! text
+    const centerX = this.cameras.main.width / 2;
+    const centerY = this.cameras.main.height / 2;
+
+    const contactText = this.add.text(centerX, centerY, '⚠️ CONTACT! ⚠️', {
+      fontSize: '64px',
+      color: '#ff0000',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 6,
+    });
+    contactText.setOrigin(0.5);
+    contactText.setDepth(10000);
+    contactText.setScrollFactor(0); // Fixed to camera
+
+    // Pulse animation
+    this.tweens.add({
+      targets: contactText,
+      scale: { from: 0.5, to: 1.5 },
+      alpha: { from: 1, to: 0 },
+      duration: 2000,
+      ease: 'Power2',
+      onComplete: () => {
+        contactText.destroy();
+      },
+    });
+
+    // Optional: Draw line between spotter and spotted
+    const spotterPos = gridToScreen(spotter.position.x, spotter.position.y, this.offsetX, this.offsetY);
+    const spottedPos = gridToScreen(spotted.position.x, spotted.position.y, this.offsetX, this.offsetY);
+
+    const contactLine = this.add.graphics();
+    contactLine.lineStyle(4, 0xff0000, 0.8);
+    contactLine.beginPath();
+    contactLine.moveTo(spotterPos.x, spotterPos.y);
+    contactLine.lineTo(spottedPos.x, spottedPos.y);
+    contactLine.strokePath();
+    contactLine.setDepth(9999);
+
+    this.time.delayedCall(2000, () => {
+      contactLine.destroy();
+    });
+  }
+
+  /**
+   * Roll initiative for all units
+   * Initiative is based on INS (Insight) stat + 1d20
+   */
+  private rollInitiative(): void {
+    const initiatives: Array<{ unit: Unit; roll: number }> = [];
+
+    this.units.forEach(unit => {
+      if (unit.hp > 0) {
+        // Roll 1d20 + INS stat
+        const roll = Math.floor(Math.random() * 20) + 1 + (unit.ins || 50);
+        initiatives.push({ unit, roll });
+
+        EventBridge.emit('log-entry', {
+          id: `init_${unit.id}_${Date.now()}`,
+          timestamp: Date.now(),
+          type: 'system',
+          actor: unit.name,
+          actorTeam: unit.team,
+          message: `🎲 ${unit.name} initiative: ${roll} (INS: ${unit.ins || 50})`,
+        });
+      }
+    });
+
+    // Sort by initiative (highest first)
+    initiatives.sort((a, b) => b.roll - a.roll);
+
+    // Log initiative order
+    console.log('[INITIATIVE] Order:', initiatives.map(i => `${i.unit.name}(${i.roll})`).join(' > '));
+  }
+
+  /**
+   * Determine which team goes first based on initiative rolls
+   * The team with the highest initiative roll goes first
+   */
+  private determineFirstTeam(): void {
+    let bestBlueInit = -1;
+    let bestRedInit = -1;
+
+    this.units.forEach(unit => {
+      if (unit.hp > 0) {
+        const roll = Math.floor(Math.random() * 20) + 1 + (unit.ins || 50);
+        if (unit.team === 'blue' && roll > bestBlueInit) {
+          bestBlueInit = roll;
+        } else if (unit.team === 'red' && roll > bestRedInit) {
+          bestRedInit = roll;
+        }
+      }
+    });
+
+    if (bestBlueInit > bestRedInit) {
+      this.currentTeam = 'blue';
+    } else if (bestRedInit > bestBlueInit) {
+      this.currentTeam = 'red';
+    }
+    // else: keep current team (tie)
+
+    console.log(`[INITIATIVE] First team: ${this.currentTeam} (Blue: ${bestBlueInit}, Red: ${bestRedInit})`);
+
+    EventBridge.emit('turn-changed', {
+      team: this.currentTeam,
+      round: this.roundNumber,
+    });
+  }
+
+
+STEP 5: Reset Combat State on Victory
+--------------------------------------
+In declareCombatEnd method (around line 5137), after:
+    this.combatEnded = true;
+
+Add:
+    // Return to free movement mode (in case combat resumes with new enemies)
+    this.combatActive = false;
+
+
+VERIFICATION
+------------
+After applying all changes, verify:
+1. Build succeeds: npm run build
+2. All methods are properly indented as class methods
+3. No duplicate declarations
+4. All braces are balanced
+
+See FREE_MOVEMENT_IMPLEMENTATION.md for full documentation.

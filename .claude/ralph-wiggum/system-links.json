@@ -1,0 +1,214 @@
+{
+  "version": 1,
+  "description": "Dependency graph for SuperHero Tactics system integration",
+  "systems": {
+    "HOOK-INFRA": {
+      "name": "Hook Infrastructure",
+      "inputs": [],
+      "outputs": ["infrastructure"],
+      "triggers": ["EVENT-GEN"],
+      "blockedBy": []
+    },
+    "EVENT-GEN": {
+      "name": "Event Generation System",
+      "inputs": ["combat-results", "time-progression", "player-actions"],
+      "outputs": ["game-events"],
+      "triggers": ["WEAPON-DB", "NEWS-GEN", "MISSION-GEN"],
+      "blockedBy": ["HOOK-INFRA"],
+      "criticalPath": true
+    },
+    "WEAPON-DB": {
+      "name": "Weapon Database Integration",
+      "inputs": ["weapons.ts"],
+      "outputs": ["combat-weapons"],
+      "triggers": ["ARMOR-DB"],
+      "blockedBy": ["EVENT-GEN"]
+    },
+    "ARMOR-DB": {
+      "name": "Armor Database Integration",
+      "inputs": ["armor.ts"],
+      "outputs": ["combat-armor", "damage-resistance"],
+      "triggers": ["STAT-INT"],
+      "blockedBy": ["WEAPON-DB"]
+    },
+    "STAT-INT": {
+      "name": "Character Stat Integration",
+      "inputs": ["characterSheet.ts"],
+      "outputs": ["stat-modifiers"],
+      "triggers": ["COMBAT-RESULTS"],
+      "blockedBy": ["ARMOR-DB"]
+    },
+    "COMBAT-RESULTS": {
+      "name": "Combat Results Processing",
+      "inputs": ["game-events", "combat-weapons", "combat-armor", "stat-modifiers"],
+      "outputs": ["injuries", "loot", "fame-change"],
+      "triggers": ["HOSPITAL"],
+      "blockedBy": ["STAT-INT"]
+    },
+    "SHIELD-SYS": {
+      "name": "Shield System",
+      "inputs": ["shieldItems.ts"],
+      "outputs": ["shield-absorption"],
+      "triggers": [],
+      "blockedBy": ["COMBAT-RESULTS"],
+      "optional": true
+    },
+    "NEWS-GEN": {
+      "name": "News Generation System",
+      "inputs": ["game-events", "newsTemplates.ts"],
+      "outputs": ["news-articles", "fame", "public-opinion"],
+      "triggers": ["LAPTOP-UI"],
+      "blockedBy": ["EVENT-GEN"]
+    },
+    "MISSION-GEN": {
+      "name": "Mission Generation System",
+      "inputs": ["cities.ts", "countries.ts", "game-events"],
+      "outputs": ["missions"],
+      "triggers": ["INVESTIGATION"],
+      "blockedBy": ["EVENT-GEN"]
+    },
+    "INVESTIGATION": {
+      "name": "Investigation System",
+      "inputs": ["investigationSystem.ts", "game-events"],
+      "outputs": ["clues", "case-resolutions"],
+      "triggers": ["LAPTOP-UI"],
+      "blockedBy": ["MISSION-GEN"]
+    },
+    "TIME-EVENTS": {
+      "name": "Time Event System",
+      "inputs": ["timeSystem.ts", "game-events"],
+      "outputs": ["time-events", "day-night", "encounters"],
+      "triggers": ["ECONOMY"],
+      "blockedBy": ["EVENT-GEN"]
+    },
+    "ECONOMY": {
+      "name": "Economy System",
+      "inputs": ["economySystem.ts", "locationEffects.ts"],
+      "outputs": ["income", "expenses", "prices"],
+      "triggers": [],
+      "blockedBy": ["TIME-EVENTS"]
+    },
+    "VEHICLE-INT": {
+      "name": "Vehicle Integration",
+      "inputs": ["vehicleSystem.ts"],
+      "outputs": ["travel-modifiers", "vehicle-hp"],
+      "triggers": ["TERRITORY"],
+      "blockedBy": ["EVENT-GEN"]
+    },
+    "TERRITORY": {
+      "name": "Territory Control System",
+      "inputs": ["sectors.ts", "factionSystem.ts"],
+      "outputs": ["territory-control", "militia"],
+      "triggers": [],
+      "blockedBy": ["VEHICLE-INT"]
+    },
+    "EMAIL-SYS": {
+      "name": "Email System",
+      "inputs": ["missions", "game-events"],
+      "outputs": ["emails", "briefings"],
+      "triggers": ["LAPTOP-UI"],
+      "blockedBy": ["MISSION-GEN"]
+    },
+    "HOSPITAL": {
+      "name": "Hospital System",
+      "inputs": ["injuries", "combinedEffects.ts"],
+      "outputs": ["recovery", "hospital-events"],
+      "triggers": ["LAPTOP-UI"],
+      "blockedBy": ["COMBAT-RESULTS"]
+    },
+    "LAPTOP-UI": {
+      "name": "Laptop UI Integration",
+      "inputs": ["news-articles", "clues", "recovery", "emails"],
+      "outputs": ["ui-screens"],
+      "triggers": ["TRAINING-UI"],
+      "blockedBy": ["NEWS-GEN", "INVESTIGATION", "HOSPITAL", "EMAIL-SYS"]
+    },
+    "TRAINING-UI": {
+      "name": "Training UI",
+      "inputs": ["educationSystem.ts"],
+      "outputs": ["training-ui"],
+      "triggers": ["BASE-UI"],
+      "blockedBy": ["LAPTOP-UI"]
+    },
+    "BASE-UI": {
+      "name": "Base Building UI",
+      "inputs": ["baseSystem.ts"],
+      "outputs": ["base-ui"],
+      "triggers": ["GAME-LOOP"],
+      "blockedBy": ["TRAINING-UI"]
+    },
+    "GAME-LOOP": {
+      "name": "Complete Game Loop",
+      "inputs": ["all-systems"],
+      "outputs": ["playable-game"],
+      "triggers": [],
+      "blockedBy": ["BASE-UI"],
+      "final": true
+    }
+  },
+  "integrationOrder": [
+    "HOOK-INFRA",
+    "EVENT-GEN",
+    "WEAPON-DB",
+    "ARMOR-DB",
+    "STAT-INT",
+    "COMBAT-RESULTS",
+    "SHIELD-SYS",
+    "NEWS-GEN",
+    "MISSION-GEN",
+    "INVESTIGATION",
+    "TIME-EVENTS",
+    "ECONOMY",
+    "VEHICLE-INT",
+    "TERRITORY",
+    "EMAIL-SYS",
+    "HOSPITAL",
+    "LAPTOP-UI",
+    "TRAINING-UI",
+    "BASE-UI",
+    "GAME-LOOP"
+  ],
+  "phases": {
+    "0": {
+      "name": "Infrastructure",
+      "systems": ["HOOK-INFRA"],
+      "description": "Set up Ralph Wiggum loop infrastructure"
+    },
+    "1": {
+      "name": "Foundation",
+      "systems": ["EVENT-GEN", "WEAPON-DB", "ARMOR-DB"],
+      "description": "Core event system and combat data integration"
+    },
+    "2": {
+      "name": "Combat Polish",
+      "systems": ["STAT-INT", "COMBAT-RESULTS", "SHIELD-SYS"],
+      "description": "Complete combat system integration"
+    },
+    "3": {
+      "name": "Strategic Layer",
+      "systems": ["NEWS-GEN", "MISSION-GEN", "INVESTIGATION", "TIME-EVENTS", "ECONOMY", "HOSPITAL"],
+      "description": "World systems that respond to events"
+    },
+    "4": {
+      "name": "World Systems",
+      "systems": ["VEHICLE-INT", "TERRITORY", "EMAIL-SYS"],
+      "description": "Travel and territory mechanics"
+    },
+    "5": {
+      "name": "UI Completion",
+      "systems": ["LAPTOP-UI", "TRAINING-UI", "BASE-UI", "GAME-LOOP"],
+      "description": "Wire all UI components and verify game loop"
+    }
+  },
+  "criticalPath": [
+    "HOOK-INFRA",
+    "EVENT-GEN",
+    "WEAPON-DB",
+    "ARMOR-DB",
+    "STAT-INT",
+    "COMBAT-RESULTS",
+    "NEWS-GEN",
+    "LAPTOP-UI",
+    "GAME-LOOP"
+  ]
+}
