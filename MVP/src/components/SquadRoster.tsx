@@ -177,7 +177,7 @@ export const SquadRoster: React.FC = () => {
   const squadStatus = useGameStore(state => state.squadStatus);
   const currentSector = useGameStore(state => state.currentSector);
 
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false); // Collapsed by default
   const [expandedCharacterId, setExpandedCharacterId] = useState<string | null>(null);
 
   // Group characters by status
@@ -235,7 +235,7 @@ export const SquadRoster: React.FC = () => {
 
   return (
     <motion.div
-      className="fixed left-0 top-16 bottom-4 z-30 w-56"
+      className="fixed left-0 top-16 bottom-4 z-30 w-44"
       initial={{ x: -300 }}
       animate={{ x: 0 }}
       exit={{ x: -300 }}
