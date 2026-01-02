@@ -38,6 +38,7 @@ import {
   Swords,
   Shield,
   Zap,
+  LogOut,
 } from 'lucide-react';
 
 // Random enemy generator
@@ -426,6 +427,11 @@ export const CombatLab: React.FC = () => {
           actions={actions}
           onGadgetClick={() => setShowGadgetPanel(true)}
           onInventoryClick={() => setShowInventory(true)}
+          onFlee={() => {
+            if (confirm('Flee from combat? Your team will retreat to safety.')) {
+              setCurrentView('world-map');
+            }
+          }}
           showGadgetPanel={showGadgetPanel}
           setShowGrenadeMenu={setShowGrenadeMenu}
         />
@@ -1285,6 +1291,7 @@ interface BottomBarProps {
   actions: ReturnType<typeof useCombatActions>;
   onGadgetClick: () => void;
   onInventoryClick: () => void;
+  onFlee: () => void;
   showGadgetPanel: boolean;
   setShowGrenadeMenu: (show: boolean) => void;
 }
@@ -1296,6 +1303,7 @@ const BottomBar: React.FC<BottomBarProps> = ({
   actions,
   onGadgetClick,
   onInventoryClick,
+  onFlee,
   showGadgetPanel,
   setShowGrenadeMenu,
 }) => {
@@ -1418,6 +1426,14 @@ const BottomBar: React.FC<BottomBarProps> = ({
           color="cyan"
         />
         <div className="flex-1" />
+        {/* Flee/Retreat */}
+        <ActionButton
+          icon={<LogOut className="w-5 h-5" />}
+          label="FLEE"
+          hotkey="F"
+          onClick={onFlee}
+          color="yellow"
+        />
         {/* End Turn */}
         <ActionButton
           icon={<Check className="w-5 h-5" />}
