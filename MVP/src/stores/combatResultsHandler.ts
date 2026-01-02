@@ -129,59 +129,141 @@ function getRandomLootArmor(): Armor | null {
 }
 
 /**
- * Generate loot based on combat difficulty and enemy type
+ * Enemy casualty info for loot extraction
+ */
+export interface EnemyCasualty {
+  enemyId: string
+  enemyName: string
+  faction?: string
+  outcome: 'killed' | 'surrendered' | 'fled' | 'unconscious'
+  equipment: {
+    weapons: string[]
+    armor: string | null
+    items: string[]
+  }
+}
+
+/**
+ * Generate loot from ACTUAL enemy equipment
+ * Only loot from killed or surrendered enemies - fled enemies keep their gear!
  */
 export function generateCombatLoot(
   victory: boolean,
-  enemyCount: number,
+  enemyCasualties: EnemyCasualty[] = [],
   rounds: number
 ): ProcessedCombatResult['lootGained'] {
   if (!victory) return []
 
   const loot: ProcessedCombatResult['lootGained'] = []
+  const lootMap = new Map<string, { name: string; type: 'weapon' | 'armor' | 'consumable'; count: number }>()
 
-  // Base loot chances
-  const weaponChance = 0.3 + (enemyCount * 0.05) // 30% + 5% per enemy
-  const armorChance = 0.2 + (enemyCount * 0.03)
-  const consumableCount = Math.floor(enemyCount / 2) // 1 consumable per 2 enemies
+  // Only loot from killed or surrendered enemies
+  const lootableEnemies = enemyCasualties.filter(
+    e => e.outcome === 'killed' || e.outcome === 'surrendered'
+  )
 
-  // Roll for weapon drop - use actual weapon from database
-  if (Math.random() < weaponChance) {
-    const weapon = getRandomLootWeapon()
-    if (weapon) {
-      loot.push({
-        itemId: weapon.id,
-        itemName: weapon.name,
-        itemType: 'weapon',
-        quantity: 1
-      })
+  // Extract actual equipment from each lootable enemy
+  for (const enemy of lootableEnemies) {
+    // Get weapons - look up actual weapon data
+    for (const weaponId of enemy.equipment.weapons) {
+      const weapon = getWeaponById(weaponId)
+      if (weapon) {
+        const key = weapon.id
+        const existing = lootMap.get(key)
+        if (existing) {
+          existing.count++
+        } else {
+          lootMap.set(key, { name: weapon.name, type: 'weapon', count: 1 })
+        }
+      }
+    }
+
+    // Get armor - look up actual armor data
+    if (enemy.equipment.armor) {
+      const armor = getArmorById(enemy.equipment.armor)
+      if (armor) {
+        const key = armor.id
+        const existing = lootMap.get(key)
+        if (existing) {
+          existing.count++
+        } else {
+          lootMap.set(key, { name: armor.name, type: 'armor', count: 1 })
+        }
+      }
+    }
+
+    // Get other items (ammo, consumables)
+    for (const itemId of enemy.equipment.items) {
+      const existing = lootMap.get(itemId)
+      if (existing) {
+        existing.count++
+      } else {
+        // Assume it's a consumable if not weapon/armor
+        lootMap.set(itemId, { name: itemId, type: 'consumable', count: 1 })
+      }
     }
   }
 
-  // Roll for armor drop - use actual armor from database
-  if (Math.random() < armorChance) {
-    const armor = getRandomLootArmor()
-    if (armor) {
-      loot.push({
-        itemId: armor.id,
-        itemName: armor.name,
-        itemType: 'armor',
-        quantity: 1
-      })
-    }
-  }
-
-  // Always some consumables (medkits for now)
-  if (consumableCount > 0) {
+  // Convert map to loot array
+  for (const [itemId, data] of lootMap.entries()) {
     loot.push({
-      itemId: 'medkit',
-      itemName: 'Medkit',
-      itemType: 'consumable',
-      quantity: Math.max(1, consumableCount)
+      itemId,
+      itemName: data.name,
+      itemType: data.type,
+      quantity: data.count
     })
   }
 
+  // If no enemy data provided (legacy support), fall back to random loot
+  if (enemyCasualties.length === 0) {
+    console.warn('[LOOT] No enemy casualty data - using legacy random loot')
+    return generateLegacyRandomLoot(rounds)
+  }
+
   return loot
+}
+
+/**
+ * Legacy random loot for backwards compatibility
+ */
+function generateLegacyRandomLoot(rounds: number): ProcessedCombatResult['lootGained'] {
+  const loot: ProcessedCombatResult['lootGained'] = []
+
+  // Random weapon chance
+  if (Math.random() < 0.3) {
+    const weapon = getRandomLootWeapon()
+    if (weapon) {
+      loot.push({ itemId: weapon.id, itemName: weapon.name, itemType: 'weapon', quantity: 1 })
+    }
+  }
+
+  // Random armor chance
+  if (Math.random() < 0.2) {
+    const armor = getRandomLootArmor()
+    if (armor) {
+      loot.push({ itemId: armor.id, itemName: armor.name, itemType: 'armor', quantity: 1 })
+    }
+  }
+
+  // Some medkits
+  loot.push({ itemId: 'medkit', itemName: 'Medkit', itemType: 'consumable', quantity: 1 })
+
+  return loot
+}
+
+/**
+ * Get weapon by ID from database
+ */
+function getWeaponById(weaponId: string): Weapon | null {
+  const allWeapons = [...getWeaponsByAvailability('Common'), ...getWeaponsByAvailability('Restricted'), ...getWeaponsByAvailability('Military')]
+  return allWeapons.find(w => w.id === weaponId || w.name.replace(/\s+/g, '_') === weaponId) || null
+}
+
+/**
+ * Get armor by ID from database
+ */
+function getArmorById(armorId: string): Armor | null {
+  return ALL_ARMOR.find(a => a.id === armorId || a.name.replace(/\s+/g, '_') === armorId) || null
 }
 
 /**
@@ -248,9 +330,18 @@ export function handleCombatComplete(result: EnhancedCombatResult): void {
     result.rounds
   )
 
+  // Convert enemy casualties to loot format
+  const enemyCasualtiesForLoot: EnemyCasualty[] = (result.enemyCasualties || []).map(e => ({
+    enemyId: e.enemyId,
+    enemyName: e.enemyName,
+    faction: e.faction,
+    outcome: e.outcome,
+    equipment: e.equipment
+  }))
+
   const lootGained = generateCombatLoot(
     result.victory,
-    result.casualties.length + result.survivors.length,
+    enemyCasualtiesForLoot,
     result.rounds
   )
 
@@ -444,6 +535,91 @@ export function handleCombatComplete(result: EnhancedCombatResult): void {
       sourceEventId: combatEvent.id
     })
   }
+
+  // ============== MISSION COMPLETION ==============
+  // Emit mission:completed when combat ends as part of a mission
+  if (result.missionLocation) {
+    const missionRewards = {
+      money: result.victory ? 5000 + Math.floor(Math.random() * 5000) : 0,
+      xp: experienceGained.reduce((sum, xp) => sum + xp.xp, 0),
+      items: lootGained.map(item => item.itemId),
+      fameChange
+    }
+
+    EventBus.emitMissionCompleted(
+      {
+        missionId: `mission_${combatEvent.id}`,
+        missionName: `Combat in ${result.missionLocation.city}`,
+        missionType: 'combat',
+        success: result.victory,
+        rewards: missionRewards,
+        casualties: result.casualties.map(c => c.characterId)
+      },
+      result.missionLocation
+    )
+    console.log('[EVENTBUS] Mission completed event emitted for:', result.missionLocation.city)
+  }
+}
+
+/**
+ * Generate injuries from damage taken by survivors
+ * Creates realistic injuries based on HP loss
+ */
+function generateInjuriesFromDamage(
+  survivors: Array<{ characterId: string; characterName: string; currentHp: number; maxHp: number; damageTaken: number }>
+): EnhancedCombatResult['injuries'] {
+  const injuries: EnhancedCombatResult['injuries'] = []
+  const bodyParts = ['head', 'torso', 'left arm', 'right arm', 'left leg', 'right leg']
+
+  for (const survivor of survivors) {
+    const hpPercentage = survivor.currentHp / survivor.maxHp
+    const damageTaken = survivor.damageTaken
+
+    // Only generate injuries if significant damage taken
+    if (damageTaken < 10 && hpPercentage > 0.8) continue
+
+    // Determine severity based on remaining HP percentage
+    let severity: 'LIGHT' | 'MODERATE' | 'SEVERE' | 'PERMANENT' = 'LIGHT'
+    let healingTime = 1
+
+    if (hpPercentage <= 0.2) {
+      severity = 'SEVERE'
+      healingTime = 14 + Math.floor(Math.random() * 14) // 14-28 days
+    } else if (hpPercentage <= 0.4) {
+      severity = 'MODERATE'
+      healingTime = 7 + Math.floor(Math.random() * 7) // 7-14 days
+    } else if (hpPercentage <= 0.6) {
+      severity = 'LIGHT'
+      healingTime = 1 + Math.floor(Math.random() * 6) // 1-7 days
+    } else {
+      // Above 60% HP - minor scrapes only
+      continue
+    }
+
+    // Random body part
+    const bodyPart = bodyParts[Math.floor(Math.random() * bodyParts.length)]
+
+    // Generate description
+    const descriptions: Record<string, string[]> = {
+      LIGHT: ['Minor bruising', 'Superficial cuts', 'Light strain', 'Minor contusion'],
+      MODERATE: ['Deep laceration', 'Fractured bone', 'Muscle tear', 'Internal bruising'],
+      SEVERE: ['Compound fracture', 'Severe internal bleeding', 'Crushed tissue', 'Multiple fractures'],
+      PERMANENT: ['Permanent nerve damage', 'Lost limb function', 'Chronic damage', 'Disfiguring injury']
+    }
+    const description = descriptions[severity][Math.floor(Math.random() * descriptions[severity].length)]
+
+    injuries.push({
+      characterId: survivor.characterId,
+      characterName: survivor.characterName,
+      bodyPart,
+      severity,
+      description: `${description} to ${bodyPart}`,
+      healingTime,
+      permanent: severity === 'PERMANENT'
+    })
+  }
+
+  return injuries
 }
 
 /**
@@ -454,26 +630,59 @@ function convertToEnhancedResult(basicResult: CombatResult): EnhancedCombatResul
   const store = useGameStore.getState()
   const victory = basicResult.winner === 'blue'
 
-  // Map casualties from basic format
-  const casualties = (basicResult.casualties || []).map(c => ({
-    characterId: c.unitId,
-    characterName: c.unitId, // Will be resolved by handler if character exists
-    status: 'dead' as const,
-    killedBy: undefined
-  }))
+  // Resolve character names from store
+  const getCharacterName = (unitId: string): string => {
+    const char = store.characters.find(c => c.id === unitId)
+    return char?.name || unitId
+  }
 
-  // Map survivors from basic format
-  const survivors = (basicResult.survivingUnits || [])
-    .filter(s => s.team === 'blue')
-    .map(s => ({
-      characterId: s.unitId,
-      characterName: s.unitId,
-      currentHp: s.hp,
-      maxHp: 100, // Default, will be looked up
-      damageDealt: 0, // Not tracked in basic result
-      damageTaken: 0,
-      kills: 0
+  // Resolve character max HP from store
+  const getCharacterMaxHp = (unitId: string): number => {
+    const char = store.characters.find(c => c.id === unitId)
+    return char?.health?.maximum || 100
+  }
+
+  // Map casualties from basic format with resolved names
+  const casualties = (basicResult.casualties || [])
+    .filter(c => c.team === 'blue') // Only track player team casualties
+    .map(c => ({
+      characterId: c.unitId,
+      characterName: getCharacterName(c.unitId),
+      status: 'dead' as const,
+      killedBy: undefined
     }))
+
+  // Calculate damage stats from surviving units
+  // Estimate damage taken based on HP loss
+  const survivingUnits = basicResult.survivingUnits || []
+  const blueSurvivors = survivingUnits.filter(s => s.team === 'blue')
+  const redSurvivors = survivingUnits.filter(s => s.team === 'red')
+
+  // Estimate total damage dealt/taken based on casualties and HP loss
+  const totalRedCasualties = (basicResult.casualties || []).filter(c => c.team === 'red').length
+  const estimatedDamageDealt = totalRedCasualties * 100 + redSurvivors.reduce((sum, s) => sum + (100 - s.hp), 0)
+  const estimatedDamageTaken = casualties.length * 100 + blueSurvivors.reduce((sum, s) => sum + (getCharacterMaxHp(s.unitId) - s.hp), 0)
+
+  // Map survivors from basic format with estimated damage stats
+  const survivors = blueSurvivors.map(s => {
+    const maxHp = getCharacterMaxHp(s.unitId)
+    const damageTaken = Math.max(0, maxHp - s.hp)
+    // Estimate kills proportionally if victory, otherwise 0
+    const estimatedKills = victory ? Math.ceil(totalRedCasualties / Math.max(1, blueSurvivors.length)) : 0
+
+    return {
+      characterId: s.unitId,
+      characterName: getCharacterName(s.unitId),
+      currentHp: s.hp,
+      maxHp,
+      damageDealt: victory ? Math.floor(estimatedDamageDealt / Math.max(1, blueSurvivors.length)) : 0,
+      damageTaken,
+      kills: estimatedKills
+    }
+  })
+
+  // Generate injuries from damage taken
+  const injuries = generateInjuriesFromDamage(survivors)
 
   // Get current sector info for mission location
   const missionLocation = store.currentSector ? {
@@ -485,13 +694,21 @@ function convertToEnhancedResult(basicResult: CombatResult): EnhancedCombatResul
   // Estimate combat time (5-10 minutes per round)
   const timeElapsed = basicResult.rounds * (5 + Math.floor(Math.random() * 5))
 
-  // Random collateral and civilian calculations
-  const collateralDamage = Math.floor(Math.random() * 50000)
-  const civilianCasualties = Math.random() < 0.1 ? Math.floor(Math.random() * 2) : 0
+  // Scale collateral damage based on rounds and casualties
+  const baseCollateral = 5000 + (basicResult.rounds * 2000) + (totalRedCasualties * 3000)
+  const collateralDamage = Math.floor(baseCollateral * (0.5 + Math.random()))
+
+  // Civilian casualties only in long fights with high collateral
+  const civilianCasualties = (basicResult.rounds > 5 && collateralDamage > 30000)
+    ? Math.floor(Math.random() * 2)
+    : 0
 
   // Calculate fame change
   const baseFame = victory ? 15 : -20
   const fameChange = baseFame - (civilianCasualties * 10) - Math.floor(collateralDamage / 10000)
+
+  // Calculate accuracy (estimate based on damage dealt vs expected)
+  const accuracyRate = victory ? 0.5 + Math.random() * 0.3 : 0.3 + Math.random() * 0.2
 
   return {
     victory,
@@ -499,16 +716,16 @@ function convertToEnhancedResult(basicResult: CombatResult): EnhancedCombatResul
     rounds: basicResult.rounds,
     timeElapsed,
     casualties,
-    injuries: [], // Basic result doesn't track injuries
+    injuries,
     survivors,
     experienceGained: [], // Will be calculated by handleCombatComplete
     lootGained: [], // Will be generated by handleCombatComplete
     fameChange,
     publicOpinionChange: {},
     missionLocation,
-    totalDamageDealt: 0, // Not tracked in basic result
-    totalDamageTaken: 0,
-    accuracyRate: 0.5, // Default
+    totalDamageDealt: estimatedDamageDealt,
+    totalDamageTaken: estimatedDamageTaken,
+    accuracyRate,
     collateralDamage,
     civilianCasualties
   }

@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useGameStore } from '../stores/enhancedGameStore'
 import toast from 'react-hot-toast'
+import { EventBridge, LocationContext } from '../game/EventBridge'
+import { getCityByName } from '../data/cities'
+import { getCountryByCity } from '../data/countries'
 
 export default function WorkingInvestigationCenter() {
   const { 
@@ -208,7 +211,7 @@ export default function WorkingInvestigationCenter() {
                   }}
                 />
                 
-                <InvestigationMethodCard 
+                <InvestigationMethodCard
                   name="Force Deployment"
                   description="Send full combat team"
                   successRate={95}
@@ -217,8 +220,54 @@ export default function WorkingInvestigationCenter() {
                   onClick={() => {
                     if (selectedInvestigation) {
                       assignInvestigation(selectedInvestigation.id)
+
+                      // Get city and country for location-based enemy generation
+                      const city = getCityByName(selectedInvestigation.city)
+                      const country = getCountryByCity(selectedInvestigation.city)
+
+                      if (!city || !country) {
+                        toast.error('Cannot find location data')
+                        return
+                      }
+
+                      // Build location context for enemy generation
+                      const locationContext: LocationContext = {
+                        country,
+                        city,
+                        missionType: 'investigation'
+                      }
+
+                      // Get assigned characters for combat
+                      const blueTeam = characters
+                        .filter(c => selectedInvestigation.assignedCharacters?.includes(c.id) || c.status === 'ready')
+                        .slice(0, 4) // Max 4 units
+                        .map(c => ({
+                          id: c.id,
+                          name: c.name,
+                          team: 'blue' as const,
+                          health: { current: c.health || 100, maximum: c.health || 100 },
+                          stats: {
+                            MEL: c.stats?.MEL || 50,
+                            AGL: c.stats?.AGL || 50,
+                            STR: c.stats?.STR || 50,
+                            STA: c.stats?.STA || 50,
+                            INT: c.stats?.INT || 50,
+                            INS: c.stats?.INS || 50,
+                            CON: c.stats?.CON || 50,
+                          },
+                          powers: c.powers || [],
+                          equipment: c.equipment || [],
+                        }))
+
+                      // Emit combat load with location context - enemies will be GENERATED!
+                      EventBridge.emit('load-combat', {
+                        blueTeam,
+                        locationContext,
+                        // No redTeam! CombatScene will generate from locationContext
+                      })
+
                       setCurrentView('tactical-combat')
-                      toast.success('Force deployment - switching to combat')
+                      toast.success(`Force deployment to ${city.name}, ${country.name} - generating local opposition`)
                     }
                   }}
                 />

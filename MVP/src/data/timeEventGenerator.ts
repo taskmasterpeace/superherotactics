@@ -512,14 +512,9 @@ export function initTimeEventGenerator(): void {
 
   console.log('[TimeEventGenerator] Initializing...')
 
-  // Subscribe to time passage events
+  // Subscribe to time passage events (hour-passed is emitted by the game store)
   state.subscriptionIds.push(
-    EventBus.on<TimePassedEvent>('time:passed', handleTimePassed, { priority: 10 })
-  )
-
-  // Also listen for hour and day passage
-  state.subscriptionIds.push(
-    EventBus.on<TimePassedEvent>('time:hour-passed', handleTimePassed, { priority: 5 })
+    EventBus.on<TimePassedEvent>('time:hour-passed', handleTimePassed, { priority: 10 })
   )
 
   state.initialized = true

@@ -65,6 +65,14 @@ import {
   getAccuracyPenalty,
 } from './statusEffects';
 
+import {
+  getPanicModifiers,
+  checkMorale,
+  MoraleCheckResult,
+  MoraleTrigger,
+  PanicLevel,
+} from './advancedMechanics';
+
 import { calculateKnockback } from '../data/knockbackSystem';
 
 // ============ DISTANCE CALCULATION ============
@@ -425,6 +433,11 @@ export function calculateAccuracy(
   // Flares negate the penalty completely in their radius
   const nightPenalty = getNightAccuracyMod(isNight, attacker.hasNightVision, isInFlareRadius);
   accuracy += nightPenalty;
+
+  // PANIC/MORALE PENALTY
+  // Shaken: -10%, Panicked: -25%, Broken: -40%
+  const panicMods = getPanicModifiers(attacker.panicLevel || 'steady');
+  accuracy += panicMods.accuracyMod;
 
   // Clamp to valid range
   return Math.max(5, Math.min(95, accuracy));

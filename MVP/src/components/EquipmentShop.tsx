@@ -17,6 +17,13 @@ import { Weapon, Armor } from '../data/equipmentTypes';
 
 type ShopTab = 'weapons' | 'armor' | 'sell';
 
+// Map contact service shop types to actual shop types
+const CONTACT_SHOP_MAP: Record<string, string> = {
+  'black_market': 'blackmarket',
+  'weapon_mods': 'highend',    // High-end shops have mods
+  'military_gear': 'military',
+};
+
 const EquipmentShop: React.FC = () => {
   const {
     budget,
@@ -29,18 +36,43 @@ const EquipmentShop: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ShopTab>('weapons');
   const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [contactShopType, setContactShopType] = useState<string | null>(null);
 
   // Get shops available in current city
   const availableShops = useMemo(() => {
     return getShopsForCity(selectedCity || 'Washington DC');
   }, [selectedCity]);
 
-  // Auto-select first shop if none selected
+  // Check for contact-granted shop access on mount
   React.useEffect(() => {
-    if (availableShops.length > 0 && !selectedShop) {
+    const savedShopType = sessionStorage.getItem('activeShopType');
+    if (savedShopType) {
+      setContactShopType(savedShopType);
+      sessionStorage.removeItem('activeShopType'); // Clear after reading
+    }
+  }, []);
+
+  // Auto-select shop based on contact access or default to first
+  React.useEffect(() => {
+    if (availableShops.length === 0) return;
+
+    // If contact granted specific shop access, try to select it
+    if (contactShopType) {
+      const mappedType = CONTACT_SHOP_MAP[contactShopType] || contactShopType;
+      const contactShop = availableShops.find(s => s.type === mappedType);
+      if (contactShop) {
+        setSelectedShop(contactShop);
+        return;
+      }
+      // If that shop not available in city, show notification
+      console.log(`Contact shop type ${mappedType} not available in this city`);
+    }
+
+    // Default: select first shop if none selected
+    if (!selectedShop) {
       setSelectedShop(availableShops[0]);
     }
-  }, [availableShops, selectedShop]);
+  }, [availableShops, selectedShop, contactShopType]);
 
   // Get items for current shop
   const shopItems = useMemo(() => {
@@ -282,53 +314,103 @@ const EquipmentShop: React.FC = () => {
                 </div>
               )}
 
-              {/* Item List */}
-              <div className="space-y-3 max-h-[600px] overflow-y-auto">
+              {/* Item Grid */}
+              <div className="max-h-[600px] overflow-y-auto">
                 {activeTab !== 'sell' ? (
-                  // Buy tab
+                  // Buy tab - Grid layout
                   filteredItems.length > 0 ? (
-                    filteredItems.map(item => {
-                      const price = selectedShop ? getBuyPrice(item, selectedShop) : item.costValue;
-                      const canAfford = budget >= price;
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {filteredItems.map(item => {
+                        const price = selectedShop ? getBuyPrice(item, selectedShop) : item.costValue;
+                        const canAfford = budget >= price;
 
-                      return (
-                        <div
-                          key={item.id}
-                          className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg border border-slate-600 hover:border-indigo-500/50 transition-all"
-                        >
-                          <div className="flex items-center gap-4">
-                            <span className="text-3xl">{item.emoji}</span>
-                            <div>
-                              <div className="text-white font-medium">{item.name}</div>
-                              {item.type === 'weapon' && renderWeaponStats(item.data as Weapon)}
-                              {item.type === 'armor' && renderArmorStats(item.data as Armor)}
-                              <div className={`text-xs mt-1 ${getAvailabilityColor(item.availability)}`}>
-                                {AVAILABILITY_INFO[item.availability]?.label || item.availability}
+                        return (
+                          <div
+                            key={item.id}
+                            className={`relative bg-slate-700/50 rounded-xl border-2 transition-all overflow-hidden ${
+                              canAfford ? 'border-slate-600 hover:border-indigo-500' : 'border-red-900/50 opacity-75'
+                            }`}
+                          >
+                            {/* Item Header with Emoji */}
+                            <div className={`h-16 flex items-center justify-center ${
+                              item.type === 'weapon' ? 'bg-gradient-to-br from-red-900/40 to-orange-900/40' :
+                              'bg-gradient-to-br from-blue-900/40 to-cyan-900/40'
+                            }`}>
+                              <span className="text-4xl">{item.emoji}</span>
+                            </div>
+
+                            {/* Availability Badge */}
+                            <div className={`absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-bold bg-black/50 ${getAvailabilityColor(item.availability)}`}>
+                              {AVAILABILITY_INFO[item.availability]?.label || item.availability}
+                            </div>
+
+                            <div className="p-3">
+                              {/* Name */}
+                              <h3 className="font-bold text-white text-sm mb-2 leading-tight truncate" title={item.name}>
+                                {item.name}
+                              </h3>
+
+                              {/* Stats */}
+                              <div className="bg-black/30 rounded-lg p-2 mb-3">
+                                {item.type === 'weapon' && (
+                                  <div className="grid grid-cols-3 gap-1 text-center text-xs">
+                                    <div>
+                                      <div className="text-gray-500">DMG</div>
+                                      <div className="text-red-400 font-bold">{(item.data as Weapon).baseDamage}</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-gray-500">RNG</div>
+                                      <div className="text-blue-400 font-bold">{(item.data as Weapon).range}</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-gray-500">SPD</div>
+                                      <div className="text-green-400 font-bold">{(item.data as Weapon).attackSpeed}s</div>
+                                    </div>
+                                  </div>
+                                )}
+                                {item.type === 'armor' && (
+                                  <div className="grid grid-cols-3 gap-1 text-center text-xs">
+                                    <div>
+                                      <div className="text-gray-500">DR</div>
+                                      <div className="text-blue-400 font-bold">{(item.data as Armor).drPhysical}</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-gray-500">SP</div>
+                                      <div className="text-cyan-400 font-bold">{(item.data as Armor).stoppingPower || '-'}</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-gray-500">WGT</div>
+                                      <div className="text-yellow-400 font-bold">{(item.data as Armor).weight}lb</div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Price and Buy */}
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className={`text-lg font-bold ${canAfford ? 'text-green-400' : 'text-red-400'}`}>
+                                    {formatPrice(price)}
+                                  </div>
+                                  <div className="text-[10px] text-gray-500">{item.costLevel}</div>
+                                </div>
+                                <button
+                                  onClick={() => handleBuy(item)}
+                                  disabled={!canAfford}
+                                  className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+                                    canAfford
+                                      ? 'bg-green-600 hover:bg-green-500 text-white'
+                                      : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                                  }`}
+                                >
+                                  BUY
+                                </button>
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <div className={`text-lg font-bold ${canAfford ? 'text-green-400' : 'text-red-400'}`}>
-                                {formatPrice(price)}
-                              </div>
-                              <div className="text-xs text-gray-400">{item.costLevel}</div>
-                            </div>
-                            <button
-                              onClick={() => handleBuy(item)}
-                              disabled={!canAfford}
-                              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                                canAfford
-                                  ? 'bg-green-600 hover:bg-green-500 text-white'
-                                  : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                              }`}
-                            >
-                              Buy
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })
+                        );
+                      })}
+                    </div>
                   ) : (
                     <div className="text-center py-12">
                       <div className="text-6xl mb-4">
@@ -338,44 +420,92 @@ const EquipmentShop: React.FC = () => {
                     </div>
                   )
                 ) : (
-                  // Sell tab
+                  // Sell tab - Grid layout
                   inventoryItems.length > 0 ? (
-                    inventoryItems.map(({ item }, index) => {
-                      const sellPrice = selectedShop ? getSellPrice(item, selectedShop) : Math.round(item.costValue * 0.5);
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {inventoryItems.map(({ item }, index) => {
+                        const sellPrice = selectedShop ? getSellPrice(item, selectedShop) : Math.round(item.costValue * 0.5);
 
-                      return (
-                        <div
-                          key={`${item.id}-${index}`}
-                          className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg border border-slate-600 hover:border-orange-500/50 transition-all"
-                        >
-                          <div className="flex items-center gap-4">
-                            <span className="text-3xl">{item.emoji}</span>
-                            <div>
-                              <div className="text-white font-medium">{item.name}</div>
-                              {item.type === 'weapon' && renderWeaponStats(item.data as Weapon)}
-                              {item.type === 'armor' && renderArmorStats(item.data as Armor)}
-                              <div className={`text-xs mt-1 ${getAvailabilityColor(item.availability)}`}>
-                                {AVAILABILITY_INFO[item.availability]?.label || item.availability}
+                        return (
+                          <div
+                            key={`${item.id}-${index}`}
+                            className="relative bg-slate-700/50 rounded-xl border-2 border-orange-900/50 hover:border-orange-500 transition-all overflow-hidden"
+                          >
+                            {/* Item Header */}
+                            <div className={`h-16 flex items-center justify-center ${
+                              item.type === 'weapon' ? 'bg-gradient-to-br from-red-900/40 to-orange-900/40' :
+                              'bg-gradient-to-br from-blue-900/40 to-cyan-900/40'
+                            }`}>
+                              <span className="text-4xl">{item.emoji}</span>
+                            </div>
+
+                            {/* Owned Badge */}
+                            <div className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold bg-green-600 text-white">
+                              OWNED
+                            </div>
+
+                            <div className="p-3">
+                              {/* Name */}
+                              <h3 className="font-bold text-white text-sm mb-2 leading-tight truncate" title={item.name}>
+                                {item.name}
+                              </h3>
+
+                              {/* Stats */}
+                              <div className="bg-black/30 rounded-lg p-2 mb-3">
+                                {item.type === 'weapon' && (
+                                  <div className="grid grid-cols-3 gap-1 text-center text-xs">
+                                    <div>
+                                      <div className="text-gray-500">DMG</div>
+                                      <div className="text-red-400 font-bold">{(item.data as Weapon).baseDamage}</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-gray-500">RNG</div>
+                                      <div className="text-blue-400 font-bold">{(item.data as Weapon).range}</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-gray-500">SPD</div>
+                                      <div className="text-green-400 font-bold">{(item.data as Weapon).attackSpeed}s</div>
+                                    </div>
+                                  </div>
+                                )}
+                                {item.type === 'armor' && (
+                                  <div className="grid grid-cols-3 gap-1 text-center text-xs">
+                                    <div>
+                                      <div className="text-gray-500">DR</div>
+                                      <div className="text-blue-400 font-bold">{(item.data as Armor).drPhysical}</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-gray-500">SP</div>
+                                      <div className="text-cyan-400 font-bold">{(item.data as Armor).stoppingPower || '-'}</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-gray-500">WGT</div>
+                                      <div className="text-yellow-400 font-bold">{(item.data as Armor).weight}lb</div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Price and Sell */}
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="text-lg font-bold text-orange-400">
+                                    {formatPrice(sellPrice)}
+                                  </div>
+                                  <div className="text-[10px] text-gray-500">50% value</div>
+                                </div>
+                                <button
+                                  onClick={() => handleSell(item)}
+                                  className="px-4 py-2 rounded-lg font-bold text-sm bg-orange-600 hover:bg-orange-500 text-white transition-all"
+                                >
+                                  SELL
+                                </button>
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <div className="text-lg font-bold text-orange-400">
-                                {formatPrice(sellPrice)}
-                              </div>
-                              <div className="text-xs text-gray-400">50% of value</div>
-                            </div>
-                            <button
-                              onClick={() => handleSell(item)}
-                              className="px-4 py-2 rounded-lg font-medium bg-orange-600 hover:bg-orange-500 text-white transition-all"
-                            >
-                              Sell
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })
+                        );
+                      })}
+                    </div>
                   ) : (
                     <div className="text-center py-12">
                       <div className="text-6xl mb-4">📦</div>

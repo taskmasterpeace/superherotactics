@@ -188,7 +188,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     accuracy: 70,
     damageType: 'GUNFIRE_BULLET',
     range: 12,
-    apCost: 3,   // Reduced from 4 to 3
+    apCost: 2,   // BF-001: Reduced from 3 to 2 for CQB viability
     rangeBrackets: {
       pointBlank: 2, pointBlankMod: 20,  // +20 at CQB (was +10)
       short: 5, shortMod: 10,            // +10 short range (was +5)

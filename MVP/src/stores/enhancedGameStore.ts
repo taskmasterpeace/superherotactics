@@ -11,6 +11,13 @@ import {
 import { getCountryByCode } from '../data/countries'
 import { calculateMedicalSystem } from '../data/combinedEffects'
 import {
+  getOriginHealing,
+  getMaxHealingPercent,
+  getHealingFrequency,
+  isOriginResearchComplete,
+  ORIGIN_HEALING,
+} from '../data/originHealingSystem'
+import {
   Investigation,
   InvestigationTemplate,
   ApproachType,
@@ -1143,6 +1150,42 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       return
     }
 
+    // Check origin-based hospital restrictions
+    const originHealing = getOriginHealing(character.origin || 1)
+    if (!originHealing || !originHealing.canUseHospital) {
+      const originName = originHealing?.originName || 'Unknown origin'
+      toast.error(`${character.name} (${originName}) cannot use hospitals. Requires specialized treatment.`)
+
+      // Set character to a different recovery status instead
+      set({
+        characters: state.characters.map(char =>
+          char.id === characterId
+            ? {
+              ...char,
+              status: 'off_the_grid' as const,
+              injuries: injuries,
+              statusData: {
+                reason: 'requires_specialized_healing',
+                originName: originName,
+                specialNotes: originHealing?.specialNotes || [],
+              }
+            }
+            : char
+        )
+      })
+
+      get().addNotification({
+        type: 'injury',
+        priority: 'critical',
+        title: `${character.name} Needs Specialized Care`,
+        message: `${originName} physiology is incompatible with human medicine. Requires alien-specific healing methods or specialized research facility.`,
+        characterId: character.id,
+        characterName: character.name,
+        timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
+      })
+      return
+    }
+
     // Use character's current country or fallback
     const hospitalCountry = countryCode || character.location?.country || state.selectedCountry
     const country = getCountryByCode(hospitalCountry)
@@ -1176,6 +1219,13 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       totalCost += baseCost
     })
 
+    // Apply origin-based recovery time modifier
+    // Origins with lower healMax or negative roll modifiers heal slower
+    const healingFrequency = originHealing.healingFrequencyHours
+    const baseFrequency = 12 // Skilled Human baseline
+    const frequencyMultiplier = healingFrequency / baseFrequency
+    totalRecoveryHours = Math.ceil(totalRecoveryHours * frequencyMultiplier)
+
     // Calculate cost per hour for long-term care
     const daysInHospital = Math.ceil(totalRecoveryHours / 24)
     if (daysInHospital > 3) {
@@ -1188,7 +1238,11 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       return
     }
 
-    // Hospitalize the character
+    // Get max healing percent based on origin research status
+    const maxHealingPercent = getMaxHealingPercent(character)
+    const researchComplete = isOriginResearchComplete(character)
+
+    // Hospitalize the character with origin data
     set({
       characters: state.characters.map(char =>
         char.id === characterId
@@ -1201,6 +1255,15 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
               ...char.location,
               country: hospitalCountry,
               city: `Hospital in ${hospitalCountry}`
+            },
+            // Store origin healing metadata for UI display
+            hospitalData: {
+              originName: originHealing.originName,
+              maxHealingPercent,
+              healingFrequencyHours: originHealing.healingFrequencyHours,
+              requirementFor100: originHealing.requirementFor100,
+              researchComplete,
+              rollModifier: originHealing.healingRollModifier,
             }
           }
           : char
@@ -1208,19 +1271,29 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       budget: state.budget - totalCost
     })
 
-    // Create notification
+    // Create notification with origin info
+    let notificationMessage = `Admitted to ${country.name} hospital (Tier ${medicalSystem.hospitalTier}). Recovery time: ${Math.ceil(totalRecoveryHours / 24)} days. Cost: $${totalCost.toLocaleString()}`
+
+    if (maxHealingPercent < 100) {
+      notificationMessage += ` WARNING: ${originHealing.originName} can only heal to ${maxHealingPercent}% without completing ${originHealing.requirementFor100}.`
+    }
+
     get().addNotification({
       type: 'injury',
       priority: 'high',
       title: `${character.name} Hospitalized`,
-      message: `Admitted to ${country.name} hospital (Tier ${medicalSystem.hospitalTier}). Recovery time: ${Math.ceil(totalRecoveryHours / 24)} days. Cost: $${totalCost.toLocaleString()}`,
+      message: notificationMessage,
       characterId: character.id,
       characterName: character.name,
       location: hospitalCountry,
       timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
     })
 
-    toast.error(`${character.name} hospitalized in ${country.name}. Recovery: ${Math.ceil(totalRecoveryHours / 24)} days`)
+    const toastMsg = maxHealingPercent < 100
+      ? `${character.name} hospitalized. WARNING: Max healing ${maxHealingPercent}% (${originHealing.originName})`
+      : `${character.name} hospitalized in ${country.name}. Recovery: ${Math.ceil(totalRecoveryHours / 24)} days`
+
+    toast.error(toastMsg)
   },
 
   transferToHospital: (characterId: string, targetCountryCode: string) => {
@@ -1229,6 +1302,14 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
     if (!character || character.status !== 'hospital') {
       toast.error('Character is not currently hospitalized')
+      return
+    }
+
+    // Check origin-based hospital restrictions
+    const originHealing = getOriginHealing(character.origin || 1)
+    if (!originHealing || !originHealing.canUseHospital) {
+      const originName = originHealing?.originName || 'Unknown origin'
+      toast.error(`${character.name} (${originName}) cannot use hospitals. Transfer not possible.`)
       return
     }
 
@@ -1257,7 +1338,11 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     const qualityRatio = oldQuality / newQuality
     const newRecoveryTime = Math.max(1, Math.round(character.recoveryTime * qualityRatio))
 
-    // Transfer the character
+    // Get max healing info for notification
+    const maxHealingPercent = getMaxHealingPercent(character)
+    const researchComplete = isOriginResearchComplete(character)
+
+    // Transfer the character with updated hospital data
     set({
       characters: state.characters.map(char =>
         char.id === characterId
@@ -1268,6 +1353,15 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
               ...char.location,
               country: targetCountryCode,
               city: `Hospital in ${targetCountryCode}`
+            },
+            // Update hospital data for UI
+            hospitalData: {
+              originName: originHealing.originName,
+              maxHealingPercent,
+              healingFrequencyHours: originHealing.healingFrequencyHours,
+              requirementFor100: originHealing.requirementFor100,
+              researchComplete,
+              rollModifier: originHealing.healingRollModifier,
             }
           }
           : char
@@ -1276,9 +1370,14 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     })
 
     const timeSaved = character.recoveryTime - newRecoveryTime
-    const message = timeSaved > 0
+    let message = timeSaved > 0
       ? `Transfer complete. Upgraded to Tier ${targetMedical.hospitalTier} hospital. Recovery time reduced by ${Math.ceil(timeSaved / 24)} days.`
       : `Transfer complete. Hospital quality: Tier ${targetMedical.hospitalTier}.`
+
+    // Add origin warning if healing is limited
+    if (maxHealingPercent < 100) {
+      message += ` Note: ${originHealing.originName} limited to ${maxHealingPercent}% healing.`
+    }
 
     get().addNotification({
       type: 'status_change',

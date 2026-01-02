@@ -106,7 +106,7 @@ export const MILITARY_SCENARIOS: CombatScenario[] = [
       ];
     },
   },
-  // BF-006: Restored Heavy Gunner after overall balance pass
+  // BF-006: Reduced to 4 enemies for balanced challenge
   {
     id: 'checkpoint',
     name: 'Checkpoint Assault',
@@ -119,8 +119,7 @@ export const MILITARY_SCENARIOS: CombatScenario[] = [
       return [
         createUnit(UNIT_PRESETS.heavyGunner, 'red', 'MG Gunner'),
         createUnit(UNIT_PRESETS.soldierShotgun, 'red', 'Breacher'),
-        createUnit(UNIT_PRESETS.soldierRifle, 'red', 'Rifleman 1'),
-        createUnit(UNIT_PRESETS.soldierRifle, 'red', 'Rifleman 2'),
+        createUnit(UNIT_PRESETS.soldierRifle, 'red', 'Rifleman'),
         createUnit(UNIT_PRESETS.soldierPistol, 'red', 'Officer'),
       ];
     },

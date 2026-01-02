@@ -40,6 +40,39 @@ import {
   processShieldRegen,
 } from './types';
 
+import {
+  checkMorale,
+  getPanicModifiers,
+  PanicLevel,
+} from './advancedMechanics';
+
+/**
+ * Process morale check for a unit when something bad happens.
+ * Updates the unit's panicLevel in place.
+ */
+function processMoraleCheck(
+  unit: SimUnit,
+  trigger: 'ally_killed' | 'critical_hit' | 'health_low' | 'outnumbered' | 'suppressed'
+): void {
+  const currentLevel = unit.panicLevel || 'steady';
+  const result = checkMorale(unit, trigger, currentLevel);
+
+  if (!result.passed) {
+    unit.panicLevel = result.newLevel;
+  }
+}
+
+/**
+ * Check all allies for morale when someone dies.
+ * Witnessing an ally's death can break morale.
+ */
+function checkAllyDeathMorale(allies: SimUnit[], deadUnit: SimUnit): void {
+  for (const ally of allies) {
+    if (!ally.alive || ally.id === deadUnit.id) continue;
+    processMoraleCheck(ally, 'ally_killed');
+  }
+}
+
 /**
  * Clone a unit for simulation (avoid mutating originals).
  */
@@ -175,8 +208,9 @@ export function runBattle(
         continue;
       }
 
-      // Check if unit's turn is skipped (stun)
-      if (statusResult.turnSkipped || !canUnitAct(unit)) {
+      // Check if unit's turn is skipped (stun) or if BROKEN (panic)
+      const panicMods = getPanicModifiers(unit.panicLevel || 'steady');
+      if (statusResult.turnSkipped || !canUnitAct(unit) || !panicMods.canAct) {
         unit.acted = true;
         continue;
       }
@@ -208,6 +242,23 @@ export function runBattle(
           log.push(result);
           applyAttackResult(target, result);
           spendAction(unit, 'attack'); // Ends turn
+
+          // MORALE CHECKS after taking damage
+          if (result.hitResult === 'crit' && target.alive) {
+            // Critical hit - morale check for target
+            processMoraleCheck(target, 'critical_hit');
+          }
+
+          if (target.alive && target.hp < target.maxHp * 0.25) {
+            // Low HP - morale check for target
+            processMoraleCheck(target, 'health_low');
+          }
+
+          if (!target.alive) {
+            // Target died - morale check for their allies
+            const targetAllies = target.team === 'blue' ? blue : red;
+            checkAllyDeathMorale(targetAllies, target);
+          }
 
           // COUNTER-ATTACK CHECK
           if (canCounterAttack(target, unit, result)) {
@@ -333,8 +384,9 @@ export function runQuickBattle(
       // Check if unit died from DoT
       if (!unit.alive) continue;
 
-      // Check if turn is skipped (stun)
-      if (statusResult.turnSkipped || !canUnitAct(unit)) continue;
+      // Check if turn is skipped (stun) or BROKEN (panic)
+      const panicMods = getPanicModifiers(unit.panicLevel || 'steady');
+      if (statusResult.turnSkipped || !canUnitAct(unit) || !panicMods.canAct) continue;
 
       const enemies = unit.team === 'blue' ? red : blue;
 

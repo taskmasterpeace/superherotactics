@@ -24,6 +24,7 @@ import {
   DEFAULT_RANGE_BRACKETS,
 } from '../../data/equipmentTypes';
 import { lookupWeaponInDatabase, getDamageSystemType, getDamageTypeByKey } from './weaponIntegration';
+import { getArmorForUnit, selectArmorForEnemy } from './armorIntegration';
 import { MapTemplate, parseMapLayout, getMapForCityType, getSpawnPositions } from '../../data/mapTemplates';
 import { generateEnemySquad, convertToCombatCharacters, debugGenerateReport } from '../../combat/enemyGeneration';
 import {
@@ -802,6 +803,8 @@ interface Unit {
   shieldHp: number; // Shield HP - absorbs damage before health
   shieldMaxHp: number;
   shieldRegenRate: number; // HP per turn
+  shieldRegenDelay: number; // Turns to wait after damage before regen starts
+  shieldRegenDelayRemaining: number; // Current countdown (0 = can regen)
   acted: boolean;
   visible: boolean;
   stance: StanceType;
@@ -884,6 +887,9 @@ interface MapTile {
   sprite?: Phaser.GameObjects.Rectangle;
   occupant?: string;
   environment?: TileEnvironmentState; // Environmental effects (fire, ice, acid)
+  hasSmoke?: boolean; // Smoke cover blocks LOS
+  smokeDuration?: number; // Turns remaining for smoke
+  smokeVisual?: Phaser.GameObjects.Circle; // Visual reference for cleanup
 }
 
 type ActionMode = 'idle' | 'move' | 'attack' | 'throw' | 'overwatch' | 'deploy' | 'teleport' | 'grapple';
@@ -1895,7 +1901,8 @@ export class CombatScene extends Phaser.Scene {
       spriteId: 'soldier_28', // Tech soldier with drone
     });
 
-    // Red team - enemy soldiers
+    // Red team - enemy soldiers with armor from database
+    const riflemanArmor = selectArmorForEnemy(2, 'standard');  // Tier 2 standard soldier
     this.spawnUnit({
       id: 'hostile1',
       name: 'Hostile',
@@ -1913,13 +1920,14 @@ export class CombatScene extends Phaser.Scene {
       personality: 'aggressive',
       str: 45,
       agl: 40,
-      dr: 5,              // Light tactical armor
-      stoppingPower: 8,   // Can stop pistol rounds
+      dr: riflemanArmor.dr,
+      stoppingPower: riflemanArmor.stoppingPower,
       acted: false,
       visible: true,
       spriteId: 'soldier_01', // Standard rifleman
     });
 
+    const gunnerArmor = selectArmorForEnemy(4, 'heavy');  // Tier 4 heavy soldier
     this.spawnUnit({
       id: 'hostile2',
       name: 'Heavy',
@@ -1937,13 +1945,14 @@ export class CombatScene extends Phaser.Scene {
       personality: 'berserker',
       str: 65,
       agl: 35,
-      dr: 12,             // Heavy ballistic armor
-      stoppingPower: 15,  // Can stop rifle rounds
+      dr: gunnerArmor.dr,
+      stoppingPower: gunnerArmor.stoppingPower,
       acted: false,
       visible: true,
       spriteId: 'soldier_04', // Heavy with LMG
     });
 
+    const rocketArmor = selectArmorForEnemy(3, 'specialist');  // Tier 3 specialist
     this.spawnUnit({
       id: 'hostile3',
       name: 'Rocket',
@@ -1961,8 +1970,8 @@ export class CombatScene extends Phaser.Scene {
       personality: 'sniper',
       str: 50,
       agl: 45,
-      dr: 8,              // Medium EOD armor
-      stoppingPower: 10,  // Blast-resistant padding
+      dr: rocketArmor.dr,
+      stoppingPower: rocketArmor.stoppingPower,
       acted: false,
       visible: true,
       spriteId: 'soldier_07', // Rocket launcher soldier
@@ -2133,6 +2142,9 @@ export class CombatScene extends Phaser.Scene {
       const spriteNum = ((index * 7 + 1) % 32) + 1; // Deterministic but varied
       const spriteId = `soldier_${spriteNum.toString().padStart(2, '0')}`;
 
+      // Get armor data from database integration
+      const armorData = getArmorForUnit(char);
+
       this.spawnUnit({
         id: char.id,
         name: char.name,
@@ -2154,8 +2166,8 @@ export class CombatScene extends Phaser.Scene {
         ins: char.stats.INS,
         con: char.stats.CON,
         mel: char.stats.MEL,
-        dr: char.dr || 0, // Damage reduction from armor
-        stoppingPower: char.stoppingPower || 0, // Armor stopping power
+        dr: armorData.dr,           // Damage reduction from armor database
+        stoppingPower: armorData.stoppingPower, // Armor stopping power from database
         acted: false,
         visible: true,
         spriteId,
@@ -2187,6 +2199,9 @@ export class CombatScene extends Phaser.Scene {
       const spriteNum = ((index * 5 + 17) % 32) + 1; // Different pattern than blue team
       const spriteId = `soldier_${spriteNum.toString().padStart(2, '0')}`;
 
+      // Get armor data - use database if equipped, otherwise generate based on tier
+      const armorData = getArmorForUnit(char);
+
       this.spawnUnit({
         id: char.id,
         name: char.name,
@@ -2208,8 +2223,8 @@ export class CombatScene extends Phaser.Scene {
         ins: char.stats.INS,
         con: char.stats.CON,
         mel: char.stats.MEL,
-        dr: char.dr || 0, // Damage reduction from armor
-        stoppingPower: char.stoppingPower || 0, // Armor stopping power
+        dr: armorData.dr,           // Damage reduction from armor database
+        stoppingPower: armorData.stoppingPower, // Armor stopping power from database
         acted: false,
         visible: true,
         spriteId,
@@ -2266,6 +2281,8 @@ export class CombatScene extends Phaser.Scene {
       shieldHp: unitData.shieldHp ?? 0, // Default no shield
       shieldMaxHp: unitData.shieldMaxHp ?? 0,
       shieldRegenRate: unitData.shieldRegenRate ?? 0,
+      shieldRegenDelay: unitData.shieldRegenDelay ?? 0, // Default: instant regen
+      shieldRegenDelayRemaining: unitData.shieldRegenDelayRemaining ?? 0, // Start ready to regen
       acted: unitData.acted ?? false,
       visible: unitData.visible ?? true,
       stance: unitData.stance ?? 'normal',
@@ -2955,6 +2972,46 @@ export class CombatScene extends Phaser.Scene {
   }
 
   /**
+   * Process smoke dissipation - smoke clears after a number of turns
+   */
+  private processSmokeDissipation(): void {
+    for (let y = 0; y < this.mapHeight; y++) {
+      for (let x = 0; x < this.mapWidth; x++) {
+        const tile = this.tiles[y]?.[x];
+        if (!tile?.hasSmoke) continue;
+
+        // Decrement smoke duration
+        if (tile.smokeDuration !== undefined) {
+          tile.smokeDuration--;
+
+          if (tile.smokeDuration <= 0) {
+            // Smoke clears - remove visual and clear flag
+            if (tile.smokeVisual) {
+              // Fade out animation before destroying
+              this.tweens.add({
+                targets: tile.smokeVisual,
+                alpha: 0,
+                duration: 500,
+                onComplete: () => {
+                  tile.smokeVisual?.destroy();
+                  tile.smokeVisual = undefined;
+                }
+              });
+            }
+            tile.hasSmoke = false;
+            tile.smokeDuration = undefined;
+
+            this.emitToUI('combat-log', {
+              message: `Smoke clears at (${x}, ${y})`,
+              type: 'status'
+            });
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * Set an environmental effect on a tile
    */
   private setTileEnvironment(x: number, y: number, type: TileEnvironment, duration: number, intensity: number): void {
@@ -3238,9 +3295,55 @@ export class CombatScene extends Phaser.Scene {
 
       // Emit to React
       EventBridge.emit('unit-selected', this.getUnitData(unit));
-    }
 
-    this.setActionMode('idle');
+      // Auto-show movement range for player units on their turn
+      if (unit.team === this.currentTeam && unit.team === this.playerTeam && unit.ap > 0) {
+        this.showSelectionOverlays(unit);
+      } else {
+        this.setActionMode('idle');
+      }
+    } else {
+      this.setActionMode('idle');
+    }
+  }
+
+  /**
+   * Show combined movement + attack range overlays when a unit is selected.
+   * Movement range is shown in blue, attack range as a subtle red outline.
+   */
+  private showSelectionOverlays(unit: Unit): void {
+    this.clearRangeOverlay();
+    this.clearLOSIndicator();
+    this.actionMode = 'idle'; // Still idle mode, but with overlays
+
+    // Show movement range (blue diamonds)
+    this.showMovementRange(unit);
+
+    // Show attack range as subtle outline
+    this.showAttackRangeOutline(unit);
+  }
+
+  /**
+   * Show a subtle attack range outline (no target highlighting).
+   * This gives players a sense of their weapon's reach without cluttering the UI.
+   */
+  private showAttackRangeOutline(unit: Unit): void {
+    const weapon = getWeaponData(unit.weapon);
+    const maxRange = weapon.range;
+
+    const unitScreenPos = gridToScreen(unit.position.x, unit.position.y, this.offsetX, this.offsetY);
+
+    // Draw dashed ellipse for attack range (isometric approximation)
+    const rangeGraphics = this.add.graphics();
+    rangeGraphics.lineStyle(1, COLORS.ATTACK_RANGE, 0.3);
+
+    // Draw isometric range ellipse
+    const radiusX = maxRange * (TILE_WIDTH / 2);
+    const radiusY = maxRange * (TILE_HEIGHT / 2);
+    rangeGraphics.strokeEllipse(unitScreenPos.x, unitScreenPos.y, radiusX * 2, radiusY * 2);
+
+    rangeGraphics.setDepth(getIsoDepth(unit.position.x, unit.position.y) + 48);
+    this.rangeLayer.add(rangeGraphics);
   }
 
   private getUnitData(unit: Unit): UnitData {
@@ -3668,9 +3771,11 @@ export class CombatScene extends Phaser.Scene {
 
   /**
    * Creates a smoke cloud visual effect on the map
-   * Smoke provides cover for units inside
+   * Smoke provides cover for units inside and blocks LOS
    */
   private createSmokeCloud(x: number, y: number, radius: number): void {
+    const SMOKE_DURATION_TURNS = 3; // Smoke lasts for 3 turns
+
     // Create smoke particles at center and surrounding tiles
     for (let dx = -radius; dx <= radius; dx++) {
       for (let dy = -radius; dy <= radius; dy++) {
@@ -3682,6 +3787,12 @@ export class CombatScene extends Phaser.Scene {
           // Make sure tile is within map bounds
           if (tileX >= 0 && tileX < this.mapWidth && tileY >= 0 && tileY < this.mapHeight) {
             const screenPos = gridToScreen(tileX, tileY, this.offsetX, this.offsetY);
+            const tile = this.tiles[tileY][tileX];
+
+            // Clean up any existing smoke visual on this tile
+            if (tile.smokeVisual) {
+              tile.smokeVisual.destroy();
+            }
 
             // Create smoke effect (semi-transparent gray cloud)
             const smokeAlpha = 0.6 - (distance * 0.1); // Fades at edges
@@ -3692,19 +3803,22 @@ export class CombatScene extends Phaser.Scene {
             smoke.x += (Math.random() - 0.5) * 10;
             smoke.y += (Math.random() - 0.5) * 10;
 
-            // Slow drift animation
+            // Mark tile as having smoke cover for LOS calculations
+            tile.hasSmoke = true;
+            tile.smokeDuration = SMOKE_DURATION_TURNS;
+            tile.smokeVisual = smoke;
+
+            // Subtle drift animation (keeps visual but tile remains smoky)
             this.tweens.add({
               targets: smoke,
-              x: smoke.x + (Math.random() - 0.5) * 30,
-              y: smoke.y - 10,
-              alpha: 0,
-              scale: 1.5,
-              duration: 5000 + Math.random() * 2000,
-              onComplete: () => smoke.destroy()
+              x: smoke.x + (Math.random() - 0.5) * 15,
+              y: smoke.y - 5,
+              scale: 1.2,
+              duration: 2000,
+              yoyo: true,
+              repeat: -1, // Loop indefinitely until smoke clears
+              ease: 'Sine.easeInOut'
             });
-
-            // TODO: Mark tile as having smoke cover for LOS/cover calculations
-            // this.tiles[tileY][tileX].hasSmoke = true;
           }
         }
       }
@@ -4616,6 +4730,13 @@ export class CombatScene extends Phaser.Scene {
       const cell = this.tiles[y]?.[x];
       // WALL and DOOR_CLOSED block LOS (but not start/end positions)
       if (cell && (cell.terrain === 'WALL' || cell.terrain === 'DOOR_CLOSED')) {
+        if (!(x === x1 && y === y1) && !(x === x2 && y === y2)) {
+          return false;
+        }
+      }
+
+      // Smoke blocks LOS (but not at start/end positions - you can see into/out of smoke at short range)
+      if (cell && cell.hasSmoke) {
         if (!(x === x1 && y === y1) && !(x === x2 && y === y2)) {
           return false;
         }
@@ -5664,6 +5785,10 @@ export class CombatScene extends Phaser.Scene {
         damage -= shieldAbsorbed;
         if (shieldAbsorbed > 0) {
           this.playSound('impact.shield', target.position);
+          // Reset regen delay when shield takes damage
+          if (target.shieldRegenDelay > 0) {
+            target.shieldRegenDelayRemaining = target.shieldRegenDelay;
+          }
         }
       } else if (bypassesShields && target.shieldHp > 0) {
         this.emitToUI('combat-log', {
@@ -6823,29 +6948,36 @@ export class CombatScene extends Phaser.Scene {
 
         unit.acted = false;
 
-        // Shield regeneration at turn start
-        if (unit.shieldRegenRate > 0 && unit.shieldMaxHp > 0 && unit.shieldHp < unit.shieldMaxHp) {
-          const regenAmount = Math.min(unit.shieldRegenRate, unit.shieldMaxHp - unit.shieldHp);
-          unit.shieldHp += regenAmount;
-          if (regenAmount > 0) {
-            const screenPos = gridToScreen(unit.position.x, unit.position.y, this.offsetX, this.offsetY);
-            const shieldText = this.add.text(screenPos.x, screenPos.y - TILE_HEIGHT, `+${regenAmount} SHIELD`, {
-              fontSize: '12px',
-              color: '#00ffff',
-              fontStyle: 'bold',
-              stroke: '#000000',
-              strokeThickness: 2,
-            });
-            shieldText.setOrigin(0.5, 1);
-            shieldText.setDepth(200);
-            this.tweens.add({
-              targets: shieldText,
-              y: screenPos.y - TILE_HEIGHT - 30,
-              alpha: 0,
-              duration: 1000,
-              ease: 'Power2',
-              onComplete: () => shieldText.destroy(),
-            });
+        // Shield regeneration at turn start (with delay after taking damage)
+        if (unit.shieldRegenRate > 0 && unit.shieldMaxHp > 0) {
+          // Decrement delay counter if active
+          if (unit.shieldRegenDelayRemaining > 0) {
+            unit.shieldRegenDelayRemaining--;
+            // Skip regen this turn - still on cooldown
+          } else if (unit.shieldHp < unit.shieldMaxHp) {
+            // Apply regen only if delay is 0
+            const regenAmount = Math.min(unit.shieldRegenRate, unit.shieldMaxHp - unit.shieldHp);
+            unit.shieldHp += regenAmount;
+            if (regenAmount > 0) {
+              const screenPos = gridToScreen(unit.position.x, unit.position.y, this.offsetX, this.offsetY);
+              const shieldText = this.add.text(screenPos.x, screenPos.y - TILE_HEIGHT, `+${regenAmount} SHIELD`, {
+                fontSize: '12px',
+                color: '#00ffff',
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 2,
+              });
+              shieldText.setOrigin(0.5, 1);
+              shieldText.setDepth(200);
+              this.tweens.add({
+                targets: shieldText,
+                y: screenPos.y - TILE_HEIGHT - 30,
+                alpha: 0,
+                duration: 1000,
+                ease: 'Power2',
+                onComplete: () => shieldText.destroy(),
+              });
+            }
           }
         }
       }
@@ -6858,6 +6990,7 @@ export class CombatScene extends Phaser.Scene {
     // Only process once per round (on blue team's turn)
     if (this.currentTeam === 'blue') {
       this.processEnvironmentalEffects();
+      this.processSmokeDissipation();
     }
 
     // Reduce power cooldowns for current team

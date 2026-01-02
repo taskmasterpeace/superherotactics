@@ -45,6 +45,10 @@ import HospitalScreen from './components/HospitalScreen'
 import EquipmentShop from './components/EquipmentShop'
 import TrainingCenter from './components/TrainingCenter'
 import BaseManager from './components/BaseManager'
+import KeyboardShortcuts from './components/KeyboardShortcuts'
+
+// UI Components
+import { ErrorBoundary } from './components/ui'
 
 // News Generator - subscribes to EventBus for automatic news generation
 import { initNewsGenerator, cleanupNewsGenerator } from './data/newsGenerator'
@@ -70,12 +74,41 @@ import { initCombatResultsHandler, cleanupCombatResultsHandler } from './stores/
 // World Systems - central initialization for all simulation systems
 import { initWorldSystems, cleanupWorldSystems } from './data/worldSystemsInit'
 
+// Minimum Width Warning Component
+function MinWidthWarning() {
+  return (
+    <div className="min-width-warning">
+      <div className="text-6xl mb-6">🖥️</div>
+      <h1 className="text-2xl font-bold text-white mb-4">Desktop Required</h1>
+      <p className="text-gray-400 mb-6 max-w-md">
+        SuperHero Tactics requires a minimum screen width of <span className="text-yellow-400 font-bold">1024px</span> for the best tactical experience.
+      </p>
+      <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700 mb-6">
+        <div className="text-sm text-gray-500 mb-2">Your current width:</div>
+        <div className="text-3xl font-bold text-red-400" id="current-width">
+          {typeof window !== 'undefined' ? window.innerWidth : 0}px
+        </div>
+      </div>
+      <div className="text-sm text-gray-500">
+        <p>Please:</p>
+        <ul className="list-disc list-inside mt-2 space-y-1">
+          <li>Rotate your device to landscape mode</li>
+          <li>Use a tablet, laptop, or desktop</li>
+          <li>Expand your browser window</li>
+        </ul>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const { gamePhase, currentView, setCurrentView, setGamePhase } = useGameStore()
   const [devMode, setDevMode] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
+  const [isBelowMinWidth, setIsBelowMinWidth] = useState(window.innerWidth < 1024)
   const [assetManagerOpen, setAssetManagerOpen] = useState(false)
   const [quickCombatOpen, setQuickCombatOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
 
   // Check if dev mode is enabled via URL parameter (?dev=true)
   const devModeEnabled = useMemo(() => {
@@ -115,19 +148,73 @@ function App() {
     // Initialize combat results handler (XP, loot, fame, injuries from combat)
     initCombatResultsHandler()
 
-    // Handle resize
-    const handleResize = () => setIsMobile(window.innerWidth <= 768)
+    // Handle resize - track both mobile and minimum width
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768)
+      setIsBelowMinWidth(window.innerWidth < 1024)
+      // Update the width display if the warning is visible
+      const widthEl = document.getElementById('current-width')
+      if (widthEl) widthEl.textContent = `${window.innerWidth}px`
+    }
     window.addEventListener('resize', handleResize)
 
-    // Dev mode keyboard shortcut (F2) - only works if ?dev=true
+    // Keyboard shortcuts
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts when typing in inputs
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return
+      }
+
+      // ? key - Show keyboard shortcuts guide
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault()
+        setShortcutsOpen(o => !o)
+      }
+
+      // Escape key - Close modals
+      if (e.key === 'Escape') {
+        setShortcutsOpen(false)
+        setAssetManagerOpen(false)
+        setQuickCombatOpen(false)
+        setInstantCombatOpen(false)
+        setDevMode(false)
+      }
+
+      // Dev mode keyboard shortcut (F2) - only works if ?dev=true
       if (e.key === 'F2' && devModeEnabled) {
         e.preventDefault()
         setDevMode(d => !d)
       }
+
+      // F4 - Asset Manager
       if (e.key === 'F4') {
         e.preventDefault()
         setAssetManagerOpen(o => !o)
+      }
+
+      // Navigation shortcuts (only when playing)
+      if (gamePhase === 'playing') {
+        switch (e.key.toLowerCase()) {
+          case 'm':
+            if (!e.ctrlKey && !e.metaKey) setCurrentView('world-map')
+            break
+          case 'c':
+            if (!e.ctrlKey && !e.metaKey) setCurrentView('characters')
+            break
+          case 'i':
+            if (!e.ctrlKey && !e.metaKey) setCurrentView('investigation')
+            break
+          case 'n':
+            if (!e.ctrlKey && !e.metaKey) setCurrentView('news')
+            break
+          case 'h':
+            if (!e.ctrlKey && !e.metaKey) setCurrentView('hospital')
+            break
+          case 'e':
+            if (!e.ctrlKey && !e.metaKey) setCurrentView('equipment-shop')
+            break
+        }
       }
     }
     window.addEventListener('keydown', handleKeyDown)
@@ -165,6 +252,11 @@ function App() {
   // Desktop Interface
   return (
     <div className="h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 relative overflow-hidden">
+      {/* Minimum Width Warning - Shown when screen is too narrow */}
+      {isBelowMinWidth && <MinWidthWarning />}
+
+      {/* Game Content - Hidden when below minimum width */}
+      <div className={`game-content h-full ${isBelowMinWidth ? 'hidden' : ''}`}>
       {/* Notification Bar - Always visible at top */}
       <NotificationBar />
 
@@ -377,13 +469,17 @@ function App() {
       {/* Instant Combat (Batch Testing) Modal */}
       {instantCombatOpen && <InstantCombat onClose={() => setInstantCombatOpen(false)} />}
 
+      {/* Keyboard Shortcuts Guide - Press ? to toggle */}
+      <KeyboardShortcuts isOpen={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+
       {/* Mobile Phone - Shows texts and calls */}
       <MobilePhone />
 
       {/* Squad Roster - Shows characters (only in playing phase on world map) */}
       {gamePhase === 'playing' && currentView === 'world-map' && <SquadRoster />}
 
-      {/* Game Setup Phase */}
+      {/* Game Setup Phase - wrapped in error boundary */}
+      <ErrorBoundary>
       {gamePhase === 'faction-selection' && <FactionSelection />}
       {gamePhase === 'country-selection' && <CountrySelection />}
       {gamePhase === 'city-selection' && <CitySelection />}
@@ -419,6 +515,8 @@ function App() {
           </div>
         </>
       )}
+      </ErrorBoundary>
+      </div> {/* End game-content wrapper */}
 
       <Toaster
         position="top-right"

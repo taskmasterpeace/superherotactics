@@ -322,6 +322,19 @@ export interface EnhancedCombatResult {
 
   collateralDamage?: number; // Property damage estimate
   civilianCasualties?: number;
+
+  // Enemy casualties with equipment (for loot)
+  enemyCasualties?: Array<{
+    enemyId: string;
+    enemyName: string;
+    faction?: string;
+    outcome: 'killed' | 'surrendered' | 'fled' | 'unconscious';
+    equipment: {
+      weapons: string[];      // Weapon IDs
+      armor: string | null;   // Armor ID
+      items: string[];        // Other items (ammo, consumables)
+    };
+  }>;
 }
 
 export interface LogEntry {

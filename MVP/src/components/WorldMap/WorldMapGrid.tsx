@@ -3,6 +3,7 @@ import { cities, City } from '../../data/cities';
 import { getCountryByName } from '../../data/countries';
 import { useGameStore, TravelingUnit, FleetVehicle, TIME_SPEEDS, TimeSpeed } from '../../stores/enhancedGameStore';
 import CityActionsPanel from './CityActionsPanel';
+import { CityAction } from '../../data/cityActions';
 // TC-004: Territory display imports
 import {
   getSectorControl,
@@ -198,6 +199,7 @@ const MessagesPanel: React.FC<{
   onStartTravel: () => void;
   onCancelTravel: (unitId: string) => void;
   sectorMissions: any[];
+  onCityActionSelect?: (action: CityAction, city: City, selectedCell: GridCell | null) => void;
 }> = ({
   characters,
   selectedCell,
@@ -229,6 +231,7 @@ const MessagesPanel: React.FC<{
   onStartTravel,
   onCancelTravel,
   sectorMissions,
+  onCityActionSelect,
 }) => {
   const [isMessagesExpanded, setIsMessagesExpanded] = useState(true);
   const [expandedVehicleId, setExpandedVehicleId] = useState<string | null>(null);
@@ -597,7 +600,9 @@ const MessagesPanel: React.FC<{
                         playerBudget={playerBudget}
                         onActionSelect={(action, city) => {
                           console.log('[CITY ACTION] Selected:', action.name, 'in', city.name);
-                          // TODO: Wire to game store action execution
+                          if (onCityActionSelect) {
+                            onCityActionSelect(action, city, selectedCell);
+                          }
                         }}
                       />
                     </div>
@@ -1148,6 +1153,72 @@ export const WorldMapGrid: React.FC = () => {
     setShowLaptop(true);
     setCurrentView('almanac');
   };
+
+  // Handle city action execution
+  const handleCityActionSelect = useCallback((action: CityAction, city: City, cell: GridCell | null) => {
+    console.log('[CITY ACTION] Executing:', action.id, 'category:', action.category, 'in city:', city.name);
+
+    // Route based on action category or specific action id
+    switch (action.category) {
+      case 'equipment':
+        // Equipment actions -> Equipment Shop
+        setCurrentView('equipment-shop');
+        break;
+
+      case 'healing':
+        // Healing actions -> Hospital
+        setCurrentView('hospital');
+        break;
+
+      case 'training':
+        // Training actions -> Training screen
+        setCurrentView('training');
+        break;
+
+      case 'recruitment':
+        // Recruitment actions -> Characters screen (for now)
+        setCurrentView('characters');
+        break;
+
+      case 'intel':
+        // Intel actions -> Investigation board
+        setCurrentView('investigation-board');
+        break;
+
+      case 'logistics':
+        // Logistics could include travel - check specific action
+        if (action.id === 'vehicle_repair') {
+          // Stay on world map for vehicle repairs
+          console.log('[CITY ACTION] Vehicle repair - staying on world map');
+        } else if (action.id === 'plan_escape_route' || action.id === 'smuggling_route') {
+          // These could go to a dedicated screen in the future
+          console.log('[CITY ACTION] Logistics action - not yet implemented:', action.id);
+        }
+        break;
+
+      case 'governance':
+        // Political actions - could go to news/almanac
+        setCurrentView('almanac');
+        break;
+
+      case 'stealth':
+        // Stealth actions - base management or stay on map
+        if (action.id === 'underground_hideout' || action.id === 'business_front') {
+          setCurrentView('base');
+        } else {
+          console.log('[CITY ACTION] Stealth action - staying on world map:', action.id);
+        }
+        break;
+
+      case 'criminal':
+        // Criminal actions - investigation or stay on map
+        console.log('[CITY ACTION] Criminal action - not yet implemented:', action.id);
+        break;
+
+      default:
+        console.log('[CITY ACTION] Unknown category:', action.category);
+    }
+  }, [setCurrentView]);
 
   // Day/night visual effect
   const dayNightStyle = useMemo(() => {
@@ -1752,6 +1823,7 @@ export const WorldMapGrid: React.FC = () => {
             onStartTravel={handleStartTravel}
             onCancelTravel={cancelTravel}
             sectorMissions={sectorMissions}
+            onCityActionSelect={handleCityActionSelect}
           />
         </div>
       </div>

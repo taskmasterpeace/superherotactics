@@ -1,6 +1,7 @@
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '../stores/enhancedGameStore'
+import { Zap, Shield, Globe, Users, Sparkles } from 'lucide-react'
 
 const factions = [
   {
@@ -123,9 +124,10 @@ const factions = [
 
 export default function FactionSelection() {
   const { selectFaction } = useGameStore()
+  const [hoveredFaction, setHoveredFaction] = useState<string | null>(null)
 
   return (
-    <div className="h-screen flex items-center justify-center p-6">
+    <div className="min-h-screen flex items-center justify-center p-4 py-8">
       <motion.div 
         className="max-w-7xl w-full"
         initial={{ opacity: 0, y: 50 }}
@@ -133,123 +135,156 @@ export default function FactionSelection() {
         transition={{ duration: 0.8 }}
       >
         {/* Header */}
-        <motion.div 
-          className="text-center mb-12"
+        <motion.div
+          className="text-center mb-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          <h1 className="text-6xl font-black mb-4">
+          <h1 className="text-5xl font-black mb-2">
             <span className="bg-gradient-to-r from-sht-primary-400 via-sht-secondary-400 to-sht-accent-400 bg-clip-text text-transparent">
               SUPERHERO TACTICS
             </span>
           </h1>
-          <h2 className="text-2xl text-gray-300 mb-2">Choose Your Faction</h2>
-          <p className="text-lg text-gray-400">
-            The world has <span className="text-sht-primary-400 font-bold">2472 days</span> to prepare for alien invasion
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            Four nations compete to build the ultimate LSW program and save humanity
+          <div className="flex items-center justify-center gap-4 mb-2">
+            <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent flex-1 max-w-32" />
+            <h2 className="text-xl text-gray-300">Choose Your Faction</h2>
+            <div className="h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent flex-1 max-w-32" />
+          </div>
+          <p className="text-sm text-gray-500">
+            <span className="text-red-400 font-bold">2472 days</span> until alien invasion • Four nations compete to save humanity
           </p>
         </motion.div>
 
         {/* Faction Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {factions.map((faction, index) => (
             <motion.div
               key={faction.id}
-              className="faction-card group"
+              className="relative bg-gray-800/80 border border-gray-700 rounded-xl overflow-hidden cursor-pointer group hover:border-gray-500 transition-colors"
               onClick={() => selectFaction(faction.id)}
-              initial={{ opacity: 0, y: 100 }}
+              onMouseEnter={() => setHoveredFaction(faction.id)}
+              onMouseLeave={() => setHoveredFaction(null)}
+              initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index, duration: 0.6 }}
-              whileHover={{ y: -10 }}
-              whileTap={{ scale: 0.98 }}
+              transition={{ delay: 0.1 * index, duration: 0.5 }}
+              whileHover={{ y: -4, scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
             >
               {/* Faction Header */}
-              <div className={`bg-gradient-to-r ${faction.color} p-4 rounded-t-xl -m-6 mb-4`}>
-                <div className="text-center text-white">
-                  <div className="text-4xl mb-2">{faction.flag}</div>
-                  <h3 className="text-xl font-bold">{faction.name}</h3>
-                  <p className="text-sm opacity-90">{faction.codeName}</p>
+              <div className={`bg-gradient-to-r ${faction.color} p-3`}>
+                <div className="flex items-center gap-3">
+                  <div className="text-4xl">{faction.flag}</div>
+                  <div className="text-white">
+                    <h3 className="text-lg font-bold leading-tight">{faction.name}</h3>
+                    <p className="text-xs opacity-80">{faction.codeName}</p>
+                  </div>
+                  <div className="ml-auto text-right">
+                    <div className="text-xs text-white/70">Budget</div>
+                    <div className="text-sm font-bold text-white">${(faction.startingBudget/1000)}K</div>
+                  </div>
                 </div>
               </div>
 
-              {/* Faction Description */}
-              <div className="mb-6">
-                <h4 className="font-bold text-sht-primary-400 mb-2 text-lg">{faction.description}</h4>
-                <p className="text-sm text-gray-300 leading-relaxed">{faction.philosophy}</p>
-              </div>
+              {/* Content */}
+              <div className="p-4">
+                {/* Description */}
+                <div className="mb-3">
+                  <h4 className="font-semibold text-sht-primary-400 text-sm mb-1">{faction.description}</h4>
+                  <p className="text-xs text-gray-400 leading-relaxed line-clamp-2">{faction.philosophy}</p>
+                </div>
 
-              {/* Faction Stats */}
-              <div className="mb-6 space-y-3">
-                {Object.entries(faction.stats).map(([stat, value]) => (
-                  <div key={stat} className="stat-display">
-                    <span className="capitalize text-gray-300">{stat}:</span>
-                    <div className="stat-bar">
-                      <motion.div 
-                        className="stat-fill bg-gradient-to-r from-sht-secondary-500 to-sht-primary-500"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${value}%` }}
-                        transition={{ delay: 0.5 + index * 0.1, duration: 1 }}
-                      />
+                {/* Stats Grid */}
+                <div className="grid grid-cols-5 gap-1 mb-3">
+                  {Object.entries(faction.stats).map(([stat, value]) => (
+                    <div key={stat} className="text-center">
+                      <div className="h-12 bg-gray-700/50 rounded relative overflow-hidden">
+                        <motion.div
+                          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-sht-primary-500/80 to-sht-secondary-500/60"
+                          initial={{ height: 0 }}
+                          animate={{ height: `${value}%` }}
+                          transition={{ delay: 0.3 + index * 0.1, duration: 0.8 }}
+                        />
+                        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white z-10">
+                          {value}
+                        </span>
+                      </div>
+                      <div className="text-[9px] text-gray-500 mt-0.5 capitalize truncate">{stat.slice(0,4)}</div>
                     </div>
-                    <span className="text-sht-primary-400 font-bold">{value}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Faction Advantages */}
-              <div className="mb-6">
-                <h5 className="font-bold text-sht-secondary-400 mb-3">Faction Advantages:</h5>
-                <div className="space-y-2">
-                  {faction.advantages.map((advantage, i) => (
-                    <motion.div 
-                      key={i}
-                      className="text-xs text-gray-300 flex items-center gap-2"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.7 + i * 0.1 }}
-                    >
-                      <div className="w-1 h-1 bg-sht-primary-400 rounded-full"></div>
-                      {advantage}
-                    </motion.div>
                   ))}
                 </div>
-              </div>
 
-              {/* Starting Resources */}
-              <div className="bg-gray-700 bg-opacity-50 p-4 rounded-lg mb-4">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-400">Starting Budget:</span>
-                  <span className="text-sht-primary-400 font-bold">
-                    ${faction.startingBudget.toLocaleString()}
-                  </span>
+                {/* Advantages */}
+                <div className="space-y-1 mb-3">
+                  {faction.advantages.slice(0, 3).map((advantage, i) => (
+                    <div key={i} className="text-[11px] text-gray-300 flex items-center gap-1.5">
+                      <div className="w-1 h-1 bg-sht-primary-400 rounded-full flex-shrink-0" />
+                      <span className="truncate">{advantage}</span>
+                    </div>
+                  ))}
+                  {faction.advantages.length > 3 && (
+                    <div className="text-[10px] text-gray-500">+{faction.advantages.length - 3} more...</div>
+                  )}
                 </div>
+
+                {/* Select Button */}
+                <button className="w-full py-2 rounded-lg bg-gradient-to-r from-gray-700 to-gray-600 hover:from-sht-primary-600 hover:to-sht-secondary-600 text-white text-xs font-bold transition-all group-hover:shadow-lg">
+                  SELECT {faction.name.toUpperCase()}
+                </button>
               </div>
 
-              {/* Select Button */}
-              <motion.button
-                className="w-full game-button"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => selectFaction(faction.id)}
-              >
-                SELECT {faction.name.toUpperCase()}
-              </motion.button>
+              {/* Hover Overlay - Special Abilities */}
+              <AnimatePresence>
+                {hoveredFaction === faction.id && (
+                  <motion.div
+                    className="absolute inset-0 bg-gray-900/95 p-4 flex flex-col"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles size={16} className="text-sht-primary-400" />
+                      <h4 className="font-bold text-sht-primary-400 text-sm">Special Abilities</h4>
+                    </div>
+                    <div className="space-y-2 flex-1">
+                      {faction.specialAbilities.map((ability, i) => (
+                        <motion.div
+                          key={i}
+                          className="flex items-start gap-2 text-xs text-gray-200"
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.05 }}
+                        >
+                          <Zap size={12} className="text-sht-secondary-400 mt-0.5 flex-shrink-0" />
+                          <span>{ability}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="mt-auto pt-3 border-t border-gray-700">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">Starting Budget</span>
+                        <span className="text-green-400 font-bold">${faction.startingBudget.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    <button className="w-full mt-3 py-2.5 rounded-lg bg-gradient-to-r from-sht-primary-500 to-sht-secondary-500 text-white text-sm font-bold shadow-lg">
+                      SELECT {faction.name.toUpperCase()}
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           ))}
         </div>
 
         {/* Footer Info */}
-        <motion.div 
-          className="text-center mt-12 text-gray-500 text-sm"
+        <motion.div
+          className="text-center mt-6 text-gray-600 text-xs"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
+          transition={{ delay: 0.8 }}
         >
-          <p>Each faction offers unique gameplay advantages and strategic approaches</p>
-          <p>Your choice affects available LSW powers, equipment access, and international authority</p>
+          <p>Hover over a faction to see special abilities • Your choice affects powers, equipment, and international authority</p>
         </motion.div>
       </motion.div>
     </div>

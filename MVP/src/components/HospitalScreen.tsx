@@ -1,4 +1,20 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Heart,
+  Clock,
+  MapPin,
+  Activity,
+  Star,
+  AlertTriangle,
+  DollarSign,
+  ArrowRight,
+  X,
+  Stethoscope,
+  Syringe,
+  Bone,
+  Zap,
+} from 'lucide-react';
 import { useGameStore } from '../stores/enhancedGameStore';
 import { getCountryByCode, ALL_COUNTRIES } from '../data/countries';
 import { calculateMedicalSystem } from '../data/combinedEffects';
@@ -22,6 +38,16 @@ const HospitalScreen: React.FC = () => {
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [targetCountry, setTargetCountry] = useState<string>('');
+  const [contactHealingBonus, setContactHealingBonus] = useState<number>(0);
+
+  // Check for contact-granted healing bonus on mount
+  React.useEffect(() => {
+    const savedBonus = sessionStorage.getItem('healingBonus');
+    if (savedBonus) {
+      setContactHealingBonus(Number(savedBonus));
+      sessionStorage.removeItem('healingBonus'); // Clear after reading
+    }
+  }, []);
 
   // Get all hospitalized characters
   const hospitalizedCharacters = characters.filter(
@@ -73,20 +99,49 @@ const HospitalScreen: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Hospital Management</h1>
-          <p className="text-blue-300">Medical Treatment & Recovery</p>
-          <div className="mt-4 flex items-center gap-6">
-            <div className="bg-slate-800/50 px-4 py-2 rounded-lg border border-blue-500/30">
-              <span className="text-blue-300">Budget:</span>
-              <span className="ml-2 text-white font-bold">${budget.toLocaleString()}</span>
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
+              <Stethoscope size={28} className="text-white" />
             </div>
-            <div className="bg-slate-800/50 px-4 py-2 rounded-lg border border-blue-500/30">
-              <span className="text-blue-300">Hospitalized:</span>
-              <span className="ml-2 text-white font-bold">{hospitalizedCharacters.length}</span>
+            <div>
+              <h1 className="text-4xl font-bold text-white">Hospital Management</h1>
+              <p className="text-blue-300">Medical Treatment & Recovery</p>
             </div>
           </div>
-        </div>
+          <div className="mt-4 flex items-center gap-4 flex-wrap">
+            <div className="bg-slate-800/50 px-4 py-2 rounded-lg border border-green-500/30 flex items-center gap-2">
+              <DollarSign size={18} className="text-green-400" />
+              <span className="text-green-300">Budget:</span>
+              <span className="text-white font-bold">${budget.toLocaleString()}</span>
+            </div>
+            <div className="bg-slate-800/50 px-4 py-2 rounded-lg border border-red-500/30 flex items-center gap-2">
+              <Heart size={18} className="text-red-400" />
+              <span className="text-red-300">Hospitalized:</span>
+              <span className="text-white font-bold">{hospitalizedCharacters.length}</span>
+            </div>
+            <div className="bg-slate-800/50 px-4 py-2 rounded-lg border border-blue-500/30 flex items-center gap-2">
+              <Activity size={18} className="text-blue-400" />
+              <span className="text-blue-300">Ready:</span>
+              <span className="text-white font-bold">{characters.filter(c => c.status === 'ready').length}</span>
+            </div>
+            {contactHealingBonus > 0 && (
+              <motion.div
+                className="bg-green-800/50 px-4 py-2 rounded-lg border border-green-500/50 flex items-center gap-2"
+                animate={{ opacity: [1, 0.7, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+              >
+                <Syringe size={18} className="text-green-400" />
+                <span className="text-green-300">Street Doc Bonus:</span>
+                <span className="text-green-400 font-bold">+{contactHealingBonus}%</span>
+              </motion.div>
+            )}
+          </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Hospitalized Characters */}
@@ -173,15 +228,22 @@ const HospitalScreen: React.FC = () => {
                             {/* Injuries */}
                             {char.injuries && char.injuries.length > 0 && (
                               <div className="mb-3">
-                                <span className="text-blue-300 text-sm">Injuries:</span>
-                                <div className="flex flex-wrap gap-2 mt-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Bone size={14} className="text-red-400" />
+                                  <span className="text-red-300 text-sm font-semibold">Active Injuries ({char.injuries.length})</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
                                   {char.injuries.map((injury: any, idx: number) => (
-                                    <span
+                                    <div
                                       key={idx}
-                                      className={`px-2 py-1 rounded text-xs font-semibold ${getSeverityColor(injury.severity)} bg-slate-800/50 border border-current`}
+                                      className={`px-3 py-2 rounded-lg text-xs font-semibold ${getSeverityColor(injury.severity)} bg-slate-800/80 border border-current flex items-center gap-2`}
                                     >
-                                      {injury.bodyPart || injury.description || 'Unknown'} ({injury.severity})
-                                    </span>
+                                      <AlertTriangle size={12} />
+                                      <div>
+                                        <div>{injury.bodyPart || injury.description || 'Unknown'}</div>
+                                        <div className="text-[10px] opacity-75 uppercase">{injury.severity}</div>
+                                      </div>
+                                    </div>
                                   ))}
                                 </div>
                               </div>
@@ -276,16 +338,31 @@ const HospitalScreen: React.FC = () => {
                             })()}
                           </div>
 
-                          {/* Transfer Button */}
-                          <button
-                            onClick={() => {
-                              setSelectedCharacter(char.id);
-                              setShowTransferModal(true);
-                            }}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
-                          >
-                            Transfer
-                          </button>
+                          {/* Transfer Button - disabled if origin cannot use hospitals */}
+                          {(() => {
+                            const originHealing = getOriginHealing(char.origin || 1);
+                            const canTransfer = originHealing?.canUseHospital !== false;
+
+                            return (
+                              <button
+                                onClick={() => {
+                                  if (canTransfer) {
+                                    setSelectedCharacter(char.id);
+                                    setShowTransferModal(true);
+                                  }
+                                }}
+                                disabled={!canTransfer}
+                                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                                  canTransfer
+                                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                                    : 'bg-gray-600 cursor-not-allowed text-gray-400'
+                                }`}
+                                title={canTransfer ? 'Transfer to another hospital' : 'This origin cannot use hospitals'}
+                              >
+                                {canTransfer ? 'Transfer' : 'No Transfer'}
+                              </button>
+                            );
+                          })()}
                         </div>
                       </div>
                     );

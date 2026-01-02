@@ -19,6 +19,9 @@ import QuickInventory from './QuickInventory';
 // Weapon and Armor Database for Balance Testing
 import { ALL_WEAPONS, getWeaponByName } from '../data/weapons';
 import { ALL_ARMOR, getArmorByName } from '../data/armor';
+// Fast Combat - Streamlined combat viewer
+import FastCombat from './FastCombat';
+import { SimUnit } from '../combat/types';
 
 // Icons from lucide-react
 import {
@@ -161,6 +164,9 @@ export const CombatLab: React.FC = () => {
   const [testTeam, setTestTeam] = useState<'blue' | 'red'>('red');
   const [testStats, setTestStats] = useState({ STR: 50, AGL: 50, STA: 50 });
 
+  // Fast Combat Mode - streamlined combat viewer for testing
+  const [showFastCombat, setShowFastCombat] = useState(false);
+
   // Handlers for gadget and inventory
   const onGadgetClick = () => {
     setShowGadgetPanel(!showGadgetPanel);
@@ -210,6 +216,81 @@ export const CombatLab: React.FC = () => {
   const generateEnemyTeam = (count: number): CombatCharacter[] => {
     return Array.from({ length: count }, (_, i) => generateRandomEnemy(i));
   };
+
+  // Convert CombatCharacter to SimUnit for FastCombat
+  const convertToSimUnit = (char: CombatCharacter): SimUnit => {
+    // Get weapon info from database or default
+    const weaponName = char.equipment?.[0] || 'Fists';
+    const weapon = getWeaponByName(weaponName);
+    const armorName = char.equipment?.[1];
+    const armor = armorName ? getArmorByName(armorName) : undefined;
+
+    return {
+      id: char.id,
+      name: char.name,
+      team: char.team,
+      hp: char.health.current,
+      maxHp: char.health.maximum,
+      shieldHp: char.shield || 0,
+      maxShieldHp: char.maxShield || 0,
+      dr: char.dr || (armor?.drPhysical || 0),
+      stoppingPower: armor?.stoppingPower || 0,
+      origin: 'biological' as const,
+      stats: {
+        MEL: char.stats.MEL,
+        RNG: char.stats.AGL, // Use AGL for ranged
+        AGL: char.stats.AGL,
+        CON: char.stats.CON,
+        INS: char.stats.INS,
+        WIL: char.stats.CON, // Use CON for WIL if not defined
+        INT: char.stats.INT,
+      },
+      stance: 'normal',
+      cover: 'none',
+      statusEffects: [],
+      accuracyPenalty: 0,
+      weapon: {
+        name: weapon?.name || weaponName,
+        damage: weapon?.damage || 20,
+        accuracy: weapon?.accuracy || 70,
+        damageType: weapon?.damageType || 'physical',
+        range: weapon?.range || 10,
+        apCost: weapon?.apCost || 3,
+      },
+      disarmed: false,
+      armor: armor ? {
+        id: armor.id,
+        name: armor.name,
+        category: armor.category as 'Light' | 'Medium' | 'Heavy' | 'Power' | 'Shield' | 'Natural',
+        drPhysical: armor.drPhysical,
+        drEnergy: armor.drEnergy || 0,
+        drMental: armor.drMental || 0,
+        stoppingPower: armor.stoppingPower || 0,
+        caliberRating: (armor.caliberRating as 'none' | 'pistol' | 'smg' | 'rifle' | 'ap' | 'heavy') || 'none',
+        coverage: 'Torso',
+        condition: armor.conditionMax || 100,
+        conditionMax: armor.conditionMax || 100,
+        movementPenalty: armor.movementPenalty || 0,
+        stealthPenalty: armor.stealthPenalty || 0,
+      } : undefined,
+      alive: true,
+      acted: false,
+    };
+  };
+
+  // Get SimUnit teams for FastCombat
+  const getSimUnitsForFastCombat = useMemo(() => {
+    if (!showFastCombat) return { blueTeam: [], redTeam: [] };
+
+    const blueCharacters = convertToBlueTeam();
+    const enemyCount = Math.max(2, blueCharacters.length);
+    const redCharacters = generateEnemyTeam(enemyCount);
+
+    return {
+      blueTeam: blueCharacters.map(convertToSimUnit),
+      redTeam: redCharacters.map(convertToSimUnit),
+    };
+  }, [showFastCombat, gameCharacters]);
 
   // Spawn a test unit with specific weapon and armor for balance testing
   const spawnTestUnit = () => {
@@ -365,6 +446,21 @@ export const CombatLab: React.FC = () => {
   const selectedWeapon = selectedUnit && allUnits.find(u => u.id === selectedUnit.id);
   const weaponInfo = selectedWeapon ? WEAPONS[selectedWeapon.weapon] : null;
 
+  // If Fast Combat mode is active, render FastCombat instead of Phaser
+  if (showFastCombat && getSimUnitsForFastCombat.blueTeam.length > 0) {
+    return (
+      <FastCombat
+        blueTeam={getSimUnitsForFastCombat.blueTeam}
+        redTeam={getSimUnitsForFastCombat.redTeam}
+        onComplete={(result) => {
+          console.log('[FAST COMBAT] Complete:', result);
+          setShowFastCombat(false);
+        }}
+        onBack={() => setShowFastCombat(false)}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white">
       {/* TOP BAR */}
@@ -374,6 +470,7 @@ export const CombatLab: React.FC = () => {
         teamColor={teamColor}
         aiVsAi={aiVsAi}
         showBalanceTest={showBalanceTest}
+        showFastCombat={showFastCombat}
         onToggleAi={toggleAiVsAi}
         onRestartCombat={() => {
           setShowSummary(false);
@@ -385,6 +482,7 @@ export const CombatLab: React.FC = () => {
         onExit={() => setCurrentView('world-map')}
         onSettings={() => setShowSettings(true)}
         onBalanceTest={() => setShowBalanceTest(!showBalanceTest)}
+        onFastCombat={() => setShowFastCombat(!showFastCombat)}
       />
 
       {/* MAIN CONTENT */}
@@ -651,11 +749,13 @@ interface TopBarProps {
   teamColor: string;
   aiVsAi: boolean;
   showBalanceTest: boolean;
+  showFastCombat: boolean;
   onToggleAi: () => void;
   onRestartCombat: () => void;
   onExit: () => void;
   onSettings: () => void;
   onBalanceTest: () => void;
+  onFastCombat: () => void;
 }
 
 const TopBar: React.FC<TopBarProps> = ({
@@ -664,11 +764,13 @@ const TopBar: React.FC<TopBarProps> = ({
   teamColor,
   aiVsAi,
   showBalanceTest,
+  showFastCombat,
   onToggleAi,
   onRestartCombat,
   onExit,
   onSettings,
   onBalanceTest,
+  onFastCombat,
 }) => (
   <div className="h-14 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4">
     <div className="flex items-center gap-6">
@@ -713,6 +815,17 @@ const TopBar: React.FC<TopBarProps> = ({
       >
         <Zap className="w-4 h-4" />
         Balance
+      </button>
+      <button
+        onClick={onFastCombat}
+        className={`flex items-center gap-2 px-3 py-2 rounded font-bold transition-all ${showFastCombat
+          ? 'bg-yellow-600 hover:bg-yellow-500'
+          : 'bg-yellow-800 hover:bg-yellow-700'
+          }`}
+        title="Fast Combat - Streamlined combat viewer"
+      >
+        <Swords className="w-4 h-4" />
+        Fast
       </button>
       <button
         onClick={onSettings}

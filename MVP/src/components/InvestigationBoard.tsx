@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useRef, useCallback, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import { useGameStore } from '../stores/enhancedGameStore'
 import {
   BoardItem,
@@ -26,6 +27,7 @@ import {
   detectPatterns,
   getNearPatterns,
 } from '../data/investigationPatterns'
+import { INVESTIGATION_TEMPLATES } from '../data/investigationSystem'
 
 // =============================================================================
 // BOARD ITEM COMPONENT
@@ -607,14 +609,41 @@ export function InvestigationBoard() {
 
   // Unlock investigation from pattern
   const handlePatternUnlock = (pattern: InvestigationPattern) => {
+    // Update board state
     setBoard((prev) => ({
       ...prev,
       detectedPatterns: [...prev.detectedPatterns, pattern.id],
       unlockedInvestigations: [...prev.unlockedInvestigations, pattern.unlocksInvestigationId],
       lastModified: Date.now(),
     }))
-    // TODO: Actually create the investigation in the store
-    alert(`Investigation unlocked: ${pattern.name}!\nReward: $${pattern.reward.cash}, Fame +${pattern.reward.fame}`)
+
+    // Find matching investigation template by converting unlocksInvestigationId to title format
+    // e.g., 'gang_war_brewing' -> 'Gang War Brewing'
+    const normalizedPatternId = pattern.unlocksInvestigationId.toLowerCase().replace(/_/g, ' ')
+    const template = INVESTIGATION_TEMPLATES.find(
+      t => t.title.toLowerCase() === normalizedPatternId
+    )
+
+    if (template) {
+      // Get current sector from game state, default to 'A1' if not available
+      const { currentSector = 'A1' } = useGameStore.getState()
+
+      // Use store method to create the investigation
+      useGameStore.getState().discoverInvestigation(
+        template,
+        'Investigation Board', // City derived from pattern detection
+        'Unknown',             // Country - could be enhanced to detect from articles
+        currentSector
+      )
+
+      toast.success(
+        `Investigation unlocked: ${pattern.name}! Reward: $${pattern.reward.cash.toLocaleString()}, Fame +${pattern.reward.fame}`,
+        { duration: 5000, icon: '🔍' }
+      )
+    } else {
+      // Fallback if template not found - show warning but still track the pattern
+      toast.error(`Pattern detected but no matching investigation template found for: ${pattern.unlocksInvestigationId}`)
+    }
   }
 
   // Clear board

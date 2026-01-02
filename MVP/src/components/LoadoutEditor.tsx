@@ -9,10 +9,11 @@
  * - Save loadout and go to Combat Lab
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGameStore } from '../stores/enhancedGameStore';
 import { GRENADES, PISTOLS, GADGETS, ALL_ITEMS } from '../data/itemDatabase';
 import { Package, Play, Save, Sword, Crosshair, Zap } from 'lucide-react';
+import { AudioPlayer } from '../utils/audioPlayer';
 
 export const LoadoutEditor: React.FC = () => {
     const { characters, updateCharacter } = useGameStore();
@@ -21,10 +22,16 @@ export const LoadoutEditor: React.FC = () => {
 
     const selectedChar = characters.find((c: any) => c.id === selectedCharId);
 
+    // Initialize AudioPlayer on mount
+    useEffect(() => {
+        AudioPlayer.init();
+    }, []);
+
     const playSound = (soundKey: string) => {
-        console.log(`🔊 Playing sound: ${soundKey}`);
-        // TODO: Wire to actual SoundManager
-        // For now, just log
+        console.log(`Playing sound: ${soundKey}`);
+        AudioPlayer.play(soundKey).catch(err => {
+            console.warn('Sound playback failed:', err);
+        });
     };
 
     const equipItem = (itemId: string) => {

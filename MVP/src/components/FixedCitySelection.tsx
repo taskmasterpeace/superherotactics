@@ -1,17 +1,23 @@
 import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '../stores/enhancedGameStore'
-import { ArrowLeft, MapPin, Users, Shield, AlertTriangle, Building, ChevronRight } from 'lucide-react'
+import { ArrowLeft, MapPin, Users, Shield, AlertTriangle, Building, ChevronRight, Search } from 'lucide-react'
 import { CITIES, getCountryByName, type City } from '../data/worldData'
 
 export default function FixedCitySelection() {
   const { selectedCountry, setGamePhase, selectCity } = useGameStore()
   const [selectedCityData, setSelectedCityData] = useState<City | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
-  // Get cities for the selected country
+  // Get cities for the selected country, filtered by search
   const availableCities = useMemo(() => {
-    return CITIES.filter(city => city.country === selectedCountry)
-  }, [selectedCountry])
+    const cities = CITIES.filter(city => city.country === selectedCountry)
+    if (!searchTerm) return cities
+    return cities.filter(city =>
+      city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      city.cityTypes.some(t => t?.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+  }, [selectedCountry, searchTerm])
 
   const country = getCountryByName(selectedCountry)
 
@@ -108,10 +114,22 @@ export default function FixedCitySelection() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Building className="text-purple-400" size={24} />
-              Available Cities ({availableCities.length})
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <Building className="text-purple-400" size={24} />
+                Cities ({availableCities.length})
+              </h2>
+              <div className="relative">
+                <Search className="absolute left-2 top-2 text-gray-500" size={16} />
+                <input
+                  type="text"
+                  placeholder="Search cities..."
+                  className="pl-8 pr-3 py-1.5 text-sm bg-gray-900 border border-gray-700 rounded-lg focus:border-purple-400 focus:ring-1 focus:ring-purple-400/20 w-40"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
 
             {availableCities.length > 0 ? (
               <div className="grid gap-3 max-h-[60vh] overflow-y-auto pr-2">
@@ -143,7 +161,7 @@ export default function FixedCitySelection() {
                         <div className={`font-bold ${getCrimeColor(city.crimeIndex)}`}>
                           {getCrimeLevel(city.crimeIndex)}
                         </div>
-                        <div className="text-xs text-gray-500">Crime: {city.crimeIndex.toFixed(1)}%</div>
+                        <div className="text-xs text-gray-500">Crime: {Math.round(city.crimeIndex)}%</div>
                       </div>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-1">
@@ -222,7 +240,7 @@ export default function FixedCitySelection() {
                       <span className="text-sm">Crime Index</span>
                     </div>
                     <div className={`text-xl font-bold ${getCrimeColor(selectedCityData.crimeIndex)}`}>
-                      {selectedCityData.crimeIndex.toFixed(1)}%
+                      {Math.round(selectedCityData.crimeIndex)}%
                     </div>
                     <div className="text-xs text-gray-500">{getCrimeLevel(selectedCityData.crimeIndex)} Crime</div>
                   </div>
@@ -237,7 +255,7 @@ export default function FixedCitySelection() {
                       selectedCityData.safetyIndex > 40 ? 'text-yellow-400' :
                       'text-red-400'
                     }`}>
-                      {selectedCityData.safetyIndex.toFixed(1)}%
+                      {Math.round(selectedCityData.safetyIndex)}%
                     </div>
                   </div>
                 </div>

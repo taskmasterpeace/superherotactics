@@ -307,94 +307,141 @@ export default function RecruitingPage() {
 
       {/* Recruits Grid */}
       <div className="flex-1 overflow-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-          {availableRecruits.map((recruit, index) => (
-            <motion.div
-              key={recruit.id}
-              className={`bg-gray-800/80 rounded-xl border-2 transition-all cursor-pointer ${selectedRecruits.has(recruit.id)
-                ? 'border-yellow-400 shadow-lg shadow-yellow-400/20'
-                : 'border-gray-700 hover:border-gray-500'
-                }`}
-              onClick={() => toggleRecruit(recruit.alias)}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(index * 0.05, 1) }}
-              whileHover={{ scale: 1.02 }}
-            >
-              {/* Selection Badge */}
-              {selectedRecruits.has(recruit.alias) && (
-                <div className="absolute top-2 right-2 bg-yellow-400 rounded-full p-1">
-                  <Check size={16} className="text-gray-900" />
-                </div>
-              )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {availableRecruits.map((recruit, index) => {
+            const isLocalRecruit = recruit.nationality === selectedCountry
+            const originEmoji = recruit.origin === 'mutant' ? '🧬' :
+              recruit.origin === 'tech' ? '🤖' :
+              recruit.origin === 'magic' ? '✨' :
+              recruit.origin === 'alien' ? '👽' :
+              recruit.origin === 'enhanced' ? '💪' :
+              recruit.origin === 'psychic' ? '🧠' : '🦸'
 
-              <div className="p-4">
-                {/* Header */}
-                <div className="text-center mb-3">
-                  <div className={`inline-block px-2 py-0.5 rounded text-xs font-bold mb-1 ${recruit.threatLevel === 'THREAT_3' ? 'bg-red-600' :
-                    recruit.threatLevel === 'THREAT_2' ? 'bg-orange-600' :
-                      'bg-blue-600'
-                    }`}>
-                    {recruit.threatLevel.replace('_', ' ')}
+            return (
+              <motion.div
+                key={recruit.id}
+                className={`relative bg-gray-800/80 rounded-xl border-2 transition-all cursor-pointer overflow-hidden ${selectedRecruits.has(recruit.alias)
+                  ? 'border-yellow-400 shadow-lg shadow-yellow-400/20 ring-2 ring-yellow-400/30'
+                  : 'border-gray-700 hover:border-gray-500'
+                  }`}
+                onClick={() => toggleRecruit(recruit.alias)}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(index * 0.03, 0.5) }}
+                whileHover={{ scale: 1.02, y: -2 }}
+              >
+                {/* Selection Badge */}
+                {selectedRecruits.has(recruit.alias) && (
+                  <div className="absolute top-2 right-2 z-10 bg-yellow-400 rounded-full p-1.5 shadow-lg">
+                    <Check size={18} className="text-gray-900" />
                   </div>
-                  <h3 className="font-bold text-lg text-white">{recruit.alias}</h3>
-                  <p className="text-sm text-gray-400">{recruit.name}</p>
-                  <p className="text-xs text-gray-500">
-                    Age: {recruit.age} • {recruit.gender} • {recruit.identity}
-                  </p>
+                )}
+
+                {/* Local Recruit Badge */}
+                {isLocalRecruit && (
+                  <div className="absolute top-2 left-2 z-10 bg-green-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <MapPin size={10} /> LOCAL
+                  </div>
+                )}
+
+                {/* Portrait Area with Origin */}
+                <div className={`h-20 flex items-center justify-center ${
+                  recruit.origin === 'mutant' ? 'bg-gradient-to-br from-yellow-900/50 to-green-900/50' :
+                  recruit.origin === 'tech' ? 'bg-gradient-to-br from-blue-900/50 to-cyan-900/50' :
+                  recruit.origin === 'magic' ? 'bg-gradient-to-br from-purple-900/50 to-pink-900/50' :
+                  recruit.origin === 'alien' ? 'bg-gradient-to-br from-green-900/50 to-teal-900/50' :
+                  recruit.origin === 'enhanced' ? 'bg-gradient-to-br from-orange-900/50 to-red-900/50' :
+                  recruit.origin === 'psychic' ? 'bg-gradient-to-br from-indigo-900/50 to-purple-900/50' :
+                  'bg-gradient-to-br from-gray-800 to-gray-700'
+                }`}>
+                  <div className="text-center">
+                    <span className="text-4xl">{originEmoji}</span>
+                    <div className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">{recruit.origin}</div>
+                  </div>
                 </div>
 
-                {/* Stats */}
-                <div className="mb-3 text-xs">
-                  <div className="grid grid-cols-2 gap-1">
-                    {Object.entries(recruit.stats).map(([stat, value]) => (
-                      <div key={stat} className="flex justify-between">
-                        <span className="text-gray-400">{stat}:</span>
-                        <span className={`font-mono ${value >= 60 ? 'text-green-400' : value >= 40 ? 'text-yellow-400' : 'text-gray-400'}`}>
-                          {viewMode === 'stars' ? statToStars(value) : value}
+                {/* Threat Badge on portrait */}
+                <div className={`absolute top-14 right-2 px-2 py-0.5 rounded text-xs font-bold shadow-lg ${
+                  recruit.threatLevel === 'THREAT_3' ? 'bg-red-600' :
+                  recruit.threatLevel === 'THREAT_2' ? 'bg-orange-600' :
+                  'bg-blue-600'
+                }`}>
+                  {recruit.threatLevel.replace('THREAT_', 'T')}
+                </div>
+
+                <div className="p-4">
+                  {/* Header */}
+                  <div className="text-center mb-3">
+                    <h3 className="font-bold text-lg text-white leading-tight">{recruit.alias}</h3>
+                    <p className="text-sm text-gray-400">{recruit.name}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {recruit.age}yo • {recruit.gender} • {recruit.identity}
+                    </p>
+                  </div>
+
+                  {/* Stats Grid - More prominent */}
+                  <div className="mb-3 bg-gray-900/50 rounded-lg p-2">
+                    <div className="grid grid-cols-4 gap-1 text-center">
+                      {Object.entries(recruit.stats).slice(0, 4).map(([stat, value]) => (
+                        <div key={stat}>
+                          <div className="text-[10px] text-gray-500 uppercase">{stat}</div>
+                          <div className={`text-sm font-bold ${
+                            value >= 60 ? 'text-green-400' :
+                            value >= 40 ? 'text-yellow-400' : 'text-gray-400'
+                          }`}>
+                            {viewMode === 'stars' ? statToStars(value).slice(0,3) : value}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-3 gap-1 text-center mt-1 pt-1 border-t border-gray-700">
+                      {Object.entries(recruit.stats).slice(4).map(([stat, value]) => (
+                        <div key={stat}>
+                          <div className="text-[10px] text-gray-500 uppercase">{stat}</div>
+                          <div className={`text-sm font-bold ${
+                            value >= 60 ? 'text-green-400' :
+                            value >= 40 ? 'text-yellow-400' : 'text-gray-400'
+                          }`}>
+                            {viewMode === 'stars' ? statToStars(value).slice(0,3) : value}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Powers - Horizontal scrollable */}
+                  <div className="mb-3">
+                    <div className="flex flex-wrap gap-1">
+                      {recruit.powers.slice(0, 3).map(power => (
+                        <span key={power} className="px-2 py-0.5 bg-purple-600/30 border border-purple-500/30 rounded text-xs text-purple-300">
+                          {power}
                         </span>
-                      </div>
-                    ))}
+                      ))}
+                      {recruit.powers.length > 3 && (
+                        <span className="text-xs text-gray-500">+{recruit.powers.length - 3}</span>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {/* Powers */}
-                <div className="mb-3">
-                  <div className="text-xs text-gray-400 mb-1">Powers:</div>
-                  <div className="flex flex-wrap gap-1">
-                    {recruit.powers.map(power => (
-                      <span key={power} className="px-2 py-0.5 bg-purple-600/30 rounded text-xs text-purple-300">
-                        {power}
-                      </span>
-                    ))}
+                  {/* Info - Two columns for compact display */}
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs text-gray-400">
+                    <div className="flex items-center gap-1">
+                      <MapPin size={11} className="text-gray-500" />
+                      <span className={isLocalRecruit ? 'text-green-400' : ''}>{recruit.nationality}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <DollarSign size={11} className="text-green-500" />
+                      <span className="text-green-400">${(recruit.weeklyPay/1000).toFixed(0)}K/wk</span>
+                    </div>
+                    <div className="flex items-center gap-1 col-span-2">
+                      <Shield size={11} className="text-gray-500" />
+                      {recruit.career} ({recruit.careerRank})
+                    </div>
                   </div>
                 </div>
-
-                {/* Info */}
-                <div className="space-y-1 text-xs text-gray-400">
-                  <div className="flex items-center gap-1">
-                    <MapPin size={12} /> {recruit.nationality}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <GraduationCap size={12} /> {recruit.education}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Shield size={12} /> {recruit.career} (Rank {recruit.careerRank})
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <DollarSign size={12} /> ${recruit.weeklyPay.toLocaleString()}/week
-                  </div>
-                </div>
-
-                {/* Origin */}
-                <div className="mt-2 text-center">
-                  <span className="px-2 py-0.5 bg-gray-700 rounded text-xs text-gray-300">
-                    {recruit.origin}
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            )
+          })}
         </div>
       </div>
 
