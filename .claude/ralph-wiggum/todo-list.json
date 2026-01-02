@@ -1,143 +1,54 @@
 {
-  "version": 3,
-  "lastUpdated": "2025-01-01T21:00:00Z",
+  "version": 4,
+  "lastUpdated": "2026-01-01T23:00:00Z",
   "config": {
     "maxIterations": 999,
     "autoContinue": true,
     "commitAfterSystem": true
   },
   "currentSystem": null,
-  "systems": [
-    {
-      "id": "TIME-ALIVE",
-      "name": "Living Time System",
-      "status": "completed",
-      "priority": 30,
-      "phase": 7,
-      "tasks": [
-        {"id": "TA-001", "task": "Create TimeEngine class with tick-based progression (1 tick = 10 minutes)", "status": "completed"},
-        {"id": "TA-002", "task": "Implement day/night cycle (6am-6pm day, 6pm-6am night)", "status": "completed"},
-        {"id": "TA-003", "task": "Create calendar system with real dates (day, month, year)", "status": "completed"},
-        {"id": "TA-004", "task": "Wire shop hours to day/night (black market only at night)", "status": "completed"},
-        {"id": "TA-005", "task": "Wire crime rates to time of day (higher at night)", "status": "completed"},
-        {"id": "TA-006", "task": "Implement healing over time (HP recovery per day)", "status": "completed"},
-        {"id": "TA-007", "task": "Create 'While you were gone' event generator for time jumps", "status": "completed"},
-        {"id": "TA-008", "task": "Add TimeDisplay component showing current date/time", "status": "completed"}
-      ],
-      "triggers": ["WORLD-EVENTS"],
-      "files": ["MVP/src/data/timeEngine.ts", "MVP/src/components/TimeDisplay.tsx", "MVP/src/stores/enhancedGameStore.ts"],
-      "completedAt": "2025-01-01T18:00:00.000Z"
-    },
-    {
-      "id": "WORLD-EVENTS",
-      "name": "World Events Simulation",
-      "status": "completed",
-      "priority": 31,
-      "phase": 7,
-      "tasks": [
-        {"id": "WE-001", "task": "Create WorldSimulation class that runs on time ticks", "status": "completed"},
-        {"id": "WE-002", "task": "Implement gang territory changes (factions gain/lose sectors)", "status": "completed"},
-        {"id": "WE-003", "task": "Implement political events (coups, elections) that change country stats", "status": "completed"},
-        {"id": "WE-004", "task": "Implement economic events (crashes, booms) affecting prices", "status": "completed"},
-        {"id": "WE-005", "task": "Implement crime waves that temporarily change city crimeIndex", "status": "completed"},
-        {"id": "WE-006", "task": "Implement superhuman incidents that generate news and missions", "status": "completed"},
-        {"id": "WE-007", "task": "Wire world events to news generation system", "status": "completed"},
-        {"id": "WE-008", "task": "Create event log showing recent world changes", "status": "completed"}
-      ],
-      "triggers": ["FACTION-MEMORY"],
-      "files": ["MVP/src/data/worldSimulation.ts", "MVP/src/data/worldNewsIntegration.ts", "MVP/src/components/EventLog.tsx"],
-      "completedAt": "2025-01-01T18:30:00.000Z"
-    },
-    {
-      "id": "FACTION-MEMORY",
-      "name": "Faction Memory & Reputation",
-      "status": "completed",
-      "priority": 32,
-      "phase": 7,
-      "tasks": [
-        {"id": "FM-001", "task": "Create FactionRelations system tracking player standing with each faction", "status": "completed"},
-        {"id": "FM-002", "task": "Wire combat results to faction hostility (fight gangs = they remember)", "status": "completed"},
-        {"id": "FM-003", "task": "Implement government heat tracking per country", "status": "completed"},
-        {"id": "FM-004", "task": "Wire surveillance system to heat decay rate", "status": "completed"},
-        {"id": "FM-005", "task": "Implement civilian reaction (fame = recognized, infamy = feared)", "status": "completed"},
-        {"id": "FM-006", "task": "Create faction hunt missions (hostile factions send squads after you)", "status": "completed"},
-        {"id": "FM-007", "task": "Implement faction allies that offer help when reputation high", "status": "completed"},
-        {"id": "FM-008", "task": "Add reputation display to character sheet", "status": "completed"}
-      ],
-      "triggers": ["NPC-LIVES"],
-      "files": ["MVP/src/data/factionSystem.ts", "MVP/src/data/heatSystem.ts", "MVP/src/data/fameSystem.ts", "MVP/src/data/combatFactionWiring.ts", "MVP/src/data/factionHuntMissions.ts", "MVP/src/data/factionAllies.ts", "MVP/src/components/ReputationDisplay.tsx"],
-      "completedAt": "2025-01-01T19:00:00.000Z"
-    },
-    {
-      "id": "NPC-LIVES",
-      "name": "NPCs With Lives",
-      "status": "completed",
-      "priority": 33,
-      "phase": 7,
-      "tasks": [
-        {"id": "NL-001", "task": "Create NPC entity system with persistent state", "status": "completed"},
-        {"id": "NL-002", "task": "Implement country-locked mercenary pools (can only recruit from home country)", "status": "completed"},
-        {"id": "NL-003", "task": "Create contact relationship system (friendship, trust levels)", "status": "completed"},
-        {"id": "NL-004", "task": "Implement contact life events (move cities, get arrested, die)", "status": "completed"},
-        {"id": "NL-005", "task": "Implement enemy leveling (enemies you spare come back stronger)", "status": "completed"},
-        {"id": "NL-006", "task": "Create informant staleness (intel expires after time)", "status": "completed"},
-        {"id": "NL-007", "task": "Wire NPC events to news system", "status": "completed"},
-        {"id": "NL-008", "task": "Add NPC status tracking to contacts screen", "status": "completed"}
-      ],
-      "triggers": ["ECONOMY-LIVE"],
-      "files": ["MVP/src/data/npcSystem.ts", "MVP/src/data/mercenaryPool.ts", "MVP/src/data/contactSystem.ts", "MVP/src/data/npcLifeEvents.ts", "MVP/src/data/npcNewsIntegration.ts", "MVP/src/components/ContactsScreen.tsx"],
-      "completedAt": "2025-01-01T20:00:00.000Z"
-    },
-    {
-      "id": "ECONOMY-LIVE",
-      "name": "Living Economy",
-      "status": "completed",
-      "priority": 34,
-      "phase": 7,
-      "tasks": [
-        {"id": "EL-001", "task": "Create dynamic price system that fluctuates over time", "status": "completed"},
-        {"id": "EL-002", "task": "Implement supply/demand (your buying affects local prices)", "status": "completed"},
-        {"id": "EL-003", "task": "Wire political events to price changes (coup = weapons cheap)", "status": "completed"},
-        {"id": "EL-004", "task": "Implement scarcity events (disaster = medical supplies expensive)", "status": "completed"},
-        {"id": "EL-005", "task": "Create currency exchange rates between countries", "status": "completed"},
-        {"id": "EL-006", "task": "Wire black market floods (military coup = weapons flood market)", "status": "completed"},
-        {"id": "EL-007", "task": "Add price trend indicators to shop UI", "status": "completed"},
-        {"id": "EL-008", "task": "Create economic news events for price changes", "status": "completed"}
-      ],
-      "triggers": [],
-      "files": ["MVP/src/data/dynamicEconomy.ts", "MVP/src/data/priceFluctuation.ts", "MVP/src/data/economicNewsIntegration.ts", "MVP/src/components/PriceTrendIndicator.tsx"],
-      "completedAt": "2025-01-01T21:00:00.000Z"
-    },
-    {
-      "id": "BALANCE-FIX",
-      "name": "Combat Balance Fixes",
-      "status": "completed",
-      "priority": 20,
-      "phase": 6,
-      "tasks": [
-        {"id": "BF-001", "task": "Reduce pistol AP cost from 3 to 2 for better CQB viability", "status": "completed"},
-        {"id": "BF-002", "task": "Add pistol accuracy bonus at close range (0-5 tiles)", "status": "completed"},
-        {"id": "BF-003", "task": "Reduce defensive stance bonus from +20% to +12% accuracy", "status": "completed"},
-        {"id": "BF-004", "task": "Reduce shotgun close-range dominance (95% -> 80%)", "status": "completed"},
-        {"id": "BF-005", "task": "Tune Gang Patrol scenario - add 1 enemy or better weapons", "status": "completed"},
-        {"id": "BF-006", "task": "Tune Checkpoint Assault - reduce from 5 to 4 enemies", "status": "completed"},
-        {"id": "BF-007", "task": "Add boss weakness mechanics for Terminator/Juggernaut", "status": "completed"},
-        {"id": "BF-008", "task": "Wire remaining 17+ damage types to status effects", "status": "completed"},
-        {"id": "BF-009", "task": "Run full test suite and verify all tests pass", "status": "completed"}
-      ],
-      "triggers": [],
-      "files": ["MVP/src/combat/core.ts", "MVP/src/combat/scenarios.ts", "MVP/src/data/weapons.ts", "MVP/src/data/damageSystem.ts"],
-      "completedAt": "2025-01-01T05:30:00.000Z"
-    }
+  "systems": [],
+  "completedSystems": [
+    "HOOK-INFRA",
+    "EVENT-GEN",
+    "WEAPON-DB",
+    "ARMOR-DB",
+    "STAT-INT",
+    "COMBAT-RESULTS",
+    "HOSPITAL",
+    "NEWS-GEN",
+    "MISSION-GEN",
+    "LAPTOP-UI",
+    "INVESTIGATION",
+    "TIME-EVENTS",
+    "ECONOMY",
+    "SHIELD-SYS",
+    "CALLING-BONUS",
+    "PENETRATION-DR",
+    "VISUAL-EFFECTS",
+    "ENEMY-GEN-V2",
+    "CITY-SERVICES",
+    "VEHICLE-INT",
+    "TERRITORY",
+    "EMAIL-SYS",
+    "TRAINING-UI",
+    "BASE-UI",
+    "GAME-LOOP",
+    "BALANCE-FIX",
+    "TIME-ALIVE",
+    "WORLD-EVENTS",
+    "FACTION-MEMORY",
+    "NPC-LIVES",
+    "ECONOMY-LIVE",
+    "COMBAT-POLISH",
+    "STRATEGIC-POLISH"
   ],
-  "completedSystems": ["HOOK-INFRA", "EVENT-GEN", "WEAPON-DB", "ARMOR-DB", "STAT-INT", "COMBAT-RESULTS", "HOSPITAL", "NEWS-GEN", "MISSION-GEN", "LAPTOP-UI", "INVESTIGATION", "TIME-EVENTS", "ECONOMY", "SHIELD-SYS", "CALLING-BONUS", "PENETRATION-DR", "VISUAL-EFFECTS", "ENEMY-GEN-V2", "CITY-SERVICES", "VEHICLE-INT", "TERRITORY", "EMAIL-SYS", "TRAINING-UI", "BASE-UI", "GAME-LOOP", "BALANCE-FIX", "TIME-ALIVE", "WORLD-EVENTS", "FACTION-MEMORY", "NPC-LIVES", "ECONOMY-LIVE"],
   "statistics": {
-    "totalSystems": 31,
-    "completedSystems": 31,
-    "totalTasks": 178,
-    "completedTasks": 178,
+    "totalSystems": 33,
+    "completedSystems": 33,
+    "totalTasks": 194,
+    "completedTasks": 194,
     "totalIterations": 0,
-    "startedAt": "2024-12-30T00:00:00.000Z",
-    "completedAt": "2025-01-01T21:00:00.000Z"
+    "startedAt": "2024-12-30T00:00:00.000Z"
   }
 }
