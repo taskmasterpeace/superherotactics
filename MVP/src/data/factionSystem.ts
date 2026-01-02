@@ -204,7 +204,8 @@ export interface CountryReputation {
 // FACTION STARTING STANDINGS
 // =============================================================================
 
-import { Country } from './countries';
+import { Country, getCultureGroupFromCode, CULTURE_GROUPS } from './countries';
+import { getCitiesByCountryCode } from './cities';
 
 /**
  * Calculate initial standing for a faction based on country attributes
@@ -212,7 +213,8 @@ import { Country } from './countries';
 export function getInitialStanding(
   factionType: FactionType,
   country: Country,
-  isHomeCountry: boolean = false
+  isHomeCountry: boolean = false,
+  homeCountryCultureCode?: number
 ): number {
   switch (factionType) {
     case 'police':
@@ -234,7 +236,15 @@ export function getInitialStanding(
     case 'government':
       // Home country starts high, others vary
       if (isHomeCountry) return 50;
-      // TODO: Culture group matching for +15 to allied countries
+
+      // Culture group matching: +15 for countries in same culture group
+      if (homeCountryCultureCode !== undefined) {
+        const homeCountryCulture = getCultureGroupFromCode(homeCountryCultureCode);
+        const targetCulture = getCultureGroupFromCode(country.cultureCode);
+        if (homeCountryCulture && targetCulture && homeCountryCulture === targetCulture) {
+          return 15;  // Allied culture bonus
+        }
+      }
       return 0;
 
     case 'media':
@@ -250,9 +260,14 @@ export function getInitialStanding(
       return -5;
 
     case 'underworld':
-      // Based on crime index (calculated from cities in that country)
-      // TODO: Get average crime index from cities
-      // For now, default to 0
+      // Based on average crime index from cities in country
+      const cities = getCitiesByCountryCode(country.code);
+      if (cities.length > 0) {
+        const avgCrime = cities.reduce((sum, c) => sum + c.crimeIndex, 0) / cities.length;
+        // Map crime index (0-100) to standing: higher crime = better underworld relations
+        // 50 crime = 0 standing, 80 crime = +18, 20 crime = -18
+        return Math.round((avgCrime - 50) * 0.6);
+      }
       return 0;
 
     default:
@@ -550,11 +565,15 @@ export function initializeFactionStandings(
 ): FactionStanding[] {
   const standings: FactionStanding[] = [];
 
+  // Find home country to get its culture code for culture matching
+  const homeCountry = countries.find(c => c.code === homeCountryCode);
+  const homeCountryCultureCode = homeCountry?.cultureCode;
+
   for (const country of countries) {
     const isHome = country.code === homeCountryCode;
 
     for (const factionType of ['police', 'military', 'government', 'media', 'corporations', 'underworld'] as FactionType[]) {
-      const initialStanding = getInitialStanding(factionType, country, isHome);
+      const initialStanding = getInitialStanding(factionType, country, isHome, homeCountryCultureCode);
 
       standings.push({
         factionId: `${factionType}_${country.code.toLowerCase()}`,

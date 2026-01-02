@@ -193,6 +193,12 @@ export function createMissionActions(set: any, get: any): MissionStoreActions {
         const mission = state.activeMissions[missionIndex];
         mission.status = success ? 'completed' : 'failed';
 
+        // Set completion timestamp for weekly tracking
+        if (success) {
+          const gameStore = (window as any).__gameStore || {};
+          mission.completedAt = gameStore.gameTime?.day || 0;
+        }
+
         // Remove from active missions
         const newActiveMissions = [...state.activeMissions];
         newActiveMissions.splice(missionIndex, 1);

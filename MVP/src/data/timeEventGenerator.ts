@@ -410,8 +410,8 @@ function processHospitalRecovery(): void {
     const recoveryStart = char.statusStartTime || Date.now()
     const hoursHospitalized = (Date.now() - recoveryStart) / (1000 * 60 * 60)
 
-    // Assume 24-48 hours recovery based on injury severity
-    const recoveryTime = 24 // TODO: Calculate based on injuries
+    // Use the character's calculated recovery time (already set during hospitalization)
+    const recoveryTime = char.recoveryTime || 24 // Fallback to 24 hours if not set
 
     if (hoursHospitalized >= recoveryTime) {
       // Discharge character
@@ -471,8 +471,13 @@ function calculateWeeklyIncome(): number {
   // Fame bonus
   income += Math.floor((store.fame || 0) * 10)
 
-  // Completed missions bonus
-  // TODO: Track weekly mission completions
+  // Completed missions bonus - Calculate bonus from completed missions in last 7 days
+  const currentDay = store.gameTime?.day || 0
+  const sevenDaysAgo = currentDay - 7
+  const weeklyMissions = (store.completedMissions || []).filter(
+    (m: any) => m.completedAt && m.completedAt >= sevenDaysAgo && m.status === 'completed'
+  ).length
+  income += weeklyMissions * 500  // $500 bonus per mission completed this week
 
   return income
 }

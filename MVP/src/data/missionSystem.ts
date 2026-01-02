@@ -447,6 +447,7 @@ export interface GeneratedMission {
   dangerLevel: number;
   timeLimit?: number;
   expiresAt?: number;  // Game timestamp
+  completedAt?: number;  // Game day when mission was completed
   status: 'available' | 'accepted' | 'in_progress' | 'completed' | 'failed' | 'expired';
 }
 
