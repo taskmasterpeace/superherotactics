@@ -883,7 +883,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   setCurrentView: (view) => {
     set({ currentView: view })
-    toast.info(`Switched to ${view.replace('-', ' ')}`)
+    toast(`Switched to ${view.replace('-', ' ')}`)
   },
 
   deployTeam: () => {
@@ -1349,7 +1349,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
           : char
       )
     })
-    toast.info('Character updated')
+    toast('Character updated')
   },
 
   removeCharacter: (characterId) => {
@@ -1359,7 +1359,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       characters: state.characters.filter(c => c.id !== characterId)
     })
     if (character) {
-      toast.info(`${character.name} has left the team`)
+      toast(`${character.name} has left the team`)
     }
   },
 
@@ -1460,7 +1460,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       }
     })
 
-    toast.info(`Mission started: ${missionType} in ${city}`)
+    toast(`Mission started: ${missionType} in ${city}`)
   },
 
   enterCombat: () => {
@@ -1899,7 +1899,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
         : state.fleetVehicles
     })
 
-    toast.info(`Travel cancelled. ${unit.name} stopped at ${currentSector}`)
+    toast(`Travel cancelled. ${unit.name} stopped at ${currentSector}`)
   },
 
   assignCharacterToVehicle: (characterId, vehicleId) => {
@@ -1940,7 +1940,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
     const char = state.characters.find(c => c.id === characterId)
     const vehicle = state.fleetVehicles.find(v => v.id === vehicleId)
-    toast.info(`${char?.name || 'Character'} removed from ${vehicle?.name || 'vehicle'}`)
+    toast(`${char?.name || 'Character'} removed from ${vehicle?.name || 'vehicle'}`)
   },
 
   // VI-003: Refuel vehicle
@@ -1964,7 +1964,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       : 100 - vehicle.currentFuel
 
     if (fuelNeeded <= 0) {
-      toast.info(`${vehicle.name} is already fully fueled`)
+      toast(`${vehicle.name} is already fully fueled`)
       return
     }
 
@@ -2004,7 +2004,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       : vehicle.maxHP - vehicle.currentHP
 
     if (hpNeeded <= 0) {
-      toast.info(`${vehicle.name} is already at full health`)
+      toast(`${vehicle.name} is already at full health`)
       return
     }
 
@@ -2804,7 +2804,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
     // Show toast notification
     if (Math.abs(fameImpact) >= 15) {
-      toast.info(`📰 News: ${article.headline}`)
+      toast(`📰 News: ${article.headline}`)
     }
   },
 
@@ -2842,7 +2842,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       timestamp: Date.now()
     })
 
-    toast.info(`New investigation lead: ${investigation.title}`)
+    toast(`New investigation lead: ${investigation.title}`)
   },
 
   startInvestigation: (investigationId, characterId) => {
@@ -3002,7 +3002,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     } else if (result.consequenceType === 'setback') {
       toast.error(result.message)
     } else {
-      toast.info(result.message)
+      toast(result.message)
     }
   },
 
@@ -3674,7 +3674,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       baseState: updateBase(state.baseState, updatedBase),
     })
 
-    toast.info('Facility removed')
+    toast('Facility removed')
   },
 
   processConstruction: (hours) => {
@@ -3892,7 +3892,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     if (!squad) return false
 
     set({ squads: state.squads.filter(s => s.id !== squadId) })
-    toast.info(`${squad.name} disbanded`)
+    toast(`${squad.name} disbanded`)
     return true
   },
 
@@ -3944,7 +3944,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       // If squad is empty, disband it
       if (squad.members.length === 0) {
         set({ squads: state.squads.filter(s => s.id !== squadId) })
-        toast.info(`${squad.name} disbanded (no members)`)
+        toast(`${squad.name} disbanded (no members)`)
       } else {
         set({ squads: [...state.squads] })
       }
@@ -3958,7 +3958,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     if (squad) {
       // Update currentSector to match squad's position
       set({ currentSector: squad.currentSector })
-      toast.info(`Active squad: ${squad.name}`)
+      toast(`Active squad: ${squad.name}`)
     }
   },
 
