@@ -119,6 +119,19 @@ export const useCombatState = () => {
       })
     );
 
+    // Also listen to combat-log events from CombatScene
+    unsubscribers.push(
+      EventBridge.on('combat-log', (entry: { message: string; type?: string }) => {
+        const logEntry: LogEntry = {
+          id: Date.now().toString(),
+          message: entry.message,
+          type: entry.type || 'info',
+          timestamp: new Date().toLocaleTimeString(),
+        };
+        setLogEntries((prev) => [...prev.slice(-99), logEntry]);
+      })
+    );
+
     return () => {
       unsubscribers.forEach((unsub) => unsub());
     };
