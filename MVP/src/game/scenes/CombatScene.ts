@@ -4812,9 +4812,16 @@ export class CombatScene extends Phaser.Scene {
     const unit = this.units.get(unitId);
     if (!unit) return;
 
-    // Only allow moving player's units on their turn (unless AI vs AI)
-    if (!this.aiVsAi && unit.team !== this.currentTeam) return;
-    if (!this.aiVsAi && unit.team !== this.playerTeam) return;
+    // During exploration phase, allow free movement for all player units
+    // (no turn order restrictions until combat triggers)
+    if (this.combatPhase === 'exploration') {
+      // Only player team can move during exploration
+      if (!this.aiVsAi && unit.team !== this.playerTeam) return;
+    } else {
+      // Combat phase: Only allow moving player's units on their turn (unless AI vs AI)
+      if (!this.aiVsAi && unit.team !== this.currentTeam) return;
+      if (!this.aiVsAi && unit.team !== this.playerTeam) return;
+    }
 
     let moveCost = this.calculateMoveCost(unit.position.x, unit.position.y, targetX, targetY);
     const tile = this.tiles[targetY][targetX];
@@ -4890,7 +4897,7 @@ export class CombatScene extends Phaser.Scene {
     }
   }
 
-  private moveUnitAnimated(unit: Unit, targetX: number, targetY: number, distance: number, callback?: () => void): void {
+  private moveUnitAnimated(unit: Unit, targetX: number, targetY: number, apCost: number, callback?: () => void): void {
     this.animating = true;
 
     // Clear old position
@@ -4906,7 +4913,7 @@ export class CombatScene extends Phaser.Scene {
     this.checkOverwatchReactions(unit, targetX, targetY);
 
     unit.position = { x: targetX, y: targetY };
-    unit.ap -= distance;
+    unit.ap -= apCost;
 
     // Calculate isometric screen positions
     const screenPos = gridToScreen(targetX, targetY, this.offsetX, this.offsetY);
