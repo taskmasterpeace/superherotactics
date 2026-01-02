@@ -1,14 +1,107 @@
 {
-  "version": 4,
-  "lastUpdated": "2026-01-01T23:00:00Z",
+  "version": 5,
+  "lastUpdated": "2026-01-02T00:00:00Z",
   "config": {
     "maxIterations": 999,
     "autoContinue": true,
     "commitAfterSystem": true
   },
-  "currentSystem": null,
-  "systems": [],
+  "currentSystem": "UI-COMBAT",
+  "systems": [
+    {
+      "id": "UI-COMBAT",
+      "name": "Combat Scene UI Polish",
+      "status": "in_progress",
+      "priority": 2,
+      "phase": 1,
+      "tasks": [
+        {"id": "UC-001", "task": "Add clear unit selection indicator (highlight selected unit)", "status": "completed"},
+        {"id": "UC-002", "task": "Show AP/action points prominently for selected unit", "status": "completed"},
+        {"id": "UC-003", "task": "Add movement range overlay when unit selected", "status": "pending"},
+        {"id": "UC-004", "task": "Add attack range indicator for current weapon", "status": "pending"},
+        {"id": "UC-005", "task": "Create unit info panel showing stats, weapon, armor", "status": "completed"},
+        {"id": "UC-006", "task": "Add turn order display showing who acts next", "status": "completed"},
+        {"id": "UC-007", "task": "Add combat log panel for hit/miss/damage messages", "status": "completed"},
+        {"id": "UC-008", "task": "Add End Turn button that's always visible", "status": "completed"},
+        {"id": "UC-009", "task": "Add Flee/Retreat option", "status": "completed"},
+        {"id": "UC-010", "task": "Test: Complete combat encounter with clear UI feedback", "status": "pending"}
+      ],
+      "triggers": ["UI-HUD"],
+      "files": [
+        "MVP/src/game/scenes/CombatScene.ts",
+        "MVP/src/components/CombatLab.tsx"
+      ]
+    },
+    {
+      "id": "UI-HUD",
+      "name": "Game HUD Polish",
+      "status": "pending",
+      "priority": 3,
+      "phase": 1,
+      "tasks": [
+        {"id": "UH-001", "task": "Make top navigation bar more compact and cleaner", "status": "pending"},
+        {"id": "UH-002", "task": "Add visual distinction for active nav item", "status": "pending"},
+        {"id": "UH-003", "task": "Fix time/budget/team display to be more readable", "status": "pending"},
+        {"id": "UH-004", "task": "Add notification badge system for pending events", "status": "pending"},
+        {"id": "UH-005", "task": "Hide dev tools by default (only show with ?dev=true)", "status": "pending"},
+        {"id": "UH-006", "task": "Add Settings menu with audio/display options", "status": "pending"},
+        {"id": "UH-007", "task": "Test: Clean professional HUD that doesn't distract from gameplay", "status": "pending"}
+      ],
+      "triggers": ["UI-SCREENS"],
+      "files": [
+        "MVP/src/App.tsx",
+        "MVP/src/index.css"
+      ]
+    },
+    {
+      "id": "UI-SCREENS",
+      "name": "Individual Screen Polish",
+      "status": "pending",
+      "priority": 4,
+      "phase": 2,
+      "tasks": [
+        {"id": "US-001", "task": "Polish faction selection screen - larger faction cards", "status": "pending"},
+        {"id": "US-002", "task": "Polish country selection - better country cards with flags", "status": "pending"},
+        {"id": "US-003", "task": "Polish city selection - show city stats clearly", "status": "pending"},
+        {"id": "US-004", "task": "Polish recruiting screen - merc cards with portraits", "status": "pending"},
+        {"id": "US-005", "task": "Polish character screen - clear stat display", "status": "pending"},
+        {"id": "US-006", "task": "Polish equipment shop - grid layout for items", "status": "pending"},
+        {"id": "US-007", "task": "Polish hospital screen - injury list and recovery times", "status": "pending"},
+        {"id": "US-008", "task": "Test: All screens feel polished and consistent", "status": "pending"}
+      ],
+      "triggers": ["UI-RESPONSIVE"],
+      "files": [
+        "MVP/src/App.tsx",
+        "MVP/src/components/CharacterScreen.tsx",
+        "MVP/src/components/EquipmentShop.tsx",
+        "MVP/src/components/HospitalScreen.tsx"
+      ]
+    },
+    {
+      "id": "UI-RESPONSIVE",
+      "name": "Responsive Design & Final Polish",
+      "status": "pending",
+      "priority": 5,
+      "phase": 2,
+      "tasks": [
+        {"id": "UR-001", "task": "Add responsive breakpoints for tablet/mobile", "status": "pending"},
+        {"id": "UR-002", "task": "Ensure minimum playable width of 1024px", "status": "pending"},
+        {"id": "UR-003", "task": "Add loading states for async operations", "status": "pending"},
+        {"id": "UR-004", "task": "Add error boundaries with user-friendly messages", "status": "pending"},
+        {"id": "UR-005", "task": "Add keyboard shortcuts guide (? key)", "status": "pending"},
+        {"id": "UR-006", "task": "Final visual polish pass - shadows, borders, spacing", "status": "pending"},
+        {"id": "UR-007", "task": "Test: Full game playable from start to finish", "status": "pending"}
+      ],
+      "triggers": [],
+      "files": [
+        "MVP/src/index.css",
+        "MVP/tailwind.config.js",
+        "MVP/src/App.tsx"
+      ]
+    }
+  ],
   "completedSystems": [
+    "UI-LAYOUT",
     "HOOK-INFRA",
     "EVENT-GEN",
     "WEAPON-DB",
@@ -44,10 +137,10 @@
     "STRATEGIC-POLISH"
   ],
   "statistics": {
-    "totalSystems": 33,
-    "completedSystems": 33,
-    "totalTasks": 194,
-    "completedTasks": 194,
+    "totalSystems": 38,
+    "completedSystems": 34,
+    "totalTasks": 234,
+    "completedTasks": 209,
     "totalIterations": 0,
     "startedAt": "2024-12-30T00:00:00.000Z"
   }
