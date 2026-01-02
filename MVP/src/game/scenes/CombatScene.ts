@@ -23,7 +23,7 @@ import {
   WeaponRangeBrackets,
   DEFAULT_RANGE_BRACKETS,
 } from '../../data/equipmentTypes';
-import { lookupWeaponInDatabase, getDamageSystemType, getDamageTypeByKey } from './weaponIntegration';
+import { lookupWeaponInDatabase, getDamageSystemType, getDamageTypeByKey, isValidWeaponKey } from './weaponIntegration';
 import { getArmorForUnit, selectArmorForEnemy } from './armorIntegration';
 import { MapTemplate, parseMapLayout, getMapForCityType, getSpawnPositions } from '../../data/mapTemplates';
 import { generateEnemySquad, convertToCombatCharacters, debugGenerateReport } from '../../combat/enemyGeneration';
@@ -993,8 +993,19 @@ export class CombatScene extends Phaser.Scene {
   }
 
   // Map equipment/powers to weapon types
+  // Now supports full 70+ weapon database via weaponIntegration.ts
   private mapEquipmentToWeapon(equipment: string[], powers: string[]): WeaponType {
-    // Check powers first for special abilities
+    // PRIORITY 1: Check if equipment[0] is a valid weapon ID/name in the database
+    // This enables full 70+ weapon database support
+    if (equipment.length > 0 && equipment[0]) {
+      const primaryWeapon = equipment[0];
+      if (isValidWeaponKey(primaryWeapon)) {
+        // Return the weapon key directly - getWeaponData() will look it up
+        return primaryWeapon as WeaponType;
+      }
+    }
+
+    // PRIORITY 2: Check powers for special abilities (supers with innate weapons)
     const powerStr = powers.join(' ').toLowerCase();
     if (powerStr.includes('psychic') || powerStr.includes('telepat') || powerStr.includes('mental')) {
       return 'psychic';
@@ -1006,7 +1017,7 @@ export class CombatScene extends Phaser.Scene {
       return 'beam_wide';
     }
 
-    // Check equipment
+    // PRIORITY 3: Fuzzy match equipment strings (legacy fallback)
     const equipStr = equipment.join(' ').toLowerCase();
     if (equipStr.includes('rifle') || equipStr.includes('assault')) {
       return 'rifle';
@@ -1021,7 +1032,7 @@ export class CombatScene extends Phaser.Scene {
       return 'fist';
     }
 
-    // Default based on stats - high strength = melee, high agility = pistol
+    // Default fallback
     return 'fist';
   }
 
