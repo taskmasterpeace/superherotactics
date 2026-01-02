@@ -357,7 +357,7 @@ export function processStatusEffects(
     // Check for stun saving throw
     if (effect.id === 'stunned' && effect.savingThrow) {
       const roll = staRoll ?? Math.random() * 100;
-      const saveTarget = 50 + (unit.stats.STA - 50); // Base 50%, +1% per STA above 50
+      const saveTarget = 50 + (unit.stats.CON - 50); // Base 50%, +1% per CON above 50
       if (roll <= saveTarget) {
         // Saved! Remove stun
         result.effectsExpired.push(effect.id);

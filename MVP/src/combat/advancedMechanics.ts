@@ -163,9 +163,9 @@ export function resolveAimedShot(
   if (result.hitResult === 'crit' || result.hitResult === 'hit') {
     if (bodyPart === 'head' && result.hitResult === 'crit') {
       specialEffect = 'Critical headshot!';
-    } else if (bodyPart === 'arms' && result.hitResult !== 'miss') {
+    } else if (bodyPart === 'arms') {
       specialEffect = 'Arm hit - accuracy reduced';
-    } else if (bodyPart === 'legs' && result.hitResult !== 'miss') {
+    } else if (bodyPart === 'legs') {
       specialEffect = 'Leg hit - movement impaired';
     }
   }

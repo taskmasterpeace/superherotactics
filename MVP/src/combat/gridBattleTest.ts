@@ -18,36 +18,36 @@ function createSniper(team: 'blue' | 'red', id: string): SimUnit {
     team,
     hp: 80,
     maxHp: 80,
+    shieldHp: 0,
+    maxShieldHp: 0,
     alive: true,
     stats: {
-      mel: 30,
-      agl: 60,
-      int: 70,
-      ins: 65,
-      con: 50,
+      MEL: 30,
+      RNG: 70,
+      AGL: 60,
+      CON: 50,
+      INS: 65,
+      WIL: 50,
+      INT: 70,
     },
     weapon: {
       name: 'Sniper Rifle',
       damage: 45,
       range: 15,  // Long range
       accuracy: 85,
-      isRanged: true,
       damageType: 'ballistic',
+      apCost: 2,
     },
     statusEffects: [],
-    facing: 0,
-    visionCone: { facing: 0, angle: 120, range: 20 },
+    vision: { facing: 0, angle: 120, range: 20 },
     acted: false,
     dr: 0,
-    drEnergy: 0,
-    drMental: 0,
     stoppingPower: 0,
-    shield: 0,
-    maxShield: 0,
-    shieldRegenRate: 0,
-    shieldRegenDelay: 0,
-    ins: 65,
-    mel: 30,
+    origin: 'biological',
+    stance: 'normal',
+    cover: 'none',
+    accuracyPenalty: 0,
+    disarmed: false,
   };
 }
 
@@ -61,36 +61,36 @@ function createMartialArtist(team: 'blue' | 'red', id: string): SimUnit {
     team,
     hp: 100,
     maxHp: 100,
+    shieldHp: 0,
+    maxShieldHp: 0,
     alive: true,
     stats: {
-      mel: 85,
-      agl: 75,
-      int: 50,
-      ins: 60,
-      con: 65,
+      MEL: 85,
+      RNG: 30,
+      AGL: 75,
+      CON: 65,
+      INS: 60,
+      WIL: 50,
+      INT: 50,
     },
     weapon: {
       name: 'Fists',
       damage: 35,
       range: 1,  // Melee only!
       accuracy: 90,
-      isRanged: false,
       damageType: 'bludgeon',
+      apCost: 1,
     },
     statusEffects: [],
-    facing: 0,
-    visionCone: { facing: 0, angle: 120, range: 15 },
+    vision: { facing: 0, angle: 120, range: 15 },
     acted: false,
     dr: 2,  // Slightly tougher
-    drEnergy: 0,
-    drMental: 0,
     stoppingPower: 0,
-    shield: 0,
-    maxShield: 0,
-    shieldRegenRate: 0,
-    shieldRegenDelay: 0,
-    ins: 60,
-    mel: 85,
+    origin: 'biological',
+    stance: 'normal',
+    cover: 'none',
+    accuracyPenalty: 0,
+    disarmed: false,
   };
 }
 
@@ -216,7 +216,8 @@ export function testGridCombat(): void {
 // Export for browser/console use
 export default testGridCombat;
 
-// If running directly
-if (typeof window === 'undefined' && typeof process !== 'undefined') {
+// If running directly via ts-node or node
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+if (typeof (globalThis as any).window === 'undefined' && typeof process !== 'undefined' && process.argv[1]?.includes('gridBattleTest')) {
   testGridCombat();
 }

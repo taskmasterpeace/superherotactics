@@ -731,10 +731,10 @@ export function resolveAttack(
     killed: targetHpAfter <= 0,
 
     effectsApplied: effectIds,
-    // Calculate knockback: weapon force vs target STR (weight)
+    // Calculate knockback: weapon force vs target MEL (physical resistance)
     // Only applies on successful hit with weapons that have knockback
     knockbackTiles: hits > 0 && weapon.knockbackForce
-      ? calculateKnockback(weapon.knockbackForce, target.stats.STR).spaces
+      ? calculateKnockback(weapon.knockbackForce, target.stats.MEL).spaces
       : 0,
 
     stanceAccuracyMod: attackerStance.accuracyMod,
@@ -762,7 +762,7 @@ export function applyAttackResult(target: SimUnit, result: AttackResult): void {
   target.alive = target.hp > 0;
 
   // Reset shield regen delay when taking damage
-  if (result.damage > 0) {
+  if (result.finalDamage > 0) {
     resetShieldRegenDelay(target);
   }
 
@@ -817,7 +817,7 @@ export function resolveGrenade(
 
     // Calculate knockback
     const knockbackTiles = Math.floor(
-      (grenade.knockbackForce * damageMult) / (30 + unit.stats.STR)
+      (grenade.knockbackForce * damageMult) / (30 + unit.stats.MEL)
     );
 
     victims.push({
@@ -972,9 +972,9 @@ export function calculateDisarmChance(
   const weaponBonus = attacker.weapon.special?.disarmBonus || 0;
   chance += weaponBonus;
 
-  // STR contest: +2% per STR difference
-  const strDiff = attacker.stats.STR - target.stats.STR;
-  chance += strDiff * 2;
+  // MEL contest: +2% per MEL difference (physical strength)
+  const melDiff = attacker.stats.MEL - target.stats.MEL;
+  chance += melDiff * 2;
 
   // Blade trapping bonus (sai vs edged weapons)
   if (attacker.weapon.special?.bladeTrapping) {
@@ -1004,8 +1004,8 @@ export function attemptDisarm(
     success: actualRoll <= chance,
     roll: actualRoll,
     chance,
-    attackerSTR: attacker.stats.STR,
-    defenderSTR: target.stats.STR,
+    attackerSTR: attacker.stats.MEL,  // MEL represents physical strength for disarm
+    defenderSTR: target.stats.MEL,
     weaponBonus: attacker.weapon.special?.disarmBonus || 0,
   };
 

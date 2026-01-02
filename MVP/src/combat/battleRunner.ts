@@ -569,15 +569,15 @@ export function runGridBattle(
 
           // Apply cover evasion bonus
           if (cover === 'half') {
-            result.hitChance = Math.max(5, result.hitChance - 12);
+            result.accuracy = Math.max(5, result.accuracy - 12);
           } else if (cover === 'full') {
-            result.hitChance = Math.max(5, result.hitChance - 16);
+            result.accuracy = Math.max(5, result.accuracy - 16);
           }
 
           // Re-roll hit based on modified chance
           if (cover !== 'none') {
             const roll = Math.random() * 100;
-            if (roll > result.hitChance && result.hitResult !== 'miss') {
+            if (roll > result.accuracy && result.hitResult !== 'miss') {
               result.hitResult = 'miss';
               result.finalDamage = 0;
             }
