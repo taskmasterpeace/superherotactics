@@ -229,10 +229,27 @@ export type OriginType = 'biological' | 'robotic' | 'energy' | 'undead' | 'const
 // ============ HIT RESULTS ============
 export type HitResult = 'miss' | 'graze' | 'hit' | 'crit';
 
+// ============ GRAPPLE STATE ============
+// Matches GrappleState enum in EventBridge.ts
+export type GrappleStateType =
+  | 'none'        // Not in any grapple
+  | 'standing'    // Both standing, in clinch
+  | 'ground'      // Both on ground
+  | 'pinned'      // Target is pinned
+  | 'restrained'  // Target fully restrained
+  | 'carried'     // Target being carried
+  | 'submission'; // In a submission hold
+
 // ============ STATUS EFFECTS ============
 export type StatusEffectId =
   | 'burning' | 'bleeding' | 'frozen' | 'stunned' | 'poisoned'
-  | 'prone' | 'exposed' | 'suppressed' | 'inspired' | 'shielded';
+  | 'prone' | 'exposed' | 'suppressed' | 'inspired' | 'shielded'
+  // Martial arts effects
+  | 'arm_injured' | 'choked' | 'disoriented' | 'drained'
+  | 'internal_bleeding' | 'crippled' | 'blinded' | 'slowed'
+  | 'silenced' | 'immobilized' | 'staggered' | 'disarmed'
+  // Grappling effects
+  | 'grappled';
 
 export type EffectScaling = 'constant' | 'increasing' | 'decreasing';
 
@@ -247,6 +264,7 @@ export interface StatusEffectInstance {
   // Penalties
   apPenalty?: number;
   accuracyPenalty?: number;
+  evasionPenalty?: number;    // Reduces evasion (positive = easier to hit)
   movementPenalty?: boolean;
   // Special behaviors
   skipTurn?: boolean;      // Stun skip turn
@@ -550,6 +568,12 @@ export interface SimUnit {
   originalWeapon?: SimWeapon;  // Stored when disarmed
   disarmed: boolean;
   armor?: SimArmor;           // Equipped armor (optional)
+
+  // Martial Arts
+  beltLevel?: number;         // 1-10 belt level for accuracy bonus (+1 to +10)
+  martialArtsStyle?: string;  // Style name for technique selection
+  grappleState?: GrappleStateType;  // Current grapple state (none by default)
+  grapplePartner?: string;    // ID of unit in grapple with (if any)
 
   // Position (optional, for grid-based combat)
   position?: { x: number; y: number };

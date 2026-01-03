@@ -456,6 +456,225 @@ export function getAccuracyPenalty(unit: SimUnit): number {
 }
 
 /**
+ * Get total evasion penalty from status effects.
+ * Positive value = easier to hit (reduced evasion)
+ */
+export function getEvasionPenalty(unit: SimUnit): number {
+  let penalty = 0;
+  for (const effect of unit.statusEffects) {
+    if (effect.evasionPenalty) {
+      penalty += effect.evasionPenalty;
+    }
+  }
+  return penalty;
+}
+
+/**
+ * Check if unit is prone (on the ground).
+ */
+export function isProne(unit: SimUnit): boolean {
+  return unit.statusEffects.some(e => e.id === 'prone');
+}
+
+/**
+ * Check if unit is stunned.
+ */
+export function isStunned(unit: SimUnit): boolean {
+  return unit.statusEffects.some(e => e.id === 'stunned');
+}
+
+/**
+ * Create a prone status effect.
+ * Prone: -20 evasion (easier to hit), -10 accuracy
+ * Duration 1 = until unit uses action to stand
+ */
+export function createProneEffect(): StatusEffectInstance {
+  return {
+    id: 'prone',
+    duration: 1,  // Lasts until unit stands (spends 1 AP)
+    evasionPenalty: 20,    // Easier to hit while on ground
+    accuracyPenalty: -10,  // Harder to aim from ground
+  };
+}
+
+/**
+ * Create a stunned status effect.
+ * Stunned: Skip turn, can save with CON check
+ */
+export function createStunnedEffect(duration: number = 1): StatusEffectInstance {
+  return {
+    id: 'stunned',
+    duration,
+    skipTurn: true,
+    savingThrow: true,  // Can resist with CON check each turn
+  };
+}
+
+// ============ MARTIAL ARTS EFFECT CREATORS ============
+
+/**
+ * Arm Injured: -20% accuracy, -2 MEL (from Armbar)
+ */
+export function createArmInjuredEffect(duration: number = 3): StatusEffectInstance {
+  return {
+    id: 'arm_injured',
+    duration,
+    accuracyPenalty: -20,
+    source: 'martial_arts',
+  };
+}
+
+/**
+ * Choked: -2 AP, escalating damage, unconscious after N turns
+ * Blood choke (rear naked, guillotine) = 2 turns to KO
+ * Air choke = 3 turns to KO
+ */
+export function createChokedEffect(isBloodChoke: boolean = false): StatusEffectInstance {
+  return {
+    id: 'choked',
+    duration: isBloodChoke ? 2 : 3,
+    apPenalty: -2,
+    damagePerTick: 5,
+    scaling: 'increasing',
+    damageChange: 3,
+    source: 'martial_arts',
+  };
+}
+
+/**
+ * Disoriented: -15% accuracy (from Nerve Strike)
+ */
+export function createDisorientedEffect(duration: number = 2): StatusEffectInstance {
+  return {
+    id: 'disoriented',
+    duration,
+    accuracyPenalty: -15,
+    source: 'martial_arts',
+  };
+}
+
+/**
+ * Drained: -1 AP next turn (from Chi Disruption)
+ */
+export function createDrainedEffect(duration: number = 2): StatusEffectInstance {
+  return {
+    id: 'drained',
+    duration,
+    apPenalty: -1,
+    source: 'martial_arts',
+  };
+}
+
+/**
+ * Internal Bleeding: DoT that ignores armor (from Dim Mak)
+ */
+export function createInternalBleedingEffect(): StatusEffectInstance {
+  return {
+    id: 'internal_bleeding',
+    duration: 5,
+    damagePerTick: 8,
+    scaling: 'constant',
+    source: 'martial_arts',
+  };
+}
+
+/**
+ * Crippled: Movement reduced to 1, -30% evasion (from Twister)
+ */
+export function createCrippledEffect(): StatusEffectInstance {
+  return {
+    id: 'crippled',
+    duration: -1, // Until healed
+    movementPenalty: true,
+    evasionPenalty: 30,
+    source: 'martial_arts',
+  };
+}
+
+/**
+ * Blinded: -50% accuracy for 1 turn (from Eye Jab)
+ */
+export function createBlindedEffect(duration: number = 1): StatusEffectInstance {
+  return {
+    id: 'blinded',
+    duration,
+    accuracyPenalty: -50,
+    source: 'martial_arts',
+  };
+}
+
+/**
+ * Slowed: -2 movement (from Low Kick)
+ */
+export function createSlowedEffect(duration: number = 2): StatusEffectInstance {
+  return {
+    id: 'slowed',
+    duration,
+    movementPenalty: true,
+    source: 'martial_arts',
+  };
+}
+
+/**
+ * Silenced: Cannot use powers for 1 turn (from Throat Strike)
+ */
+export function createSilencedEffect(duration: number = 1): StatusEffectInstance {
+  return {
+    id: 'silenced',
+    duration,
+    source: 'martial_arts',
+  };
+}
+
+/**
+ * Immobilized: Cannot move for N turns (from Heel Hook, Joint Lock)
+ */
+export function createImmobilizedEffect(duration: number = 2): StatusEffectInstance {
+  return {
+    id: 'immobilized',
+    duration,
+    movementPenalty: true,
+    source: 'martial_arts',
+  };
+}
+
+/**
+ * Staggered: -1 AP, -10% accuracy (from Uppercut)
+ */
+export function createStaggeredEffect(duration: number = 1): StatusEffectInstance {
+  return {
+    id: 'staggered',
+    duration,
+    apPenalty: -1,
+    accuracyPenalty: -10,
+    source: 'martial_arts',
+  };
+}
+
+/**
+ * Disarmed: Drop weapon, use fists
+ */
+export function createDisarmedEffect(): StatusEffectInstance {
+  return {
+    id: 'disarmed',
+    duration: -1, // Until weapon recovered
+    source: 'martial_arts',
+  };
+}
+
+/**
+ * Grappled: In grapple, movement restricted
+ */
+export function createGrappledEffect(): StatusEffectInstance {
+  return {
+    id: 'grappled',
+    duration: -1, // Until grapple ends
+    movementPenalty: true,
+    source: 'martial_arts',
+  };
+}
+
+/**
  * Check if unit has movement penalty (from bleeding).
  */
 export function hasMovementPenalty(unit: SimUnit): boolean {
