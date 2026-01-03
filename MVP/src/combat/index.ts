@@ -84,12 +84,45 @@ export {
   canUnitAct,
   getAPPenalty,
   getAccuracyPenalty,
+  getEvasionPenalty,
+  isProne,
+  isStunned,
+  createProneEffect,
+  createStunnedEffect,
   hasMovementPenalty,
   canShatter,
   applyShatter,
   cleanExpiredEffects,
   describeEffects,
 } from './statusEffects';
+
+// Grapple system
+export {
+  GRAPPLE_TRANSITIONS,
+  GRAPPLE_ESCAPE_DC,
+  getGrappleState,
+  isGrappling,
+  canTransitionGrapple,
+  transitionGrapple,
+  calculateEscapeDC,
+  attemptEscape,
+  initiateGrapple,
+  breakGrapple,
+  canUseTechniqueInState,
+} from './grapple';
+
+// Technique system
+export {
+  getAvailableTechniques,
+  getUsableTechniques,
+  selectBestTechnique,
+  calculateTechniqueHitChance,
+  calculateTechniqueDamage,
+  executeTechnique,
+  tryMartialArtsAttack,
+} from './technique';
+
+export type { Technique, TechniqueResult } from './technique';
 
 // Battle runner
 export {
@@ -233,3 +266,11 @@ export type {
   ScenarioType,
   CombatScenario,
 } from './scenarios';
+
+// Grid visualization
+export {
+  printGrid,
+  printGridWithInfo,
+  printEmptyGrid,
+  getGridSummary,
+} from './gridVisualizer';

@@ -37,6 +37,10 @@ import {
 } from './statusEffects';
 
 import {
+  tryMartialArtsAttack,
+} from './technique';
+
+import {
   processShieldRegen,
 } from './types';
 
@@ -62,6 +66,7 @@ import {
   generateQuickMap,
   loadMapTemplate,
   generateMap,
+  getRandomTemplateForCity,
   MapConfig,
   MapTerrain,
 } from './mapGenerator';
@@ -257,8 +262,35 @@ export function runBattle(
         const inRange = distance === undefined || distance <= weaponRange;
 
         if (inRange && canPerformAction(unit, 'attack')) {
-          // Attack (ends turn)
-          const result = resolveAttack(unit, target, distance);
+          // Try martial arts technique if in melee range and trained
+          const isMeleeRange = distance === undefined || (distance !== undefined && distance <= 2);
+          const techniqueResult = isMeleeRange ? tryMartialArtsAttack(unit, target) : null;
+
+          let result: AttackResult;
+          if (techniqueResult && techniqueResult.hit) {
+            // Calculate HP after technique damage (techniques bypass armor/shield)
+            const newHp = Math.max(0, target.hp - techniqueResult.damage);
+
+            // Convert technique result to attack result format
+            result = {
+              attacker: unit.id,
+              target: target.id,
+              hitResult: 'hit',
+              damage: techniqueResult.damage,
+              damageAfterArmor: techniqueResult.damage, // Techniques bypass armor
+              actualDamage: techniqueResult.damage,
+              finalDamage: techniqueResult.damage,
+              attackName: techniqueResult.techniqueName,
+              statusEffects: techniqueResult.statusApplied,
+              // Required by applyAttackResult
+              targetHpAfter: newHp,
+              targetShieldAfter: target.shieldHp || 0,
+            };
+          } else {
+            // Regular weapon attack
+            result = resolveAttack(unit, target, distance);
+          }
+
           result.round = rounds;
           result.turn = totalTurns;
           log.push(result);
@@ -426,9 +458,22 @@ export function runQuickBattle(
         const inRange = distance === undefined || distance <= weaponRange;
 
         if (inRange && canPerformAction(unit, 'attack')) {
-          // Attack (ends turn)
-          const result = resolveAttack(unit, target, distance);
-          applyAttackResult(target, result);
+          // Try martial arts technique if in melee range and trained
+          const isMeleeRange = distance === undefined || (distance !== undefined && distance <= 2);
+          const techniqueResult = isMeleeRange ? tryMartialArtsAttack(unit, target) : null;
+
+          if (techniqueResult && techniqueResult.hit) {
+            // Apply technique damage directly
+            target.hp = Math.max(0, target.hp - techniqueResult.damage);
+            if (target.hp <= 0) {
+              target.alive = false;
+            }
+          } else {
+            // Regular weapon attack
+            const result = resolveAttack(unit, target, distance);
+            applyAttackResult(target, result);
+          }
+
           spendAction(unit, 'attack');
 
           if (isTeamEliminated(enemies)) {
@@ -461,6 +506,7 @@ export function runQuickBattle(
 export interface GridBattleConfig extends BattleConfig {
   useGrid: true;
   mapTemplate?: string;      // Use existing template ID
+  cityType?: string;         // Auto-select template by city type (Military, Industrial, etc.)
   mapConfig?: MapConfig;     // Or generate procedural map
   terrain?: MapTerrain;      // Quick terrain type for generateQuickMap
 }
@@ -488,7 +534,10 @@ export function runGridBattle(
 
   // Create or load map
   let map: GridMap;
-  if (fullConfig.mapTemplate) {
+  if (fullConfig.cityType) {
+    // Auto-select template based on city type (Military → checkpoint/barracks, etc.)
+    map = getRandomTemplateForCity(fullConfig.cityType);
+  } else if (fullConfig.mapTemplate) {
     const loaded = loadMapTemplate(fullConfig.mapTemplate);
     if (!loaded) {
       // Fallback to quick map
@@ -562,22 +611,49 @@ export function runGridBattle(
           // Get cover for accuracy modifier
           const cover = getCoverAtPosition(map, targetPos.x, targetPos.y, unitPos.x, unitPos.y);
 
-          // Attack
-          const result = resolveAttack(unit, target, distance);
+          // Try martial arts technique if in melee range and trained
+          const isMeleeRange = distance <= 2;
+          const techniqueResult = isMeleeRange ? tryMartialArtsAttack(unit, target) : null;
+
+          let result: AttackResult;
+          if (techniqueResult && techniqueResult.hit) {
+            // Calculate HP after technique damage (techniques bypass armor/shield)
+            const newHp = Math.max(0, target.hp - techniqueResult.damage);
+
+            // Convert technique result to attack result format
+            result = {
+              attacker: unit.id,
+              target: target.id,
+              hitResult: 'hit',
+              damage: techniqueResult.damage,
+              damageAfterArmor: techniqueResult.damage,
+              actualDamage: techniqueResult.damage,
+              finalDamage: techniqueResult.damage,
+              attackName: techniqueResult.techniqueName,
+              statusEffects: techniqueResult.statusApplied,
+              // Required by applyAttackResult
+              targetHpAfter: newHp,
+              targetShieldAfter: target.shieldHp || 0,
+            };
+          } else {
+            // Regular weapon attack
+            result = resolveAttack(unit, target, distance);
+          }
+
           result.round = rounds;
           result.turn = totalTurns;
 
-          // Apply cover evasion bonus
-          if (cover === 'half') {
-            result.accuracy = Math.max(5, result.accuracy - 12);
-          } else if (cover === 'full') {
-            result.accuracy = Math.max(5, result.accuracy - 16);
+          // Apply cover evasion bonus (only for ranged attacks)
+          if (!techniqueResult && cover === 'half') {
+            result.accuracy = Math.max(5, (result.accuracy || 50) - 12);
+          } else if (!techniqueResult && cover === 'full') {
+            result.accuracy = Math.max(5, (result.accuracy || 50) - 16);
           }
 
-          // Re-roll hit based on modified chance
-          if (cover !== 'none') {
+          // Re-roll hit based on modified chance (only for ranged attacks with cover)
+          if (!techniqueResult && cover !== 'none') {
             const roll = Math.random() * 100;
-            if (roll > result.accuracy && result.hitResult !== 'miss') {
+            if (roll > (result.accuracy || 50) && result.hitResult !== 'miss') {
               result.hitResult = 'miss';
               result.finalDamage = 0;
             }
