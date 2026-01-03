@@ -152,6 +152,11 @@ export {
   removeUnit,
   moveUnit,
   findUnitPosition,
+  // Breaching system
+  isBreakable,
+  damageWall,
+  destroyWall,
+  getAdjacentTiles,
 } from './gridEngine';
 
 export type { GridTile, GridMap, CoverType } from './gridEngine';

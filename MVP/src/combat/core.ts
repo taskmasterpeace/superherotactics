@@ -63,6 +63,7 @@ import {
   getStatusEffectsForDamage,
   applyStatusEffects,
   getAccuracyPenalty,
+  getEvasionPenalty,
 } from './statusEffects';
 
 import {
@@ -421,6 +422,12 @@ export function calculateAccuracy(
   const statusAccPenalty = getAccuracyPenalty(attacker);
   accuracy += statusAccPenalty;
 
+  // STATUS EFFECT EVASION PENALTIES (Target)
+  // Prone, exposed, etc. reduce target's ability to dodge
+  // Positive penalty = target is easier to hit
+  const targetEvasionPenalty = getEvasionPenalty(target);
+  accuracy += targetEvasionPenalty;
+
   // FLANKING BONUS
   // Attacking from the side, rear, or blindspot gives accuracy bonus.
   // Side: +10, Rear: +25, Blindspot: +40 (behind and outside vision cone)
@@ -434,10 +441,24 @@ export function calculateAccuracy(
   const nightPenalty = getNightAccuracyMod(isNight, attacker.hasNightVision, isInFlareRadius);
   accuracy += nightPenalty;
 
-  // PANIC/MORALE PENALTY
+  // PANIC/MORALE PENALTY (Attacker)
   // Shaken: -10%, Panicked: -25%, Broken: -40%
   const panicMods = getPanicModifiers(attacker.panicLevel || 'steady');
   accuracy += panicMods.accuracyMod;
+
+  // TARGET PANIC EVASION PENALTY
+  // Panicked targets are distracted and easier to hit
+  // Shaken: +5%, Panicked: +15%, Broken: +25% (evasionMod is negative)
+  const targetPanicMods = getPanicModifiers(target.panicLevel || 'steady');
+  accuracy -= targetPanicMods.evasionMod;
+
+  // BELT BONUS (Martial Arts Training)
+  // Trained martial artists are more accurate in melee combat.
+  // Belt 1 (White) = +1, Belt 10 (Black II) = +10 accuracy
+  // Only applies to melee attacks (range <= 2)
+  if (weapon.range <= 2 && attacker.beltLevel && attacker.beltLevel > 0) {
+    accuracy += attacker.beltLevel;
+  }
 
   // Clamp to valid range
   return Math.max(5, Math.min(95, accuracy));
@@ -784,13 +805,31 @@ export function resolveGrenade(
   units: SimUnit[]
 ): GrenadeExplosionResult {
   const victims: GrenadeExplosionResult['victims'] = [];
+  const blastTiles: Array<{ x: number; y: number; damage: number }> = [];
   let tilesAffected = 0;
 
-  // Count affected tiles (circle)
+  // Count affected tiles and calculate damage at each position
   for (let dx = -grenade.blastRadius; dx <= grenade.blastRadius; dx++) {
     for (let dy = -grenade.blastRadius; dy <= grenade.blastRadius; dy++) {
       const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist <= grenade.blastRadius) tilesAffected++;
+      if (dist <= grenade.blastRadius) {
+        tilesAffected++;
+
+        // Calculate wall damage based on distance (only for explosive grenades)
+        if (grenade.damageType === 'EXPLOSIVE' || grenade.damageAtCenter >= 50) {
+          const damageMult = grenade.damageFalloff === 'linear'
+            ? 1 - (dist / grenade.blastRadius)
+            : Math.pow(1 - (dist / grenade.blastRadius), 2);
+          const wallDamage = Math.floor(grenade.damageAtCenter * damageMult * 0.5); // 50% to walls
+          if (wallDamage > 0) {
+            blastTiles.push({
+              x: centerPos.x + dx,
+              y: centerPos.y + dy,
+              damage: wallDamage,
+            });
+          }
+        }
+      }
     }
   }
 
@@ -834,6 +873,7 @@ export function resolveGrenade(
     centerPosition: centerPos,
     victims,
     tilesAffected,
+    blastDamage: blastTiles.length > 0 ? blastTiles : undefined,
   };
 }
 

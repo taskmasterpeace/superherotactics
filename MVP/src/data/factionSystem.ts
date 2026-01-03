@@ -7,6 +7,8 @@
  * See: FACTION_RELATIONS_PROPOSAL.md for full design details
  */
 
+import { generateFactionReactionEmail, generateConsequenceEmail } from './emailSystem';
+
 // =============================================================================
 // FACTION TYPES
 // =============================================================================
@@ -438,6 +440,7 @@ export function getStandingDecay(standing: number, daysPassed: number = 1): numb
 
 /**
  * Modify faction standing and return updated standing object
+ * Shaun Lyng: "Decisions should have visible consequences"
  */
 export function modifyStanding(
   standing: FactionStanding,
@@ -446,6 +449,7 @@ export function modifyStanding(
   timestamp: number,
   missionId?: string
 ): FactionStanding {
+  const oldStanding = standing.standing;
   const newStanding = Math.max(-100, Math.min(100, standing.standing + change));
 
   const event: StandingEvent = {
@@ -458,6 +462,66 @@ export function modifyStanding(
 
   // Keep last 20 events
   const newHistory = [event, ...standing.history].slice(0, 20);
+
+  // Check for threshold crossings and send emails
+  const thresholds = [75, 50, 25, 0, -25, -50, -75];
+  const crossedThreshold = thresholds.find(t =>
+    (oldStanding < t && newStanding >= t) || (oldStanding >= t && newStanding < t)
+  );
+
+  // Only send email on significant changes (>= 5 points or crossing a threshold)
+  if (Math.abs(change) >= 5 || crossedThreshold !== undefined) {
+    // Map FactionType to email faction type
+    const factionTypeMap: Record<FactionType, 'government' | 'criminal' | 'corporate' | 'civilian' | 'superhuman'> = {
+      police: 'government',
+      military: 'government',
+      government: 'government',
+      media: 'civilian',
+      corporations: 'corporate',
+      underworld: 'criminal',
+    };
+
+    generateFactionReactionEmail(
+      FACTION_NAMES[standing.factionType],
+      factionTypeMap[standing.factionType],
+      change,
+      newStanding,
+      reason
+    );
+
+    // Send consequence warning if crossing into hostile territory
+    if (oldStanding >= 0 && newStanding < 0) {
+      if (standing.factionType === 'police') {
+        generateConsequenceEmail('police_response', 'medium', {
+          source: FACTION_NAMES[standing.factionType],
+          timeframe: '24-48 hours'
+        });
+      } else if (standing.factionType === 'underworld') {
+        generateConsequenceEmail('faction_retaliation', 'low', {
+          source: FACTION_NAMES[standing.factionType],
+          timeframe: 'within the week'
+        });
+      }
+    }
+
+    // Send SWAT alert if crossing into very hostile territory with police
+    if (oldStanding >= -50 && newStanding < -50 && standing.factionType === 'police') {
+      generateConsequenceEmail('swat_alert', 'high', {
+        timeframe: '15 minutes'
+      });
+    }
+
+    // Send bounty alert if crossing bounty threshold
+    if (oldStanding >= -25 && newStanding < -25) {
+      generateConsequenceEmail('bounty_posted',
+        newStanding < -50 ? 'high' : 'medium',
+        {
+          source: FACTION_NAMES[standing.factionType],
+          amount: newStanding < -50 ? 100000 : 50000
+        }
+      );
+    }
+  }
 
   return {
     ...standing,

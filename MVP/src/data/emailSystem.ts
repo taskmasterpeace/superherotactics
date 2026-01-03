@@ -51,11 +51,35 @@ export interface EmailSender {
   avatar?: string
 }
 
+export type AttachmentAspectRatio = '4:3' | '3:4' | '16:9' | '1:1' | 'a4';
+
+// Aspect ratio dimensions for image generation
+export const ATTACHMENT_DIMENSIONS: Record<AttachmentAspectRatio, { width: number; height: number }> = {
+  '4:3': { width: 800, height: 600 },    // Photo - surveillance, evidence
+  '3:4': { width: 600, height: 800 },    // Dossier - character/org portraits
+  '16:9': { width: 1280, height: 720 },  // Map - location intel, sector maps
+  '1:1': { width: 512, height: 512 },    // Intel - icons, symbols, seals
+  'a4': { width: 595, height: 842 },     // Document - reports, files
+};
+
+// Default aspect ratio for each attachment type
+export const ATTACHMENT_TYPE_RATIOS: Record<string, AttachmentAspectRatio> = {
+  photo: '4:3',
+  dossier: '3:4',
+  map: '16:9',
+  intel: '1:1',
+  document: 'a4',
+};
+
 export interface EmailAttachment {
   id: string
   name: string
   type: 'dossier' | 'map' | 'photo' | 'document' | 'intel'
-  data: any
+  aspectRatio: AttachmentAspectRatio
+  imageUrl?: string           // Generated image URL
+  thumbnailUrl?: string       // Smaller preview version
+  caption?: string            // Display caption
+  data: any                   // Structured data for display
 }
 
 export interface EmailReplyOption {
@@ -118,15 +142,22 @@ export const EMAIL_SENDERS: Record<string, EmailSender> = {
 interface EmailSystemState {
   initialized: boolean
   subscriptionIds: string[]
-  emails: Email[]
   lastEmailId: number
 }
 
 const state: EmailSystemState = {
   initialized: false,
   subscriptionIds: [],
-  emails: [],
   lastEmailId: 0
+}
+
+// Lazy import to avoid circular dependency
+let _store: any = null
+function getStore() {
+  if (!_store) {
+    _store = require('../stores/enhancedGameStore').useGameStore
+  }
+  return _store.getState()
 }
 
 // ============================================================================
@@ -134,7 +165,7 @@ const state: EmailSystemState = {
 // ============================================================================
 
 /**
- * Create a new email
+ * Create a new email (persisted to store)
  */
 export function createEmail(
   category: EmailCategory,
@@ -165,69 +196,96 @@ export function createEmail(
     actionable: options?.actionable
   }
 
-  state.emails.unshift(email)  // Add to front
+  // Add to store for persistence
+  getStore().addEmail(email)
   return email
 }
 
 /**
- * Get all emails
+ * Get all emails (from store)
  */
 export function getAllEmails(): Email[] {
-  return state.emails.filter(e => !e.archived)
+  return getStore().getEmails()
 }
 
 /**
- * Get unread count
+ * Get unread count (from store)
  */
 export function getUnreadCount(): number {
-  return state.emails.filter(e => !e.read && !e.archived).length
+  return getStore().getEmailUnreadCount()
 }
 
 /**
- * Get emails by category
+ * Get emails by category (from store)
  */
 export function getEmailsByCategory(category: EmailCategory): Email[] {
-  return state.emails.filter(e => e.category === category && !e.archived)
+  const store = getStore()
+  return store.emails.filter((e: Email) => e.category === category && !e.archived)
 }
 
 /**
- * Mark email as read
+ * Mark email as read (persisted to store)
  */
 export function markEmailRead(emailId: string): void {
-  const email = state.emails.find(e => e.id === emailId)
-  if (email) {
-    email.read = true
-  }
+  getStore().updateEmail(emailId, { read: true })
 }
 
 /**
- * Star/unstar email
+ * Star/unstar email (persisted to store)
  */
 export function toggleEmailStar(emailId: string): void {
-  const email = state.emails.find(e => e.id === emailId)
+  const store = getStore()
+  const email = store.emails.find((e: Email) => e.id === emailId)
   if (email) {
-    email.starred = !email.starred
+    store.updateEmail(emailId, { starred: !email.starred })
   }
 }
 
 /**
- * Archive email
+ * Archive email (persisted to store)
  */
 export function archiveEmail(emailId: string): void {
-  const email = state.emails.find(e => e.id === emailId)
-  if (email) {
-    email.archived = true
+  getStore().updateEmail(emailId, { archived: true })
+}
+
+/**
+ * Delete email (persisted to store)
+ */
+export function deleteEmail(emailId: string): void {
+  getStore().deleteEmail(emailId)
+}
+
+/**
+ * Create an email attachment with proper aspect ratio
+ */
+export function createAttachment(
+  type: EmailAttachment['type'],
+  name: string,
+  data: any,
+  options?: {
+    imageUrl?: string
+    thumbnailUrl?: string
+    caption?: string
+  }
+): EmailAttachment {
+  return {
+    id: `att-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    name,
+    type,
+    aspectRatio: ATTACHMENT_TYPE_RATIOS[type],
+    imageUrl: options?.imageUrl,
+    thumbnailUrl: options?.thumbnailUrl,
+    caption: options?.caption,
+    data,
   }
 }
 
 /**
- * Delete email
+ * Get dimensions for an attachment type (for image generation)
  */
-export function deleteEmail(emailId: string): void {
-  const index = state.emails.findIndex(e => e.id === emailId)
-  if (index !== -1) {
-    state.emails.splice(index, 1)
-  }
+export function getAttachmentDimensions(type: EmailAttachment['type']): { width: number; height: number } {
+  const ratio = ATTACHMENT_TYPE_RATIOS[type];
+  return ATTACHMENT_DIMENSIONS[ratio];
 }
 
 // ============================================================================
@@ -393,6 +451,196 @@ Do what you want with this. I won't contact you again.
     body,
     {
       priority: 'normal'
+    }
+  )
+}
+
+/**
+ * Generate faction reaction email when standing changes
+ * Shaun Lyng: "Decisions should have visible consequences"
+ */
+export function generateFactionReactionEmail(
+  factionName: string,
+  factionType: 'government' | 'criminal' | 'corporate' | 'civilian' | 'superhuman',
+  standingChange: number,
+  newStanding: number,
+  reason: string
+): Email {
+  // Determine reaction tone based on standing change
+  const positive = standingChange > 0
+  const threshold = newStanding >= 75 ? 'allied' :
+                   newStanding >= 50 ? 'friendly' :
+                   newStanding >= 25 ? 'neutral' :
+                   newStanding >= 0 ? 'suspicious' : 'hostile'
+
+  // Generate appropriate sender based on faction type
+  const senders: Record<string, EmailSender> = {
+    government: { name: 'Government Liaison', email: 'liaison@gov.secure', organization: factionName, avatar: '🏛️' },
+    criminal: { name: 'Unknown Contact', email: 'anon@darkweb.onion', organization: 'Underground', avatar: '🎭' },
+    corporate: { name: 'Corporate Affairs', email: 'pr@corp.secure', organization: factionName, avatar: '🏢' },
+    civilian: { name: 'Community Rep', email: 'community@local.org', organization: 'Citizens', avatar: '👥' },
+    superhuman: { name: 'Meta Affairs', email: 'meta@registry.gov', organization: 'Meta Registry', avatar: '⚡' }
+  }
+
+  const sender = senders[factionType] || EMAIL_SENDERS.anonymous
+
+  // Generate body based on reaction
+  let body: string
+  if (positive) {
+    body = `
+FACTION STANDING UPDATE
+=======================
+
+${factionName} - Standing: ${threshold.toUpperCase()}
+
+Your recent actions have been noted favorably:
+"${reason}"
+
+Current standing with ${factionName}: ${newStanding}%
+${newStanding >= 75 ? '\nYou are now considered an ally. Special opportunities may become available.' : ''}
+${newStanding >= 50 && newStanding < 75 ? '\nYou are viewed positively. Continue building trust.' : ''}
+
+- ${factionName} Relations
+`.trim()
+  } else {
+    body = `
+FACTION STANDING UPDATE
+=======================
+
+${factionName} - Standing: ${threshold.toUpperCase()}
+
+Your recent actions have caused concern:
+"${reason}"
+
+Current standing with ${factionName}: ${newStanding}%
+${newStanding < 0 ? '\n⚠️ WARNING: You are now considered hostile. Expect consequences.' : ''}
+${newStanding >= 0 && newStanding < 25 ? '\nYou are being watched closely. Further incidents will escalate.' : ''}
+
+- ${factionName} Relations
+`.trim()
+  }
+
+  return createEmail(
+    'intel_report',
+    sender,
+    `${factionName}: ${positive ? '↑' : '↓'} Standing ${standingChange > 0 ? '+' : ''}${standingChange}%`,
+    body,
+    {
+      priority: newStanding < 0 ? 'urgent' : 'normal'
+    }
+  )
+}
+
+/**
+ * Generate consequence warning email
+ * Shaun Lyng: "Foreshadow consequences through character messages"
+ */
+export function generateConsequenceEmail(
+  consequenceType: 'police_response' | 'swat_alert' | 'bounty_posted' | 'faction_retaliation' | 'media_attention',
+  severity: 'low' | 'medium' | 'high' | 'critical',
+  details: { location?: string; timeframe?: string; source?: string; amount?: number }
+): Email {
+  const templates: Record<string, { subject: string; body: string; sender: EmailSender }> = {
+    police_response: {
+      subject: '⚠️ Police Activity Alert',
+      body: `
+URGENT INTELLIGENCE
+==================
+
+Local law enforcement is responding to recent activity${details.location ? ` in ${details.location}` : ''}.
+
+Expected response level: ${severity.toUpperCase()}
+${details.timeframe ? `ETA: ${details.timeframe}` : 'Response is imminent.'}
+
+Recommend extraction or laying low until heat dies down.
+
+- Intel Division
+`.trim(),
+      sender: EMAIL_SENDERS.intel
+    },
+    swat_alert: {
+      subject: '🚨 SWAT TEAM EN ROUTE',
+      body: `
+CRITICAL INTELLIGENCE
+====================
+
+SWAT tactical team has been deployed${details.location ? ` to ${details.location}` : ''}.
+
+Threat level: ${severity.toUpperCase()}
+${details.timeframe ? `ETA: ${details.timeframe}` : 'Arrival imminent.'}
+
+This is not a drill. Recommend immediate extraction.
+
+Heavy resistance expected. Avoid engagement if possible.
+
+- Intel Division
+`.trim(),
+      sender: EMAIL_SENDERS.intel
+    },
+    bounty_posted: {
+      subject: '💰 Bounty Alert',
+      body: `
+INTELLIGENCE REPORT
+==================
+
+A bounty has been posted${details.source ? ` by ${details.source}` : ''}.
+
+Amount: $${(details.amount || 50000).toLocaleString()}
+Priority: ${severity.toUpperCase()}
+
+${severity === 'critical' ? 'Expect professional hunters. Watch your back.' : 'Low-level operatives may attempt collection.'}
+
+- Intel Division
+`.trim(),
+      sender: EMAIL_SENDERS.intel
+    },
+    faction_retaliation: {
+      subject: '⚔️ Retaliation Warning',
+      body: `
+URGENT INTELLIGENCE
+==================
+
+${details.source || 'Hostile faction'} is planning retaliation${details.location ? ` targeting ${details.location}` : ''}.
+
+Threat level: ${severity.toUpperCase()}
+${details.timeframe ? `Expected timeframe: ${details.timeframe}` : 'Timing unknown.'}
+
+Increase security posture. Consider preemptive measures.
+
+- Intel Division
+`.trim(),
+      sender: EMAIL_SENDERS.intel
+    },
+    media_attention: {
+      subject: '📰 Media Coverage Alert',
+      body: `
+INTELLIGENCE REPORT
+==================
+
+Your activities have attracted media attention.
+
+Coverage level: ${severity.toUpperCase()}
+${details.source ? `Primary source: ${details.source}` : 'Multiple outlets covering.'}
+
+${severity === 'critical' ? 'You are now a major news story. Public opinion will shift.' :
+  severity === 'high' ? 'Expect increased scrutiny. Consider media management.' :
+  'Minor coverage. May affect local reputation.'}
+
+- Intel Division
+`.trim(),
+      sender: EMAIL_SENDERS.news
+    }
+  }
+
+  const template = templates[consequenceType] || templates.police_response
+
+  return createEmail(
+    'intel_report',
+    template.sender,
+    template.subject,
+    template.body,
+    {
+      priority: severity === 'critical' ? 'urgent' : severity === 'high' ? 'urgent' : 'normal'
     }
   )
 }

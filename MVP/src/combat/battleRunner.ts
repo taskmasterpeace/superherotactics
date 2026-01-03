@@ -47,6 +47,7 @@ import {
 import {
   checkMorale,
   getPanicModifiers,
+  attemptRally,
   PanicLevel,
 } from './advancedMechanics';
 
@@ -96,6 +97,49 @@ function checkAllyDeathMorale(allies: SimUnit[], deadUnit: SimUnit): void {
     if (!ally.alive || ally.id === deadUnit.id) continue;
     processMoraleCheck(ally, 'ally_killed');
   }
+}
+
+/**
+ * Find an adjacent panicked ally that could be rallied.
+ * Returns the most panicked adjacent ally, or null if none.
+ */
+function findAdjacentPanickedAlly(
+  unit: SimUnit,
+  allies: SimUnit[],
+  map?: GridMap
+): SimUnit | null {
+  if (!unit.position) return null;
+
+  const panicOrder: PanicLevel[] = ['broken', 'panicked', 'shaken', 'steady'];
+  let bestTarget: SimUnit | null = null;
+  let bestPanicIdx = -1;
+
+  for (const ally of allies) {
+    if (!ally.alive || ally.id === unit.id || !ally.position) continue;
+
+    // Check panic level
+    const panicLevel = ally.panicLevel || 'steady';
+    if (panicLevel === 'steady') continue;
+
+    // Check if adjacent (distance <= 1.5 to handle diagonals)
+    const dist = map
+      ? gridDistance(unit.position.x, unit.position.y, ally.position.x, ally.position.y)
+      : Math.max(
+          Math.abs(unit.position.x - ally.position.x),
+          Math.abs(unit.position.y - ally.position.y)
+        );
+
+    if (dist > 1.5) continue;
+
+    // Prioritize more panicked allies
+    const panicIdx = panicOrder.indexOf(panicLevel);
+    if (panicIdx > bestPanicIdx) {
+      bestPanicIdx = panicIdx;
+      bestTarget = ally;
+    }
+  }
+
+  return bestTarget;
 }
 
 /**
@@ -248,6 +292,13 @@ export function runBattle(
       // XCOM-STYLE 2-ACTION SYSTEM
       // Each unit gets 2 actions: Move + Attack, Dash, or Overwatch
       resetTurnState(unit);
+
+      // PANIC AP PENALTY (reuse panicMods from above)
+      // Panicked units have fewer actions due to hesitation/indecision
+      if (panicMods.apMod >= 1.5) {
+        unit.turnState!.actionsRemaining = 1;
+      }
+      // Note: broken units (canAct=false) already skipped above
 
       while (!isTurnComplete(unit) && unit.alive) {
         // Select target
@@ -449,6 +500,11 @@ export function runQuickBattle(
       // XCOM-STYLE 2-ACTION SYSTEM
       resetTurnState(unit);
 
+      // PANIC AP PENALTY (reuse panicMods from above)
+      if (panicMods.apMod >= 1.5) {
+        unit.turnState!.actionsRemaining = 1;
+      }
+
       while (!isTurnComplete(unit) && unit.alive) {
         const target = selectTarget(unit, enemies);
         if (!target) break;
@@ -579,20 +635,79 @@ export function runGridBattle(
       const statusResult = processStatusEffects(unit);
       if (!unit.alive) continue;
 
+      // OUTNUMBERED CHECK: Trigger morale check if enemies > allies
+      const aliveEnemies = (unit.team === 'blue' ? red : blue).filter(u => u.alive).length;
+      const aliveAllies = (unit.team === 'blue' ? blue : red).filter(u => u.alive).length;
+      if (aliveEnemies > aliveAllies + 1) {
+        // Outnumbered by 2+ enemies - morale check
+        processMoraleCheck(unit, 'outnumbered');
+      }
+
       // Panic check
       const panicMods = getPanicModifiers(unit.panicLevel || 'steady');
-      if (statusResult.turnSkipped || !canUnitAct(unit) || !panicMods.canAct) {
+
+      // BROKEN UNITS: Auto-flee toward map entry point
+      if (!panicMods.canAct && unit.position) {
+        unit.acted = true;
+
+        // Find nearest entry point for unit's team (retreat direction)
+        const teamEntries = map.entryPoints.filter(e => e.team === unit.team);
+        if (teamEntries.length > 0) {
+          // Find closest entry point
+          let closestEntry = teamEntries[0];
+          let closestDist = gridDistance(unit.position.x, unit.position.y, closestEntry.x, closestEntry.y);
+          for (const entry of teamEntries) {
+            const dist = gridDistance(unit.position.x, unit.position.y, entry.x, entry.y);
+            if (dist < closestDist) {
+              closestDist = dist;
+              closestEntry = entry;
+            }
+          }
+
+          // Move toward entry point (flee)
+          const path = findPath(map, unit.position.x, unit.position.y, closestEntry.x, closestEntry.y, 20);
+          if (path && path.length > 1) {
+            const nextStep = path[1]; // First step after current position
+            moveUnit(map, unit.id, nextStep.x, nextStep.y);
+            unit.position = { x: nextStep.x, y: nextStep.y };
+          }
+        }
+        continue; // Skip normal actions
+      }
+
+      if (statusResult.turnSkipped || !canUnitAct(unit)) {
         unit.acted = true;
         continue;
       }
 
       unit.acted = true;
       const enemies = unit.team === 'blue' ? red : blue;
+      const allies = unit.team === 'blue' ? blue : red;
 
       // 2-action system
       resetTurnState(unit);
 
+      // PANIC AP PENALTY (reuse panicMods from above)
+      if (panicMods.apMod >= 1.5) {
+        unit.turnState!.actionsRemaining = 1;
+      }
+
       while (!isTurnComplete(unit) && unit.alive) {
+        // RALLY CHECK: Try to rally adjacent panicked allies first
+        const panickedAlly = findAdjacentPanickedAlly(unit, allies, map);
+        if (panickedAlly && canPerformAction(unit, 'move')) {
+          // Attempt rally (costs 1 action like move)
+          const allyPanicLevel = panickedAlly.panicLevel || 'shaken';
+          const rallyResult = attemptRally(unit, panickedAlly, allyPanicLevel);
+
+          if (rallyResult.success) {
+            panickedAlly.panicLevel = rallyResult.newLevel;
+          }
+
+          spendAction(unit, 'move'); // Rally costs 1 action
+          continue; // Try again or proceed to attack
+        }
+
         const target = selectGridTarget(unit, enemies, map);
         if (!target) break;
 

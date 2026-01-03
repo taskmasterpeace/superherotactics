@@ -734,6 +734,8 @@ export interface GrenadeExplosionResult {
     effectsApplied: StatusEffectId[];
   }>;
   tilesAffected: number;
+  wallsDestroyed?: Array<{ x: number; y: number }>;  // Breached walls (set by caller)
+  blastDamage?: Array<{ x: number; y: number; damage: number }>;  // Wall damage at each tile
 }
 
 // Default fist weapon for disarmed units

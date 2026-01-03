@@ -12,6 +12,7 @@ import {
   MissionRecommendation,
 } from '../data/missionGeneration';
 import { getCountryByName } from '../data/countries';
+import { generateMissionBriefing } from '../data/emailSystem';
 
 // =============================================================================
 // MISSION STORE STATE
@@ -170,6 +171,18 @@ export function createMissionActions(set: any, get: any): MissionStoreActions {
 
         // Update mission status
         foundMission.status = 'accepted';
+
+        // Generate mission briefing email
+        generateMissionBriefing(
+          foundMission.name,
+          foundMission.id,
+          foundMission.briefing || foundMission.description,
+          {
+            city: foundMission.targetCity,
+            country: foundMission.targetCountry
+          },
+          foundMission.rewards?.cash || 0
+        );
 
         return {
           availableMissions: newAvailableMissions,

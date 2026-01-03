@@ -10,7 +10,7 @@
  * Target: 500+ battles/sec for batch testing
  */
 
-import { TERRAIN_TYPES, TerrainType } from '../game/config';
+import { TERRAIN_TYPES, TerrainType } from './terrainTypes';
 import { MapTemplate, parseMapLayout, charToTerrain } from '../data/mapTemplates';
 
 // =============================================================================
@@ -22,6 +22,7 @@ export interface GridTile {
   y: number;
   terrain: TerrainType;
   occupant?: string;  // Unit ID
+  durability?: number;  // Wall HP for breakable walls (undefined = indestructible)
 }
 
 export interface GridMap {
@@ -50,11 +51,19 @@ export function parseMapTemplate(template: MapTemplate): GridMap {
   for (let y = 0; y < height; y++) {
     tiles[y] = [];
     for (let x = 0; x < width; x++) {
-      tiles[y][x] = {
+      const terrain = terrainGrid[y]?.[x] || 'FLOOR';
+      const tile: GridTile = {
         x,
         y,
-        terrain: terrainGrid[y]?.[x] || 'FLOOR',
+        terrain,
       };
+
+      // Set durability for breakable walls
+      if (terrain === 'BREAKABLE_WALL') {
+        tile.durability = 50;  // Default durability for breakable walls
+      }
+
+      tiles[y][x] = tile;
     }
   }
 
@@ -524,6 +533,73 @@ export function findUnitPosition(map: GridMap, unitId: string): { x: number; y: 
 }
 
 // =============================================================================
+// WALL DESTRUCTION (Breaching)
+// =============================================================================
+
+/**
+ * Check if a tile is breakable (has durability)
+ */
+export function isBreakable(map: GridMap, x: number, y: number): boolean {
+  const tile = getTile(map, x, y);
+  if (!tile) return false;
+  return tile.durability !== undefined && tile.durability > 0;
+}
+
+/**
+ * Damage a wall tile. Returns true if wall was destroyed.
+ */
+export function damageWall(map: GridMap, x: number, y: number, damage: number): boolean {
+  const tile = getTile(map, x, y);
+  if (!tile || tile.durability === undefined) return false;
+
+  tile.durability = Math.max(0, tile.durability - damage);
+
+  if (tile.durability <= 0) {
+    // Wall destroyed - convert to rubble
+    tile.terrain = 'RUBBLE';
+    tile.durability = undefined;
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Destroy a wall immediately (convert to rubble)
+ */
+export function destroyWall(map: GridMap, x: number, y: number): boolean {
+  const tile = getTile(map, x, y);
+  if (!tile) return false;
+
+  // Only destroy walls or breakable walls
+  if (tile.terrain !== 'WALL' && tile.terrain !== 'BREAKABLE_WALL') return false;
+
+  tile.terrain = 'RUBBLE';
+  tile.durability = undefined;
+  return true;
+}
+
+/**
+ * Get adjacent tiles (4-directional + diagonals)
+ */
+export function getAdjacentTiles(map: GridMap, x: number, y: number): GridTile[] {
+  const adjacent: GridTile[] = [];
+  const offsets = [
+    { dx: -1, dy: 0 }, { dx: 1, dy: 0 },
+    { dx: 0, dy: -1 }, { dx: 0, dy: 1 },
+    { dx: -1, dy: -1 }, { dx: 1, dy: -1 },
+    { dx: -1, dy: 1 }, { dx: 1, dy: 1 },
+  ];
+
+  for (const { dx, dy } of offsets) {
+    const tile = getTile(map, x + dx, y + dy);
+    if (tile) adjacent.push(tile);
+  }
+
+  return adjacent;
+}
+
+// =============================================================================
 // EXPORTS
 // =============================================================================
 
@@ -543,4 +619,9 @@ export default {
   removeUnit,
   moveUnit,
   findUnitPosition,
+  // Breaching
+  isBreakable,
+  damageWall,
+  destroyWall,
+  getAdjacentTiles,
 };

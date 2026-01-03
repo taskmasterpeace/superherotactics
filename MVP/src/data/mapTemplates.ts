@@ -12,6 +12,8 @@
  * Terrain Legend:
  * . = FLOOR (walkable)
  * # = WALL (blocks movement and LOS)
+ * B = BREAKABLE_WALL (can be breached by explosives)
+ * % = RUBBLE (debris from destroyed wall, half cover)
  * + = DOOR_CLOSED (can open)
  * - = DOOR_OPEN (walkable)
  * L = LOW_WALL (half cover, costs extra AP)
@@ -20,7 +22,7 @@
  * C = CONCRETE (walkable)
  */
 
-export type TerrainType = 'FLOOR' | 'WALL' | 'LOW_WALL' | 'DOOR_CLOSED' | 'DOOR_OPEN' | 'WATER' | 'GRASS' | 'CONCRETE';
+export type TerrainType = 'FLOOR' | 'WALL' | 'LOW_WALL' | 'DOOR_CLOSED' | 'DOOR_OPEN' | 'WATER' | 'GRASS' | 'CONCRETE' | 'BREAKABLE_WALL' | 'RUBBLE';
 
 export interface MapTemplate {
   id: string;
@@ -42,6 +44,8 @@ export function charToTerrain(char: string): TerrainType {
     case '~': return 'WATER';
     case 'G': return 'GRASS';
     case 'C': return 'CONCRETE';
+    case 'B': return 'BREAKABLE_WALL';  // Can be breached by explosives
+    case '%': return 'RUBBLE';           // Already-destroyed wall
     case '.':
     default: return 'FLOOR';
   }
@@ -129,7 +133,7 @@ const POLITICAL_EMBASSY: MapTemplate = {
   id: 'political_embassy',
   name: 'Embassy Interior',
   cityTypes: ['Political'],
-  description: 'Diplomatic facility with reception, offices, and secure vault. Marble floors, high ceilings.',
+  description: 'Diplomatic facility with reception, offices, and secure vault. Marble floors, high ceilings. Some walls can be breached.',
   entryPoints: [
     { x: 7, y: 13, team: 'blue' },
     { x: 3, y: 13, team: 'blue' },
@@ -141,12 +145,12 @@ const POLITICAL_EMBASSY: MapTemplate = {
 #.....#.#.....#
 #.L...-.-...L.#
 #.....#.#.....#
-###-#######-###
+###-###B###-###
 #...#.....#...#
 #...-.....-.L.#
-#...#.....#...#
+#...B.....B...#
 #.L.#.....#.L.#
-###-#######-###
+###-###B###-###
 #.............#
 #....LLLLL....#
 #.............#
@@ -383,7 +387,7 @@ const COMPANY_OFFICE: MapTemplate = {
   id: 'company_office',
   name: 'Corporate Tower',
   cityTypes: ['Company'],
-  description: 'Modern office floor with cubicles, conference rooms, and corner offices. Glass and steel.',
+  description: 'Modern office floor with cubicles, conference rooms, and corner offices. Glass and steel. Drywall partitions can be breached.',
   entryPoints: [
     { x: 7, y: 13, team: 'blue' },
     { x: 1, y: 7, team: 'blue' },
@@ -395,13 +399,13 @@ const COMPANY_OFFICE: MapTemplate = {
 #.....#.#.....#
 #.LL..-.-..LL.#
 #.LL.#.#..LL..#
-#####-###-#####
+##B##-###-##B##
 #LLLL.....LLLL#
 -.............#
 #.....L.L.....-
 -.............#
 #LLLL.....LLLL#
-#####-###-#####
+##B##-###-##B##
 #.LL.#.#..LL..#
 #.LL..-.-..LL.#
 #.....#.#.....#
@@ -413,7 +417,7 @@ const COMPANY_LAB: MapTemplate = {
   id: 'company_lab',
   name: 'Research Lab',
   cityTypes: ['Company'],
-  description: 'High-tech research facility with clean rooms, equipment bays, and secure storage.',
+  description: 'High-tech research facility with clean rooms, equipment bays, and secure storage. Lab partitions can be breached.',
   entryPoints: [
     { x: 1, y: 7, team: 'blue' },
     { x: 7, y: 13, team: 'blue' },
@@ -421,19 +425,19 @@ const COMPANY_LAB: MapTemplate = {
   ],
   layout: `
 ###############
-#...#####...###
+#...##B##...###
 #.L.-...-L....#
 #...#####.....#
-###-#####-#####
+###-##B##-#####
 #.....L.......#
 #.....L.......-
 -.............#
 #.....L.......-
 #.....L.......#
-###-#####-#####
+###-##B##-#####
 #...#####.....#
 #.L.-...-L....#
-#...#####...###
+#...##B##...###
 ###############
 `,
 };
@@ -572,7 +576,7 @@ const RESORT_HOTEL: MapTemplate = {
   id: 'resort_hotel',
   name: 'Luxury Hotel',
   cityTypes: ['Resort'],
-  description: 'Upscale hotel with lobby, rooms, pool area, and rooftop access. Civilian cover concerns.',
+  description: 'Upscale hotel with lobby, rooms, pool area, and rooftop access. Thin walls between rooms can be breached.',
   entryPoints: [
     { x: 7, y: 13, team: 'blue' },
     { x: 1, y: 7, team: 'blue' },
@@ -580,7 +584,7 @@ const RESORT_HOTEL: MapTemplate = {
   ],
   layout: `
 ###-###-###-###
-#...#...#...#.#
+#...B...B...#.#
 #...-...-...-.-
 #...#...#...#.#
 ###-###-###-###
@@ -592,7 +596,7 @@ const RESORT_HOTEL: MapTemplate = {
 ###-###-###-###
 #...#...#...#.#
 #...-...-...-.-
-#...#...#...#.#
+#...B...B...#.#
 ###-###-###-###
 `,
 };

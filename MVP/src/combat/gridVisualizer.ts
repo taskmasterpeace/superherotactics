@@ -18,6 +18,8 @@ const TERRAIN_CHARS: Record<string, string> = {
   LOW_WALL: 'L',
   DOOR_CLOSED: '+',
   DOOR_OPEN: '-',
+  RUBBLE: '%',
+  BREAKABLE_WALL: 'B',
 };
 
 /**
