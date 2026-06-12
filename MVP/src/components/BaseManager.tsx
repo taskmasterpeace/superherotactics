@@ -18,6 +18,7 @@ import {
   FacilityType,
   PlayerBase,
   Facility,
+  ConstructionProject,
   getActiveBase,
   calculatePowerUsage,
   calculatePowerCapacity,
@@ -29,7 +30,75 @@ import {
   getCraftingBonus,
   getTeamCapacityBonus,
   getVehicleSlots,
+  hasRequiredFacilities,
+  getAllFacilities,
 } from '../data/baseSystem'
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Format hours to a readable string (e.g., "2d 4h" or "8h")
+ */
+function formatHours(hours: number): string {
+  if (hours < 24) return `${hours}h`
+  const days = Math.floor(hours / 24)
+  const remainingHours = hours % 24
+  return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days}d`
+}
+
+/**
+ * Get missing prerequisites for a facility type
+ */
+function getMissingPrerequisites(base: PlayerBase, facilityType: FacilityType): string[] {
+  const config = FACILITIES[facilityType]
+  if (!config.requiredFacilities) return []
+
+  const existingTypes = getAllFacilities(base).map(f => f.type)
+  return config.requiredFacilities
+    .filter(req => !existingTypes.includes(req))
+    .map(req => FACILITIES[req].name)
+}
+
+/**
+ * Get bonus text for a facility at a given level
+ */
+function getFacilityBonusText(facilityType: FacilityType, level: number): string {
+  const config = FACILITIES[facilityType]
+  const bonuses: string[] = []
+  const idx = level - 1
+
+  if (config.educationBonus) {
+    bonuses.push(`Education +${config.educationBonus[idx]}%`)
+  }
+  if (config.healingBonus) {
+    bonuses.push(`Healing +${config.healingBonus[idx]}%`)
+  }
+  if (config.investigationBonus) {
+    bonuses.push(`Investigation +${config.investigationBonus[idx]}%`)
+  }
+  if (config.craftingBonus) {
+    bonuses.push(`Crafting +${config.craftingBonus[idx]}%`)
+  }
+  if (config.securityBonus) {
+    bonuses.push(`Security +${config.securityBonus[idx]}%`)
+  }
+  if (config.teamCapacityBonus) {
+    bonuses.push(`Team +${config.teamCapacityBonus[idx]}`)
+  }
+  if (config.vehicleSlots) {
+    bonuses.push(`Vehicles: ${config.vehicleSlots[idx]}`)
+  }
+
+  // Special case for power generator
+  if (facilityType === 'power_generator') {
+    const powerOutput = [50, 100, 200]
+    bonuses.push(`Power +${powerOutput[idx]}`)
+  }
+
+  return bonuses.length > 0 ? bonuses.join(', ') : 'No bonuses'
+}
 
 // ============================================================================
 // COMPONENT
@@ -42,6 +111,13 @@ export const BaseManager: React.FC = () => {
   const buildFacility = useGameStore((state) => state.buildFacility)
   const upgradeFacilityAt = useGameStore((state) => state.upgradeFacilityAt)
   const removeFacilityAt = useGameStore((state) => state.removeFacilityAt)
+  const cancelConstruction = useGameStore((state) => state.cancelConstruction)
+
+  // Get construction queue for active base
+  const constructionQueue = useMemo(() => {
+    if (!baseState.activeBaseId) return []
+    return baseState.constructionQueue.filter(p => p.baseId === baseState.activeBaseId)
+  }, [baseState.constructionQueue, baseState.activeBaseId])
 
   // Local state
   const [showPurchaseModal, setShowPurchaseModal] = useState(false)
@@ -58,9 +134,12 @@ export const BaseManager: React.FC = () => {
   // Calculate stats for active base
   const baseStats = useMemo(() => {
     if (!activeBase) return null
+    const powerUsed = calculatePowerUsage(activeBase)
+    const powerCapacity = calculatePowerCapacity(activeBase)
     return {
-      powerUsed: calculatePowerUsage(activeBase),
-      powerCapacity: calculatePowerCapacity(activeBase),
+      powerUsed,
+      powerCapacity,
+      powerShortage: powerUsed > powerCapacity,
       security: calculateSecurity(activeBase),
       upkeep: calculateMonthlyUpkeep(activeBase),
       educationBonus: getEducationBonus(activeBase, 'general'),
@@ -157,12 +236,67 @@ export const BaseManager: React.FC = () => {
                 </p>
               </div>
               <div className="text-right text-sm">
-                <div className={baseStats.powerUsed > baseStats.powerCapacity ? 'text-red-400' : 'text-green-400'}>
+                <div className={baseStats.powerShortage ? 'text-red-400' : 'text-green-400'}>
                   Power: {baseStats.powerUsed}/{baseStats.powerCapacity}
                 </div>
                 <div className="text-yellow-400">Security: {baseStats.security}%</div>
               </div>
             </div>
+
+            {/* Power Shortage Warning */}
+            {baseStats.powerShortage && (
+              <div className="mb-4 p-3 bg-red-900/50 border border-red-500 rounded-lg flex items-center gap-2">
+                <span className="text-xl">⚡</span>
+                <div>
+                  <div className="font-semibold text-red-400">POWER SHORTAGE!</div>
+                  <div className="text-sm text-red-300">
+                    Some facilities are offline. Build a Power Generator to restore operations.
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Construction Queue */}
+            {constructionQueue.length > 0 && (
+              <div className="mb-4 bg-gray-700 rounded-lg p-3">
+                <h3 className="font-semibold text-amber-400 mb-2 flex items-center gap-2">
+                  <span>🔨</span> Under Construction
+                </h3>
+                <div className="space-y-2">
+                  {constructionQueue.map(project => {
+                    const progress = ((project.totalHours - project.hoursRemaining) / project.totalHours) * 100
+                    const facilityName = FACILITIES[project.facilityType].name
+                    return (
+                      <div key={project.id} className="bg-gray-600 rounded p-2">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium">
+                            {facilityName} L{project.targetLevel}
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            {formatHours(project.hoursRemaining)} remaining
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-gray-800 rounded-full h-2 overflow-hidden">
+                            <div
+                              className="h-full bg-amber-500 transition-all duration-300"
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                          <button
+                            onClick={() => cancelConstruction(project.id)}
+                            className="text-xs px-2 py-1 bg-red-600 hover:bg-red-500 rounded"
+                            title="Cancel construction (partial refund)"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Base Grid */}
             <div
@@ -181,9 +315,10 @@ export const BaseManager: React.FC = () => {
                     <button
                       key={`${x}-${y}`}
                       onClick={() => handleCellClick(x, y)}
+                      title={facility ? getFacilityBonusText(facility.type, facility.level) : 'Build new facility'}
                       className={`
                         aspect-square rounded-lg border-2 flex flex-col items-center justify-center
-                        transition-all hover:scale-105
+                        transition-all hover:scale-105 relative group
                         ${isSelected ? 'border-cyan-400 ring-2 ring-cyan-400/50' : 'border-gray-600'}
                         ${facility
                           ? 'bg-gray-700'
@@ -196,6 +331,10 @@ export const BaseManager: React.FC = () => {
                           <span className="text-2xl">{config?.icon || '?'}</span>
                           <span className="text-xs text-gray-300 mt-1">{config?.name || 'Unknown'}</span>
                           <span className="text-xs text-gray-500">Lv.{facility.level}</span>
+                          {/* Tooltip on hover */}
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 border border-gray-600 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                            {getFacilityBonusText(facility.type, facility.level)}
+                          </div>
                         </>
                       ) : (
                         <span className="text-gray-600 text-2xl">+</span>
@@ -257,48 +396,84 @@ export const BaseManager: React.FC = () => {
                       </button>
                     </div>
                     {selectedFacilityType ? (
-                      <div>
-                        <div className="mb-3 p-2 bg-gray-600 rounded">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl">{FACILITIES[selectedFacilityType].icon}</span>
-                            <span className="font-medium">{FACILITIES[selectedFacilityType].name}</span>
+                      (() => {
+                        const missingPrereqs = getMissingPrerequisites(activeBase, selectedFacilityType)
+                        const canAfford = money >= FACILITIES[selectedFacilityType].buildCost[0]
+                        const canBuild = canAfford && missingPrereqs.length === 0
+
+                        return (
+                          <div>
+                            <div className="mb-3 p-2 bg-gray-600 rounded">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xl">{FACILITIES[selectedFacilityType].icon}</span>
+                                <span className="font-medium">{FACILITIES[selectedFacilityType].name}</span>
+                              </div>
+                              <p className="text-sm text-gray-300 mt-1">
+                                {FACILITIES[selectedFacilityType].description}
+                              </p>
+                              <div className="text-sm text-gray-400 mt-2">
+                                Cost: ${FACILITIES[selectedFacilityType].buildCost[0].toLocaleString()}
+                                {' • '}Power: {FACILITIES[selectedFacilityType].powerRequired[0]}
+                                {' • '}Build Time: {formatHours(FACILITIES[selectedFacilityType].buildHours[0])}
+                              </div>
+                              {/* Show bonuses */}
+                              <div className="text-sm text-cyan-400 mt-1">
+                                {getFacilityBonusText(selectedFacilityType, 1)}
+                              </div>
+                            </div>
+
+                            {/* Prerequisites Warning */}
+                            {missingPrereqs.length > 0 && (
+                              <div className="mb-3 p-2 bg-amber-900/50 border border-amber-500 rounded text-sm">
+                                <span className="text-amber-400 font-medium">Requires: </span>
+                                <span className="text-amber-300">{missingPrereqs.join(', ')}</span>
+                              </div>
+                            )}
+
+                            <button
+                              onClick={handleBuildFacility}
+                              disabled={!canBuild}
+                              className={`w-full py-2 rounded font-semibold ${
+                                canBuild
+                                  ? 'bg-cyan-600 hover:bg-cyan-500'
+                                  : 'bg-gray-600 cursor-not-allowed'
+                              }`}
+                            >
+                              {!canAfford
+                                ? 'Not Enough Money'
+                                : missingPrereqs.length > 0
+                                  ? 'Missing Prerequisites'
+                                  : 'Build Facility'}
+                            </button>
                           </div>
-                          <p className="text-sm text-gray-300 mt-1">
-                            {FACILITIES[selectedFacilityType].description}
-                          </p>
-                          <div className="text-sm text-gray-400 mt-2">
-                            Cost: ${FACILITIES[selectedFacilityType].buildCost[0].toLocaleString()}
-                            {' • '}Power: {FACILITIES[selectedFacilityType].powerRequired[0]}
-                          </div>
-                        </div>
-                        <button
-                          onClick={handleBuildFacility}
-                          disabled={money < FACILITIES[selectedFacilityType].buildCost[0]}
-                          className={`w-full py-2 rounded font-semibold ${
-                            money >= FACILITIES[selectedFacilityType].buildCost[0]
-                              ? 'bg-cyan-600 hover:bg-cyan-500'
-                              : 'bg-gray-600 cursor-not-allowed'
-                          }`}
-                        >
-                          Build Facility
-                        </button>
-                      </div>
+                        )
+                      })()
                     ) : (
                       <div className="space-y-2 max-h-48 overflow-y-auto">
                         {Object.entries(facilityCategories).map(([category, types]) => (
                           <div key={category}>
                             <div className="text-xs text-gray-500 mb-1">{category}</div>
                             <div className="flex flex-wrap gap-1">
-                              {types.map((type) => (
-                                <button
-                                  key={type}
-                                  onClick={() => setSelectedFacilityType(type)}
-                                  className="px-2 py-1 bg-gray-600 hover:bg-gray-500 rounded text-sm flex items-center gap-1"
-                                >
-                                  <span>{FACILITIES[type].icon}</span>
-                                  <span>{FACILITIES[type].name}</span>
-                                </button>
-                              ))}
+                              {types.map((type) => {
+                                const missingPrereqs = getMissingPrerequisites(activeBase, type)
+                                const hasMissing = missingPrereqs.length > 0
+                                return (
+                                  <button
+                                    key={type}
+                                    onClick={() => setSelectedFacilityType(type)}
+                                    title={hasMissing ? `Requires: ${missingPrereqs.join(', ')}` : FACILITIES[type].description}
+                                    className={`px-2 py-1 rounded text-sm flex items-center gap-1 ${
+                                      hasMissing
+                                        ? 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                                        : 'bg-gray-600 hover:bg-gray-500'
+                                    }`}
+                                  >
+                                    <span>{FACILITIES[type].icon}</span>
+                                    <span>{FACILITIES[type].name}</span>
+                                    {hasMissing && <span className="text-amber-400 text-xs">!</span>}
+                                  </button>
+                                )
+                              })}
                             </div>
                           </div>
                         ))}
@@ -322,8 +497,9 @@ export const BaseManager: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Power:</span>
-                  <span className={baseStats.powerUsed > baseStats.powerCapacity ? 'text-red-400' : 'text-green-400'}>
+                  <span className={baseStats.powerShortage ? 'text-red-400' : 'text-green-400'}>
                     {baseStats.powerUsed} / {baseStats.powerCapacity}
+                    {baseStats.powerShortage && ' ⚠'}
                   </span>
                 </div>
                 <div className="flex justify-between">

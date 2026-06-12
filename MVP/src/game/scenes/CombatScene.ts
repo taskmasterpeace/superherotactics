@@ -11,7 +11,22 @@
  */
 
 import Phaser from 'phaser';
-import { EventBridge, Position, UnitData, ActionPayload, CombatCharacter, LocationContext } from '../EventBridge';
+import { EventBridge, Position, UnitData, ActionPayload, CombatCharacter, LocationContext, EnhancedCombatResult, GrappleState, GrappleInteraction, MartialArtsStyleId } from '../EventBridge';
+import {
+  getBeltBonus,
+  getBeltName,
+  getAvailableTechniques,
+  getStyle,
+  calculateTechniqueHitChance,
+  calculateTechniqueDamage,
+  canUseTechnique,
+  canTransitionGrapple,
+  calculateEscapeDifficulty,
+  attemptEscape,
+  checkChokeProgress,
+  GRAPPLE_TRANSITIONS,
+} from '../systems/MartialArtsSystem';
+import { buildEnhancedCombatResult, logCombatResultSummary } from './CombatResultsBuilder';
 import {
   TILE_SIZE, TILE_WIDTH, TILE_HEIGHT,
   COLORS, TERRAIN_TYPES, TerrainType,
@@ -26,6 +41,7 @@ import {
 import { lookupWeaponInDatabase, getDamageSystemType, getDamageTypeByKey, isValidWeaponKey } from './weaponIntegration';
 import { getArmorForUnit, selectArmorForEnemy } from './armorIntegration';
 import { MapTemplate, parseMapLayout, getMapForCityType, getSpawnPositions } from '../../data/mapTemplates';
+import { GadgetUIHandler } from './GadgetUIHandler';
 import { generateEnemySquad, convertToCombatCharacters, debugGenerateReport } from '../../combat/enemyGeneration';
 import {
   getFlankingResult,
@@ -61,10 +77,61 @@ import {
   PROJECTILE_FORCES,
   KnockbackResult,
 } from '../../data/knockbackSystem';
+import { getCharacterWeight } from '../../data/strengthSystem';
+import { getWeaponByName, getWeaponById } from '../../data/weapons';
+// Escalation system imports
+import {
+  EscalationState,
+  initializeEscalation,
+  processEscalationTurn,
+  addHeat,
+  buildCityResponseProfile,
+  calculateHeatGenerated,
+  getAvailableEscapeOptions,
+  getCharacterEscalationOpinions,
+  CityResponseProfile,
+  EscapeType,
+  createEmptyFactionKills,
+  recordFactionKill,
+  EscalationFactionKills,
+} from '../../combat/escalationSystem';
+import {
+  EscalationDisplayState,
+  EscalationWave,
+  EscapeOption as UIEscapeOption,
+  CharacterEscalationOpinion as UICharacterOpinion,
+} from '../EventBridge';
 import {
   evaluateCallingBonuses,
   CallingBonusResult,
 } from '../../combat/callingCombatBonuses';
+// Game mode system imports
+import {
+  GameModeId,
+  GameModeConfig,
+  GameModeState,
+  GameModeScore,
+  GAME_MODES,
+  initializeGameMode,
+  calculateScore,
+  generateGauntletWave,
+  generateZombieWave,
+  shouldReanimate,
+  GauntletWave,
+  ZombieWave,
+} from '../../combat/gameModes';
+// Zombie system imports
+import {
+  ZombieType,
+  isZombie,
+  getZombieType,
+  reanimateAsZombie,
+  calculateZombieDamage,
+  rollForInfection,
+  createZombieUnit,
+  spawnRandomZombie,
+  randomZombieName,
+} from '../../combat/zombieSystem';
 
 // Combat statistics tracking interface
 interface UnitStats {
@@ -333,6 +400,10 @@ const STATUS_EFFECTS = {
   exposed: { id: 'exposed', name: 'Exposed', emoji: '🎯', evasionPenalty: 30, duration: 1, stackable: false, color: 0xff8844 },
   staggered: { id: 'staggered', name: 'Staggered', emoji: '😵‍💫', apPenalty: 1, accuracyPenalty: 10, duration: 1, stackable: false, color: 0xaaaa44 },
   dim_mak: { id: 'dim_mak', name: 'Death Touch', emoji: '☠️💀', delayedDamage: true, duration: 1, stackable: false, color: 0x000000 },
+
+  // Mental/fear effects (referenced by damage system)
+  panicked: { id: 'panicked', name: 'Panicked', emoji: '😱', accuracyPenalty: 30, duration: 2, stackable: false, color: 0xff44ff },
+  dazed: { id: 'dazed', name: 'Dazed', emoji: '💫', apPenalty: 2, accuracyPenalty: 15, duration: 1, stackable: false, color: 0xaaaaff },
 };
 
 type StatusEffectType = keyof typeof STATUS_EFFECTS;
@@ -348,14 +419,26 @@ const STANCES = {
 
 type StanceType = keyof typeof STANCES;
 
-// ============ GRAPPLE POSITIONS (Simplified) ============
-const GRAPPLE_POSITIONS = {
-  standing: { id: 'standing', name: 'Standing', emoji: '🧍', description: 'Not grappling', transitions: ['clinch'] },
-  clinch: { id: 'clinch', name: 'Clinch', emoji: '🤼', description: 'Close quarters grapple', transitions: ['standing', 'ground'], damageBonus: 5 },
-  ground: { id: 'ground', name: 'Ground', emoji: '🏋️', description: 'Ground control position', transitions: ['clinch', 'standing'], damageBonus: 10, escapepenalty: -20 },
+// ============ GRAPPLE STATE DISPLAY (Uses GrappleState enum from EventBridge) ============
+// GrappleState enum: NONE, STANDING, GROUND, PINNED, RESTRAINED, CARRIED, SUBMISSION
+const GRAPPLE_STATE_DISPLAY: Record<GrappleState, { name: string; emoji: string; description: string; damageBonus: number; escapePenalty: number }> = {
+  [GrappleState.NONE]: { name: 'None', emoji: '', description: 'Not grappling', damageBonus: 0, escapePenalty: 0 },
+  [GrappleState.STANDING]: { name: 'Clinch', emoji: '', description: 'Standing clinch', damageBonus: 5, escapePenalty: 0 },
+  [GrappleState.GROUND]: { name: 'Ground', emoji: '', description: 'Ground control', damageBonus: 10, escapePenalty: -10 },
+  [GrappleState.PINNED]: { name: 'Pinned', emoji: '', description: 'Pinned down', damageBonus: 15, escapePenalty: -20 },
+  [GrappleState.RESTRAINED]: { name: 'Restrained', emoji: '', description: 'Fully restrained', damageBonus: 20, escapePenalty: -30 },
+  [GrappleState.CARRIED]: { name: 'Carried', emoji: '', description: 'Being carried', damageBonus: 25, escapePenalty: -40 },
+  [GrappleState.SUBMISSION]: { name: 'Submission', emoji: '', description: 'In submission hold', damageBonus: 10, escapePenalty: -25 },
 };
 
-type GrapplePosition = keyof typeof GRAPPLE_POSITIONS;
+// Track active grapple interactions for event emissions
+interface ActiveGrapple {
+  interaction: GrappleInteraction;
+  submissionProgress: number; // Turns in submission
+}
+
+// Legacy type alias for backward compatibility
+type GrapplePosition = GrappleState;
 
 // ============ INJURY TABLE (d100) ============
 const INJURY_TABLE = [
@@ -426,19 +509,58 @@ function getOriginType(numericOrigin: number | undefined): DamageOriginType {
 }
 
 // Map weapon key to knockback force source ID
+// Enhanced with database fallback for weapons.ts integration
 function getWeaponForceSourceId(weaponKey: string): string {
   const key = weaponKey.toLowerCase();
+
+  // First try exact key name matching (fast path for internal weapons)
   if (key.includes('punch') || key === 'fist') return 'PUNCH';
   if (key.includes('super_punch')) return 'SUPER_PUNCH';
   if (key.includes('kick')) return 'KICK';
   if (key.includes('club') || key.includes('bat')) return 'CLUB';
   if (key.includes('shotgun')) return 'BUCKSHOT';
   if (key.includes('sniper')) return 'SNIPER';
-  if (key.includes('rifle')) return 'BULLET_RIFLE';
-  if (key.includes('pistol')) return 'BULLET_PISTOL';
+  if (key.includes('rifle') && !key.includes('pistol')) return 'BULLET_RIFLE';
+  if (key.includes('pistol') || key.includes('revolver')) return 'BULLET_PISTOL';
   if (key.includes('rpg') || key.includes('rocket')) return 'ROCKET';
   if (key.includes('grenade') || key.includes('frag')) return 'GRENADE_FRAG';
   if (key.includes('missile')) return 'MISSILE';
+  if (key.includes('cannon')) return 'CANNON';
+  if (key.includes('throw')) return 'THROW_OBJECT';
+
+  // GAP 1 FIX: Try database lookup for weapon category/damageSubType
+  const weaponData = getWeaponByName(weaponKey) || getWeaponById(weaponKey);
+  if (weaponData) {
+    // Map category to force source
+    const category = weaponData.category;
+    const damageSubType = weaponData.damageSubType;
+
+    // Melee categories - use CLUB for blunt, PUNCH for others
+    if (category === 'Melee_Regular' || category === 'Melee_Skill') {
+      if (damageSubType === 'SMASHING_MELEE') return 'CLUB';
+      return 'PUNCH'; // Edged/piercing melee has minimal knockback
+    }
+
+    // Infer from damage subtype
+    if (damageSubType === 'BUCKSHOT') return 'BUCKSHOT';
+    if (damageSubType === 'EXPLOSION' || damageSubType === 'SHRAPNEL') return 'GRENADE_FRAG';
+    if (damageSubType === 'CONCUSSIVE') return 'GRENADE_CONCUSSION';
+    if (damageSubType === 'SLUG') return 'BUCKSHOT'; // Slugs have similar knockback to buckshot
+    if (damageSubType === 'GUNFIRE') return 'BULLET_RIFLE';
+
+    // Energy weapons have reduced knockback
+    if (category === 'Energy_Weapons') return 'BULLET_PISTOL';
+
+    // Grenades category
+    if (category === 'Grenades') {
+      if (damageSubType === 'FLASH' || damageSubType === 'STUN') return 'GRENADE_FLASH';
+      return 'GRENADE_FRAG';
+    }
+
+    // Thrown weapons
+    if (category === 'Thrown') return 'THROW_OBJECT';
+  }
+
   return 'BULLET_RIFLE'; // Default
 }
 
@@ -809,8 +931,10 @@ interface Unit {
   visible: boolean;
   stance: StanceType;
   grappleState: {
-    position: GrapplePosition;
+    state: GrappleState;
     targetId: string | null;
+    isAttacker: boolean; // True if this unit initiated the grapple
+    turnStarted: number; // Round when grapple started
   };
   powers: SpecialPower[];
   powerCooldowns: Record<string, number>;
@@ -830,6 +954,7 @@ interface Unit {
   accuracyPenalty?: number; // Flat accuracy modifier (negative = worse)
   apPenalty?: number; // AP reduction per turn
   origin?: number; // Origin type for immunity checks (1-9)
+  factionType?: string; // For escalation tracking: 'police' | 'swat' | 'military' | undefined
   // Martial arts training
   martialArts?: {
     styleId: string;
@@ -868,6 +993,11 @@ interface Unit {
     executesWounded: boolean;
     takesHostages: boolean;
   };
+  // Drone-specific properties for spawned gadget drones
+  isDrone?: boolean;
+  droneOwnerId?: string;
+  droneTurnsRemaining?: number;
+  droneConfig?: any;
 }
 
 // Environmental effect types for tiles
@@ -927,6 +1057,9 @@ export class CombatScene extends Phaser.Scene {
   private verboseLog: boolean = true; // Toggle detailed combat log
   private locationContext?: LocationContext; // Stored for death event location info
 
+  // Active grapple tracking - maps attacker ID to grapple interaction
+  private activeGrapples: Map<string, ActiveGrapple> = new Map();
+
   // Visual layers
   private tileLayer!: Phaser.GameObjects.Container;
   private gridLayer!: Phaser.GameObjects.Container;
@@ -964,6 +1097,54 @@ export class CombatScene extends Phaser.Scene {
   // Sound system
   private soundManager: SoundManager | null = null;
   private soundConfig: Record<string, string> = {};
+
+  // Gadget system
+  private gadgetHandler: GadgetUIHandler | null = null;
+
+  // ==================== ESCALATION SYSTEM ====================
+  private escalationEnabled: boolean = false;
+  private escalationState: EscalationState | null = null;
+  private cityResponseProfile: CityResponseProfile | null = null;
+  private factionKills: EscalationFactionKills = createEmptyFactionKills();
+
+  // Entry points for reinforcements (map edges by default)
+  private entryPoints: Record<string, Position[]> = {
+    north: [],
+    south: [],
+    east: [],
+    west: [],
+  };
+
+  // ==================== GAME MODE SYSTEM ====================
+  private gameModeId: GameModeId = 'elimination';
+  private gameModeState: GameModeState | null = null;
+  private gameModeScore: GameModeScore = {
+    kills: 0,
+    roundsSurvived: 0,
+    objectivesCompleted: 0,
+    extractionBonus: 0,
+    damageDealt: 0,
+    damageTaken: 0,
+    factionKills: { police: 0, swat: 0, military: 0 },
+    total: 0,
+  };
+  private currentGauntletWave: GauntletWave | null = null;
+  private gauntletWaveCount: number = 0;
+
+  // ==================== ZOMBIE OUTBREAK SYSTEM ====================
+  private zombiesEnabled: boolean = false;
+  private currentZombieWave: ZombieWave | null = null;
+  private zombieWaveCount: number = 0;
+  private pendingCorpses: Array<{
+    unitId: string;
+    originalUnit: Unit;
+    position: { x: number; y: number };
+    wasInfected: boolean;
+    wasBitten: boolean;
+    roundOfDeath: number;
+    isOrganic: boolean;
+  }> = [];
+  private totalReanimations: number = 0;
 
   // Combat statistics tracking
   private combatStats: CombatStats = this.createEmptyCombatStats();
@@ -1069,6 +1250,23 @@ export class CombatScene extends Phaser.Scene {
 
     // Initialize sound system
     this.initSoundSystem();
+
+    // Capture mission context for strategic layer integration
+    const gameStore = (window as any).__GAME_STORE__;
+    if (gameStore) {
+      this.missionContext = {
+        sector: gameStore.currentSector || 'unknown',
+        city: gameStore.pendingMission?.city || this.pendingCityType || 'unknown',
+        country: gameStore.selectedCountry || 'unknown'
+      };
+      console.log('[COMBAT] Mission context captured:', this.missionContext);
+    }
+
+    // Initialize escalation system with location context
+    this.initializeEscalationSystem();
+
+    // Initialize game mode system
+    this.initializeGameMode();
 
     // Notify combat started
     EventBridge.emit('combat-started', {
@@ -1561,8 +1759,214 @@ export class CombatScene extends Phaser.Scene {
         timestamp: Date.now(),
         type: 'system',
         actor: 'System',
-        message: `⚖️ Test unit spawned: ${character.name} with ${weaponName}`,
+        message: `Test unit spawned: ${character.name} with ${weaponName}`,
       });
+    });
+
+    // Handle martial arts escape attempts from UI
+    EventBridge.on('attempt-escape', (data: { unitId: string }) => {
+      console.log('[COMBAT] Escape attempt:', data.unitId);
+      this.handleEscapeAttempt(data.unitId);
+      this.emitAllUnitsData();
+    });
+
+    // Handle martial arts technique execution from UI
+    EventBridge.on('use-technique', (data: { unitId: string; techniqueId: string; targetId?: string }) => {
+      console.log('[COMBAT] Technique used:', data);
+      if (!data.targetId) {
+        this.emitToUI('combat-log', { message: 'Select a target for the technique!', type: 'system' });
+        return;
+      }
+      // Infer style from technique ID prefix or unit training
+      const unit = this.units.get(data.unitId);
+      if (!unit) return;
+
+      // Find which style contains this technique
+      const training = unit.martialArts?.find(m => {
+        const techniques = getAvailableTechniques(m.styleId as MartialArtsStyleId, m.beltLevel);
+        return techniques.some(t => t.id === data.techniqueId);
+      });
+
+      if (training) {
+        this.executeMartialArtsTechnique(data.unitId, data.targetId, data.techniqueId, training.styleId);
+      } else {
+        this.emitToUI('combat-log', { message: `Unit does not know technique: ${data.techniqueId}`, type: 'system' });
+      }
+    });
+
+    // Handle reversal attempts (counter style specialty)
+    EventBridge.on('attempt-reversal', (data: { unitId: string }) => {
+      console.log('[COMBAT] Reversal attempt:', data.unitId);
+      // Reversals use counter training to turn failed grapple into own grapple
+      const unit = this.units.get(data.unitId);
+      if (!unit) return;
+
+      const targetId = unit.grappleState.targetId;
+      if (!targetId) {
+        this.emitToUI('combat-log', { message: 'Not in a grapple to reverse!', type: 'system' });
+        return;
+      }
+
+      // Check for counter training
+      const counterTraining = unit.martialArts?.find(m => m.styleId === 'counter');
+      if (!counterTraining || counterTraining.beltLevel < 3) {
+        this.emitToUI('combat-log', { message: 'Need Counter Fighting belt 3+ for reversals!', type: 'system' });
+        return;
+      }
+
+      // Reversal attempt - similar to escape but you become attacker
+      const target = this.units.get(targetId);
+      if (!target) return;
+
+      if (unit.ap < 3) {
+        this.emitToUI('combat-log', { message: 'Not enough AP for reversal! (need 3)', type: 'system' });
+        return;
+      }
+
+      unit.ap -= 3;
+      const beltBonus = getBeltBonus(counterTraining.beltLevel);
+      const reversalRoll = Math.floor(Math.random() * 100) + unit.agl + unit.ins + beltBonus;
+      const resistRoll = Math.floor(Math.random() * 100) + target.str + target.mel;
+
+      if (reversalRoll >= resistRoll) {
+        // Swap attacker/defender roles
+        const currentState = unit.grappleState.state;
+        unit.grappleState = { state: currentState, targetId: target.id, isAttacker: true, turnStarted: this.roundNumber };
+        target.grappleState = { state: currentState, targetId: unit.id, isAttacker: false, turnStarted: this.roundNumber };
+
+        // Update active grapple tracking
+        this.activeGrapples.delete(targetId);
+        const newInteraction: GrappleInteraction = {
+          attackerId: unit.id,
+          defenderId: target.id,
+          state: currentState,
+          turnStarted: this.roundNumber,
+          attackerPosition: 'top',
+        };
+        this.activeGrapples.set(unit.id, { interaction: newInteraction, submissionProgress: 0 });
+
+        EventBridge.emit('grapple-changed', newInteraction);
+        this.emitToUI('combat-log', {
+          message: `${unit.name} REVERSES the grapple! (${Math.floor(reversalRoll)} vs ${Math.floor(resistRoll)})`,
+          type: 'attack'
+        });
+      } else {
+        this.emitToUI('combat-log', {
+          message: `${unit.name} fails the reversal! (${Math.floor(reversalRoll)} vs ${Math.floor(resistRoll)})`,
+          type: 'miss'
+        });
+      }
+      this.emitAllUnitsData();
+    });
+
+    // ==================== GADGET SYSTEM INTEGRATION ====================
+    // Initialize gadget handler for drones, medical, explosives, sensors, etc.
+    this.gadgetHandler = new GadgetUIHandler(this as any);
+    this.gadgetHandler.setupEventListeners();
+
+    // Handle drone unit spawning from gadget system
+    EventBridge.on('spawn-drone-unit', (data: {
+      id: string;
+      name: string;
+      team: 'blue' | 'red';
+      position: { x: number; y: number };
+      hp: number;
+      maxHp: number;
+      weapon?: any;
+      isDrone: boolean;
+      droneOwnerId?: string;
+      droneTurnsRemaining?: number;
+      droneConfig?: any;
+    }) => {
+      console.log('[GADGET] Spawning drone unit:', data);
+
+      // Create drone as a combat unit
+      this.spawnUnit({
+        id: data.id,
+        name: data.name,
+        team: data.team,
+        hp: data.hp,
+        maxHp: data.maxHp,
+        ap: 4, // Drones get 4 AP
+        maxAp: 4,
+        position: data.position,
+        facing: data.team === 'blue' ? 90 : 270,
+        statusEffects: [],
+        weapon: 'drone_weapon' as any,
+        fireMode: 'single' as any,
+        personality: 'tactical',
+        str: 30,
+        agl: 60,
+        int: 20,
+        sta: 30,
+        ins: 50,
+        con: 30,
+        mel: 10,
+        evasion: 40,
+        dr: 0,
+        stoppingPower: 0,
+        shieldHp: 0,
+        shieldMaxHp: 0,
+        shieldRegenRate: 0,
+        acted: false,
+        visible: true,
+        powers: [],
+        isDrone: true,
+        droneOwnerId: data.droneOwnerId,
+        droneTurnsRemaining: data.droneTurnsRemaining,
+        droneConfig: data.droneConfig,
+      });
+
+      this.updateAllUnitsUI();
+
+      EventBridge.emit('log-entry', {
+        id: `drone_spawn_${Date.now()}`,
+        timestamp: Date.now(),
+        type: 'system',
+        actor: 'System',
+        message: `🤖 ${data.name} deployed!`,
+      });
+    });
+
+    // Handle visual effects from gadget system
+    EventBridge.on('show-effect', (data: {
+      type: 'heal' | 'reveal' | 'explosion';
+      position: { x: number; y: number };
+      value?: number;
+      radius?: number;
+    }) => {
+      const screenPos = gridToScreen(data.position.x, data.position.y, this.offsetX, this.offsetY);
+
+      if (data.type === 'heal') {
+        // Show healing effect
+        const healText = this.add.text(screenPos.x, screenPos.y - 30, `+${data.value} HP`, {
+          fontSize: '18px',
+          color: '#00ff00',
+          fontStyle: 'bold',
+        }).setOrigin(0.5);
+        this.effectsLayer.add(healText);
+        this.tweens.add({
+          targets: healText,
+          y: healText.y - 50,
+          alpha: 0,
+          duration: 1500,
+          onComplete: () => healText.destroy(),
+        });
+      } else if (data.type === 'explosion') {
+        // Show explosion effect
+        this.showExplosionEffect(screenPos.x, screenPos.y);
+      } else if (data.type === 'reveal') {
+        // Show reveal pulse
+        const circle = this.add.circle(screenPos.x, screenPos.y, 10, 0x00ffff, 0.5);
+        this.effectsLayer.add(circle);
+        this.tweens.add({
+          targets: circle,
+          radius: (data.radius || 5) * TILE_WIDTH,
+          alpha: 0,
+          duration: 800,
+          onComplete: () => circle.destroy(),
+        });
+      }
     });
   }
 
@@ -2297,7 +2701,7 @@ export class CombatScene extends Phaser.Scene {
       acted: unitData.acted ?? false,
       visible: unitData.visible ?? true,
       stance: unitData.stance ?? 'normal',
-      grappleState: unitData.grappleState ?? { position: 'standing', targetId: null },
+      grappleState: unitData.grappleState ?? { state: GrappleState.NONE, targetId: null, isAttacker: false, turnStarted: 0 },
       powers: unitData.powers ?? [],
       powerCooldowns: unitData.powerCooldowns ?? {},
       overwatching: unitData.overwatching ?? false,
@@ -2554,6 +2958,24 @@ export class CombatScene extends Phaser.Scene {
     this.emitToUI('status-applied', { unitId: unit.id, effect: effectType, emoji: effectDef.emoji });
   }
 
+  /**
+   * Remove a status effect from a unit
+   */
+  private removeStatusEffect(unit: Unit, effectType: StatusEffectType): void {
+    const effectIdx = unit.statusEffects.findIndex(e => e.type === effectType);
+    if (effectIdx >= 0) {
+      const effectDef = STATUS_EFFECTS[effectType];
+      unit.statusEffects.splice(effectIdx, 1);
+      this.updateStatusIcons(unit);
+      if (effectDef) {
+        this.emitToUI('combat-log', {
+          message: `${unit.name}'s ${effectDef.name} effect removed.`,
+          type: 'status'
+        });
+      }
+    }
+  }
+
   private processStatusEffects(unit: Unit): { damage: number; skipTurn: boolean; messages: string[] } {
     let totalDamage = 0;
     let skipTurn = false;
@@ -2579,20 +3001,25 @@ export class CombatScene extends Phaser.Scene {
         messages.push(`${effectDef.emoji} ${unit.name} is ${effectDef.name} and cannot act!`);
       }
 
-      // Process choke - increment turn counter and check for KO
+      // Process choke - increment turn counter and check for KO using MartialArtsSystem
       if (effect.type === 'choked' && unit.chokeState) {
         unit.chokeState.turnsInChoke++;
-        const turnsToKO = unit.chokeState.chokeType === 'blood' ? 2 : 3;
-        const turnsRemaining = turnsToKO - unit.chokeState.turnsInChoke;
 
-        if (turnsRemaining <= 0) {
-          // KO from choke!
-          messages.push(`😰 ${unit.name} goes UNCONSCIOUS from the choke!`);
+        // Use checkChokeProgress from MartialArtsSystem
+        const isKO = checkChokeProgress(unit.chokeState.turnsInChoke, unit.chokeState.chokeType);
+
+        if (isKO) {
+          // KO from choke - end the grapple with submission
+          const attackerId = unit.chokeState.attackerId;
+          messages.push(`${unit.name} goes UNCONSCIOUS from the choke!`);
+          this.endGrapple(attackerId, unit.id, 'submission');
           this.incapacitateUnit(unit);
           skipTurn = true;
         } else {
-          const urgency = turnsRemaining === 1 ? '⚠️ ' : '';
-          messages.push(`${urgency}😰 ${unit.name} is being choked! (${turnsRemaining} turns to unconscious)`);
+          const turnsToKO = unit.chokeState.chokeType === 'blood' ? 2 : 3;
+          const turnsRemaining = turnsToKO - unit.chokeState.turnsInChoke;
+          const urgency = turnsRemaining === 1 ? 'WARNING: ' : '';
+          messages.push(`${urgency}${unit.name} is being choked! (${turnsRemaining} turns to unconscious)`);
         }
       }
 
@@ -2627,6 +3054,46 @@ export class CombatScene extends Phaser.Scene {
   private applyDamageTypeEffects(target: Unit, damageTypeId: string, damage: number, isCrit: boolean): void {
     const damageTypeDef = getDamageType(damageTypeId);
     if (!damageTypeDef) return;
+
+    // === SHATTER MECHANIC: Hitting frozen targets deals bonus damage ===
+    // Check if target is frozen and we're dealing damage
+    const targetFrozen = target.statusEffects?.find(e => e.type === 'frozen');
+    if (targetFrozen && damage > 0) {
+      // Get shatter damage from the ice damage type definition, or default to 20
+      const iceDef = getDamageType('ENERGY_ICE');
+      const shatterDamage = iceDef?.freeze?.shatterDamage || 20;
+      target.hp = Math.max(0, target.hp - shatterDamage);
+      this.updateHealthBar(target);
+
+      // Remove frozen effect - ice shatters
+      target.statusEffects = target.statusEffects.filter(e => e.type !== 'frozen');
+      this.updateStatusIcons(target);
+
+      this.emitToUI('combat-log', {
+        message: `Ice SHATTERS! ${target.name} takes ${shatterDamage} extra damage!`,
+        type: 'status'
+      });
+
+      // Floating damage text for shatter
+      const targetScreenPos = gridToScreen(target.position.x, target.position.y, this.offsetX, this.offsetY);
+      const shatterText = this.add.text(targetScreenPos.x + 15, targetScreenPos.y - TILE_HEIGHT / 2 - 10, `SHATTER! -${shatterDamage}`, {
+        fontSize: '14px',
+        color: '#88ddff',
+        fontStyle: 'bold',
+        stroke: '#000000',
+        strokeThickness: 2,
+      });
+      shatterText.setOrigin(0.5, 1);
+      shatterText.setDepth(200);
+      this.tweens.add({
+        targets: shatterText,
+        y: targetScreenPos.y - TILE_HEIGHT / 2 - 50,
+        alpha: 0,
+        duration: 1000,
+        ease: 'Power2',
+        onComplete: () => shatterText.destroy(),
+      });
+    }
 
     // Apply bleeding effect
     if (damageTypeDef.bleeding?.enabled) {
@@ -3633,6 +4100,15 @@ export class CombatScene extends Phaser.Scene {
     unit.ap -= 2;
     this.emitAllUnitsData();
 
+    // Generate escalation heat for grenade throw (explosives generate lots of heat!)
+    if (unit.team === this.playerTeam && this.escalationEnabled) {
+      const heat = calculateHeatGenerated(25, {
+        stats: { INS: unit.ins || 50 },
+        weapon: undefined,
+      });
+      this.addEscalationHeat(heat, `${unit.name} threw ${this.pendingGrenade.name}`);
+    }
+
     EventBridge.emit('log-entry', {
       id: `grenade_${Date.now()}`,
       timestamp: Date.now(),
@@ -3913,67 +4389,121 @@ export class CombatScene extends Phaser.Scene {
 
     // Check AP (grapple costs 2 AP)
     if (attacker.ap < 2) {
-      this.emitToUI('combat-log', { message: '❌ Not enough AP! (need 2)', type: 'system' });
+      this.emitToUI('combat-log', { message: 'Not enough AP! (need 2)', type: 'system' });
       return;
     }
 
-    // Grapple attempt - STR vs STR contest
-    const attackerRoll = Math.floor(Math.random() * 100) + attacker.str;
-    const targetRoll = Math.floor(Math.random() * 100) + target.str;
+    // Get martial arts training for belt bonuses
+    const attackerGrapplingTraining = attacker.martialArts?.find(m =>
+      m.styleId === 'grappling' || m.styleId === 'submission'
+    );
+    const targetGrapplingTraining = target.martialArts?.find(m =>
+      m.styleId === 'grappling' || m.styleId === 'submission'
+    );
+
+    // Calculate belt bonuses using MartialArtsSystem
+    const attackerBeltLevel = attackerGrapplingTraining?.beltLevel || 0;
+    const targetBeltLevel = targetGrapplingTraining?.beltLevel || 0;
+    const attackerBeltBonus = getBeltBonus(attackerBeltLevel);
+    const targetBeltBonus = getBeltBonus(targetBeltLevel);
+
+    // Grapple attempt - STR + MEL + Belt Bonus contest
+    const attackerRoll = Math.floor(Math.random() * 100) + attacker.str + (attacker.mel / 2) + attackerBeltBonus;
+    const targetRoll = Math.floor(Math.random() * 100) + target.str + (target.agl / 2) + targetBeltBonus;
 
     attacker.ap -= 2;
 
+    // Log belt info if trained
+    if (attackerBeltLevel > 0) {
+      const beltName = getBeltName(attackerBeltLevel);
+      this.emitToUI('combat-log', {
+        message: `${attacker.name} uses ${beltName} training (+${attackerBeltBonus} grapple)`,
+        type: 'system'
+      });
+    }
+
     if (attackerRoll >= targetRoll) {
-      // Check for super strength override: if STR > target STR + 20, skip to CARRIED
+      // Check for super strength override: if STR > target STR + 20, skip to GROUND
       const isSuperStrength = attacker.str > target.str + 20;
 
-      if (isSuperStrength) {
-        // Super strength: skip ground, go straight to carried!
-        attacker.grappleState = { position: 'ground', targetId: target.id };
-        target.grappleState = { position: 'ground', targetId: attacker.id };
-        this.applyStatusEffect(attacker, 'grappled');
-        this.applyStatusEffect(target, 'grappled');
-        this.applyStatusEffect(target, 'prone');
+      // Determine initial grapple state
+      const newState: GrappleState = isSuperStrength ? GrappleState.GROUND : GrappleState.STANDING;
 
+      // Set grapple states on both units
+      attacker.grappleState = { state: newState, targetId: target.id, isAttacker: true, turnStarted: this.roundNumber };
+      target.grappleState = { state: newState, targetId: attacker.id, isAttacker: false, turnStarted: this.roundNumber };
+
+      this.applyStatusEffect(attacker, 'grappled');
+      this.applyStatusEffect(target, 'grappled');
+
+      // Create GrappleInteraction for tracking and event emission
+      const grappleInteraction: GrappleInteraction = {
+        attackerId: attacker.id,
+        defenderId: target.id,
+        state: newState,
+        turnStarted: this.roundNumber,
+        attackerPosition: isSuperStrength ? 'top' : 'side',
+      };
+
+      // Store active grapple
+      this.activeGrapples.set(attacker.id, {
+        interaction: grappleInteraction,
+        submissionProgress: 0,
+      });
+
+      // Emit grapple-started event
+      EventBridge.emit('grapple-started', grappleInteraction);
+
+      if (isSuperStrength) {
+        this.applyStatusEffect(target, 'prone');
         this.emitToUI('combat-log', {
-          message: `💪🤼 ${attacker.name} OVERWHELMS ${target.name} with SUPER STRENGTH! (${attackerRoll} vs ${targetRoll})`,
+          message: `${attacker.name} OVERWHELMS ${target.name} with SUPER STRENGTH! (${Math.floor(attackerRoll)} vs ${Math.floor(targetRoll)})`,
           type: 'attack'
         });
         this.emitToUI('combat-log', {
-          message: `🔽 ${target.name} is immediately taken to the ground!`,
+          message: `${target.name} is immediately taken to the ground!`,
           type: 'status'
         });
       } else {
-        // Normal grapple - enter clinch
-        attacker.grappleState = { position: 'clinch', targetId: target.id };
-        target.grappleState = { position: 'clinch', targetId: attacker.id };
-        this.applyStatusEffect(attacker, 'grappled');
-        this.applyStatusEffect(target, 'grappled');
-
+        const stateDisplay = GRAPPLE_STATE_DISPLAY[newState];
         this.emitToUI('combat-log', {
-          message: `🤼 ${attacker.name} GRAPPLES ${target.name}! (${attackerRoll} vs ${targetRoll})`,
+          message: `${attacker.name} GRAPPLES ${target.name} into ${stateDisplay.name}! (${Math.floor(attackerRoll)} vs ${Math.floor(targetRoll)})`,
           type: 'attack'
         });
       }
 
-      // Deal grapple damage (more for super strength)
-      const baseDamage = Math.floor(attacker.str / 10) + 5;
+      // Deal grapple damage (more for super strength, plus belt bonus)
+      const baseDamage = Math.floor(attacker.str / 10) + 5 + Math.floor(attackerBeltBonus / 2);
       const damage = isSuperStrength ? baseDamage * 2 : baseDamage;
       target.hp -= damage;
       this.updateHealthBar(target);
       this.emitToUI('combat-log', {
-        message: `💪 ${attacker.name} deals ${damage} grapple damage!`,
+        message: `${attacker.name} deals ${damage} grapple damage!`,
         type: 'damage'
       });
 
       if (target.hp <= 0) {
+        this.endGrapple(attacker.id, target.id, 'knockout');
         this.incapacitateUnit(target);
       }
     } else {
-      this.emitToUI('combat-log', {
-        message: `🤼 ${attacker.name} fails to grapple ${target.name}! (${attackerRoll} vs ${targetRoll})`,
-        type: 'miss'
-      });
+      // Failure - check if target has counter training
+      const hasCounterTraining = target.martialArts?.some(m => m.styleId === 'counter');
+      if (hasCounterTraining && targetBeltLevel >= 3) {
+        this.emitToUI('combat-log', {
+          message: `${attacker.name} fails to grapple ${target.name}!`,
+          type: 'miss'
+        });
+        this.emitToUI('combat-log', {
+          message: `${target.name}'s counter training allows a reversal opportunity!`,
+          type: 'status'
+        });
+      } else {
+        this.emitToUI('combat-log', {
+          message: `${attacker.name} fails to grapple ${target.name}! (${Math.floor(attackerRoll)} vs ${Math.floor(targetRoll)})`,
+          type: 'miss'
+        });
+      }
     }
 
     this.setActionMode('idle');
@@ -3981,7 +4511,156 @@ export class CombatScene extends Phaser.Scene {
   }
 
   /**
-   * Execute a martial arts technique
+   * End a grapple interaction and clean up state
+   */
+  private endGrapple(attackerId: string, defenderId: string, reason: 'escape' | 'knockout' | 'submission' | 'slam'): void {
+    const attacker = this.units.get(attackerId);
+    const defender = this.units.get(defenderId);
+
+    // Clean up grapple states
+    if (attacker) {
+      attacker.grappleState = { state: GrappleState.NONE, targetId: null, isAttacker: false, turnStarted: 0 };
+      this.removeStatusEffect(attacker, 'grappled');
+    }
+    if (defender) {
+      defender.grappleState = { state: GrappleState.NONE, targetId: null, isAttacker: false, turnStarted: 0 };
+      this.removeStatusEffect(defender, 'grappled');
+    }
+
+    // Remove from active grapples
+    this.activeGrapples.delete(attackerId);
+
+    // Emit grapple-ended event
+    EventBridge.emit('grapple-ended', {
+      winnerId: reason === 'escape' ? defenderId : attackerId,
+      loserId: reason === 'escape' ? attackerId : defenderId,
+      reason,
+    });
+
+    const reasonMessages = {
+      escape: `escaped the grapple!`,
+      knockout: `was knocked out in the grapple!`,
+      submission: `submitted!`,
+      slam: `was slammed into the ground!`,
+    };
+
+    this.emitToUI('combat-log', {
+      message: `Grapple ended: ${defender?.name || 'Target'} ${reasonMessages[reason]}`,
+      type: 'status'
+    });
+  }
+
+  /**
+   * Transition grapple to a new state (for techniques that change position)
+   */
+  private transitionGrappleState(attackerId: string, newState: GrappleState): boolean {
+    const activeGrapple = this.activeGrapples.get(attackerId);
+    if (!activeGrapple) return false;
+
+    const currentState = activeGrapple.interaction.state;
+
+    // Validate transition using MartialArtsSystem
+    if (!canTransitionGrapple(currentState, newState)) {
+      this.emitToUI('combat-log', {
+        message: `Cannot transition from ${GRAPPLE_STATE_DISPLAY[currentState].name} to ${GRAPPLE_STATE_DISPLAY[newState].name}!`,
+        type: 'system'
+      });
+      return false;
+    }
+
+    const attacker = this.units.get(attackerId);
+    const defender = this.units.get(activeGrapple.interaction.defenderId);
+
+    if (!attacker || !defender) return false;
+
+    // Update grapple state
+    activeGrapple.interaction.state = newState;
+    attacker.grappleState.state = newState;
+    defender.grappleState.state = newState;
+
+    // Update attacker position based on new state
+    if (newState === GrappleState.GROUND || newState === GrappleState.PINNED) {
+      activeGrapple.interaction.attackerPosition = 'top';
+      if (!defender.statusEffects.find(e => e.type === 'prone')) {
+        this.applyStatusEffect(defender, 'prone');
+      }
+    } else if (newState === GrappleState.SUBMISSION) {
+      activeGrapple.interaction.attackerPosition = 'back';
+    }
+
+    // Emit grapple-changed event
+    EventBridge.emit('grapple-changed', activeGrapple.interaction);
+
+    const stateDisplay = GRAPPLE_STATE_DISPLAY[newState];
+    this.emitToUI('combat-log', {
+      message: `Grapple position changed to ${stateDisplay.name}!`,
+      type: 'status'
+    });
+
+    return true;
+  }
+
+  /**
+   * Handle escape attempt from a grapple using MartialArtsSystem
+   */
+  private handleEscapeAttempt(defenderId: string): boolean {
+    const defender = this.units.get(defenderId);
+    if (!defender) return false;
+
+    // Find the grapple this unit is in
+    const attackerId = defender.grappleState.targetId;
+    if (!attackerId) {
+      this.emitToUI('combat-log', { message: 'Not in a grapple!', type: 'system' });
+      return false;
+    }
+
+    const attacker = this.units.get(attackerId);
+    if (!attacker) return false;
+
+    // Check AP (escape costs 2 AP)
+    if (defender.ap < 2) {
+      this.emitToUI('combat-log', { message: 'Not enough AP to escape! (need 2)', type: 'system' });
+      return false;
+    }
+
+    defender.ap -= 2;
+
+    // Get attacker's grappling training for escape DC
+    const attackerTraining = attacker.martialArts?.find(m =>
+      m.styleId === 'grappling' || m.styleId === 'submission'
+    );
+    const attackerStyleId = (attackerTraining?.styleId || 'grappling') as MartialArtsStyleId;
+    const attackerBeltLevel = attackerTraining?.beltLevel || 0;
+
+    // Calculate escape DC using MartialArtsSystem
+    const escapeDC = calculateEscapeDifficulty(attacker.mel, attackerStyleId, attackerBeltLevel);
+
+    // Add escape penalty based on current grapple state
+    const currentState = defender.grappleState.state;
+    const stateInfo = GRAPPLE_STATE_DISPLAY[currentState];
+    const adjustedDC = escapeDC + Math.abs(stateInfo.escapePenalty);
+
+    // Attempt escape using MartialArtsSystem
+    const escapeResult = attemptEscape(defender.str, defender.agl, adjustedDC);
+
+    if (escapeResult.success) {
+      this.endGrapple(attackerId, defenderId, 'escape');
+      this.emitToUI('combat-log', {
+        message: `${defender.name} ESCAPES the grapple! (${escapeResult.roll} vs DC ${escapeResult.dc})`,
+        type: 'attack'
+      });
+      return true;
+    } else {
+      this.emitToUI('combat-log', {
+        message: `${defender.name} fails to escape! (${escapeResult.roll} vs DC ${escapeResult.dc})`,
+        type: 'miss'
+      });
+      return false;
+    }
+  }
+
+  /**
+   * Execute a martial arts technique using MartialArtsSystem
    * This is the main entry point for martial arts in combat
    */
   private executeMartialArtsTechnique(
@@ -3997,29 +4676,52 @@ export class CombatScene extends Phaser.Scene {
     // Find the technique from martial arts data
     const technique = this.getMartialArtsTechnique(styleId, techniqueId);
     if (!technique) {
-      this.emitToUI('combat-log', { message: `❌ Unknown technique: ${techniqueId}`, type: 'system' });
+      this.emitToUI('combat-log', { message: `Unknown technique: ${techniqueId}`, type: 'system' });
       return;
     }
 
     // Check AP cost
     if (attacker.ap < (technique.apCost || 1)) {
       this.emitToUI('combat-log', {
-        message: `❌ Not enough AP! (need ${technique.apCost})`,
+        message: `Not enough AP! (need ${technique.apCost})`,
         type: 'system'
       });
       return;
     }
 
-    // Get belt bonus
+    // Get belt level and bonus using MartialArtsSystem
     const training = attacker.martialArts?.find(m => m.styleId === styleId);
     const beltLevel = training?.beltLevel || 1;
-    const beltBonus = beltLevel; // Belt bonus = belt level
+    const beltBonus = getBeltBonus(beltLevel);
 
-    // Calculate hit chance
-    const attackerMEL = attacker.mel || 50;
-    const defenderAGL = target.agl || 50;
-    const baseHitChance = attackerMEL + beltBonus + (attacker.str / 4) - (defenderAGL / 3) + 30;
-    const hitChance = Math.max(5, Math.min(95, baseHitChance));
+    // Check technique requirements using canUseTechnique from MartialArtsSystem
+    const currentGrappleState = attacker.grappleState.state;
+    const isStanding = !attacker.statusEffects.find(e => e.type === 'prone');
+    const targetRestrained = target.grappleState.state === GrappleState.RESTRAINED;
+
+    const canUseResult = canUseTechnique(
+      technique as any, // Type cast for compatibility
+      currentGrappleState,
+      isStanding,
+      targetRestrained
+    );
+
+    if (!canUseResult.canUse) {
+      this.emitToUI('combat-log', {
+        message: `Cannot use ${technique.name}: ${canUseResult.reason}`,
+        type: 'system'
+      });
+      return;
+    }
+
+    // Calculate hit chance using MartialArtsSystem
+    const hitChance = calculateTechniqueHitChance(
+      attacker.mel,
+      { STR: attacker.str, AGL: attacker.agl, INS: attacker.ins },
+      styleId as MartialArtsStyleId,
+      beltLevel,
+      target.agl
+    );
 
     // Roll to hit
     const hitRoll = Math.floor(Math.random() * 100);
@@ -4027,24 +4729,27 @@ export class CombatScene extends Phaser.Scene {
 
     attacker.ap -= technique.apCost || 1;
 
+    // Emit technique-used event
+    EventBridge.emit('technique-used', {
+      unitId: attacker.id,
+      techniqueId,
+      targetId: target.id,
+      success: hit,
+    });
+
     if (!hit) {
       this.emitToUI('combat-log', {
-        message: `🥋 ${attacker.name}'s ${technique.name} MISSES! (${hitRoll} vs ${hitChance}%)`,
+        message: `${attacker.name}'s ${technique.name} MISSES! (${hitRoll} vs ${hitChance}%)`,
         type: 'miss'
       });
       this.emitAllUnitsData();
       return;
     }
 
-    // Calculate damage
+    // Calculate damage using MartialArtsSystem
     let damage = 0;
     if (technique.damage) {
-      // Slam technique uses STR directly
-      if (techniqueId === 'tech_slam') {
-        damage = Math.floor(attacker.str * 0.5);
-      } else {
-        damage = technique.damage + Math.floor(attacker.str / 20) + Math.floor(beltLevel / 3);
-      }
+      damage = calculateTechniqueDamage(technique as any, attacker.str, beltLevel);
     }
 
     // Apply damage
@@ -4052,7 +4757,7 @@ export class CombatScene extends Phaser.Scene {
       target.hp -= damage;
       this.updateHealthBar(target);
       this.emitToUI('combat-log', {
-        message: `🥋 ${attacker.name}'s ${technique.name} HITS ${target.name} for ${damage} damage!`,
+        message: `${attacker.name}'s ${technique.name} HITS ${target.name} for ${damage} damage!`,
         type: 'damage'
       });
 
@@ -4061,7 +4766,7 @@ export class CombatScene extends Phaser.Scene {
       this.showFloatingDamage(screenPos.x, screenPos.y, damage, 0xffaa00);
     } else {
       this.emitToUI('combat-log', {
-        message: `🥋 ${attacker.name} executes ${technique.name} on ${target.name}!`,
+        message: `${attacker.name} executes ${technique.name} on ${target.name}!`,
         type: 'attack'
       });
     }
@@ -4069,7 +4774,7 @@ export class CombatScene extends Phaser.Scene {
     // Apply status effects from technique
     if (technique.statusApplied && technique.statusApplied.length > 0) {
       for (const statusId of technique.statusApplied) {
-        // Special handling for choke - determine blood vs air based on technique
+        // Special handling for choke - use checkChokeProgress from MartialArtsSystem
         if (statusId === 'choked') {
           const isBloodChoke = ['tech_blood_choke', 'tech_rear_naked', 'tech_triangle'].includes(techniqueId);
           target.chokeState = {
@@ -4079,7 +4784,7 @@ export class CombatScene extends Phaser.Scene {
           };
           const turnsToKO = isBloodChoke ? 2 : 3;
           this.emitToUI('combat-log', {
-            message: `😰 ${target.name} is in a ${isBloodChoke ? 'BLOOD' : 'AIR'} choke! (${turnsToKO} turns to unconscious)`,
+            message: `${target.name} is in a ${isBloodChoke ? 'BLOOD' : 'AIR'} choke! (${turnsToKO} turns to unconscious)`,
             type: 'status'
           });
         }
@@ -4091,27 +4796,62 @@ export class CombatScene extends Phaser.Scene {
       }
     }
 
-    // Update grapple state if technique sets it
+    // Update grapple state if technique sets it - use transitionGrappleState
     if (technique.setsGrappleState) {
-      const newState = technique.setsGrappleState as GrapplePosition;
-      attacker.grappleState = { position: newState, targetId: target.id };
-      target.grappleState = { position: newState, targetId: attacker.id };
+      const newStateString = technique.setsGrappleState;
+      // Map string state to GrappleState enum
+      const stateMap: Record<string, GrappleState> = {
+        'standing': GrappleState.STANDING,
+        'ground': GrappleState.GROUND,
+        'pinned': GrappleState.PINNED,
+        'restrained': GrappleState.RESTRAINED,
+        'carried': GrappleState.CARRIED,
+        'submission': GrappleState.SUBMISSION,
+      };
+      const newState = stateMap[newStateString] || GrappleState.GROUND;
 
-      if (newState === 'ground' || newState === 'pinned') {
-        // Apply prone to target when taken to ground
-        if (!target.statusEffects.find(e => e.type === 'prone')) {
-          this.applyStatusEffect(target, 'prone');
+      // Check if already in a grapple
+      if (attacker.grappleState.state !== GrappleState.NONE) {
+        // Transition existing grapple
+        this.transitionGrappleState(attacker.id, newState);
+      } else {
+        // Start new grapple
+        attacker.grappleState = { state: newState, targetId: target.id, isAttacker: true, turnStarted: this.roundNumber };
+        target.grappleState = { state: newState, targetId: attacker.id, isAttacker: false, turnStarted: this.roundNumber };
+
+        this.applyStatusEffect(attacker, 'grappled');
+        this.applyStatusEffect(target, 'grappled');
+
+        // Create and store grapple interaction
+        const grappleInteraction: GrappleInteraction = {
+          attackerId: attacker.id,
+          defenderId: target.id,
+          state: newState,
+          turnStarted: this.roundNumber,
+          attackerPosition: newState === GrappleState.SUBMISSION ? 'back' : 'top',
+        };
+        this.activeGrapples.set(attacker.id, { interaction: grappleInteraction, submissionProgress: 0 });
+        EventBridge.emit('grapple-started', grappleInteraction);
+
+        if (newState === GrappleState.GROUND || newState === GrappleState.PINNED) {
+          if (!target.statusEffects.find(e => e.type === 'prone')) {
+            this.applyStatusEffect(target, 'prone');
+          }
         }
-      }
 
-      this.emitToUI('combat-log', {
-        message: `🤼 Grapple position: ${newState.toUpperCase()}`,
-        type: 'status'
-      });
+        const stateDisplay = GRAPPLE_STATE_DISPLAY[newState];
+        this.emitToUI('combat-log', {
+          message: `Grapple position: ${stateDisplay.name}`,
+          type: 'status'
+        });
+      }
     }
 
-    // Check for death
+    // Check for death or submission knockout
     if (target.hp <= 0) {
+      if (attacker.grappleState.state !== GrappleState.NONE) {
+        this.endGrapple(attacker.id, target.id, 'knockout');
+      }
       this.incapacitateUnit(target);
     }
 
@@ -4183,6 +4923,112 @@ export class CombatScene extends Phaser.Scene {
     };
 
     return TECHNIQUE_DATA[styleId]?.[techniqueId] || null;
+  }
+
+  /**
+   * Select the best martial arts technique for the current situation.
+   * Uses smart AI: prioritizes damage, respects grapple/stance requirements.
+   */
+  private selectBestMartialArtsTechnique(
+    attacker: CombatUnit,
+    target: CombatUnit,
+    styleId: string,
+    beltLevel: number
+  ): { id: string; name: string; damage?: number } | null {
+    // Get all techniques for this style (from hardcoded data)
+    const TECHNIQUE_DATA: Record<string, Record<string, any>> = {
+      grappling: {
+        tech_double_leg: { id: 'tech_double_leg', name: 'Double Leg', apCost: 2, damage: 7, beltRequired: 1, setsGrappleState: 'ground' },
+        tech_takedown: { id: 'tech_takedown', name: 'Takedown', apCost: 2, damage: 5, beltRequired: 2, statusApplied: ['prone'], setsGrappleState: 'ground' },
+        tech_hip_throw: { id: 'tech_hip_throw', name: 'Hip Throw', apCost: 2, damage: 8, beltRequired: 3, statusApplied: ['prone'], setsGrappleState: 'ground' },
+        tech_suplex: { id: 'tech_suplex', name: 'Suplex', apCost: 3, damage: 15, beltRequired: 5, statusApplied: ['prone', 'stunned'], setsGrappleState: 'ground' },
+        tech_slam: { id: 'tech_slam', name: 'Slam', apCost: 3, damage: 12, beltRequired: 4, setsGrappleState: 'ground' },
+        tech_pile_driver: { id: 'tech_pile_driver', name: 'Pile Driver', apCost: 4, damage: 30, beltRequired: 8, statusApplied: ['stunned', 'prone'], setsGrappleState: 'ground' },
+      },
+      submission: {
+        tech_shoot: { id: 'tech_shoot', name: 'Shoot', apCost: 2, damage: 6, beltRequired: 1, setsGrappleState: 'ground' },
+        tech_armbar: { id: 'tech_armbar', name: 'Armbar', apCost: 2, damage: 10, beltRequired: 2, requiresGrapple: true, setsGrappleState: 'submission' },
+        tech_triangle: { id: 'tech_triangle', name: 'Triangle Choke', apCost: 2, damage: 8, beltRequired: 3, requiresGrapple: true, statusApplied: ['choked'] },
+        tech_kimura: { id: 'tech_kimura', name: 'Kimura', apCost: 2, damage: 15, beltRequired: 4, requiresGrapple: true },
+        tech_heel_hook: { id: 'tech_heel_hook', name: 'Heel Hook', apCost: 2, damage: 20, beltRequired: 6, requiresGrapple: true },
+        tech_neck_crank: { id: 'tech_neck_crank', name: 'Neck Crank', apCost: 3, damage: 25, beltRequired: 7, requiresGrapple: true },
+      },
+      internal: {
+        tech_palm_strike: { id: 'tech_palm_strike', name: 'Palm Strike', apCost: 1, damage: 8, beltRequired: 1, requiresStanding: true },
+        tech_joint_lock: { id: 'tech_joint_lock', name: 'Joint Lock', apCost: 2, damage: 10, beltRequired: 2, requiresStanding: true },
+        tech_qi_disruption: { id: 'tech_qi_disruption', name: 'Qi Disruption', apCost: 2, damage: 12, beltRequired: 3, requiresStanding: true },
+        tech_iron_palm: { id: 'tech_iron_palm', name: 'Iron Palm', apCost: 2, damage: 15, beltRequired: 5, requiresStanding: true },
+        tech_dim_mak: { id: 'tech_dim_mak', name: 'Dim Mak', apCost: 4, damage: 35, beltRequired: 8, requiresStanding: true },
+      },
+      counter: {
+        tech_eye_jab: { id: 'tech_eye_jab', name: 'Eye Jab', apCost: 1, damage: 5, beltRequired: 1, requiresStanding: true },
+        tech_low_kick: { id: 'tech_low_kick', name: 'Low Kick', apCost: 1, damage: 10, beltRequired: 2, requiresStanding: true },
+        tech_throat_strike: { id: 'tech_throat_strike', name: 'Throat Strike', apCost: 2, damage: 15, beltRequired: 4, requiresStanding: true },
+        tech_simultaneous: { id: 'tech_simultaneous', name: 'Simultaneous Attack', apCost: 3, damage: 20, beltRequired: 6, requiresStanding: true },
+      },
+      striking: {
+        tech_jab: { id: 'tech_jab', name: 'Jab', apCost: 1, damage: 5, beltRequired: 1, requiresStanding: true },
+        tech_cross: { id: 'tech_cross', name: 'Cross', apCost: 1, damage: 10, beltRequired: 2, requiresStanding: true },
+        tech_hook: { id: 'tech_hook', name: 'Hook', apCost: 1, damage: 12, beltRequired: 3, requiresStanding: true },
+        tech_uppercut: { id: 'tech_uppercut', name: 'Uppercut', apCost: 2, damage: 15, beltRequired: 4, requiresStanding: true },
+        tech_elbow: { id: 'tech_elbow', name: 'Elbow Strike', apCost: 1, damage: 12, beltRequired: 3, requiresStanding: true },
+        tech_knee: { id: 'tech_knee', name: 'Knee Strike', apCost: 2, damage: 18, beltRequired: 5, requiresGrapple: true },
+        tech_spinning_back: { id: 'tech_spinning_back', name: 'Spinning Back Fist', apCost: 2, damage: 20, beltRequired: 6, requiresStanding: true },
+        tech_superman_punch: { id: 'tech_superman_punch', name: 'Superman Punch', apCost: 3, damage: 25, beltRequired: 8, requiresStanding: true },
+      },
+    };
+
+    const styleTechs = TECHNIQUE_DATA[styleId];
+    if (!styleTechs) return null;
+
+    // Get attacker's current state
+    const isInGrapple = attacker.grappleState.state !== GrappleState.NONE;
+    const isStanding = !attacker.statusEffects.some(e => e.type === 'prone');
+
+    // Filter techniques by:
+    // 1. Belt level requirement
+    // 2. AP cost
+    // 3. Grapple requirement
+    // 4. Standing requirement
+    const usableTechniques = Object.values(styleTechs).filter((tech: any) => {
+      // Check belt requirement
+      if (tech.beltRequired && tech.beltRequired > beltLevel) return false;
+
+      // Check AP
+      if (tech.apCost && tech.apCost > attacker.ap) return false;
+
+      // Check grapple requirement
+      if (tech.requiresGrapple && !isInGrapple) return false;
+
+      // Check standing requirement
+      if (tech.requiresStanding && !isStanding) return false;
+
+      return true;
+    });
+
+    if (usableTechniques.length === 0) return null;
+
+    // Smart AI: If not in grapple but have high-damage grapple techniques, use initiator
+    if (!isInGrapple) {
+      const grappleInitiators = usableTechniques.filter((t: any) =>
+        t.setsGrappleState && !t.requiresGrapple && (t.damage || 0) > 0
+      );
+      if (grappleInitiators.length > 0) {
+        // Check if style has high-damage grapple techniques worth setting up
+        const grappleDamageTechs = Object.values(styleTechs).filter((t: any) =>
+          t.requiresGrapple && (t.damage || 0) >= 15
+        );
+        if (grappleDamageTechs.length > 0) {
+          // Use the initiator to set up the combo
+          return grappleInitiators[0] as { id: string; name: string; damage?: number };
+        }
+      }
+    }
+
+    // Sort by damage (highest first)
+    usableTechniques.sort((a: any, b: any) => (b.damage || 0) - (a.damage || 0));
+
+    return usableTechniques[0] as { id: string; name: string; damage?: number };
   }
 
   private onTileHover(x: number, y: number): void {
@@ -5162,7 +6008,10 @@ export class CombatScene extends Phaser.Scene {
 
     // Handle wall collision damage
     if (hitWall) {
-      const wallDamage = Math.floor(remainingKnockback * 12); // 12 damage per tile of remaining knockback
+      // GAP 3 FIX: Scale wall damage with target weight (heavier = more impact damage)
+      // Formula: remainingKnockback * (8 + weight/500) - heavier units hit harder
+      const targetWeight = getCharacterWeight(target.str || 15);
+      const wallDamage = Math.floor(remainingKnockback * (8 + targetWeight / 500));
       target.hp = Math.max(0, target.hp - wallDamage);
       this.updateHealthBar(target);
 
@@ -5306,6 +6155,23 @@ export class CombatScene extends Phaser.Scene {
         actor: target.name,
         actorTeam: target.team,
         message: `${target.name} is knocked back ${actualKnockback} tiles!`,
+      });
+    }
+
+    // GAP 2 FIX: Apply prone status if knockback >= 3 tiles (unit loses footing)
+    if (knockbackDistance >= 3 && target.hp > 0 && !target.statusEffects.find(e => e.type === 'prone')) {
+      this.applyStatusEffect(target, 'prone');
+      this.emitToUI('combat-log', {
+        message: `${target.name} knocked PRONE from the impact!`,
+        type: 'status'
+      });
+      EventBridge.emit('log-entry', {
+        id: `knockback_prone_${Date.now()}`,
+        timestamp: Date.now(),
+        type: 'status',
+        actor: target.name,
+        actorTeam: target.team,
+        message: `${target.name} is knocked prone!`,
       });
     }
 
@@ -5648,8 +6514,66 @@ export class CombatScene extends Phaser.Scene {
       return;
     }
 
+    // === MARTIAL ARTS AUTO-SELECTION ===
+    // In melee range, martial artists use techniques automatically
+    const isMeleeRange = dist <= 2;
+    if (isMeleeRange && attacker.martialArts && attacker.martialArts.length > 0) {
+      // Get the attacker's primary martial arts style (first one)
+      const primaryTraining = attacker.martialArts[0];
+      const styleId = primaryTraining.styleId;
+      const beltLevel = primaryTraining.beltLevel || 1;
+
+      // Get the best available technique for this situation
+      const technique = this.selectBestMartialArtsTechnique(attacker, target, styleId, beltLevel);
+
+      if (technique) {
+        // Use martial arts technique instead of weapon
+        this.executeMartialArtsTechnique(attackerId, targetId, technique.id, styleId);
+        if (callback) callback();
+        return;
+      }
+      // If no suitable technique, fall through to normal weapon attack
+    }
+
     attacker.ap -= apCost;
     this.animating = true;
+
+    // Generate escalation heat for player team attacks
+    // Only player actions generate heat (enemies are already responding)
+    if (attacker.team === this.playerTeam && this.escalationEnabled) {
+      // Base heat depends on weapon loudness
+      const weaponTypeLC = attacker.weapon.toLowerCase();
+      let baseHeat = 5; // Default for unknown weapons
+
+      if (weaponTypeLC.includes('rpg') || weaponTypeLC.includes('rocket') || weaponTypeLC.includes('grenade')) {
+        baseHeat = 25; // Explosives are LOUD
+      } else if (weaponTypeLC.includes('sniper') || weaponTypeLC.includes('rifle')) {
+        baseHeat = 15; // Rifles are loud
+      } else if (weaponTypeLC.includes('shotgun')) {
+        baseHeat = 12; // Shotguns are loud
+      } else if (weaponTypeLC.includes('smg')) {
+        baseHeat = 10; // SMGs are moderately loud
+      } else if (weaponTypeLC.includes('pistol')) {
+        baseHeat = 8; // Pistols are less loud
+      } else if (weaponTypeLC.includes('beam') || weaponTypeLC.includes('laser') || weaponTypeLC.includes('plasma')) {
+        baseHeat = 5; // Energy weapons are quieter
+      } else if (weaponTypeLC.includes('melee') || weaponTypeLC.includes('fist') || weaponTypeLC.includes('sword')) {
+        baseHeat = 2; // Melee is very quiet
+      }
+
+      // Apply INS modifier: high INS = cleaner operator = less heat
+      // Also checks for suppressed weapons
+      const isSuppressed = weaponTypeLC.includes('suppressed') || weaponTypeLC.includes('silenced');
+      const heat = calculateHeatGenerated(baseHeat, {
+        stats: { INS: attacker.ins || 50 },
+        weapon: {
+          suppressedModifiers: isSuppressed ? { soundReduction: 0.5 } : undefined,
+          damageType: undefined, // Could check for stun weapons
+        },
+      });
+
+      this.addEscalationHeat(heat, `${attacker.name} fired ${attacker.weapon}`);
+    }
 
     // Play weapon sound based on weapon type
     const weaponType = attacker.weapon.toLowerCase();
@@ -5896,6 +6820,38 @@ export class CombatScene extends Phaser.Scene {
         }
       }
 
+      // === ZOMBIE HEADSHOT MECHANICS ===
+      // Zombies take reduced damage from body shots - you gotta hit 'em in the head!
+      if (didHit && damage > 0 && isZombie(target)) {
+        const targetZombieType = getZombieType(target);
+        if (targetZombieType) {
+          const zombieDamageResult = calculateZombieDamage(
+            damage,
+            isCrit,
+            targetZombieType,
+            damageTypeDef?.id
+          );
+
+          const originalDamage = damage;
+          damage = zombieDamageResult.finalDamage;
+
+          if (zombieDamageResult.wasHeadshot) {
+            // HEADSHOT! Double damage
+            this.emitToUI('combat-log', {
+              message: `🎯💀 HEADSHOT! ${originalDamage} -> ${damage} damage!`,
+              type: 'critical'
+            });
+            this.playSound('impact.critical', target.position);
+          } else if (zombieDamageResult.bodyDamageReduction > 0) {
+            // Body shot - reduced damage
+            this.emitToUI('combat-log', {
+              message: `🧟 Body shot! ${target.name} shrugs it off (${Math.round(zombieDamageResult.bodyDamageReduction * 100)}% reduced)`,
+              type: 'status'
+            });
+          }
+        }
+      }
+
       // === TRACK COMBAT STATS ===
       const attackerTeam = attacker.team as 'blue' | 'red';
       const targetTeam = target.team as 'blue' | 'red';
@@ -5931,6 +6887,9 @@ export class CombatScene extends Phaser.Scene {
         if (this.combatStats.damageByUnit[target.name].taken > this.combatStats.mostDamageTaken.damage) {
           this.combatStats.mostDamageTaken = { unit: target.name, damage: this.combatStats.damageByUnit[target.name].taken };
         }
+
+        // Record damage for game mode scoring
+        this.recordGameModeDamage(attackerTeam, damage);
       } else {
         this.combatStats.misses[attackerTeam]++;
       }
@@ -5949,6 +6908,39 @@ export class CombatScene extends Phaser.Scene {
         const damageSystemType = getDamageSystemType(attacker.weapon);
         if (damageSystemType && target.hp > 0) {
           this.applyDamageTypeEffects(target, damageSystemType, damage, isCrit);
+        }
+
+        // ZOMBIE INFECTION: Roll for infection when zombie bites
+        if (this.zombiesEnabled && isZombie(attacker) && target.hp > 0 && !isZombie(target)) {
+          const infection = rollForInfection(attacker, target, isCrit);
+          if (infection) {
+            target.statusEffects.push(infection);
+            const severity = infection.metadata?.severity || 'mild';
+
+            this.emitToUI('combat-log', {
+              message: `🧟 ${target.name} has been INFECTED! (${severity})`,
+              type: 'critical'
+            });
+
+            // Visual indicator
+            const infectedText = this.add.text(tx, ty - 40, `INFECTED!`, {
+              fontSize: '14px',
+              color: '#00ff00',
+              fontStyle: 'bold',
+              stroke: '#000000',
+              strokeThickness: 2,
+            });
+            infectedText.setOrigin(0.5, 1);
+            infectedText.setDepth(201);
+            this.tweens.add({
+              targets: infectedText,
+              y: ty - 80,
+              alpha: 0,
+              duration: 1500,
+              ease: 'Power2',
+              onComplete: () => infectedText.destroy(),
+            });
+          }
         }
 
         // INJURY ROLL: Every hit can cause additional injuries beyond HP damage
@@ -6649,6 +7641,19 @@ export class CombatScene extends Phaser.Scene {
       }
     }
 
+    // Record faction kill for escalation (if victim is police/SWAT/military)
+    if (this.escalationEnabled && unit.factionType) {
+      const factionType = unit.factionType.toLowerCase();
+      if (factionType === 'police' || factionType === 'swat' || factionType === 'military') {
+        this.recordEscalationKill(factionType);
+      }
+    }
+
+    // Record kill for game mode scoring
+    if (killerTeam) {
+      this.recordGameModeKill(killerTeam, unit.factionType);
+    }
+
     // Clear tile
     this.tiles[unit.position.y][unit.position.x].occupant = undefined;
 
@@ -6724,6 +7729,31 @@ export class CombatScene extends Phaser.Scene {
       targetTeam: killer?.team,
       message: `💀 ${unit.name} has been KILLED by ${killer?.name || 'unknown'}!`,
     });
+
+    // Track corpse for potential zombie reanimation
+    if (this.zombiesEnabled && !isZombie(unit)) {
+      const wasInfected = unit.statusEffects.some(e => e.id === 'infected');
+      const wasBitten = weapon === 'Zombie Bite' || weapon === 'Ravening Bite';
+      const isOrganic = unit.origin !== 'robotic' && unit.origin !== 'construct' && unit.origin !== 'energy';
+
+      if (isOrganic) {
+        this.pendingCorpses.push({
+          unitId: unit.id,
+          originalUnit: { ...unit }, // Deep-ish copy
+          position: { ...unit.position },
+          wasInfected,
+          wasBitten,
+          roundOfDeath: this.roundNumber,
+          isOrganic,
+        });
+
+        console.log(`[ZOMBIE] Corpse tracked: ${unit.name}`, {
+          infected: wasInfected,
+          bitten: wasBitten,
+          organic: isOrganic,
+        });
+      }
+    }
 
     this.units.delete(unitId);
     this.emitAllUnitsData();
@@ -6855,6 +7885,7 @@ export class CombatScene extends Phaser.Scene {
   // ==================== TURN MANAGEMENT ====================
 
   private combatEnded: boolean = false;
+  private missionContext?: { sector: string; city: string; country: string };
 
   private checkVictory(): boolean {
     const blueAlive = Array.from(this.units.values()).filter(u => u.team === 'blue' && u.hp > 0);
@@ -6878,6 +7909,18 @@ export class CombatScene extends Phaser.Scene {
     const winnerName = winner === 'blue' ? 'BLUE TEAM' : 'RED TEAM';
     const emoji = winner === 'blue' ? '🔵' : '🔴';
 
+    // Build enhanced combat result for strategic layer integration
+    const enhancedResult: EnhancedCombatResult = buildEnhancedCombatResult(
+      winner,
+      this.roundNumber,
+      this.units,
+      this.combatStats,
+      this.missionContext
+    );
+
+    // Log comprehensive summary to console
+    logCombatResultSummary(enhancedResult);
+
     EventBridge.emit('log-entry', {
       id: `victory_${Date.now()}`,
       timestamp: Date.now(),
@@ -6886,10 +7929,14 @@ export class CombatScene extends Phaser.Scene {
       message: `🏆 VICTORY! ${emoji} ${winnerName} WINS! 🏆`,
     });
 
+    // Emit legacy combat-ended event (backwards compatibility)
     EventBridge.emit('combat-ended', {
       winner,
       round: this.roundNumber,
     });
+
+    // Emit new enhanced combat-complete event for strategic layer
+    EventBridge.emit('combat-complete', enhancedResult);
 
     // Show victory text on screen
     const centerX = this.cameras.main.width / 2;
@@ -6913,7 +7960,7 @@ export class CombatScene extends Phaser.Scene {
       repeat: 2,
     });
 
-    console.log(`[COMBAT] Combat ended! Winner: ${winner}`);
+    console.log(`[COMBAT] Combat ended! Winner: ${winner}. Enhanced result emitted.`);
   }
 
   private endTurn(): void {
@@ -7037,6 +8084,12 @@ export class CombatScene extends Phaser.Scene {
 
     this.emitAllUnitsData();
     this.setActionMode('idle');
+
+    // Process escalation at end of player's turn (before team switch notification)
+    this.processEscalation();
+
+    // Process game mode round (scoring, wave spawning, conditions)
+    this.processGameModeRound();
 
     // If AI vs AI mode or enemy turn, run AI
     console.log(`[AI] endTurn complete. aiVsAi=${this.aiVsAi}, currentTeam=${this.currentTeam}, playerTeam=${this.playerTeam}`);
@@ -7444,6 +8497,1051 @@ export class CombatScene extends Phaser.Scene {
     }));
 
     EventBridge.emit('all-units-updated', unitsData);
+  }
+
+  // ==================== ESCALATION SYSTEM METHODS ====================
+
+  /**
+   * Initialize escalation system for this combat
+   * Called after map is generated and location context is set
+   */
+  private initializeEscalationSystem(): void {
+    if (!this.locationContext) {
+      console.log('[ESCALATION] No location context - escalation disabled');
+      return;
+    }
+
+    const { city, country } = this.locationContext;
+
+    // Build city response profile from real city/country data
+    this.cityResponseProfile = buildCityResponseProfile(city, country);
+
+    // Initialize escalation state
+    this.escalationState = initializeEscalation(this.cityResponseProfile, this.roundNumber);
+    this.escalationEnabled = true;
+    this.factionKills = createEmptyFactionKills();
+
+    // Initialize entry points (map edges)
+    this.initializeEntryPoints();
+
+    console.log('[ESCALATION] System initialized:', {
+      city: city.name,
+      country: country.name,
+      policeDelay: this.cityResponseProfile.policeResponseTurns,
+      swatDelay: this.cityResponseProfile.swatResponseTurns,
+    });
+
+    // Emit initial state to UI
+    this.emitEscalationState();
+  }
+
+  /**
+   * Initialize reinforcement entry points (map edges)
+   */
+  private initializeEntryPoints(): void {
+    this.entryPoints = {
+      north: [],
+      south: [],
+      east: [],
+      west: [],
+    };
+
+    // North edge (y = 0)
+    for (let x = 0; x < this.mapWidth; x++) {
+      const tile = this.tiles[0]?.[x];
+      if (tile && TERRAIN_TYPES[tile.terrain].walkable && !tile.occupant) {
+        this.entryPoints.north.push({ x, y: 0 });
+      }
+    }
+
+    // South edge (y = mapHeight - 1)
+    for (let x = 0; x < this.mapWidth; x++) {
+      const tile = this.tiles[this.mapHeight - 1]?.[x];
+      if (tile && TERRAIN_TYPES[tile.terrain].walkable && !tile.occupant) {
+        this.entryPoints.south.push({ x, y: this.mapHeight - 1 });
+      }
+    }
+
+    // West edge (x = 0)
+    for (let y = 0; y < this.mapHeight; y++) {
+      const tile = this.tiles[y]?.[0];
+      if (tile && TERRAIN_TYPES[tile.terrain].walkable && !tile.occupant) {
+        this.entryPoints.west.push({ x: 0, y });
+      }
+    }
+
+    // East edge (x = mapWidth - 1)
+    for (let y = 0; y < this.mapHeight; y++) {
+      const tile = this.tiles[y]?.[this.mapWidth - 1];
+      if (tile && TERRAIN_TYPES[tile.terrain].walkable && !tile.occupant) {
+        this.entryPoints.east.push({ x: this.mapWidth - 1, y });
+      }
+    }
+
+    console.log('[ESCALATION] Entry points initialized:', {
+      north: this.entryPoints.north.length,
+      south: this.entryPoints.south.length,
+      east: this.entryPoints.east.length,
+      west: this.entryPoints.west.length,
+    });
+  }
+
+  /**
+   * Process escalation at end of round (player's turn ending)
+   */
+  private processEscalation(): void {
+    if (!this.escalationEnabled || !this.escalationState || !this.cityResponseProfile) {
+      return;
+    }
+
+    // Only process at end of player's turn
+    if (this.currentTeam !== this.playerTeam) return;
+
+    console.log('[ESCALATION] Processing turn', this.roundNumber);
+
+    // Get blue team characters for opinion generation
+    const blueUnits = Array.from(this.units.values())
+      .filter(u => u.team === 'blue' && u.hp > 0)
+      .map(u => ({
+        id: u.id,
+        name: u.name,
+        calling: (u as any).calling || 'Mercenary',
+      }));
+
+    // Process the turn
+    const result = processEscalationTurn(
+      this.escalationState,
+      this.cityResponseProfile,
+      this.roundNumber
+    );
+
+    this.escalationState = result.state;
+
+    // Handle warnings
+    for (const warning of result.events.warnings) {
+      console.log(`[ESCALATION] Warning: ${warning.faction} arriving in ${warning.turnsUntil} turns`);
+
+      EventBridge.emit('escalation:wave-warning', {
+        wave: {
+          id: `wave-${warning.faction}-${this.roundNumber}`,
+          factionId: warning.faction as 'police' | 'swat' | 'military',
+          turnToArrive: this.roundNumber + warning.turnsUntil,
+          unitCount: warning.size,
+          announced: true,
+        },
+        turnsUntil: warning.turnsUntil,
+        message: this.getReinforcementWarningMessage(warning.faction),
+      });
+
+      // Show in-game notification
+      EventBridge.emit('log-entry', {
+        id: `escalation_warning_${Date.now()}`,
+        timestamp: Date.now(),
+        type: 'system',
+        actor: 'System',
+        message: this.getReinforcementWarningMessage(warning.faction),
+      });
+    }
+
+    // Handle arrivals - SPAWN REINFORCEMENTS
+    for (const arrival of result.events.arrivals) {
+      console.log(`[ESCALATION] ${arrival.faction} ARRIVED (${arrival.size} units from ${arrival.entryPoint})`);
+
+      this.spawnReinforcements(
+        arrival.faction as 'police' | 'swat' | 'military',
+        arrival.size,
+        arrival.entryPoint as 'north' | 'south' | 'east' | 'west'
+      );
+
+      EventBridge.emit('escalation:wave-arrived', {
+        wave: {
+          id: `wave-${arrival.faction}-${this.roundNumber}`,
+          factionId: arrival.faction as 'police' | 'swat' | 'military',
+          turnToArrive: this.roundNumber,
+          unitCount: arrival.size,
+          announced: true,
+        },
+        message: this.getReinforcementArrivalMessage(arrival.faction),
+      });
+
+      // Show in-game notification
+      EventBridge.emit('log-entry', {
+        id: `escalation_arrival_${Date.now()}`,
+        timestamp: Date.now(),
+        type: 'system',
+        actor: 'System',
+        message: this.getReinforcementArrivalMessage(arrival.faction),
+      });
+    }
+
+    // Emit updated state to UI
+    this.emitEscalationState();
+  }
+
+  /**
+   * Spawn reinforcement units at map edge
+   */
+  private spawnReinforcements(
+    faction: 'police' | 'swat' | 'military',
+    count: number,
+    entryDirection: 'north' | 'south' | 'east' | 'west'
+  ): void {
+    const entryPoints = this.entryPoints[entryDirection];
+    if (entryPoints.length === 0) {
+      console.warn(`[ESCALATION] No valid entry points from ${entryDirection}`);
+      return;
+    }
+
+    console.log(`[ESCALATION] Spawning ${count} ${faction} units from ${entryDirection}`);
+
+    // Get available spawn points (not occupied)
+    const availablePoints = entryPoints.filter(pos => {
+      const tile = this.tiles[pos.y]?.[pos.x];
+      return tile && !tile.occupant;
+    });
+
+    // Spawn units
+    for (let i = 0; i < Math.min(count, availablePoints.length); i++) {
+      const pos = availablePoints[i];
+      const unitData = this.generateReinforcementUnit(faction, i);
+
+      this.spawnUnit({
+        id: `${faction}-${this.roundNumber}-${i}`,
+        name: unitData.name,
+        team: 'red', // Reinforcements are hostile to player
+        position: pos,
+        hp: unitData.hp,
+        maxHp: unitData.hp,
+        ap: unitData.ap,
+        maxAp: unitData.ap,
+        weapon: unitData.weapon,
+        dr: unitData.dr,
+        stoppingPower: unitData.stoppingPower,
+        personality: 'tactical',
+        str: unitData.str,
+        agl: unitData.agl,
+        int: unitData.int,
+        sta: unitData.sta,
+        ins: unitData.ins,
+        con: unitData.con,
+        mel: unitData.mel,
+        factionType: faction, // Track faction for escalation kills
+      });
+
+      console.log(`[ESCALATION] Spawned ${unitData.name} at (${pos.x}, ${pos.y})`);
+    }
+
+    // Update fog of war and unit display
+    this.updateFogOfWar();
+    this.emitAllUnitsData();
+  }
+
+  /**
+   * Generate a reinforcement unit based on faction
+   */
+  private generateReinforcementUnit(faction: 'police' | 'swat' | 'military', index: number): {
+    name: string;
+    hp: number;
+    ap: number;
+    weapon: string;
+    dr: number;
+    stoppingPower: number;
+    str: number;
+    agl: number;
+    int: number;
+    sta: number;
+    ins: number;
+    con: number;
+    mel: number;
+  } {
+    switch (faction) {
+      case 'police':
+        return {
+          name: `Officer ${index + 1}`,
+          hp: 60,
+          ap: 5,
+          weapon: 'pistol',
+          dr: 2,
+          stoppingPower: 2,
+          str: 45 + Math.floor(Math.random() * 15),
+          agl: 45 + Math.floor(Math.random() * 15),
+          int: 40 + Math.floor(Math.random() * 15),
+          sta: 45 + Math.floor(Math.random() * 15),
+          ins: 40 + Math.floor(Math.random() * 15),
+          con: 40 + Math.floor(Math.random() * 15),
+          mel: 35 + Math.floor(Math.random() * 15),
+        };
+
+      case 'swat':
+        return {
+          name: `SWAT ${index + 1}`,
+          hp: 80,
+          ap: 6,
+          weapon: 'smg',
+          dr: 8,
+          stoppingPower: 8,
+          str: 55 + Math.floor(Math.random() * 15),
+          agl: 55 + Math.floor(Math.random() * 15),
+          int: 50 + Math.floor(Math.random() * 15),
+          sta: 55 + Math.floor(Math.random() * 15),
+          ins: 50 + Math.floor(Math.random() * 15),
+          con: 55 + Math.floor(Math.random() * 15),
+          mel: 50 + Math.floor(Math.random() * 15),
+        };
+
+      case 'military':
+        return {
+          name: `Soldier ${index + 1}`,
+          hp: 100,
+          ap: 7,
+          weapon: 'rifle',
+          dr: 12,
+          stoppingPower: 12,
+          str: 60 + Math.floor(Math.random() * 20),
+          agl: 55 + Math.floor(Math.random() * 20),
+          int: 50 + Math.floor(Math.random() * 20),
+          sta: 60 + Math.floor(Math.random() * 20),
+          ins: 55 + Math.floor(Math.random() * 20),
+          con: 60 + Math.floor(Math.random() * 20),
+          mel: 55 + Math.floor(Math.random() * 20),
+        };
+    }
+  }
+
+  /**
+   * Add heat from combat action
+   */
+  public addEscalationHeat(amount: number, reason: string): void {
+    if (!this.escalationEnabled || !this.escalationState || !this.cityResponseProfile) {
+      return;
+    }
+
+    const oldHeat = this.escalationState.heat;
+    this.escalationState = addHeat(this.escalationState, this.cityResponseProfile, amount);
+    const newHeat = this.escalationState.heat;
+
+    if (newHeat !== oldHeat) {
+      console.log(`[ESCALATION] Heat: ${oldHeat} -> ${newHeat} (${reason})`);
+
+      EventBridge.emit('escalation:heat-changed', {
+        oldHeat,
+        newHeat,
+        reason,
+      });
+
+      // Check for star changes
+      const oldStars = Math.floor(oldHeat / 20);
+      const newStars = Math.floor(newHeat / 20);
+      if (newStars !== oldStars) {
+        EventBridge.emit('escalation:stars-changed', { oldStars, newStars });
+
+        EventBridge.emit('log-entry', {
+          id: `escalation_stars_${Date.now()}`,
+          timestamp: Date.now(),
+          type: 'system',
+          actor: 'System',
+          message: newStars > oldStars
+            ? `⭐ Wanted level increased to ${newStars} stars!`
+            : `⭐ Wanted level decreased to ${newStars} stars`,
+        });
+      }
+
+      this.emitEscalationState();
+    }
+  }
+
+  /**
+   * Track faction kills for consequence calculation
+   */
+  public recordEscalationKill(victimFaction: string): void {
+    if (!this.escalationEnabled) return;
+
+    this.factionKills = recordFactionKill(this.factionKills, victimFaction);
+    console.log('[ESCALATION] Recorded kill:', victimFaction, this.factionKills);
+  }
+
+  /**
+   * Emit current escalation state to UI (EscalationHUD)
+   */
+  private emitEscalationState(): void {
+    if (!this.escalationState) return;
+
+    const state = this.escalationState;
+
+    // Build incoming waves list
+    const incomingWaves: EscalationWave[] = state.reinforcements.waves
+      .filter(w => w.arrivalTurn > this.roundNumber)
+      .map(w => ({
+        id: `wave-${w.faction}-${w.arrivalTurn}`,
+        factionId: w.faction as 'police' | 'swat' | 'military',
+        turnToArrive: w.arrivalTurn,
+        unitCount: w.size,
+        announced: true,
+      }));
+
+    // Get escape options
+    const escapeOptions = this.getEscapeOptionsForUI();
+
+    // Calculate turns until next wave
+    const turnsUntilNextWave = incomingWaves.length > 0
+      ? Math.min(...incomingWaves.map(w => w.turnToArrive - this.roundNumber))
+      : null;
+
+    const displayState: EscalationDisplayState = {
+      heat: state.heat,
+      maxHeat: 100,
+      stars: state.stars,
+      incomingWaves,
+      escapeOptions,
+      isChoicePoint: false, // TODO: Set true when police first arrive
+      turnsUntilNextWave,
+    };
+
+    EventBridge.emit('escalation:update', displayState);
+  }
+
+  /**
+   * Get escape options formatted for UI
+   */
+  private getEscapeOptionsForUI(): UIEscapeOption[] {
+    if (!this.cityResponseProfile) return [];
+
+    // Get available options from escalation system
+    const options = getAvailableEscapeOptions(
+      this.cityResponseProfile.cityType,
+      {}, // TODO: Pass real faction standings
+      {}, // TODO: Pass inventory
+      {} // TODO: Pass squad skills
+    );
+
+    return options.map(opt => ({
+      id: opt.id,
+      type: opt.type,
+      label: opt.label,
+      description: opt.description,
+      available: opt.available,
+      requirements: opt.requirements,
+      successChance: opt.successChance,
+    }));
+  }
+
+  private getReinforcementWarningMessage(faction: string): string {
+    switch (faction) {
+      case 'police': return '⚠️ Police sirens in the distance!';
+      case 'swat': return '🚨 SWAT team inbound!';
+      case 'military': return '⚠️ Military convoy approaching!';
+      default: return '⚠️ Reinforcements approaching!';
+    }
+  }
+
+  private getReinforcementArrivalMessage(faction: string): string {
+    switch (faction) {
+      case 'police': return '🚔 POLICE HAVE ARRIVED!';
+      case 'swat': return '🚨 SWAT TEAM BREACHING!';
+      case 'military': return '🪖 MILITARY FORCES ENGAGING!';
+      default: return '❗ Reinforcements have arrived!';
+    }
+  }
+
+  // ==================== GAME MODE SYSTEM METHODS ====================
+
+  /**
+   * Initialize game mode system
+   * Reads mode from scene data or defaults to elimination
+   */
+  private initializeGameMode(): void {
+    // Check if game mode was passed in scene data
+    const sceneData = this.scene.settings.data as any;
+    const requestedMode = sceneData?.gameMode as GameModeId | undefined;
+
+    if (requestedMode && GAME_MODES[requestedMode]) {
+      this.gameModeId = requestedMode;
+    } else {
+      this.gameModeId = 'elimination';
+    }
+
+    // Initialize game mode state
+    this.gameModeState = initializeGameMode(this.gameModeId, this.mapWidth, this.mapHeight);
+
+    // Reset score
+    this.gameModeScore = {
+      kills: 0,
+      roundsSurvived: 0,
+      objectivesCompleted: 0,
+      extractionBonus: 0,
+      damageDealt: 0,
+      damageTaken: 0,
+      factionKills: { police: 0, swat: 0, military: 0 },
+      total: 0,
+    };
+
+    // Mode-specific initialization
+    const config = GAME_MODES[this.gameModeId];
+
+    // Set escalation enabled based on mode
+    if (config.settings.enableEscalation) {
+      // Escalation was already initialized, but set starting heat
+      if (this.escalationState && config.settings.startingHeat) {
+        this.addEscalationHeat(config.settings.startingHeat, 'Starting heat');
+      }
+    }
+
+    // For gauntlet and last_stand, generate first wave
+    if (this.gameModeId === 'escalation_gauntlet' || this.gameModeId === 'last_stand') {
+      this.gauntletWaveCount = 0;
+      this.currentGauntletWave = generateGauntletWave(1);
+    }
+
+    // For outbreak mode, initialize zombie system
+    if (this.gameModeId === 'outbreak' || config.settings.enableZombies) {
+      this.zombiesEnabled = true;
+      this.zombieWaveCount = 0;
+      this.currentZombieWave = generateZombieWave(1);
+      this.pendingCorpses = [];
+      this.totalReanimations = 0;
+
+      // Spawn initial zombies
+      if (config.settings.initialZombieCount) {
+        this.spawnInitialZombies(config.settings.initialZombieCount);
+      }
+
+      console.log('[ZOMBIE] Outbreak mode initialized:', {
+        initialCount: config.settings.initialZombieCount || 0,
+        reanimation: config.settings.reanimationEnabled,
+        infection: config.settings.infectionEnabled,
+      });
+    }
+
+    console.log('[GAME MODE] Initialized:', {
+      mode: this.gameModeId,
+      name: config.name,
+      escalation: config.settings.enableEscalation,
+      startingHeat: config.settings.startingHeat || 0,
+      zombies: this.zombiesEnabled,
+    });
+
+    // Emit game mode state to UI
+    this.emitGameModeState();
+  }
+
+  // ==================== ZOMBIE OUTBREAK METHODS ====================
+
+  /**
+   * Spawn initial zombies for Outbreak mode
+   */
+  private spawnInitialZombies(count: number): void {
+    console.log(`[ZOMBIE] Spawning ${count} initial zombies...`);
+
+    // Get spawn positions from map (use enemy spawn zones)
+    const enemySpawns = getSpawnPositions(this.tiles, 'enemy');
+    const spawnPositions = enemySpawns.length > 0 ? enemySpawns : this.getRandomSpawnPositions(count);
+
+    for (let i = 0; i < count; i++) {
+      const position = spawnPositions[i % spawnPositions.length];
+      const zombie = spawnRandomZombie(position, 1);
+      this.addZombieToScene(zombie);
+    }
+  }
+
+  /**
+   * Get random spawn positions for zombies
+   */
+  private getRandomSpawnPositions(count: number): { x: number; y: number }[] {
+    const positions: { x: number; y: number }[] = [];
+
+    for (let i = 0; i < count; i++) {
+      let attempts = 0;
+      while (attempts < 50) {
+        const x = Math.floor(Math.random() * this.mapWidth);
+        const y = Math.floor(Math.random() * this.mapHeight);
+
+        if (this.tiles[y] && this.tiles[y][x] &&
+            this.tiles[y][x].walkable && !this.tiles[y][x].occupant) {
+          positions.push({ x, y });
+          break;
+        }
+        attempts++;
+      }
+    }
+
+    return positions;
+  }
+
+  /**
+   * Add a zombie unit to the combat scene
+   */
+  private addZombieToScene(zombie: any): void {
+    // Convert SimUnit to Unit format for scene
+    const position = zombie.position;
+    const screenPos = gridToScreen(position.x, position.y);
+
+    // Create unit with all required properties
+    const unit: Unit = {
+      id: zombie.id,
+      name: zombie.name,
+      team: 'red',
+      position,
+      hp: zombie.hp,
+      maxHp: zombie.maxHp,
+      shieldHp: 0,
+      maxShieldHp: 0,
+      ap: zombie.stats?.AGL >= 50 ? 6 : 2, // Sprinters get more AP
+      maxAp: 8,
+      stats: zombie.stats,
+      weapon: zombie.weapon,
+      origin: 'undead',
+      alive: true,
+      acted: false,
+      stance: 'standing',
+      cover: 'none',
+      statusEffects: zombie.statusEffects || [],
+      accuracyPenalty: 0,
+      dr: zombie.dr || 0,
+      stoppingPower: 0,
+      disarmed: false,
+      factionType: 'zombie',
+    };
+
+    // Create sprite
+    const sprite = this.add.sprite(screenPos.x, screenPos.y, 'unit');
+    sprite.setTint(0x00ff00); // Green tint for zombies
+    sprite.setDepth(getIsoDepth(position.x, position.y, 10));
+    sprite.setScale(0.8);
+
+    // Spawn animation
+    sprite.setAlpha(0);
+    sprite.setScale(0.2);
+    this.tweens.add({
+      targets: sprite,
+      alpha: 1,
+      scale: 0.8,
+      duration: 500,
+      ease: 'Back.easeOut',
+    });
+
+    unit.sprite = sprite;
+
+    // Create health bar
+    const healthBarBg = this.add.rectangle(screenPos.x - 16, screenPos.y - 25, 32, 4, 0x333333);
+    healthBarBg.setDepth(getIsoDepth(position.x, position.y, 15));
+
+    const healthBar = this.add.graphics();
+    healthBar.fillStyle(0x00ff00, 1); // Green for zombies
+    healthBar.fillRect(screenPos.x - 16, screenPos.y - 25, 32 * (unit.hp / unit.maxHp), 4);
+    healthBar.setDepth(getIsoDepth(position.x, position.y, 16));
+
+    unit.healthBarBg = healthBarBg;
+    unit.healthBar = healthBar;
+
+    // Create name text
+    const nameText = this.add.text(screenPos.x, screenPos.y - 40, unit.name, {
+      fontSize: '10px',
+      color: '#00ff00',
+    });
+    nameText.setOrigin(0.5);
+    nameText.setDepth(getIsoDepth(position.x, position.y, 17));
+    unit.nameText = nameText;
+
+    // Occupy tile
+    this.tiles[position.y][position.x].occupant = unit.id;
+
+    // Add to units map
+    this.units.set(unit.id, unit);
+
+    // Emit event
+    EventBridge.emit('log-entry', {
+      id: `zombie_spawn_${Date.now()}`,
+      timestamp: Date.now(),
+      type: 'spawn',
+      actor: unit.name,
+      actorTeam: 'red',
+      message: `🧟 ${unit.name} has risen!`,
+    });
+
+    console.log(`[ZOMBIE] Spawned: ${unit.name} at (${position.x}, ${position.y})`);
+  }
+
+  /**
+   * Process zombie reanimations at end of round
+   */
+  private processZombieReanimations(): void {
+    if (!this.zombiesEnabled) return;
+
+    const config = GAME_MODES[this.gameModeId];
+    if (!config.settings.reanimationEnabled) return;
+
+    const toReanimate: typeof this.pendingCorpses = [];
+    const remaining: typeof this.pendingCorpses = [];
+
+    for (const corpse of this.pendingCorpses) {
+      const roundsSinceDeath = this.roundNumber - corpse.roundOfDeath;
+
+      if (shouldReanimate(corpse.wasInfected, corpse.wasBitten, corpse.isOrganic, roundsSinceDeath)) {
+        // Check if tile is still free
+        if (!this.tiles[corpse.position.y][corpse.position.x].occupant) {
+          toReanimate.push(corpse);
+        } else {
+          remaining.push(corpse); // Keep waiting
+        }
+      } else if (roundsSinceDeath < 5) {
+        remaining.push(corpse); // Still has chance to reanimate
+      }
+      // Corpses older than 5 rounds are discarded
+    }
+
+    this.pendingCorpses = remaining;
+
+    // Reanimate corpses
+    for (const corpse of toReanimate) {
+      const zombie = reanimateAsZombie(corpse.originalUnit as any);
+      zombie.position = corpse.position;
+      this.addZombieToScene(zombie);
+      this.totalReanimations++;
+
+      EventBridge.emit('log-entry', {
+        id: `reanimate_${Date.now()}`,
+        timestamp: Date.now(),
+        type: 'spawn',
+        actor: zombie.name,
+        actorTeam: 'red',
+        message: `🧟 ${corpse.originalUnit.name} has REANIMATED as ${zombie.name}!`,
+      });
+    }
+
+    if (toReanimate.length > 0) {
+      console.log(`[ZOMBIE] ${toReanimate.length} corpses reanimated this round`);
+    }
+  }
+
+  /**
+   * Spawn zombie reinforcements for waves
+   */
+  private spawnZombieWave(): void {
+    if (!this.zombiesEnabled || !this.currentZombieWave) return;
+
+    this.zombieWaveCount++;
+    const wave = generateZombieWave(this.zombieWaveCount);
+    this.currentZombieWave = wave;
+
+    const positions = this.getRandomSpawnPositions(wave.totalCount);
+
+    // Spawn based on wave composition
+    let spawnIndex = 0;
+    for (let i = 0; i < wave.zombieCounts.shambler; i++) {
+      if (positions[spawnIndex]) {
+        const zombie = createZombieUnit(
+          `zombie_wave_${this.zombieWaveCount}_${spawnIndex}`,
+          randomZombieName(),
+          'shambler',
+          positions[spawnIndex]
+        );
+        this.addZombieToScene(zombie);
+        spawnIndex++;
+      }
+    }
+
+    for (let i = 0; i < wave.zombieCounts.sprinter; i++) {
+      if (positions[spawnIndex]) {
+        const zombie = createZombieUnit(
+          `zombie_wave_${this.zombieWaveCount}_${spawnIndex}`,
+          randomZombieName(),
+          'sprinter',
+          positions[spawnIndex]
+        );
+        this.addZombieToScene(zombie);
+        spawnIndex++;
+      }
+    }
+
+    for (let i = 0; i < wave.zombieCounts.intelligent; i++) {
+      if (positions[spawnIndex]) {
+        const zombie = createZombieUnit(
+          `zombie_wave_${this.zombieWaveCount}_${spawnIndex}`,
+          randomZombieName(),
+          'intelligent',
+          positions[spawnIndex]
+        );
+        this.addZombieToScene(zombie);
+        spawnIndex++;
+      }
+    }
+
+    console.log(`[ZOMBIE] Wave ${this.zombieWaveCount} spawned:`, wave);
+
+    EventBridge.emit('log-entry', {
+      id: `zombie_wave_${Date.now()}`,
+      timestamp: Date.now(),
+      type: 'spawn',
+      message: `🧟 ZOMBIE WAVE ${this.zombieWaveCount}: ${wave.totalCount} zombies incoming!`,
+    });
+  }
+
+  /**
+   * Record a kill for game mode scoring
+   */
+  public recordGameModeKill(killerTeam: 'blue' | 'red', victimFaction?: string): void {
+    if (!this.gameModeState) return;
+
+    const config = GAME_MODES[this.gameModeId];
+
+    if (killerTeam === 'blue') {
+      this.gameModeScore.kills += config.settings.scorePerKill || 100;
+
+      // Track faction kills
+      if (victimFaction) {
+        const faction = victimFaction.toLowerCase();
+        if (faction === 'police') this.gameModeScore.factionKills.police++;
+        if (faction === 'swat') this.gameModeScore.factionKills.swat++;
+        if (faction === 'military') this.gameModeScore.factionKills.military++;
+      }
+
+      this.updateGameModeScore();
+      this.emitGameModeState();
+    }
+  }
+
+  /**
+   * Record damage for game mode scoring
+   */
+  public recordGameModeDamage(dealerTeam: 'blue' | 'red', amount: number): void {
+    if (!this.gameModeState) return;
+
+    if (dealerTeam === 'blue') {
+      this.gameModeScore.damageDealt += amount;
+    } else {
+      this.gameModeScore.damageTaken += amount;
+    }
+  }
+
+  /**
+   * Process end of round for game mode
+   */
+  private processGameModeRound(): void {
+    if (!this.gameModeState) return;
+
+    const config = GAME_MODES[this.gameModeId];
+
+    // Add round survival bonus
+    this.gameModeScore.roundsSurvived += config.settings.scorePerRound || 50;
+    this.gameModeState.roundNumber = this.roundNumber;
+
+    // Check for gauntlet wave spawn
+    if (this.gameModeId === 'escalation_gauntlet' || this.gameModeId === 'last_stand') {
+      this.checkGauntletWaveSpawn();
+    }
+
+    // Process zombie reanimations and waves for Outbreak mode
+    if (this.zombiesEnabled) {
+      this.processZombieReanimations();
+
+      // Spawn zombie wave based on zombie count
+      const zombieCount = Array.from(this.units.values())
+        .filter(u => u.alive && u.factionType === 'zombie')
+        .length;
+
+      if (zombieCount <= 3 && this.gameModeId === 'outbreak') {
+        this.spawnZombieWave();
+      }
+    }
+
+    this.updateGameModeScore();
+    this.emitGameModeState();
+
+    // Check victory/defeat conditions
+    this.checkGameModeConditions();
+  }
+
+  /**
+   * Check and spawn gauntlet waves
+   */
+  private checkGauntletWaveSpawn(): void {
+    if (!this.currentGauntletWave) return;
+
+    // Count remaining enemies
+    const enemyCount = Array.from(this.units.values())
+      .filter(u => u.alive && u.team !== this.playerTeam)
+      .length;
+
+    // Spawn new wave when enemies are low
+    if (enemyCount <= 2) {
+      this.gauntletWaveCount++;
+      const wave = generateGauntletWave(this.gauntletWaveCount);
+      this.currentGauntletWave = wave;
+
+      console.log('[GAME MODE] Gauntlet wave', wave.waveNumber, ':', wave.faction, wave.unitCount, 'units');
+
+      // Add wave survival bonus
+      this.gameModeScore.roundsSurvived += wave.bonusScore;
+
+      // Determine spawn direction
+      const directions = ['north', 'south', 'east', 'west'];
+      const spawnDir = directions[Math.floor(Math.random() * directions.length)];
+
+      // Spawn the wave
+      this.spawnReinforcements(wave.faction, wave.unitCount, spawnDir);
+
+      // Combat log message
+      const waveMsg = `⚔️ WAVE ${wave.waveNumber}: ${wave.unitCount} ${wave.faction.toUpperCase()} incoming!`;
+      EventBridge.emit('combat-log', { message: waveMsg, type: 'warning' });
+
+      // Emit event for UI
+      EventBridge.emit('gamemode:wave-spawned', {
+        waveNumber: wave.waveNumber,
+        faction: wave.faction,
+        unitCount: wave.unitCount,
+        hasElite: wave.hasElite,
+      });
+    }
+  }
+
+  /**
+   * Check victory and defeat conditions
+   */
+  private checkGameModeConditions(): void {
+    if (!this.gameModeState) return;
+
+    const config = GAME_MODES[this.gameModeId];
+
+    // Count alive units by team
+    const blueAlive = Array.from(this.units.values()).filter(u => u.alive && u.team === 'blue').length;
+    const redAlive = Array.from(this.units.values()).filter(u => u.alive && u.team === 'red').length;
+
+    // Defeat check: team wiped
+    if (config.defeatConditions.teamWiped && blueAlive === 0) {
+      this.endGameModeWithDefeat('Team eliminated');
+      return;
+    }
+
+    // Defeat check: heat maxed
+    if (config.defeatConditions.heatMaxed && this.escalationState?.heat >= 100) {
+      this.endGameModeWithDefeat('Heat reached maximum - overwhelmed by reinforcements');
+      return;
+    }
+
+    // Victory check: elimination
+    if (config.victoryConditions.elimination && redAlive === 0) {
+      // For gauntlet modes, this triggers next wave instead
+      if (this.gameModeId !== 'escalation_gauntlet' && this.gameModeId !== 'last_stand') {
+        this.endGameModeWithVictory('All enemies eliminated');
+        return;
+      }
+    }
+
+    // Victory check: score threshold (Last Stand)
+    if (config.victoryConditions.score && this.gameModeScore.total >= config.victoryConditions.score) {
+      this.endGameModeWithVictory(`Score threshold ${config.victoryConditions.score} reached!`);
+      return;
+    }
+
+    // Victory check: survive rounds
+    if (config.victoryConditions.surviveRounds && this.roundNumber >= config.victoryConditions.surviveRounds) {
+      this.endGameModeWithVictory(`Survived ${config.victoryConditions.surviveRounds} rounds`);
+      return;
+    }
+  }
+
+  /**
+   * End game mode with victory
+   */
+  private endGameModeWithVictory(reason: string): void {
+    console.log('[GAME MODE] Victory:', reason);
+
+    this.updateGameModeScore();
+
+    EventBridge.emit('gamemode:victory', {
+      mode: this.gameModeId,
+      reason,
+      score: this.gameModeScore,
+      rounds: this.roundNumber,
+      waves: this.gauntletWaveCount,
+    });
+
+    // Also emit standard combat ended
+    EventBridge.emit('combat-ended', {
+      winner: this.playerTeam,
+      rounds: this.roundNumber,
+    });
+  }
+
+  /**
+   * End game mode with defeat
+   */
+  private endGameModeWithDefeat(reason: string): void {
+    console.log('[GAME MODE] Defeat:', reason);
+
+    this.updateGameModeScore();
+
+    EventBridge.emit('gamemode:defeat', {
+      mode: this.gameModeId,
+      reason,
+      score: this.gameModeScore,
+      rounds: this.roundNumber,
+      waves: this.gauntletWaveCount,
+    });
+
+    // Also emit standard combat ended
+    EventBridge.emit('combat-ended', {
+      winner: this.playerTeam === 'blue' ? 'red' : 'blue',
+      rounds: this.roundNumber,
+    });
+  }
+
+  /**
+   * Update total score
+   */
+  private updateGameModeScore(): void {
+    const config = GAME_MODES[this.gameModeId];
+
+    // Calculate total
+    const factionBonus =
+      this.gameModeScore.factionKills.police * 150 +
+      this.gameModeScore.factionKills.swat * 250 +
+      this.gameModeScore.factionKills.military * 400;
+
+    this.gameModeScore.total =
+      this.gameModeScore.kills +
+      this.gameModeScore.roundsSurvived +
+      this.gameModeScore.objectivesCompleted +
+      this.gameModeScore.extractionBonus +
+      factionBonus;
+  }
+
+  /**
+   * Emit game mode state to UI
+   */
+  private emitGameModeState(): void {
+    if (!this.gameModeState) return;
+
+    const config = GAME_MODES[this.gameModeId];
+
+    EventBridge.emit('gamemode:update', {
+      mode: this.gameModeId,
+      modeName: config.name,
+      modeDescription: config.description,
+      score: this.gameModeScore,
+      roundNumber: this.roundNumber,
+      waveNumber: this.gauntletWaveCount,
+      currentWave: this.currentGauntletWave,
+      extractionUnlocked: this.gameModeState.extractionUnlocked,
+    });
+  }
+
+  /**
+   * Handle player extraction (for modes that support it)
+   */
+  public handleGameModeExtraction(): void {
+    const config = GAME_MODES[this.gameModeId];
+
+    if (!config.settings.extractionAvailable) {
+      console.log('[GAME MODE] Extraction not available in this mode');
+      return;
+    }
+
+    // Add extraction bonus
+    this.gameModeScore.extractionBonus = 1000 + (this.gauntletWaveCount * 200);
+    this.updateGameModeScore();
+
+    this.endGameModeWithVictory('Successful extraction');
   }
 }
 

@@ -256,6 +256,21 @@ export const PISTOLS = {
 };
 
 // ==================== GADGETS ====================
+// TODO: Wire gadgets to combat system
+// Current status: Defined but NOT WIRED to CombatScene or battleRunner
+// Future implementation should:
+// 1. Add 'use_gadget' action to battleRunner.ts
+// 2. Add drone spawn/control logic to CombatScene.ts
+// 3. Add drone AI for recon (reveals fog) and combat (attacks enemies)
+
+export interface CombatGadget {
+    id: string;
+    name: string;
+    apCost: number;
+    cooldownTurns: number;
+    modes: string[];
+    // Future: onUse(user: SimUnit, target?: Position): GadgetResult
+}
 
 export const GADGETS = {
     DRONE_CONTROLLER: {
@@ -276,6 +291,8 @@ export const GADGETS = {
         apCost: 3,  // Cost to deploy drone
         cooldownTurns: 0,
         modes: ['Deploy Recon Drone', 'Deploy Combat Drone', 'Recall Drone'],
+        // NOT WIRED TO COMBAT - see TODO above
+        combatReady: false,
     },
 };
 

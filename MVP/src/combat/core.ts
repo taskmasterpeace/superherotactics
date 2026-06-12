@@ -666,6 +666,9 @@ export function resolveAttack(
   const shotDamage = baseDamage * modeConfig.damagePerShot;
 
   for (let shot = 0; shot < modeConfig.shotsPerAttack; shot++) {
+    // NOTE: Base accuracy penalty from FIRE_MODES already applied above
+    // Single: 0, Burst: -15%, Auto: -25%
+    // Additional recoil would over-nerf multi-shot modes
     const shotRoll = roll !== undefined && shot === 0 ? roll : Math.random() * 100;
     const hitResult = getHitResult(shotRoll, accuracy);
 

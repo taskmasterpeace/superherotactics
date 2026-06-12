@@ -22,6 +22,7 @@ import { Country, ALL_COUNTRIES } from './countries';
 import { City, getCitiesByCountryCode } from './cities';
 import { ThreatLevel } from './characterSheet';
 import { getTimeEngine } from './timeEngine';
+import { useGameStore } from '../stores/enhancedGameStore';
 
 // =============================================================================
 // MERCENARY TYPES
@@ -219,9 +220,29 @@ export class MercenaryPoolManager {
     if (this.started) return;
     this.started = true;
 
-    // Refresh pools weekly
     const timeEngine = getTimeEngine();
+
+    // Process daily events on day change
     timeEngine.on('day_change', (time) => {
+      // Pay daily wages to all hired mercs
+      const dailyWages = this.payDailyWages();
+      if (dailyWages > 0) {
+        const store = useGameStore.getState();
+        store.addMoney(-dailyWages);
+        console.log(`[MercenaryPool] Paid $${dailyWages} in daily merc wages`);
+
+        // Add notification for significant payments
+        if (dailyWages >= 500) {
+          store.addNotification({
+            type: 'economy',
+            priority: 'low',
+            title: 'Mercenary Wages',
+            message: `Paid $${dailyWages} in daily wages to hired mercenaries`,
+          });
+        }
+      }
+
+      // Refresh pools weekly (every 7 days)
       if (time.date.day % 7 === 1) {
         this.refreshAllPools();
       }

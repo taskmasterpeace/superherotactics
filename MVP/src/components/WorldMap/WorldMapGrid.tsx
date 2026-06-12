@@ -31,6 +31,7 @@ import {
   Laptop,
   Settings,
   Users,
+  Users2,
   MapPin,
   Car,
   Plane,
@@ -46,8 +47,13 @@ import {
   Timer,
   Target,
   Crosshair,
+  Shield,
+  Star,
+  Trash2,
+  Plus,
 } from 'lucide-react';
 import { RetroButton, RetroBadge, RetroTabs, RetroTabPanel, cn } from '../ui';
+import { Squad, PERSONALITIES } from '../../data/squadSystem';
 
 // Grid configuration - 40 columns x 24 rows (matches V0)
 const GRID_COLS = 40;
@@ -99,7 +105,7 @@ interface GridCell {
   threatLevel?: number;
 }
 
-type TabType = 'character' | 'map' | 'vehicles';
+type TabType = 'character' | 'map' | 'vehicles' | 'squads';
 
 // Time Display Component - Retro NeoBrutalism Style
 const TimeDisplay: React.FC<{
@@ -200,6 +206,14 @@ const MessagesPanel: React.FC<{
   onCancelTravel: (unitId: string) => void;
   sectorMissions: any[];
   onCityActionSelect?: (action: CityAction, city: City, selectedCell: GridCell | null) => void;
+  // Squad management props
+  squads: Squad[];
+  onCreateSquad: (name: string, characterIds: string[]) => Squad | null;
+  onDisbandSquad: (squadId: string) => boolean;
+  onSetActiveSquad: (squadId: string) => void;
+  onAssignToSquad: (characterId: string, squadId: string) => boolean;
+  onRemoveFromSquad: (characterId: string, squadId: string) => boolean;
+  onDeploySquad: (squadId: string, sector: string) => void;
 }> = ({
   characters,
   selectedCell,
@@ -232,8 +246,18 @@ const MessagesPanel: React.FC<{
   onCancelTravel,
   sectorMissions,
   onCityActionSelect,
+  squads,
+  onCreateSquad,
+  onDisbandSquad,
+  onSetActiveSquad,
+  onAssignToSquad,
+  onRemoveFromSquad,
+  onDeploySquad,
 }) => {
   const [isMessagesExpanded, setIsMessagesExpanded] = useState(true);
+  const [newSquadName, setNewSquadName] = useState('');
+  const [selectedSquadId, setSelectedSquadId] = useState<string | null>(null);
+  const [squadMemberSelection, setSquadMemberSelection] = useState<string[]>([]);
   const [expandedVehicleId, setExpandedVehicleId] = useState<string | null>(null);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
 
@@ -328,6 +352,7 @@ const MessagesPanel: React.FC<{
         <div className="flex border-b-2 border-black">
           {[
             { id: 'character' as TabType, label: 'TEAM', icon: <Users className="w-4 h-4" /> },
+            { id: 'squads' as TabType, label: 'SQUADS', icon: <Users2 className="w-4 h-4" /> },
             { id: 'map' as TabType, label: 'MAP', icon: <MapPin className="w-4 h-4" /> },
             { id: 'vehicles' as TabType, label: 'VEHICLES', icon: <Car className="w-4 h-4" /> },
           ].map((tab) => (
@@ -795,6 +820,273 @@ const MessagesPanel: React.FC<{
               )}
             </div>
           )}
+
+          {activeTab === 'squads' && (
+            <div className="flex flex-col h-full bg-background">
+              {/* Header */}
+              <div className="px-3 py-2 bg-primary/80 border-b-2 border-black flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <span className="text-primary-foreground font-bold text-sm tracking-wider">SQUAD MANAGEMENT</span>
+                  <span className="text-primary-foreground/70 text-[10px]">{squads.length} squads</span>
+                </div>
+              </div>
+
+              {/* Squad List */}
+              <div className="flex-1 overflow-y-auto">
+                {squads.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full py-8 text-center">
+                    <div className="w-16 h-16 rounded-xl bg-surface border-2 border-black flex items-center justify-center shadow-retro-sm mb-3">
+                      <Users2 className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <p className="text-foreground font-semibold">No Squads Created</p>
+                    <p className="text-muted-foreground text-xs mt-1">Create a squad to deploy operatives</p>
+                  </div>
+                ) : (
+                  <div className="divide-y-2 divide-black/20">
+                    {squads.map((squad) => {
+                      const isExpanded = selectedSquadId === squad.id;
+                      const leader = squad.members.find(m => m.role === 'leader');
+                      const leaderPersonality = leader ? PERSONALITIES[leader.personality] : null;
+
+                      // Get status color
+                      const getStatusColor = (status: string) => {
+                        switch (status) {
+                          case 'idle': return 'bg-success';
+                          case 'traveling': return 'bg-secondary';
+                          case 'on_mission': return 'bg-warning';
+                          case 'resting': return 'bg-primary';
+                          case 'training': return 'bg-accent';
+                          default: return 'bg-muted';
+                        }
+                      };
+
+                      return (
+                        <div key={squad.id} className="border-b border-black/20">
+                          {/* Squad Header */}
+                          <div
+                            onClick={() => setSelectedSquadId(isExpanded ? null : squad.id)}
+                            className={cn(
+                              "flex items-center px-3 py-2 transition-colors cursor-pointer hover:bg-primary/10",
+                              isExpanded && 'bg-primary/20'
+                            )}
+                          >
+                            <div className="w-10 h-10 rounded-lg bg-surface border-2 border-black flex items-center justify-center shadow-retro-sm mr-3">
+                              <Shield className="w-5 h-5 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="text-foreground font-bold text-sm truncate">{squad.name}</p>
+                                <div className={cn("w-2 h-2 rounded-full border border-black", getStatusColor(squad.status))} />
+                              </div>
+                              <div className="flex items-center gap-2 text-muted-foreground text-[10px]">
+                                <span>{squad.members.length} members</span>
+                                <span>•</span>
+                                <span className="flex items-center gap-0.5">
+                                  <Heart className="w-3 h-3" /> {Math.round(squad.squadMorale)}%
+                                </span>
+                                <span>•</span>
+                                <span>{squad.currentSector}</span>
+                              </div>
+                            </div>
+                            <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", isExpanded && 'rotate-180')} />
+                          </div>
+
+                          {/* Expanded Content */}
+                          {isExpanded && (
+                            <div className="bg-surface/50 px-3 py-2 border-t border-black/20">
+                              {/* Leader Info */}
+                              {leader && (
+                                <div className="mb-2 p-2 bg-primary/10 rounded-lg border border-black/30">
+                                  <div className="flex items-center gap-2">
+                                    <Star className="w-4 h-4 text-warning" />
+                                    <span className="text-foreground text-xs font-bold">{leader.name}</span>
+                                    <span className="text-muted-foreground text-[10px]">
+                                      ({leaderPersonality?.name || leader.personality})
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Members List */}
+                              <div className="mb-2">
+                                <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Members</p>
+                                <div className="space-y-1 max-h-24 overflow-y-auto">
+                                  {squad.members.map(member => {
+                                    const personality = PERSONALITIES[member.personality];
+                                    return (
+                                      <div key={member.characterId} className="flex items-center justify-between bg-surface rounded-lg px-2 py-1 border border-black/30">
+                                        <div className="flex items-center gap-2">
+                                          {member.role === 'leader' && <Star className="w-3 h-3 text-warning" />}
+                                          <span className="text-foreground text-xs font-medium">{member.name}</span>
+                                          <span className="text-muted-foreground text-[10px]">{personality?.name}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-muted-foreground text-[10px]">
+                                            HP:{member.health}% MOR:{member.morale}%
+                                          </span>
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              onRemoveFromSquad(member.characterId, squad.id);
+                                            }}
+                                            className="p-0.5 rounded bg-destructive hover:bg-destructive/80 text-white border border-black"
+                                            title="Remove from squad"
+                                          >
+                                            <UserMinus className="w-3 h-3" />
+                                          </button>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+
+                              {/* Add Members Section */}
+                              {(() => {
+                                const availableChars = characters.filter(char =>
+                                  !squads.some(s => s.members.some(m => m.characterId === char.id))
+                                );
+                                if (availableChars.length === 0) return null;
+                                return (
+                                  <div className="mb-2">
+                                    <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Add Members</p>
+                                    <div className="space-y-1 max-h-20 overflow-y-auto">
+                                      {availableChars.slice(0, 5).map(char => (
+                                        <div key={char.id} className="flex items-center justify-between bg-success/20 rounded-lg px-2 py-1 border border-black/30">
+                                          <span className="text-foreground text-xs">{char.name}</span>
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              onAssignToSquad(char.id, squad.id);
+                                            }}
+                                            className="p-0.5 rounded bg-success hover:bg-success/80 text-white border border-black"
+                                            title="Add to squad"
+                                          >
+                                            <UserPlus className="w-3 h-3" />
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+
+                              {/* Squad Actions */}
+                              <div className="flex gap-2 mt-2">
+                                <RetroButton
+                                  variant="primary"
+                                  size="sm"
+                                  className="flex-1"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onSetActiveSquad(squad.id);
+                                  }}
+                                >
+                                  SET ACTIVE
+                                </RetroButton>
+                                {selectedCell && (
+                                  <RetroButton
+                                    variant="secondary"
+                                    size="sm"
+                                    className="flex-1"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onDeploySquad(squad.id, selectedCell.id);
+                                    }}
+                                  >
+                                    DEPLOY → {selectedCell.id}
+                                  </RetroButton>
+                                )}
+                                <RetroButton
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDisbandSquad(squad.id);
+                                    setSelectedSquadId(null);
+                                  }}
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </RetroButton>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Create New Squad Section */}
+              <div className="px-3 py-2 border-t-2 border-black bg-surface flex-shrink-0">
+                <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Create New Squad</p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newSquadName}
+                    onChange={(e) => setNewSquadName(e.target.value)}
+                    placeholder="Squad name..."
+                    className="flex-1 px-2 py-1 text-xs bg-background border-2 border-black rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <RetroButton
+                    variant="success"
+                    size="sm"
+                    disabled={!newSquadName.trim() || squadMemberSelection.length === 0}
+                    onClick={() => {
+                      if (newSquadName.trim() && squadMemberSelection.length > 0) {
+                        onCreateSquad(newSquadName.trim(), squadMemberSelection);
+                        setNewSquadName('');
+                        setSquadMemberSelection([]);
+                      }
+                    }}
+                  >
+                    <Plus className="w-3 h-3" />
+                    CREATE
+                  </RetroButton>
+                </div>
+                {/* Member Selection for new squad */}
+                {(() => {
+                  const availableChars = characters.filter(char =>
+                    !squads.some(s => s.members.some(m => m.characterId === char.id))
+                  );
+                  if (availableChars.length === 0) return (
+                    <p className="text-muted-foreground text-[10px] mt-1 italic">All characters are in squads</p>
+                  );
+                  return (
+                    <div className="mt-2">
+                      <p className="text-[10px] text-muted-foreground mb-1">Select members ({squadMemberSelection.length} selected)</p>
+                      <div className="flex flex-wrap gap-1">
+                        {availableChars.slice(0, 8).map(char => {
+                          const isSelected = squadMemberSelection.includes(char.id);
+                          return (
+                            <button
+                              key={char.id}
+                              onClick={() => {
+                                if (isSelected) {
+                                  setSquadMemberSelection(prev => prev.filter(id => id !== char.id));
+                                } else {
+                                  setSquadMemberSelection(prev => [...prev, char.id]);
+                                }
+                              }}
+                              className={cn(
+                                "px-2 py-0.5 text-[10px] rounded border border-black transition-colors",
+                                isSelected
+                                  ? "bg-accent text-black font-bold"
+                                  : "bg-surface text-foreground hover:bg-surface-light"
+                              )}
+                            >
+                              {char.name.split(' ')[0]}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -907,6 +1199,14 @@ export const WorldMapGrid: React.FC = () => {
     generateMissionsForSector,
     acceptMission,
     activeMissions,
+    // Squad system
+    squads,
+    createNewSquad,
+    disbandSquad,
+    setActiveSquad,
+    assignToSquad,
+    removeFromSquad,
+    deploySquad,
   } = useGameStore();
 
   // Selected characters for travel
@@ -1824,6 +2124,13 @@ export const WorldMapGrid: React.FC = () => {
             onCancelTravel={cancelTravel}
             sectorMissions={sectorMissions}
             onCityActionSelect={handleCityActionSelect}
+            squads={squads}
+            onCreateSquad={createNewSquad}
+            onDisbandSquad={disbandSquad}
+            onSetActiveSquad={setActiveSquad}
+            onAssignToSquad={assignToSquad}
+            onRemoveFromSquad={removeFromSquad}
+            onDeploySquad={deploySquad}
           />
         </div>
       </div>

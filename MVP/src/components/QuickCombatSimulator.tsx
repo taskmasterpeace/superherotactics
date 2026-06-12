@@ -433,6 +433,7 @@ export const QuickCombatSimulator: React.FC<{ onClose?: () => void }> = ({ onClo
 
   // Event icon based on type
   const getEventIcon = (event: BattleEvent) => {
+    if (!event) return <Swords className="w-4 h-4 text-gray-400" />;
     switch (event.type) {
       case 'crit': return <Zap className="w-4 h-4 text-yellow-400" />;
       case 'hit': return <Target className="w-4 h-4 text-red-400" />;
@@ -446,6 +447,7 @@ export const QuickCombatSimulator: React.FC<{ onClose?: () => void }> = ({ onClo
   };
 
   const getEventColor = (event: BattleEvent) => {
+    if (!event) return 'border-gray-600 bg-gray-900/10';
     if (event.type === 'death') return 'border-red-600 bg-red-900/30';
     if (event.type === 'crit') return 'border-yellow-500 bg-yellow-900/20';
     if (event.type === 'injury') return 'border-pink-500 bg-pink-900/20';
@@ -582,9 +584,9 @@ export const QuickCombatSimulator: React.FC<{ onClose?: () => void }> = ({ onClo
                 className="flex-1 overflow-y-auto p-4 space-y-2"
               >
                 <AnimatePresence>
-                  {displayedEvents.map((event, i) => (
+                  {displayedEvents.filter(e => e != null).map((event, i) => (
                     <motion.div
-                      key={event.id}
+                      key={`${event.id}-${i}`}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       className={`p-3 rounded-lg border-l-4 ${getEventColor(event)}`}

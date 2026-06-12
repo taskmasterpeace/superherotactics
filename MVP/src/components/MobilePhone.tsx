@@ -30,7 +30,10 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { RetroButton, RetroBadge } from './ui';
-import { getAllEmails, getUnreadCount as getEmailUnreadCount, markEmailRead, Email } from '../data/emailSystem';
+import { getAllEmails, getUnreadCount as getEmailUnreadCount, markEmailRead, archiveEmail, Email, EmailReplyOption, EmailAttachment, ATTACHMENT_DIMENSIONS } from '../data/emailSystem';
+import { EventBus } from '../data/eventBus';
+import toast from 'react-hot-toast';
+import { Paperclip, FileText, Image, MapIcon, Shield, ZoomIn, ZoomOut } from 'lucide-react';
 import {
   CONTACTS,
   Contact,
@@ -61,6 +64,8 @@ export const MobilePhone: React.FC = () => {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [contactLastUsed, setContactLastUsed] = useState<Map<string, number>>(new Map());
+  const [selectedAttachment, setSelectedAttachment] = useState<EmailAttachment | null>(null);
+  const [attachmentZoomed, setAttachmentZoomed] = useState(false);
 
   // Filter phone-relevant notifications
   const phoneMessages = useMemo(() => {
@@ -212,6 +217,52 @@ export const MobilePhone: React.FC = () => {
     });
 
     setSelectedContact(null);
+  };
+
+  // Handle email reply action
+  const handleEmailReply = (email: Email, option: EmailReplyOption) => {
+    const store = useGameStore.getState();
+    const countryCode = store.selectedCountry || 'US';
+
+    // Process effects
+    if (option.effect) {
+      // Reputation effect - modify faction standing
+      if (option.effect.reputation) {
+        // Apply to primary faction based on email category
+        const factionMap: Record<string, FactionType> = {
+          mission_briefing: 'government',
+          intel_report: 'police',
+          contact: 'underworld',
+          news_tip: 'media',
+          admin: 'government',
+          personal: 'media',
+        };
+        const faction = factionMap[email.category] || 'government';
+        store.modifyFactionStanding(faction, countryCode, option.effect.reputation, `Email response: ${option.label}`);
+      }
+
+      // Trigger mission acceptance
+      if (option.effect.triggersMission && email.actionable?.missionId) {
+        EventBus.emit({
+          type: 'mission:accepted',
+          data: {
+            missionId: email.actionable.missionId,
+            source: 'email',
+          },
+        });
+        toast.success(`Mission accepted: ${email.subject.replace('MISSION: ', '')}`);
+      }
+    }
+
+    // Show confirmation toast
+    toast(option.response, {
+      icon: option.id === 'accept' ? '✅' : option.id === 'decline' ? '❌' : '📧',
+      duration: 3000,
+    });
+
+    // Archive the email after reply
+    archiveEmail(email.id);
+    setSelectedEmail(null);
   };
 
   // Get intel message based on intel type
@@ -565,6 +616,33 @@ export const MobilePhone: React.FC = () => {
                           <div className="bg-surface border-2 border-black rounded-lg p-3 shadow-retro-sm">
                             <pre className="whitespace-pre-wrap text-sm text-foreground font-sans">{selectedEmail.body}</pre>
                           </div>
+
+                          {/* Attachments */}
+                          {selectedEmail.attachments && selectedEmail.attachments.length > 0 && (
+                            <div className="mt-3">
+                              <p className="text-xs text-muted-foreground font-semibold mb-2 flex items-center gap-1">
+                                <Paperclip className="w-3 h-3" />
+                                ATTACHMENTS ({selectedEmail.attachments.length})
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {selectedEmail.attachments.map((attachment) => (
+                                  <button
+                                    key={attachment.id}
+                                    onClick={() => setSelectedAttachment(attachment)}
+                                    className="flex items-center gap-2 px-3 py-2 bg-surface border-2 border-black rounded-lg shadow-retro-sm hover:bg-primary/10 transition-colors"
+                                  >
+                                    {attachment.type === 'photo' && <Image className="w-4 h-4 text-secondary" />}
+                                    {attachment.type === 'dossier' && <User className="w-4 h-4 text-warning" />}
+                                    {attachment.type === 'map' && <MapPin className="w-4 h-4 text-primary" />}
+                                    {attachment.type === 'document' && <FileText className="w-4 h-4 text-muted-foreground" />}
+                                    {attachment.type === 'intel' && <Shield className="w-4 h-4 text-destructive" />}
+                                    <span className="text-xs font-semibold">{attachment.name}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                           {selectedEmail.replyOptions && selectedEmail.replyOptions.length > 0 && (
                             <div className="mt-4 flex flex-wrap gap-2">
                               {selectedEmail.replyOptions.map((option) => (
@@ -572,10 +650,7 @@ export const MobilePhone: React.FC = () => {
                                   key={option.id}
                                   variant={option.id === 'accept' ? 'success' : option.id === 'decline' ? 'destructive' : 'default'}
                                   size="sm"
-                                  onClick={() => {
-                                    // Handle reply action
-                                    setSelectedEmail(null);
-                                  }}
+                                  onClick={() => handleEmailReply(selectedEmail, option)}
                                 >
                                   {option.label}
                                 </RetroButton>
@@ -875,6 +950,127 @@ export const MobilePhone: React.FC = () => {
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* Attachment Viewer Modal */}
+      <AnimatePresence>
+        {selectedAttachment && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            onClick={() => {
+              setSelectedAttachment(null);
+              setAttachmentZoomed(false);
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative max-w-4xl max-h-[90vh] bg-background border-4 border-black rounded-xl shadow-retro overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="bg-surface border-b-2 border-black px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {selectedAttachment.type === 'photo' && <Image className="w-5 h-5 text-secondary" />}
+                  {selectedAttachment.type === 'dossier' && <User className="w-5 h-5 text-warning" />}
+                  {selectedAttachment.type === 'map' && <MapPin className="w-5 h-5 text-primary" />}
+                  {selectedAttachment.type === 'document' && <FileText className="w-5 h-5 text-muted-foreground" />}
+                  {selectedAttachment.type === 'intel' && <Shield className="w-5 h-5 text-destructive" />}
+                  <span className="font-bold">{selectedAttachment.name}</span>
+                  <RetroBadge variant="secondary" size="sm">{selectedAttachment.type.toUpperCase()}</RetroBadge>
+                  <RetroBadge variant="default" size="sm">{selectedAttachment.aspectRatio}</RetroBadge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setAttachmentZoomed(!attachmentZoomed)}
+                    className="p-2 hover:bg-surface-light rounded-lg transition-colors"
+                  >
+                    {attachmentZoomed ? <ZoomOut className="w-5 h-5" /> : <ZoomIn className="w-5 h-5" />}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedAttachment(null);
+                      setAttachmentZoomed(false);
+                    }}
+                    className="p-2 hover:bg-destructive/10 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className={`p-4 overflow-auto ${attachmentZoomed ? 'max-h-[80vh]' : 'max-h-[60vh]'}`}>
+                {selectedAttachment.imageUrl ? (
+                  <div className="flex flex-col items-center gap-4">
+                    <div
+                      className="border-2 border-black rounded-lg overflow-hidden shadow-retro-sm"
+                      style={{
+                        width: attachmentZoomed
+                          ? ATTACHMENT_DIMENSIONS[selectedAttachment.aspectRatio].width
+                          : Math.min(400, ATTACHMENT_DIMENSIONS[selectedAttachment.aspectRatio].width),
+                        aspectRatio: selectedAttachment.aspectRatio === 'a4'
+                          ? '595/842'
+                          : selectedAttachment.aspectRatio.replace(':', '/'),
+                      }}
+                    >
+                      <img
+                        src={selectedAttachment.imageUrl}
+                        alt={selectedAttachment.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    {selectedAttachment.caption && (
+                      <p className="text-sm text-muted-foreground text-center italic">
+                        {selectedAttachment.caption}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  /* Placeholder for attachments without images */
+                  <div className="flex flex-col items-center gap-4 py-8">
+                    <div
+                      className="border-2 border-dashed border-muted-foreground/30 rounded-lg flex items-center justify-center bg-surface/50"
+                      style={{
+                        width: Math.min(300, ATTACHMENT_DIMENSIONS[selectedAttachment.aspectRatio].width),
+                        aspectRatio: selectedAttachment.aspectRatio === 'a4'
+                          ? '595/842'
+                          : selectedAttachment.aspectRatio.replace(':', '/'),
+                      }}
+                    >
+                      {selectedAttachment.type === 'photo' && <Image className="w-16 h-16 text-muted-foreground/30" />}
+                      {selectedAttachment.type === 'dossier' && <User className="w-16 h-16 text-muted-foreground/30" />}
+                      {selectedAttachment.type === 'map' && <MapPin className="w-16 h-16 text-muted-foreground/30" />}
+                      {selectedAttachment.type === 'document' && <FileText className="w-16 h-16 text-muted-foreground/30" />}
+                      {selectedAttachment.type === 'intel' && <Shield className="w-16 h-16 text-muted-foreground/30" />}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Image pending generation ({ATTACHMENT_DIMENSIONS[selectedAttachment.aspectRatio].width}x{ATTACHMENT_DIMENSIONS[selectedAttachment.aspectRatio].height})
+                    </p>
+                    {selectedAttachment.caption && (
+                      <p className="text-sm text-foreground font-semibold">
+                        {selectedAttachment.caption}
+                      </p>
+                    )}
+                    {/* Display data if available */}
+                    {selectedAttachment.data && typeof selectedAttachment.data === 'object' && (
+                      <div className="w-full max-w-md bg-surface border-2 border-black rounded-lg p-4 shadow-retro-sm">
+                        <p className="text-xs text-muted-foreground font-semibold mb-2">ATTACHMENT DATA</p>
+                        <pre className="text-xs text-foreground font-mono whitespace-pre-wrap">
+                          {JSON.stringify(selectedAttachment.data, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </>

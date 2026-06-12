@@ -46,6 +46,7 @@ export type DamageSubType =
     | 'TOXIN_ACID'
     | 'BIOTOXIN_VIRUS'
     | 'BIOTOXIN_DISEASE'
+    | 'NECROTIC_BITE'       // Zombie bite - high infection
     // MENTAL
     | 'MENTAL_CONTROL'
     | 'MENTAL_BLAST'
@@ -665,6 +666,50 @@ export const DAMAGE_TYPES: Record<string, DamageDefinition> = {
             canBlock: false,
             canParry: false,
             environmental: true,  // Damages terrain
+        },
+    },
+
+    NECROTIC_BITE: {
+        id: 'NECROTIC_BITE',
+        name: 'Zombie Bite',
+        category: 'BIOLOGICAL',
+        subType: 'NECROTIC_BITE',
+        emoji: '🧟',
+        description: 'Infected bite - high chance of zombification',
+        bleeding: {
+            enabled: true,
+            initialDamage: 4,
+            scaling: 'constant',
+            duration: 3,
+            maxStacks: 2,
+            movementPenalty: true,
+        },
+        poison: {
+            enabled: true,
+            initialDamage: 3,  // Infection spreading
+            damageReduction: 0,  // Constant until cured or death
+            duration: 10,  // Long duration - time to turn
+            affectsArmor: false,
+            affectsBiological: true,
+            affectsRobotic: false,
+        },
+        dotType: 'constant',
+        originModifiers: { biological: 1.5, robotic: 0, energy: 0.2, undead: 0, construct: 0 },
+        armorInteraction: {
+            armorEffectiveness: 0.6,  // Bites find gaps in armor
+            ignoresArmor: false,
+            damagesArmor: false,
+            bypassesShields: true,  // Direct contact
+        },
+        specialMechanics: {
+            canTargetItems: false,
+            cannotBeDodged: false,
+            canImpale: false,
+            canBreakBones: false,
+            canBlock: true,  // Can push away
+            canParry: false,
+            spreadRadius: 0,  // Infection spreads on death, not contact
+            environmental: false,
         },
     },
 

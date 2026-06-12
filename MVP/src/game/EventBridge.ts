@@ -512,4 +512,132 @@ export interface MartialArtsEvents {
   'technique-used': { unitId: string; techniqueId: string; targetId: string; success: boolean; damage?: number };
 }
 
+// ============== ESCALATION SYSTEM ==============
+
+/**
+ * Reinforcement wave approaching combat
+ */
+export interface EscalationWave {
+  id: string;
+  factionId: 'police' | 'swat' | 'military';
+  turnToArrive: number;
+  unitCount: number;
+  announced: boolean;
+}
+
+/**
+ * Escape option available to player
+ */
+export interface EscapeOption {
+  id: string;
+  type: 'extract_north' | 'extract_south' | 'extract_east' | 'extract_west' |
+        'rooftop' | 'underground' | 'blend_in' | 'bribe' | 'negotiate' | 'vehicle';
+  label: string;
+  description: string;
+  available: boolean;
+  requirements?: string;
+  successChance?: number;
+}
+
+/**
+ * Character opinion on current escalation
+ */
+export interface CharacterEscalationOpinion {
+  characterId: string;
+  characterName: string;
+  calling: string;
+  recommendation: 'fight' | 'flee' | 'negotiate' | 'neutral';
+  quote: string;
+  confidence: number;
+}
+
+/**
+ * Full escalation state for UI display
+ */
+export interface EscalationDisplayState {
+  heat: number;              // 0-100
+  maxHeat: number;           // 100 usually
+  stars: number;             // 0-5
+  incomingWaves: EscalationWave[];
+  escapeOptions: EscapeOption[];
+  characterOpinions?: CharacterEscalationOpinion[];
+  isChoicePoint: boolean;    // True when player must decide fight/flee
+  turnsUntilNextWave: number | null;
+}
+
+/**
+ * Escalation events for React <-> Phaser communication
+ */
+export interface EscalationEvents {
+  // Phaser → React
+  'escalation:update': EscalationDisplayState;
+  'escalation:wave-warning': { wave: EscalationWave; turnsUntil: number; message: string };
+  'escalation:wave-arrived': { wave: EscalationWave; message: string };
+  'escalation:choice-required': { options: EscapeOption[]; opinions: CharacterEscalationOpinion[] };
+  'escalation:heat-changed': { oldHeat: number; newHeat: number; reason: string };
+  'escalation:stars-changed': { oldStars: number; newStars: number };
+
+  // React → Phaser
+  'escalation:choose-option': { optionId: string };
+  'escalation:request-state': void;
+}
+
+// ============================================================================
+// GAME MODE TYPES - For arcade-style modes (Gauntlet, Last Stand, etc)
+// ============================================================================
+
+/**
+ * Game mode score breakdown
+ */
+export interface GameModeScoreDisplay {
+  kills: number;
+  roundsSurvived: number;
+  objectivesCompleted: number;
+  extractionBonus: number;
+  damageDealt: number;
+  damageTaken: number;
+  factionKills: { police: number; swat: number; military: number };
+  total: number;
+}
+
+/**
+ * Gauntlet wave info for display
+ */
+export interface GauntletWaveDisplay {
+  waveNumber: number;
+  faction: 'police' | 'swat' | 'military';
+  unitCount: number;
+  hasElite: boolean;
+  bonusScore: number;
+}
+
+/**
+ * Full game mode state for UI display
+ */
+export interface GameModeDisplayState {
+  mode: string;
+  modeName: string;
+  modeDescription: string;
+  score: GameModeScoreDisplay;
+  roundNumber: number;
+  waveNumber: number;
+  currentWave: GauntletWaveDisplay | null;
+  extractionUnlocked: boolean;
+}
+
+/**
+ * Game mode events for React <-> Phaser communication
+ */
+export interface GameModeEvents {
+  // Phaser → React
+  'gamemode:update': GameModeDisplayState;
+  'gamemode:wave-spawned': { waveNumber: number; faction: string; unitCount: number; hasElite: boolean };
+  'gamemode:victory': { mode: string; reason: string; score: GameModeScoreDisplay; rounds: number; waves: number };
+  'gamemode:defeat': { mode: string; reason: string; score: GameModeScoreDisplay; rounds: number; waves: number };
+
+  // React → Phaser
+  'gamemode:request-extraction': void;
+  'gamemode:request-state': void;
+}
+
 export default EventBridge;

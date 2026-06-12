@@ -277,10 +277,10 @@ function simulateGrenadeBattle(
   enemyCount: number,
   clusterSpread: number,
   iterations: number
-): { avgDamage: number; avgHits: number; avgKills: number } {
+): { avgDamage: number; avgHits: number; avgIncapacitated: number } {
   let totalDamage = 0;
   let totalHits = 0;
-  let totalKills = 0;
+  let totalIncapacitated = 0;
 
   const grenade = GRENADES[grenadeType];
 
@@ -294,15 +294,16 @@ function simulateGrenadeBattle(
     totalHits += result.victims.length;
     totalDamage += result.victims.reduce((sum, v) => sum + v.damage, 0);
 
-    // Count kills (assuming 80 HP per enemy)
-    const kills = result.victims.filter(v => v.damage >= 80).length;
-    totalKills += kills;
+    // Track "incapacitated" - 40+ damage makes someone combat ineffective
+    // (grenades wound/suppress, combined arms finish them off)
+    const incapacitated = result.victims.filter(v => v.damage >= 40).length;
+    totalIncapacitated += incapacitated;
   }
 
   return {
     avgDamage: totalDamage / iterations,
     avgHits: totalHits / iterations,
-    avgKills: totalKills / iterations,
+    avgIncapacitated: totalIncapacitated / iterations,
   };
 }
 
@@ -318,7 +319,7 @@ for (const config of testConfigs) {
   console.log(`\n${config.desc}:`);
   for (const gType of grenadeTypes) {
     const result = simulateGrenadeBattle(gType, config.enemies, config.spread, 100);
-    console.log(`  ${GRENADES[gType].emoji} ${GRENADES[gType].name.padEnd(12)}: ${result.avgHits.toFixed(1)} hits, ${result.avgDamage.toFixed(0)} total dmg, ${result.avgKills.toFixed(2)} kills`);
+    console.log(`  ${GRENADES[gType].emoji} ${GRENADES[gType].name.padEnd(12)}: ${result.avgHits.toFixed(1)} hits, ${result.avgDamage.toFixed(0)} total dmg, ${result.avgIncapacitated.toFixed(1)} incap`);
   }
 }
 

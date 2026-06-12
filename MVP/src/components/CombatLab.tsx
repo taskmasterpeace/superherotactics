@@ -22,6 +22,9 @@ import { ALL_ARMOR, getArmorByName } from '../data/armor';
 // Fast Combat - Streamlined combat viewer
 import FastCombat from './FastCombat';
 import { SimUnit } from '../combat/types';
+// Escalation HUD - Heat/wanted level display
+import { EscalationHUD, EscalationChoiceModal } from './EscalationHUD';
+import { EscapeOption, CharacterEscalationOpinion } from '../game/EventBridge';
 
 // Icons from lucide-react
 import {
@@ -179,6 +182,11 @@ export const CombatLab: React.FC = () => {
   const [combatLoaded, setCombatLoaded] = useState(false);
   const [activeGrapple, setActiveGrapple] = useState<GrappleInteraction | null>(null);
   const [showGrenadeMenu, setShowGrenadeMenu] = useState(false);
+
+  // Escalation system state
+  const [showEscalationChoice, setShowEscalationChoice] = useState(false);
+  const [escalationOptions, setEscalationOptions] = useState<EscapeOption[]>([]);
+  const [escalationOpinions, setEscalationOpinions] = useState<CharacterEscalationOpinion[]>([]);
 
   // Get characters and setCurrentView from game store
   const gameCharacters = useGameStore(state => state.characters);
@@ -412,6 +420,17 @@ export const CombatLab: React.FC = () => {
       }
     });
 
+    // Listen for escalation choice required
+    const unsubEscalationChoice = EventBridge.on('escalation:choice-required', (data: {
+      options: EscapeOption[];
+      opinions: CharacterEscalationOpinion[];
+    }) => {
+      console.log('[COMBAT LAB] Escalation choice required:', data);
+      setEscalationOptions(data.options);
+      setEscalationOpinions(data.opinions);
+      setShowEscalationChoice(true);
+    });
+
     return () => {
       unsubscribe();
       unsubAi();
@@ -420,6 +439,7 @@ export const CombatLab: React.FC = () => {
       unsubGrappleChange();
       unsubGrappleEnd();
       unsubConsumeGrenade();
+      unsubEscalationChoice();
     };
   }, [gameCharacters]);
 
@@ -688,6 +708,30 @@ export const CombatLab: React.FC = () => {
           </button>
         </div>
       )}
+
+      {/* Escalation HUD - Heat/wanted level display */}
+      <div className="fixed top-20 left-4 z-40">
+        <EscalationHUD
+          visible={combatLoaded}
+          onEscapeSelected={(optionId) => {
+            console.log('[COMBAT LAB] Escape option selected:', optionId);
+            EventBridge.emit('escalation:choose-option', { optionId });
+          }}
+        />
+      </div>
+
+      {/* Escalation Choice Modal */}
+      <EscalationChoiceModal
+        isOpen={showEscalationChoice}
+        onClose={() => setShowEscalationChoice(false)}
+        options={escalationOptions}
+        opinions={escalationOpinions}
+        onSelect={(optionId) => {
+          console.log('[COMBAT LAB] Escalation choice made:', optionId);
+          EventBridge.emit('escalation:choose-option', { optionId });
+          setShowEscalationChoice(false);
+        }}
+      />
 
       {/* Grapple Panel - Shows when selected unit is in a grapple */}
       {activeGrapple && selectedUnit && (

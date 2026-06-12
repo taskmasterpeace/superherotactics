@@ -807,6 +807,15 @@ export interface BattleConfig {
   includeMovement: boolean;// If false, skip movement phase
   apPerRound: number;      // AP budget per unit per round (default 4)
   seed?: number;           // For deterministic battles
+
+  // Escalation settings (optional - Phase 5 addition)
+  escalation?: {
+    enabled: boolean;           // Enable heat/reinforcement system
+    targetCity?: string;        // City name for response profile
+    targetCountry?: string;     // Country name for response profile
+    entryDirection?: 'north' | 'south' | 'east' | 'west';
+    factionStandings?: Record<string, number>;  // Player's faction standings
+  };
 }
 
 export const DEFAULT_BATTLE_CONFIG: BattleConfig = {
@@ -817,6 +826,7 @@ export const DEFAULT_BATTLE_CONFIG: BattleConfig = {
   includeMovement: false,
   apPerRound: 8,        // Each unit gets 8 AP per round (scaled up for granularity)
   seed: undefined,
+  escalation: undefined,  // Disabled by default for headless simulations
 };
 
 // ============ BATTLE RESULTS ============

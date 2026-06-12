@@ -20,23 +20,24 @@
       "primaryStat": "STR",
       "techniques": [
         {
-          "id": "tech_clinch",
-          "name": "Clinch",
+          "id": "tech_double_leg",
+          "name": "Double Leg",
           "styleId": "grappling",
           "beltRequired": 1,
           "apCost": 1,
-          "effect": "Enter grapple range with target. Both become engaged.",
-          "setsGrappleState": "standing",
+          "damage": 7,
+          "effect": "Explosive double leg takedown. Initiates grapple.",
+          "setsGrappleState": "ground",
           "requiresStanding": true
         },
         {
-          "id": "tech_takedown",
-          "name": "Takedown",
+          "id": "tech_trip",
+          "name": "Foot Sweep",
           "styleId": "grappling",
           "beltRequired": 2,
-          "apCost": 2,
-          "damage": 5,
-          "effect": "Knock target prone. You remain standing.",
+          "apCost": 1,
+          "damage": 8,
+          "effect": "Sweep legs from standing. Target falls prone.",
           "statusApplied": ["prone"],
           "requiresGrapple": true,
           "setsGrappleState": "ground"
@@ -47,8 +48,8 @@
           "styleId": "grappling",
           "beltRequired": 3,
           "apCost": 2,
-          "damage": 8,
-          "effect": "Throw target 1 tile. Target becomes prone.",
+          "damage": 10,
+          "effect": "Classic judo throw. Target becomes prone.",
           "statusApplied": ["prone"],
           "requiresGrapple": true,
           "setsGrappleState": "ground"
@@ -58,55 +59,57 @@
           "name": "Suplex",
           "styleId": "grappling",
           "beltRequired": 4,
-          "apCost": 3,
-          "damage": 15,
-          "effect": "Slam target onto their back. Both go prone.",
-          "statusApplied": ["prone", "stunned"],
+          "apCost": 2,
+          "damage": 14,
+          "effect": "Slam target onto their back. Devastating impact.",
+          "statusApplied": ["stunned"],
           "requiresGrapple": true,
           "setsGrappleState": "ground"
         },
         {
           "id": "tech_slam",
-          "name": "Slam",
+          "name": "Power Slam",
           "styleId": "grappling",
           "beltRequired": 5,
-          "apCost": 3,
-          "damage": 0,
-          "effect": "Damage equals STR x 0.5. Devastating power slam.",
+          "apCost": 2,
+          "damage": 16,
+          "effect": "Lift and slam with full force. Brutal.",
           "requiresGrapple": true,
           "setsGrappleState": "ground"
         },
         {
-          "id": "tech_pin",
-          "name": "Pin",
+          "id": "tech_german_suplex",
+          "name": "German Suplex",
           "styleId": "grappling",
           "beltRequired": 6,
           "apCost": 2,
-          "effect": "Restrain target. They lose 2 AP per turn while pinned.",
+          "damage": 18,
+          "effect": "Back suplex dropping on head/shoulders.",
+          "statusApplied": ["stunned"],
           "requiresGrapple": true,
-          "requiresProne": true,
-          "setsGrappleState": "pinned"
+          "setsGrappleState": "ground"
         },
         {
-          "id": "tech_lift_carry",
-          "name": "Lift & Carry",
+          "id": "tech_belly_to_belly",
+          "name": "Belly-to-Belly",
           "styleId": "grappling",
           "beltRequired": 7,
-          "apCost": 1,
-          "effect": "Pick up a restrained target. Can move with them.",
-          "requiresRestrained": true,
-          "setsGrappleState": "carried"
+          "apCost": 2,
+          "damage": 20,
+          "effect": "Explosive overhead throw. Crowd pleaser.",
+          "requiresGrapple": true,
+          "setsGrappleState": "ground"
         },
         {
           "id": "tech_pile_driver",
           "name": "Pile Driver",
           "styleId": "grappling",
           "beltRequired": 8,
-          "apCost": 4,
-          "damage": 30,
-          "effect": "Devastating head-first slam. Requires lifted target.",
+          "apCost": 3,
+          "damage": 28,
+          "effect": "Devastating head-first slam. Fight ender.",
           "statusApplied": ["stunned", "prone"],
-          "requiresRestrained": true,
+          "requiresGrapple": true,
           "setsGrappleState": "ground"
         }
       ]
@@ -120,14 +123,15 @@
       "secondaryStat": "STR",
       "techniques": [
         {
-          "id": "tech_guard_pull",
-          "name": "Guard Pull",
+          "id": "tech_shoot",
+          "name": "Shoot",
           "styleId": "submission",
           "beltRequired": 1,
           "apCost": 1,
-          "effect": "Both go prone. You gain guard control position.",
-          "statusApplied": ["prone"],
-          "setsGrappleState": "ground"
+          "damage": 6,
+          "effect": "Level change and tackle. Initiates grapple on hit.",
+          "setsGrappleState": "ground",
+          "requiresStanding": true
         },
         {
           "id": "tech_armbar",
@@ -139,19 +143,18 @@
           "effect": "Hyperextend arm joint. Target gets -2 MEL.",
           "statusApplied": ["arm_injured"],
           "requiresGrapple": true,
-          "requiresProne": true,
           "setsGrappleState": "submission"
         },
         {
-          "id": "tech_triangle",
-          "name": "Triangle Choke",
+          "id": "tech_guillotine",
+          "name": "Guillotine Choke",
           "styleId": "submission",
           "beltRequired": 3,
           "apCost": 2,
-          "effect": "Leg choke. Target loses 1 AP per turn until escape.",
+          "damage": 8,
+          "effect": "Front headlock choke. Can be applied standing or ground.",
           "statusApplied": ["choked"],
           "requiresGrapple": true,
-          "requiresProne": true,
           "setsGrappleState": "submission"
         },
         {
@@ -171,8 +174,9 @@
           "name": "Rear Naked Choke",
           "styleId": "submission",
           "beltRequired": 5,
-          "apCost": 3,
-          "effect": "Blood choke from behind. Unconscious in 3 turns if held.",
+          "apCost": 2,
+          "damage": 12,
+          "effect": "Blood choke from behind. Devastating finish.",
           "statusApplied": ["choked"],
           "requiresGrapple": true,
           "setsGrappleState": "submission"
@@ -183,11 +187,10 @@
           "styleId": "submission",
           "beltRequired": 6,
           "apCost": 2,
-          "damage": 20,
+          "damage": 18,
           "effect": "Devastating leg lock. Target is immobilized.",
           "statusApplied": ["immobilized"],
           "requiresGrapple": true,
-          "requiresProne": true,
           "setsGrappleState": "submission"
         },
         {
@@ -196,19 +199,20 @@
           "styleId": "submission",
           "beltRequired": 7,
           "apCost": 3,
-          "damage": 25,
+          "damage": 22,
           "effect": "Brutal neck manipulation. High damage spine attack.",
           "requiresGrapple": true,
           "setsGrappleState": "submission"
         },
         {
-          "id": "tech_blood_choke",
-          "name": "Blood Choke",
+          "id": "tech_twister",
+          "name": "Twister",
           "styleId": "submission",
           "beltRequired": 8,
           "apCost": 3,
-          "effect": "Cut blood to brain. Unconscious in 2 turns if held.",
-          "statusApplied": ["choked"],
+          "damage": 28,
+          "effect": "Spinal lock. One of the most painful submissions.",
+          "statusApplied": ["crippled"],
           "requiresGrapple": true,
           "setsGrappleState": "submission"
         }
@@ -217,29 +221,30 @@
     {
       "id": "internal",
       "name": "Internal Arts",
-      "description": "Tai Chi, Aikido - Redirection & Defense. Use opponent's force against them.",
+      "description": "Tai Chi, Aikido, Bagua - Redirection & Internal Power. Use opponent's force against them.",
       "role": "defense",
       "primaryStat": "INS",
       "secondaryStat": "AGL",
       "techniques": [
         {
-          "id": "tech_deflect",
-          "name": "Deflect",
+          "id": "tech_palm_strike",
+          "name": "Palm Strike",
           "styleId": "internal",
           "beltRequired": 1,
-          "apCost": 0,
-          "effect": "Reaction: Reduce incoming melee damage by 25%.",
-          "isReaction": true,
+          "apCost": 1,
+          "damage": 8,
+          "effect": "Focused palm strike channeling internal force.",
           "requiresStanding": true
         },
         {
-          "id": "tech_redirect",
-          "name": "Redirect",
+          "id": "tech_nerve_strike",
+          "name": "Nerve Strike",
           "styleId": "internal",
           "beltRequired": 2,
           "apCost": 1,
-          "effect": "Reaction: Send incoming attack to an adjacent enemy.",
-          "isReaction": true,
+          "damage": 10,
+          "effect": "Precise strike to nerve cluster. Target's accuracy reduced.",
+          "statusApplied": ["disoriented"],
           "requiresStanding": true
         },
         {
@@ -248,8 +253,9 @@
           "styleId": "internal",
           "beltRequired": 3,
           "apCost": 1,
-          "damage": 0,
-          "effect": "Knockback target 1 tile. No damage, pure positioning.",
+          "damage": 6,
+          "effect": "Explosive push using rooted power. Knockback 1 tile.",
+          "statusApplied": ["knockback"],
           "requiresStanding": true
         },
         {
@@ -258,27 +264,30 @@
           "styleId": "internal",
           "beltRequired": 4,
           "apCost": 2,
-          "damage": 5,
+          "damage": 8,
           "effect": "Control opponent's joint. Immobilize for 1 turn.",
           "statusApplied": ["immobilized"],
           "requiresStanding": true
         },
         {
-          "id": "tech_energy_steal",
-          "name": "Energy Steal",
+          "id": "tech_fa_jin",
+          "name": "Fa Jin",
           "styleId": "internal",
           "beltRequired": 5,
           "apCost": 2,
-          "effect": "Drain 1 AP from target. You gain that AP.",
-          "requiresGrapple": true
+          "damage": 14,
+          "effect": "Explosive internal power release. Short-range devastation.",
+          "requiresStanding": true
         },
         {
-          "id": "tech_circle_walk",
-          "name": "Circle Walk",
+          "id": "tech_chi_disruption",
+          "name": "Chi Disruption",
           "styleId": "internal",
           "beltRequired": 6,
-          "apCost": 1,
-          "effect": "Move without triggering overwatch or opportunity attacks.",
+          "apCost": 2,
+          "damage": 12,
+          "effect": "Strike disrupts energy flow. Target loses 1 AP next turn.",
+          "statusApplied": ["drained"],
           "requiresStanding": true
         },
         {
@@ -286,19 +295,20 @@
           "name": "Iron Body",
           "styleId": "internal",
           "beltRequired": 7,
-          "apCost": 0,
-          "effect": "Passive: +5 Damage Reduction vs all melee attacks.",
-          "isPassive": true
+          "apCost": 2,
+          "damage": 16,
+          "effect": "Iron Palm strike with conditioned hands. Ignores armor.",
+          "requiresStanding": true
         },
         {
           "id": "tech_dim_mak",
           "name": "Dim Mak",
           "styleId": "internal",
           "beltRequired": 8,
-          "apCost": 4,
-          "damage": 0,
-          "effect": "Death touch. Delayed damage triggers at start of target's next turn.",
-          "statusApplied": ["dim_mak"],
+          "apCost": 3,
+          "damage": 25,
+          "effect": "Death touch to vital point. Devastating internal damage.",
+          "statusApplied": ["internal_bleeding"],
           "requiresStanding": true
         }
       ]

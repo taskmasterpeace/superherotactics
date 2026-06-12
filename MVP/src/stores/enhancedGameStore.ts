@@ -45,6 +45,7 @@ import {
 import { simulateWeek, SimulationEvent, SimulationResult } from '../data/criminalSimulation'
 import { generateWeeklyNews } from '../data/criminalNewsBridge'
 import { getCitiesByCountry } from '../data/cities'
+import { Email } from '../data/emailSystem'
 
 // Territory System Imports
 import {
@@ -342,6 +343,9 @@ interface EnhancedGameStore {
   // Notification System
   notifications: GameNotification[]
 
+  // Email System
+  emails: Email[]
+
   // News System
   newsArticles: NewsArticle[]
   playerFame: number  // 0-1000 (fame score)
@@ -481,6 +485,13 @@ interface EnhancedGameStore {
   clearAllNotifications: () => void
   getUnreadCount: () => number
 
+  // Email System
+  addEmail: (email: Email) => void
+  updateEmail: (emailId: string, updates: Partial<Email>) => void
+  deleteEmail: (emailId: string) => void
+  getEmails: () => Email[]
+  getEmailUnreadCount: () => number
+
   // News System
   addNewsArticle: (article: NewsArticle) => void
   markArticleRead: (articleId: string) => void
@@ -534,6 +545,7 @@ interface EnhancedGameStore {
   upgradeFacilityAt: (gridX: number, gridY: number) => void
   removeFacilityAt: (gridX: number, gridY: number) => void
   processConstruction: (hours: number) => void
+  cancelConstruction: (projectId: string) => void
   getBaseBonuses: () => { education: number; healing: number; investigation: number }
 
   // Faction Relations Actions
@@ -658,6 +670,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       equippedShield: null,
       status: 'ready',
       statusStartTime: Date.now(),  // Track when became idle
+      statusStartGameHour: 32,  // Initial game hour: day 1 at 8:00 AM = (1*24) + 8 = 32
       idleEscalationLevel: 0,
       location: { country: 'United States', city: 'Washington DC' },
       injuries: [],
@@ -685,6 +698,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       equippedShield: null,
       status: 'ready',
       statusStartTime: Date.now(),
+      statusStartGameHour: 32,  // Initial game hour: day 1 at 8:00 AM
       idleEscalationLevel: 0,
       location: { country: 'United States', city: 'New York' },
       injuries: [],
@@ -712,6 +726,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       equippedShield: null,
       status: 'ready',
       statusStartTime: Date.now(),
+      statusStartGameHour: 32,  // Initial game hour: day 1 at 8:00 AM
       idleEscalationLevel: 0,
       location: { country: 'United States', city: 'Los Angeles' },
       injuries: [],
@@ -739,6 +754,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       equippedShield: null,
       status: 'ready',
       statusStartTime: Date.now(),
+      statusStartGameHour: 32,  // Initial game hour: day 1 at 8:00 AM
       idleEscalationLevel: 0,
       location: { country: 'Russia', city: 'Moscow' },
       injuries: [],
@@ -781,6 +797,9 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   ],
 
   medicalQueue: [],
+
+  // Email System - starts empty, populated by emailSystem.ts
+  emails: [],
 
   // Notification System - start with a welcome message
   notifications: [
@@ -1030,12 +1049,20 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   processRecovery: () => {
     const state = get()
     const recovered = []
+    // Calculate current game hour for idle tracking
+    const currentGameHour = (state.gameTime.day * 24) + Math.floor(state.gameTime.minutes / 60)
+
+    // Get base healing bonus (if player has a base with medical facilities)
+    const activeBase = getActiveBase(state.baseState)
+    const healingBonus = activeBase ? getHealingBonus(activeBase) : 0
+    const healingMultiplier = 1 + (healingBonus / 100) // e.g., 50% bonus = 1.5x faster
 
     const updatedCharacters = state.characters.map(char => {
       // Process both 'hospitalized' (legacy) and 'hospital' (new) status
       if ((char.status === 'hospitalized' || char.status === 'hospital') && char.recoveryTime > 0) {
-        // Reduce recovery time by 1 hour per tick
-        const newRecoveryTime = char.recoveryTime - 1
+        // Reduce recovery time by 1 hour per tick, multiplied by healing bonus
+        const recoveryRate = healingMultiplier
+        const newRecoveryTime = Math.max(0, char.recoveryTime - recoveryRate)
 
         if (newRecoveryTime <= 0) {
           recovered.push(char.name)
@@ -1046,6 +1073,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
             injuries: [], // Clear injuries upon full recovery
             health: { ...char.health, current: char.health.maximum },
             statusStartTime: Date.now(),
+            statusStartGameHour: currentGameHour,
             idleEscalationLevel: 0
           }
         }
@@ -1857,6 +1885,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   completeTravelUnit: (unitId) => {
     const state = get()
+    // Calculate current game hour for idle tracking
+    const currentGameHour = (state.gameTime.day * 24) + Math.floor(state.gameTime.minutes / 60)
     const unit = state.travelingUnits.find(u => u.id === unitId)
     if (!unit) return
 
@@ -1913,7 +1943,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       travelingUnits: state.travelingUnits.filter(u => u.id !== unitId),
       characters: state.characters.map(char =>
         unit.characterIds.includes(char.id)
-          ? { ...char, status: 'ready', sector: unit.destinationSector, travelUnitId: undefined, statusStartTime: arrivalTime, idleEscalationLevel: 0 }
+          ? { ...char, status: 'ready', sector: unit.destinationSector, travelUnitId: undefined, statusStartTime: arrivalTime, statusStartGameHour: currentGameHour, idleEscalationLevel: 0 }
           : char
       ),
       fleetVehicles: unit.vehicleId
@@ -2182,43 +2212,78 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     return get().notifications.filter(n => !n.read && !n.dismissed).length
   },
 
-  // Idle Detection System - Now uses personality-based impatience
-  // Base times adjusted by character's impatience trait
+  // Email System Actions
+  addEmail: (email) => {
+    set(state => ({
+      emails: [email, ...state.emails].slice(0, 100) // Keep last 100 emails
+    }))
+  },
+
+  updateEmail: (emailId, updates) => {
+    set(state => ({
+      emails: state.emails.map(e =>
+        e.id === emailId ? { ...e, ...updates } : e
+      )
+    }))
+  },
+
+  deleteEmail: (emailId) => {
+    set(state => ({
+      emails: state.emails.filter(e => e.id !== emailId)
+    }))
+  },
+
+  getEmails: () => {
+    return get().emails.filter(e => !e.archived)
+  },
+
+  getEmailUnreadCount: () => {
+    return get().emails.filter(e => !e.read && !e.archived).length
+  },
+
+  // Idle Detection System - Uses GAME HOURS not real-time
+  // Characters only complain after hours of in-game idleness
   checkIdleCharacters: () => {
     const state = get()
     const now = Date.now()
 
-    // Base escalation times in milliseconds
+    // Calculate current game hour (total hours since game start)
+    const currentGameHour = (state.gameTime.day * 24) + Math.floor(state.gameTime.minutes / 60)
+
+    // Base escalation times in GAME HOURS (not real-time!)
     // Impatient characters (ESTP, ENTJ) will escalate faster
     // Patient characters (INTP, INFP) will wait longer
-    const BASE_WARNING_MS = 15 * 1000    // 15 seconds base
-    const BASE_TEXT_MS = 30 * 1000       // 30 seconds base
-    const BASE_CALL_MS = 45 * 1000       // 45 seconds base
+    const BASE_WARNING_HOURS = 4    // 4 game hours before first warning
+    const BASE_TEXT_HOURS = 8       // 8 game hours before text message
+    const BASE_CALL_HOURS = 12      // 12 game hours before phone call
 
     const idleCharacters = state.characters.filter(
-      c => c.status === 'ready' && c.statusStartTime
+      c => c.status === 'ready' && (c.statusStartGameHour !== undefined || c.statusStartTime)
     )
 
     idleCharacters.forEach(char => {
-      const idleTime = now - (char.statusStartTime || now)
+      // Use game hours for idle calculation
+      // Fall back to converting statusStartTime to approximate game hours for legacy data
+      const startGameHour = char.statusStartGameHour ?? currentGameHour
+      const idleHours = currentGameHour - startGameHour
       const currentEscalation = char.idleEscalationLevel || 0
 
       // Get personality-based impatience multiplier
       const traits = getPersonalityTraits(char.personality?.mbti)
       const impatienceMultiplier = getImpatienceMultiplier(traits.impatience)
 
-      // Calculate adjusted escalation times
-      const warningTime = BASE_WARNING_MS * impatienceMultiplier
-      const textTime = BASE_TEXT_MS * impatienceMultiplier
-      const callTime = BASE_CALL_MS * impatienceMultiplier
+      // Calculate adjusted escalation times (in game hours)
+      const warningTime = BASE_WARNING_HOURS * impatienceMultiplier
+      const textTime = BASE_TEXT_HOURS * impatienceMultiplier
+      const callTime = BASE_CALL_HOURS * impatienceMultiplier
 
-      // Get personality-based messages
-      const impatienceState = getImpatienceState((idleTime / callTime) * 100)
+      // Get personality-based messages (scale by hours)
+      const impatienceState = getImpatienceState((idleHours / callTime) * 100)
       const messages = IMPATIENCE_STATE_MESSAGES[impatienceState]
       const randomMessage = messages[Math.floor(Math.random() * messages.length)]
 
-      // Check if we need to escalate
-      if (idleTime >= callTime && currentEscalation < 3) {
+      // Check if we need to escalate (using game hours)
+      if (idleHours >= callTime && currentEscalation < 3) {
         // Level 3: Phone call (urgent)
         const furiousMessages = [
           `"Hey! I've been waiting here forever. What's the plan?"`,
@@ -2242,7 +2307,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
             c.id === char.id ? { ...c, idleEscalationLevel: 3, impatienceState } : c
           )
         }))
-      } else if (idleTime >= textTime && currentEscalation < 2) {
+      } else if (idleHours >= textTime && currentEscalation < 2) {
         // Level 2: Text message (high priority)
         const textMessages = [
           `"I'm here waiting. Any orders?"`,
@@ -2266,7 +2331,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
             c.id === char.id ? { ...c, idleEscalationLevel: 2, impatienceState } : c
           )
         }))
-      } else if (idleTime >= warningTime && currentEscalation < 1) {
+      } else if (idleHours >= warningTime && currentEscalation < 1) {
         // Level 1: Initial notification (medium priority)
         get().addNotification({
           type: 'idle_warning',
@@ -2290,13 +2355,17 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   setCharacterStatus: (characterId, status, data) => {
     const now = Date.now()
-    set(state => ({
-      characters: state.characters.map(char =>
+    const state = get()
+    // Calculate current game hour for idle tracking
+    const currentGameHour = (state.gameTime.day * 24) + Math.floor(state.gameTime.minutes / 60)
+    set(s => ({
+      characters: s.characters.map(char =>
         char.id === characterId
           ? {
               ...char,
               status,
               statusStartTime: now,
+              statusStartGameHour: currentGameHour,  // Track game hours for idle detection
               idleEscalationLevel: 0,  // Reset escalation when status changes
               ...data
             }
@@ -2946,6 +3015,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   startInvestigation: (investigationId, characterId) => {
     const state = get()
+    // Calculate current game hour for idle tracking
+    const currentGameHour = (state.gameTime.day * 24) + Math.floor(state.gameTime.minutes / 60)
     const lead = state.investigationLeads.find(inv => inv.id === investigationId)
     const character = state.characters.find(c => c.id === characterId)
 
@@ -2990,7 +3061,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       activeInvestigations: [...state.activeInvestigations, updatedInvestigation],
       characters: state.characters.map(char =>
         char.id === characterId
-          ? { ...char, status: 'investigating', statusStartTime: Date.now(), idleEscalationLevel: 0 }
+          ? { ...char, status: 'investigating', statusStartTime: Date.now(), statusStartGameHour: currentGameHour, idleEscalationLevel: 0 }
           : char
       )
     })
@@ -3044,6 +3115,15 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
             break  // Apply only one bonus per action
           }
         }
+      }
+    }
+
+    // Apply base investigation bonus (intel center, library facilities)
+    const activeBase = getActiveBase(state.baseState)
+    if (activeBase) {
+      const investigationBonus = getInvestigationBonus(activeBase)
+      if (investigationBonus > 0) {
+        result.progressGained = Math.round(result.progressGained * (1 + investigationBonus / 100))
       }
     }
 
@@ -3107,6 +3187,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   completeInvestigation: (investigationId) => {
     const state = get()
+    // Calculate current game hour for idle tracking
+    const currentGameHour = (state.gameTime.day * 24) + Math.floor(state.gameTime.minutes / 60)
     const investigation = state.activeInvestigations.find(inv => inv.id === investigationId)
 
     if (!investigation) return
@@ -3119,7 +3201,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       activeInvestigations: state.activeInvestigations.filter(inv => inv.id !== investigationId),
       characters: state.characters.map(char =>
         investigation.assignedCharacters.includes(char.id)
-          ? { ...char, status: 'ready', statusStartTime: Date.now(), fame: (char.fame || 0) + Math.floor(reward.fame / investigation.assignedCharacters.length) }
+          ? { ...char, status: 'ready', statusStartTime: Date.now(), statusStartGameHour: currentGameHour, idleEscalationLevel: 0, fame: (char.fame || 0) + Math.floor(reward.fame / investigation.assignedCharacters.length) }
           : char
       )
     })
@@ -3172,6 +3254,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   failInvestigation: (investigationId) => {
     const state = get()
+    // Calculate current game hour for idle tracking
+    const currentGameHour = (state.gameTime.day * 24) + Math.floor(state.gameTime.minutes / 60)
     const investigation = state.activeInvestigations.find(inv => inv.id === investigationId)
 
     if (!investigation) return
@@ -3180,7 +3264,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       activeInvestigations: state.activeInvestigations.filter(inv => inv.id !== investigationId),
       characters: state.characters.map(char =>
         investigation.assignedCharacters.includes(char.id)
-          ? { ...char, status: 'ready', statusStartTime: Date.now() }
+          ? { ...char, status: 'ready', statusStartTime: Date.now(), statusStartGameHour: currentGameHour, idleEscalationLevel: 0 }
           : char
       )
     })
@@ -3199,6 +3283,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   expireInvestigation: (investigationId) => {
     const state = get()
+    // Calculate current game hour for idle tracking
+    const currentGameHour = (state.gameTime.day * 24) + Math.floor(state.gameTime.minutes / 60)
     const investigation = [...state.investigationLeads, ...state.activeInvestigations].find(inv => inv.id === investigationId)
 
     if (!investigation) return
@@ -3208,7 +3294,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       activeInvestigations: state.activeInvestigations.filter(inv => inv.id !== investigationId),
       characters: state.characters.map(char =>
         investigation.assignedCharacters.includes(char.id)
-          ? { ...char, status: 'ready', statusStartTime: Date.now() }
+          ? { ...char, status: 'ready', statusStartTime: Date.now(), statusStartGameHour: currentGameHour, idleEscalationLevel: 0 }
           : char
       )
     })
@@ -3793,6 +3879,23 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
         timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
       })
     })
+  },
+
+  cancelConstruction: (projectId) => {
+    const state = get()
+    const { cancelConstruction } = require('../data/baseSystem')
+    const result = cancelConstruction(state.baseState, projectId)
+
+    set({
+      baseState: result.state,
+      budget: state.budget + result.refundAmount,
+    })
+
+    if (result.refundAmount > 0) {
+      toast(`Construction cancelled. Refunded $${result.refundAmount.toLocaleString()}`)
+    } else {
+      toast('Construction cancelled')
+    }
   },
 
   getBaseBonuses: () => {
@@ -4757,3 +4860,11 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     })
   },
 }))
+
+// Expose store to window for Phaser scene access (combat integration)
+if (typeof window !== 'undefined') {
+  (window as any).__GAME_STORE__ = useGameStore.getState();
+  useGameStore.subscribe(() => {
+    (window as any).__GAME_STORE__ = useGameStore.getState();
+  });
+}

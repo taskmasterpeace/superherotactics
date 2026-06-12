@@ -72,6 +72,16 @@ import {
   MapTerrain,
 } from './mapGenerator';
 
+import {
+  EscalationCombatState,
+  initializeEscalationFromMission,
+  addHeat,
+  processEscalationTurn,
+  getEscalationDisplay,
+  HEAT_VALUES,
+  calculateHeatGenerated,
+} from './escalationSystem';
+
 /**
  * Process morale check for a unit when something bad happens.
  * Updates the unit's panicLevel in place.
@@ -247,6 +257,19 @@ export function runBattle(
   // the left-side team a massive flanking advantage.
   initializeUnitFacing(blue, red);
 
+  // Initialize escalation state if enabled
+  let escalationState: EscalationCombatState | null = null;
+  if (fullConfig.escalation?.enabled) {
+    escalationState = initializeEscalationFromMission(
+      fullConfig.escalation.targetCity || 'Unknown',
+      fullConfig.escalation.targetCountry || 'Unknown',
+      fullConfig.escalation.entryDirection || 'south',
+      15, // mapWidth
+      15, // mapHeight
+      fullConfig.escalation.factionStandings
+    );
+  }
+
   const log: AttackResult[] = [];
   let rounds = 0;
   let totalTurns = 0;
@@ -348,6 +371,46 @@ export function runBattle(
           applyAttackResult(target, result);
           spendAction(unit, 'attack'); // Ends turn
 
+          // HEAT GENERATION from attack (escalation system)
+          // Ian's Requirement: High INS = cleaner operators = less heat
+          if (escalationState && unit.team === 'blue') {
+            // Only player actions generate heat
+            const weaponType = unit.weapon?.type?.toLowerCase() || 'rifle';
+            let heatAction = 'rifle_shot';  // Default
+
+            if (weaponType.includes('pistol') || weaponType.includes('handgun')) {
+              heatAction = 'pistol_shot';
+            } else if (weaponType.includes('shotgun')) {
+              heatAction = 'shotgun_shot';
+            } else if (weaponType.includes('sniper')) {
+              heatAction = 'sniper_shot';
+            } else if (weaponType.includes('smg') || weaponType.includes('automatic')) {
+              heatAction = 'automatic_fire';
+            } else if (weaponType.includes('grenade') || weaponType.includes('explosive')) {
+              heatAction = 'grenade';
+            } else if (weaponType.includes('rpg') || weaponType.includes('rocket')) {
+              heatAction = 'rpg';
+            }
+
+            // Get base heat value
+            const baseHeat = HEAT_VALUES[heatAction] || 5;
+
+            // Apply character stat modifiers (INS, suppressor, non-lethal)
+            const modifiedHeat = calculateHeatGenerated(baseHeat, unit);
+
+            // Add the modified heat to state
+            escalationState.heat = addHeat(
+              escalationState.heat,
+              heatAction,
+              totalTurns,
+              unit.position
+            );
+            // Override with calculated value
+            escalationState.heat.current = Math.max(0, Math.min(100,
+              escalationState.heat.current - baseHeat + modifiedHeat
+            ));
+          }
+
           // MORALE CHECKS after taking damage
           if (result.hitResult === 'crit' && target.alive) {
             // Critical hit - morale check for target
@@ -399,6 +462,25 @@ export function runBattle(
 
     // Reset acted flags
     allUnits.forEach(u => u.acted = false);
+
+    // PROCESS ESCALATION at end of round
+    if (escalationState) {
+      const escalationResult = processEscalationTurn(escalationState);
+      escalationState = escalationResult.state;
+
+      // Log escalation events
+      if (escalationResult.events.warnings.length > 0) {
+        for (const warning of escalationResult.events.warnings) {
+          console.log(`[ESCALATION] ${warning.message}`);
+        }
+      }
+      if (escalationResult.events.arrivals.length > 0) {
+        for (const arrival of escalationResult.events.arrivals) {
+          console.log(`[ESCALATION] ${arrival.faction.toUpperCase()} ARRIVED (${arrival.size} units from ${arrival.entryPoint})`);
+          // TODO: Spawn reinforcement units
+        }
+      }
+    }
 
     // Check for victory
     if (isTeamEliminated(blue) || isTeamEliminated(red)) {
@@ -538,6 +620,25 @@ export function runQuickBattle(
         } else if (canPerformAction(unit, 'move')) {
           // Move closer
           spendAction(unit, 'move');
+
+          // BALANCE FIX: Ranged units get free reaction shot when melee closes
+          // This represents "opportunity fire" when someone charges at you
+          if (unit.weapon.range <= 2 && target.weapon.range > 3 && target.alive) {
+            const reactionDistance = distance !== undefined ? distance - 1 : 2; // Closer now
+            if (reactionDistance > 0 && reactionDistance <= target.weapon.range) {
+              // Ranged unit gets a reaction shot at -15% accuracy (hasty fire)
+              const reactionRoll = Math.random() * 100;
+              const reactionAccuracy = (target.weapon.accuracy || 70) - 15;
+              if (reactionRoll < reactionAccuracy) {
+                // Hit! Apply reduced damage (50% - panic fire)
+                const reactionDamage = Math.round((target.weapon.damage || 20) * 0.5);
+                unit.hp = Math.max(0, unit.hp - reactionDamage);
+                if (unit.hp <= 0) {
+                  unit.alive = false;
+                }
+              }
+            }
+          }
         } else {
           break;
         }

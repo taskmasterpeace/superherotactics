@@ -4,7 +4,8 @@
       "mcp__ruv-swarm",
       "mcp__claude-flow@alpha",
       "mcp__flow-nexus",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(pushd:*)"
     ],
     "deny": []
   }

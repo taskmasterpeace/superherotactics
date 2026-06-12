@@ -71,6 +71,9 @@ import { initEmailSystem, cleanupEmailSystem } from './data/emailSystem'
 // Combat Results Handler - processes combat completion for XP, loot, fame, injuries
 import { initCombatResultsHandler, cleanupCombatResultsHandler } from './stores/combatResultsHandler'
 
+// Faction Event Handler - updates faction standings based on mission outcomes
+import { initFactionEventHandler, cleanupFactionEventHandler } from './data/factionEventHandler'
+
 // World Systems - central initialization for all simulation systems
 import { initWorldSystems, cleanupWorldSystems } from './data/worldSystemsInit'
 
@@ -147,6 +150,9 @@ function App() {
 
     // Initialize combat results handler (XP, loot, fame, injuries from combat)
     initCombatResultsHandler()
+
+    // Initialize faction event handler (standings update from missions)
+    initFactionEventHandler()
 
     // Handle resize - track both mobile and minimum width
     const handleResize = () => {
@@ -235,6 +241,7 @@ function App() {
       cleanupTerritorySystem()
       cleanupEmailSystem()
       cleanupCombatResultsHandler()
+      cleanupFactionEventHandler()
       cleanupWorldSystems()
     }
   }, [checkIdleCharacters])

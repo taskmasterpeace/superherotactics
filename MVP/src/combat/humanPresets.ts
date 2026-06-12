@@ -341,7 +341,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     name: 'Fist',
     damage: 10,  // Trained punch
     accuracy: 88,
-    damageType: 'IMPACT_BLUNT',
+    damageType: 'SMASHING_MELEE',
     range: 1,
     apCost: 2,   // Was 1 - scaled for 8 AP budget
     isLightAttack: true,  // Quick punch - can combo into heavy or move
@@ -350,7 +350,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     name: 'Jab',
     damage: 3,   // Was 6 - setup punch, not damage dealer
     accuracy: 95,
-    damageType: 'IMPACT_BLUNT',
+    damageType: 'SMASHING_MELEE',
     range: 1,
     apCost: 2,   // Was 1 - quick but still takes time
     knockbackForce: 10,
@@ -360,7 +360,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     name: 'Cross',
     damage: 14,  // Power punch
     accuracy: 85,
-    damageType: 'IMPACT_BLUNT',
+    damageType: 'SMASHING_MELEE',
     range: 1,
     apCost: 3,   // Was 1 - power punch takes wind-up
     knockbackForce: 40,
@@ -369,7 +369,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     name: 'Hook',
     damage: 16,  // Devastating when it lands
     accuracy: 78,
-    damageType: 'IMPACT_BLUNT',
+    damageType: 'SMASHING_MELEE',
     range: 1,
     apCost: 4,   // Was 2 - big commitment
     knockbackForce: 60,
@@ -378,7 +378,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     name: 'Uppercut',
     damage: 20,  // Knockout punch
     accuracy: 72,
-    damageType: 'IMPACT_BLUNT',
+    damageType: 'SMASHING_MELEE',
     range: 1,
     apCost: 4,   // Was 2 - big commitment
     knockbackForce: 80,
@@ -387,7 +387,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     name: 'Kick',
     damage: 15,  // Legs are stronger than arms
     accuracy: 80,
-    damageType: 'IMPACT_BLUNT',
+    damageType: 'SMASHING_MELEE',
     range: 1,
     apCost: 4,   // Was 2 - balance + power
     knockbackForce: 70,
@@ -396,7 +396,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     name: 'Roundhouse Kick',
     damage: 22,  // Devastating spinning kick
     accuracy: 68,
-    damageType: 'IMPACT_BLUNT',
+    damageType: 'SMASHING_MELEE',
     range: 1,
     apCost: 6,   // Was 3 - full spin commitment
     knockbackForce: 100,
@@ -409,9 +409,10 @@ export const WEAPONS: Record<string, SimWeapon> = {
     name: 'Nunchucks',
     damage: 15,  // Increased from 12 - heavy swinging weapon
     accuracy: 75,
-    damageType: 'IMPACT_BLUNT',
+    damageType: 'SMASHING_MELEE',
     range: 1,
-    apCost: 4,   // Heavy swing commitment
+    apCost: 3,   // Fast whipping strikes
+    isLightAttack: true,  // Quick strikes - like knife
     knockbackForce: 40,
     special: { disarmBonus: 25 },  // Excellent at disarming!
   },
@@ -419,7 +420,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     name: 'Bo Staff',
     damage: 15,
     accuracy: 80,
-    damageType: 'IMPACT_BLUNT',
+    damageType: 'SMASHING_MELEE',
     range: 2,  // Extra reach!
     apCost: 4,   // Was 2 - sweeping motion
     knockbackForce: 70,
@@ -429,7 +430,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     name: 'Tonfa',
     damage: 10,
     accuracy: 85,
-    damageType: 'IMPACT_BLUNT',
+    damageType: 'SMASHING_MELEE',
     range: 1,
     apCost: 2,   // Was 1 - quick defensive strikes
     knockbackForce: 30,
@@ -450,7 +451,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     name: 'Brass Knuckles',
     damage: 10,  // Reduced from 12 - enhanced fist, not power weapon
     accuracy: 90,
-    damageType: 'IMPACT_BLUNT',
+    damageType: 'SMASHING_MELEE',
     range: 1,
     apCost: 2,   // Quick punches like fist
     knockbackForce: 40,
@@ -656,7 +657,7 @@ export const WEAPONS: Record<string, SimWeapon> = {
     name: 'Power Fist',
     damage: 40,
     accuracy: 70,
-    damageType: 'IMPACT_BLUNT',
+    damageType: 'SMASHING_MELEE',
     range: 1,
     apCost: 5,
     knockbackForce: 120,

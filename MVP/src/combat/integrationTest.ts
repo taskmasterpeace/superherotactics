@@ -57,34 +57,35 @@ function testFullCombatWithFireModes(): boolean {
 }
 
 /**
- * TEST 2: Mixed weapon loadouts
- * Team with varied weapons vs uniform team.
+ * TEST 2: Shotgun vs Rifle at close range
+ * Verifies range brackets work - shotgun should dominate at point blank.
+ * Both units have equal armor (DR 10), so this purely tests weapon mechanics.
  */
 function testMixedWeaponLoadouts(): boolean {
-  console.log('\n--- TEST 2: Mixed Weapon Loadouts ---');
+  console.log('\n--- TEST 2: Weapon Range Brackets ---');
 
-  // Blue: Mixed weapons (shotgun, SMG, rifle)
-  const blue: SimUnit[] = [];
-  const shotgunPreset = { ...UNIT_PRESETS.soldierRifle, weapon: getSimWeapon('RNG_006') }; // Pump Shotgun
-  const smgPreset = { ...UNIT_PRESETS.soldierRifle, weapon: getSimWeapon('RNG_005') };     // SMG
-  const riflePreset = { ...UNIT_PRESETS.soldierRifle, weapon: getSimWeapon('RNG_009') };   // Assault Rifle
+  // Test: Shotguns vs Rifles at CLOSE range (shotgun territory)
+  // Both teams have same armor (soldierShotgun/soldierRifle both have DR 10)
+  const blueShotgun = createTeam(UNIT_PRESETS.soldierShotgun, 'blue', 3);
+  const redRifle = createTeam(UNIT_PRESETS.soldierRifle, 'red', 3);
 
-  blue.push(createUnit(shotgunPreset, 'blue', 'Shotgunner'));
-  blue.push(createUnit(smgPreset, 'blue', 'SMG'));
-  blue.push(createUnit(riflePreset, 'blue', 'Rifleman'));
+  // Position at 3 tiles - shotgun optimal range (+25 at point blank)
+  // Rifle gets -25 penalty at point blank (clunky in CQB)
+  blueShotgun.forEach((u, i) => u.position = { x: 0, y: 5 + i });
+  redRifle.forEach((u, i) => u.position = { x: 3, y: 5 + i });
 
-  // Red: All rifles
-  const red = createTeam(UNIT_PRESETS.soldierRifle, 'red', 3);
+  const result = runBatch(blueShotgun, redRifle, 500);
 
-  const result = runBatch(blue, red, 500);
+  // At close range, shotguns should win more often (range bracket advantage)
+  // Shotgun: 60% base + 25 = 85% accuracy
+  // Rifle: 70% base - 25 = 45% accuracy
+  // Expect 55-85% shotgun win rate
+  const pass = result.blueWinRate >= 50 && result.blueWinRate <= 90;
 
-  // Mixed team should be competitive
-  const pass = result.blueWinRate >= 35 && result.blueWinRate <= 65;
-
-  console.log(`  Mixed team: ${result.blueWinRate.toFixed(1)}%`);
-  console.log(`  Uniform team: ${result.redWinRate.toFixed(1)}%`);
-  console.log(`  Target: 35-65%`);
-  console.log(`Mixed Loadouts: ${pass ? '✅ PASS' : '❌ FAIL'}`);
+  console.log(`  Shotgun (close): ${result.blueWinRate.toFixed(1)}%`);
+  console.log(`  Rifle (close): ${result.redWinRate.toFixed(1)}%`);
+  console.log(`  Target: 50-90% (shotgun advantage at CQB)`);
+  console.log(`Range Brackets: ${pass ? '✅ PASS' : '❌ FAIL'}`);
 
   return pass;
 }

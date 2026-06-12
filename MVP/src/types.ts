@@ -283,7 +283,8 @@ export interface GameCharacter {
 
     // Status System (14 statuses)
     status: CharacterStatus;
-    statusStartTime?: number;              // When current status began (game minutes)
+    statusStartTime?: number;              // When current status began (real milliseconds - legacy)
+    statusStartGameHour?: number;          // When current status began (game hours for idle detection)
     statusDuration?: number;               // How long status lasts (minutes)
     statusData?: Record<string, unknown>;  // Status-specific data
 

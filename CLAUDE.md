@@ -43,10 +43,11 @@ The meta-game interface - like a phone/laptop the player uses.
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| News/Web Browser | **DESIGNED** | **See NEWS_SYSTEM_SUMMARY.md** |
-| Investigations | STUB | UI exists, no gameplay |
-| Hospital | NOT DONE | Injury recovery tracking |
-| Education/Training | NOT DONE | Skill learning |
+| News/Web Browser | **WORKING** | `NewsBrowser.tsx` - full article system |
+| Investigations | WORKING | `InvestigationCenter.tsx` - education bonuses wired |
+| Hospital | **WORKING** | `HospitalScreen.tsx` - origin healing, transfers |
+| Time Display | **WORKING** | `TimeDisplay.tsx` - day/night, speed controls |
+| Education/Training | PARTIAL | Education fields in recruiting, not skill learning |
 | Email System | NOT DONE | Mission briefings |
 | Character Management | PARTIAL | CharacterScreen exists |
 | Base Overview | NOT DONE | See Base Building below |
@@ -63,7 +64,7 @@ Grid-based global operations.
 | Enter Combat | WORKING | Button appears when on_mission |
 | 1050 Cities | WORKING | Displays in sector panels |
 | 168 Countries | DATA ONLY | Not affecting gameplay yet |
-| Time Progression | NOT DONE | Need day/night, calendar |
+| Time Progression | **WORKING** | `TimeDisplay.tsx`, `timeEventGenerator.ts` |
 | Vehicles | DATA ONLY | 24 vehicles defined, not used |
 | Militia/Territory | NOT DONE | Faction control |
 
@@ -94,15 +95,16 @@ Phaser-based turn-based tactical combat.
 | AI Combat | WORKING | AI vs AI mode |
 | Grappling | PARTIAL | Basic grabs |
 | RPG/Rockets | WORKING | Knockback 5, blast radius 2 |
+| DR/Armor Stopping Power | WORKING | `armorIntegration.ts`, applied in damage calc |
+| Shield Absorption | WORKING | Shields absorb before HP |
+| Weapon Database (70+) | WORKING | `weaponIntegration.ts` bridges to weapons.ts |
+| Free Movement | WORKING | Exploration phase before enemy contact |
+| Character Stats in Combat | WORKING | MEL/INT/INS/CON imported to units |
 
-**NOT WIRED YET**:
-- DR (armor stopping power) - defined in armor.ts
-- Shield absorption - defined but not applied
-- 70+ weapons in weapons.ts (CombatScene has 13 internal)
-- 20+ damage types -> status effects
-- Advanced knockback physics (knockbackSystem.ts)
-- Character stats MEL/INT/INS/CON in combat
-- Free movement before enemy spotted
+**PARTIAL/NOT WIRED**:
+- 20+ damage types -> status effects (types defined, effects partial)
+- Advanced knockback physics (knockbackSystem.ts has calculations, basic version in use)
+- Grappling system (basic grabs only)
 
 **Files**:
 - `game/scenes/CombatScene.ts` - Main combat logic (~5000 lines)
@@ -225,27 +227,35 @@ npm run build    # Production build
 
 ## Implementation Priority
 
-### Phase 1: News System (MVP)
-- [ ] Add news store to enhancedGameStore.ts
-- [ ] Create NewsBrowser component
-- [ ] Hook mission completion -> news generation
-- [ ] Implement fame/public opinion tracking
+### Phase 1: News System (MVP) ✅ COMPLETE
+- [x] Add news store to enhancedGameStore.ts
+- [x] Create NewsBrowser component
+- [x] Hook mission completion -> news generation
+- [x] Implement fame/public opinion tracking
 
-### Phase 2: Time & Economy
-- [ ] Time progression system (day/night, calendar)
-- [ ] Economy loop (income, expenses, budget)
-- [ ] Combat results -> strategic layer
+### Phase 2: Time & Economy ✅ COMPLETE
+- [x] Time progression system (day/night, calendar) - `TimeDisplay.tsx`
+- [x] Combat results -> strategic layer - `combatResultsHandler.ts` wired
+- [x] Economy loop - weekly payday (`timeEventGenerator.ts`), daily merc wages (`mercenaryPool.ts`)
 
-### Phase 3: Combat Polish
-- [ ] Wire DR/armor stopping power
-- [ ] Free movement before enemy contact
-- [ ] Import full weapon database (70+ weapons)
+### Phase 3: Combat Polish ✅ COMPLETE
+- [x] Wire DR/armor stopping power
+- [x] Free movement before enemy contact
+- [x] Import full weapon database (70+ weapons)
+- [x] Shield absorption system
+- [x] Character stats (MEL/INT/INS/CON) in combat
 
-### Phase 4: Strategic Depth
-- [ ] Faction relations system
-- [ ] Multiple squads
-- [ ] Base building
+### Phase 4: Strategic Depth ✅ COMPLETE
+- [x] Faction relations system - `factionSystem.ts`, `ReputationDisplay.tsx`, standings tracked per country
+- [x] Multiple squads - `squadSystem.ts`, `createSquad()`, `deploySquadToSector()`, vehicle assignment
+- [x] Base building - `baseSystem.ts`, `BaseManager.tsx`, 6 base types, 13 facility types, grid placement
+
+### Phase 5: Polish & Integration (NEXT)
+- [ ] Wire faction standings to mission rewards/consequences
+- [ ] Add squad management UI in world map
+- [ ] Wire base bonuses to game systems (healing, investigation, etc.)
+- [ ] Territory control system (militia training, sector defense)
 
 ---
 
-*Updated: December 2024 - Claude Flow v2.7 integrated*
+*Updated: January 2026 - Phases 1-4 complete, all core systems implemented*

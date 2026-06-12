@@ -2,7 +2,21 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useGameStore } from '../stores/enhancedGameStore'
 import { Investigation, ApproachType, APPROACH_CONFIGS } from '../data/investigationSystem'
+import { EDUCATION_FIELDS, EducationField } from '../data/countryProfiles'
 import toast from 'react-hot-toast'
+
+// Helper to get education fields from a character (may be ProfiledCharacter)
+function getCharacterEducation(character: any): EducationField[] {
+  return character.education || []
+}
+
+// Calculate total investigation bonus from education fields
+function calculateEducationBonus(education: EducationField[]): number {
+  return education.reduce((total, field) => {
+    const fieldConfig = EDUCATION_FIELDS[field]
+    return total + (fieldConfig?.investigationBonus || 0)
+  }, 0)
+}
 
 export default function InvestigationCenter() {
   const {
@@ -404,6 +418,47 @@ function InvestigationDetails({ investigation }: { investigation: Investigation 
                     <div className="font-bold text-green-400">{character.stats.CON}</div>
                   </div>
                 </div>
+
+                {/* Education Fields with Investigation Bonuses */}
+                {(() => {
+                  const education = getCharacterEducation(character)
+                  const totalBonus = calculateEducationBonus(education)
+                  if (education.length === 0) return null
+
+                  return (
+                    <div className="mt-2 pt-2 border-t border-gray-600">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-gray-400">Education</span>
+                        {totalBonus > 0 && (
+                          <span className="text-xs font-bold text-green-400">+{totalBonus}% Investigation</span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {education.slice(0, 3).map((field) => {
+                          const fieldConfig = EDUCATION_FIELDS[field]
+                          const bonus = fieldConfig?.investigationBonus || 0
+                          return (
+                            <span
+                              key={field}
+                              className={`text-xs px-1.5 py-0.5 rounded ${
+                                bonus > 0
+                                  ? 'bg-green-900 text-green-300 border border-green-700'
+                                  : 'bg-gray-600 text-gray-300'
+                              }`}
+                              title={bonus > 0 ? `+${bonus}% to investigations` : undefined}
+                            >
+                              {fieldConfig?.label || field}
+                              {bonus > 0 && <span className="ml-1 text-green-400">+{bonus}%</span>}
+                            </span>
+                          )
+                        })}
+                        {education.length > 3 && (
+                          <span className="text-xs text-gray-500">+{education.length - 3} more</span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
             ))}
           </div>
@@ -427,20 +482,37 @@ function InvestigationDetails({ investigation }: { investigation: Investigation 
           <div className="mb-4">
             <h3 className="text-sm font-bold text-gray-300 mb-2">Select Investigator:</h3>
             <div className="grid grid-cols-2 gap-2">
-              {assignedCharacters.map(char => (
-                <div
-                  key={char.id}
-                  className={`p-3 rounded cursor-pointer ${
-                    selectedCharacter === char.id
-                      ? 'bg-sht-primary-400 text-black'
-                      : 'bg-gray-700 text-white hover:bg-gray-600'
-                  }`}
-                  onClick={() => setSelectedCharacter(char.id)}
-                >
-                  <div className="font-bold">{char.name}</div>
-                  <div className="text-xs opacity-75">INT {char.stats.INT} • INS {char.stats.INS}</div>
-                </div>
-              ))}
+              {assignedCharacters.map(char => {
+                const education = getCharacterEducation(char)
+                const totalBonus = calculateEducationBonus(education)
+                return (
+                  <div
+                    key={char.id}
+                    className={`p-3 rounded cursor-pointer ${
+                      selectedCharacter === char.id
+                        ? 'bg-sht-primary-400 text-black'
+                        : 'bg-gray-700 text-white hover:bg-gray-600'
+                    }`}
+                    onClick={() => setSelectedCharacter(char.id)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="font-bold">{char.name}</div>
+                      {totalBonus > 0 && (
+                        <span className={`text-xs font-bold ${
+                          selectedCharacter === char.id ? 'text-green-800' : 'text-green-400'
+                        }`}>+{totalBonus}%</span>
+                      )}
+                    </div>
+                    <div className="text-xs opacity-75">INT {char.stats.INT} • INS {char.stats.INS}</div>
+                    {education.length > 0 && (
+                      <div className="text-xs opacity-60 mt-1">
+                        {education.slice(0, 2).map(f => EDUCATION_FIELDS[f]?.label || f).join(', ')}
+                        {education.length > 2 && ` +${education.length - 2}`}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
 

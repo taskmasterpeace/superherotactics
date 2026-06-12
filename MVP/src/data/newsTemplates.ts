@@ -619,6 +619,381 @@ export const WORLD_EVENTS: WorldEventTemplate[] = [
 ];
 
 // =============================================================================
+// ESCALATION NEWS TEMPLATES
+// News generated from police/SWAT/military confrontations
+// =============================================================================
+
+export const ESCALATION_HEADLINES: Record<string, HeadlineSet> = {
+  // Police killed during escalation
+  escalation_police_killed: {
+    pro_hero: [
+      'Tragic Confrontation: Officers Down in {city}',
+      '{heroName} Clash with Police Turns Deadly',
+      'Chaos in {city}: {casualties} Officers Killed',
+    ],
+    anti_hero: [
+      'COP KILLER: {heroName} Murders {casualties} Officers',
+      'Vigilante Rampage Leaves {casualties} Police Dead',
+      '"Hero" Turns Villain: {casualties} Officers Slain in {city}',
+      'Blood on Their Hands: {city} Police Massacred',
+    ],
+    neutral: [
+      '{casualties} Officers Killed in {city} Incident',
+      'Deadly Confrontation in {city}: Police Officers Dead',
+      '{city} Mourns Fallen Officers After Vigilante Encounter',
+    ],
+    tabloid: [
+      'MASSACRE: {casualties} COPS DEAD After {heroName} Shootout!',
+      'BLOODBATH in {city}! Heroes vs Police - {casualties} DEAD!',
+      'SHOCKING: The Hero Who Became a COP KILLER 💀',
+    ],
+    government: [
+      'Officer Deaths in {city} Under Federal Review',
+      '{casualties} Law Enforcement Casualties Reported',
+      'Government Condemns Violence Against Police in {city}',
+    ],
+    corporate: [
+      'Market Instability Following {city} Police Deaths',
+      'Insurance Implications After Officer Casualties',
+    ],
+    independent: [
+      'Community Divided After Officers Killed in {city}',
+      'What Led to {casualties} Police Deaths in {city}?',
+      'Witnesses Describe Deadly {city} Confrontation',
+    ],
+  },
+
+  // SWAT team killed
+  escalation_swat_killed: {
+    pro_hero: [
+      'Devastating Loss: SWAT Team Falls in {city}',
+      'Tactical Tragedy in {city}',
+    ],
+    anti_hero: [
+      'SWAT SLAUGHTER: {casualties} Elite Officers Down',
+      'Vigilante Annihilates Tactical Team in {city}',
+      '"Heroes" Wipe Out SWAT Unit - {casualties} Dead',
+    ],
+    neutral: [
+      'SWAT Team Casualties in {city} Operation',
+      '{casualties} Tactical Officers Killed in {city}',
+      'Deadly Engagement Leaves SWAT Team Devastated',
+    ],
+    tabloid: [
+      'HORROR: Entire SWAT Team DESTROYED! 😱',
+      'THEY KILLED THE ELITE: {casualties} SWAT Officers MASSACRED!',
+      'TERMINATOR-Style RAMPAGE Claims SWAT Lives!',
+    ],
+    government: [
+      'National Guard Deployment Considered After SWAT Losses',
+      'Federal Response to {city} SWAT Casualties',
+    ],
+    corporate: [],
+    independent: [
+      'How Did This Happen? Inside the {city} SWAT Disaster',
+    ],
+  },
+
+  // Military killed
+  escalation_military_killed: {
+    pro_hero: [
+      'Soldiers Fall in {city} - A Dark Day',
+    ],
+    anti_hero: [
+      'TERROR: Military Personnel Killed by Vigilantes',
+      'Domestic Terrorism? {casualties} Soldiers Dead in {city}',
+      'ENEMY OF THE STATE: {heroName} Kills Military',
+    ],
+    neutral: [
+      '{casualties} Military Personnel Killed in {city}',
+      'Armed Forces Suffer Casualties in {city} Operation',
+      'Military Engagement in {city} Turns Fatal',
+    ],
+    tabloid: [
+      'UNTHINKABLE: Heroes KILL {casualties} SOLDIERS!',
+      'WAR ON THE STREETS: Military vs Vigilantes!',
+    ],
+    government: [
+      'President Addresses {city} Military Casualties',
+      'National Security Alert Following Military Deaths',
+      'Defense Department Statement on {city} Incident',
+    ],
+    corporate: [],
+    independent: [
+      'Why Were Troops in {city}? Inside the Military Operation',
+    ],
+  },
+
+  // Civilian casualties during escalation
+  escalation_civilian_casualties: {
+    pro_hero: [
+      'Tragedy Strikes: Civilians Lost in {city} Battle',
+      '{heroName} Mourns Civilian Deaths',
+    ],
+    anti_hero: [
+      'INNOCENT BLOOD: {casualties} Civilians Killed by "Heroes"',
+      'Vigilante Violence Claims {casualties} Innocent Lives',
+      'Collateral Damage: {casualties} Dead, {heroName} Responsible',
+    ],
+    neutral: [
+      '{casualties} Civilians Killed in {city} Incident',
+      'Civilian Casualties Mount in {city}',
+      'Bystanders Pay Ultimate Price in {city} Battle',
+    ],
+    tabloid: [
+      'HORROR: {casualties} INNOCENTS DEAD! Blood on {heroName}\'s Hands!',
+      'MASSACRE of the INNOCENT in {city}! 💔',
+    ],
+    government: [
+      'Investigation Launched After Civilian Deaths',
+      'Government Demands Answers for {city} Tragedy',
+    ],
+    corporate: [],
+    independent: [
+      'Victims\' Families Speak Out After {city} Tragedy',
+      'Who Will Answer for {casualties} Civilian Deaths?',
+    ],
+  },
+
+  // Major incident (high heat, no faction kills)
+  escalation_major_incident: {
+    pro_hero: [
+      'Major Operation in {city} Draws Attention',
+      'Heroes Make Waves in {city}',
+    ],
+    anti_hero: [
+      'Chaos in {city}: Vigilantes Run Wild',
+      'Massive Property Damage in {city} Super-Battle',
+    ],
+    neutral: [
+      'Significant Superhuman Activity in {city}',
+      'Major Incident Reported in {city}',
+      '{city} Rocked by Superhuman Conflict',
+    ],
+    tabloid: [
+      'INSANE Battle Rocks {city}! 🔥',
+      'WILD Superpowered Showdown in {city}!',
+    ],
+    government: [
+      '{city} Incident Under Review',
+      'Authorities Respond to {city} Disturbance',
+    ],
+    corporate: [
+      'Business Disruption in {city} After Incident',
+    ],
+    independent: [
+      'What Really Happened in {city}?',
+    ],
+  },
+
+  // Minor incident (low heat)
+  escalation_minor: {
+    pro_hero: [],
+    anti_hero: [],
+    neutral: [
+      'Minor Incident Reported in {city}',
+      'Authorities Respond to {city} Disturbance',
+    ],
+    tabloid: [],
+    government: [],
+    corporate: [],
+    independent: [],
+  },
+};
+
+export const ESCALATION_BODIES: Record<string, Record<NewsBias, string[]>> = {
+  escalation_police_killed: {
+    pro_hero: [
+      '{city}, {country} - A tragic confrontation today left {casualties} officers dead. Sources indicate the incident escalated rapidly, leaving heroes with few options. Witnesses describe a chaotic scene.',
+    ],
+    anti_hero: [
+      '{city}, {country} - In a shocking display of brutality, vigilantes murdered {casualties} police officers responding to reports of superhuman activity. The victims, dedicated servants of the community, were cut down in what witnesses describe as a one-sided slaughter. How many more must die before we stop these so-called "heroes"?',
+    ],
+    neutral: [
+      '{city}, {country} - {casualties} police officers were killed today following an encounter with superhuman individuals. The incident began when officers responded to reports of disturbance. An investigation is underway.',
+    ],
+    tabloid: [
+      'OMG you guys, the absolute CHAOS in {city} today! {casualties} cops are DEAD after running into {heroName}. Our sources are saying it was BRUTAL. We have the footage and it\'s NOT pretty! 💀',
+    ],
+    government: [
+      '{city}, {country} - The Department of Justice has opened an investigation into the deaths of {casualties} law enforcement officers. Federal authorities are considering enhanced charges. A statement from the Attorney General is expected.',
+    ],
+    corporate: [
+      '{city}, {country} - Insurance adjusters are on scene following the incident. Liability claims related to officer deaths may impact municipal budgets. Private security firms report increased inquiry volume.',
+    ],
+    independent: [
+      '{city}, {country} - Local residents are still processing what happened. "We heard the shooting," said one witness. "It didn\'t stop for minutes." Questions remain about why the situation escalated to such deadly force.',
+    ],
+  },
+
+  escalation_swat_killed: {
+    pro_hero: [
+      '{city}, {country} - A tactical operation went tragically wrong today, resulting in the deaths of {casualties} elite SWAT officers. The circumstances remain unclear as investigators work to understand how such a well-trained unit was overwhelmed.',
+    ],
+    anti_hero: [
+      '{city}, {country} - Our most elite tactical officers are dead. {casualties} SWAT team members were slaughtered today by individuals who claim to be "heroes." These were the best of the best, trained for the worst scenarios. They never stood a chance against these monsters.',
+    ],
+    neutral: [
+      '{city}, {country} - A tactical response team suffered {casualties} casualties during an operation today. The SWAT unit was deployed following reports of superhuman activity. Details of the engagement remain under investigation.',
+    ],
+    tabloid: [
+      'UNREAL! A whole SWAT team got WIPED OUT in {city}! We\'re talking full tactical gear, armored vehicles, the works - and they got DESTROYED. {casualties} dead! This is like something out of a movie! 😱',
+    ],
+    government: [
+      '{city}, {country} - The loss of {casualties} SWAT officers represents a significant blow to local law enforcement capabilities. Federal assistance has been requested. The Governor has ordered flags to half-staff.',
+    ],
+    corporate: [],
+    independent: [
+      '{city}, {country} - Community members are asking difficult questions after {casualties} elite officers were killed. "They were supposed to be the last line," said one resident. "If they can\'t stop them, who can?"',
+    ],
+  },
+
+  escalation_military_killed: {
+    pro_hero: [
+      '{city}, {country} - Military personnel have fallen in what authorities are calling an unprecedented domestic engagement. {casualties} service members gave their lives. The nation mourns.',
+    ],
+    anti_hero: [
+      '{city}, {country} - Domestic terrorists have murdered {casualties} American soldiers on American soil. These vigilantes have crossed every line. They are no longer heroes - they are enemies of the state who must be stopped by any means necessary.',
+    ],
+    neutral: [
+      '{city}, {country} - {casualties} military personnel were killed during an operation in {city} today. The circumstances that led to military involvement remain classified. Next of kin have been notified.',
+    ],
+    tabloid: [
+      'This is INSANE! {casualties} SOLDIERS are DEAD after going up against {heroName}! The MILITARY couldn\'t stop them! What is even happening?! Are we watching the start of a superhuman WAR?! 🔥',
+    ],
+    government: [
+      '{city}, {country} - The President has been briefed on the loss of {casualties} military personnel. The National Security Council convened an emergency session. Martial law options are reportedly under discussion.',
+    ],
+    corporate: [],
+    independent: [
+      '{city}, {country} - The presence of military forces in a civilian area raises serious constitutional questions. "Who authorized this?" asks one civil rights attorney. "And why did {casualties} soldiers die on our streets?"',
+    ],
+  },
+
+  escalation_civilian_casualties: {
+    pro_hero: [
+      '{city}, {country} - Tragedy struck today as {casualties} innocent civilians lost their lives during a superhuman confrontation. Heroes have expressed profound grief over the losses, which occurred despite efforts to protect bystanders.',
+    ],
+    anti_hero: [
+      '{city}, {country} - {casualties} innocent people are dead today because vigilantes couldn\'t be bothered to fight somewhere else. Children, families, workers - all dead because "heroes" decided our neighborhood was their battleground. No apology will bring them back.',
+    ],
+    neutral: [
+      '{city}, {country} - {casualties} civilians were killed during a superhuman incident today. Emergency services responded to multiple casualty reports. Grief counselors have been deployed to the affected area.',
+    ],
+    tabloid: [
+      'We can\'t believe we\'re writing this 💔 {casualties} people who were just going about their day are GONE. Caught in the crossfire of a hero battle. The faces of the victims are heartbreaking...',
+    ],
+    government: [
+      '{city}, {country} - The government has announced a full investigation into circumstances that led to {casualties} civilian deaths. Victim compensation programs are being discussed. New restrictions on superhuman activity may follow.',
+    ],
+    corporate: [],
+    independent: [
+      '{city}, {country} - Candlelight vigils are being organized for the {casualties} victims. "They were my neighbors," said one resident through tears. "They didn\'t ask for any of this." The community demands answers.',
+    ],
+  },
+
+  escalation_major_incident: {
+    pro_hero: [
+      '{city}, {country} - A significant operation unfolded in the city today, drawing attention from authorities and media alike. While details remain limited, heroes appear to have successfully managed a challenging situation.',
+    ],
+    anti_hero: [
+      '{city}, {country} - Yet another day disrupted by vigilante activity. Streets closed, businesses shuttered, residents frightened - all so self-appointed "heroes" could play out their fantasy. When will this end?',
+    ],
+    neutral: [
+      '{city}, {country} - A major incident involving superhuman individuals occurred in the city today. Multiple agencies responded. The situation has been contained. Residents are advised to check with local authorities before returning to the area.',
+    ],
+    tabloid: [
+      'WILD scene in {city} today! Explosions, super-powers flying everywhere, the whole nine yards! We\'ve got video and it\'s INSANE! Check out these shots! 🔥',
+    ],
+    government: [
+      '{city}, {country} - Authorities are reviewing the incident that occurred in {city} today. A formal assessment of property damage and response effectiveness will be conducted.',
+    ],
+    corporate: [
+      '{city}, {country} - Business leaders are assessing the economic impact of today\'s incident. Early estimates suggest significant disruption to commerce in the affected area. Insurance adjusters are on scene.',
+    ],
+    independent: [
+      '{city}, {country} - Residents are sharing their experiences from today\'s incident on social media. Stories range from gratitude to frustration. The community conversation continues.',
+    ],
+  },
+
+  escalation_minor: {
+    pro_hero: [],
+    anti_hero: [],
+    neutral: [
+      '{city}, {country} - A minor incident involving superhuman activity was reported today. No significant casualties or damage reported. Authorities continue to monitor the situation.',
+    ],
+    tabloid: [],
+    government: [],
+    corporate: [],
+    independent: [],
+  },
+};
+
+/**
+ * Generate news from escalation outcome
+ */
+export function generateEscalationNews(
+  templateId: string,
+  data: {
+    cityName: string;
+    countryName: string;
+    heroName?: string;
+    casualties: number;
+    propertyDamage?: number;
+  },
+  gameTime: GameTime,
+  fame: number = 0
+): NewsArticle {
+  const headlines = ESCALATION_HEADLINES[templateId] || ESCALATION_HEADLINES.escalation_minor;
+  const bodies = ESCALATION_BODIES[templateId] || ESCALATION_BODIES.escalation_minor;
+
+  // Determine importance based on template
+  let importance: NewsImportance = 'standard';
+  if (templateId.includes('military') || templateId.includes('swat')) {
+    importance = 'breaking';
+  } else if (templateId.includes('police') || templateId.includes('civilian')) {
+    importance = 'major';
+  }
+
+  // Pick source based on fame - negative fame = more anti-hero coverage
+  const source = fame < -25
+    ? pickRandomSource('anti_hero')
+    : fame < 0
+      ? pickRandomSource('neutral')
+      : pickRandomSource('pro_hero');
+
+  const descriptor = selectDescriptor(fame, data.heroName);
+
+  const variables: Record<string, string | number> = {
+    city: data.cityName,
+    country: data.countryName,
+    heroName: descriptor,
+    casualties: data.casualties,
+    damage: data.propertyDamage?.toLocaleString() || '0',
+    quote: generateWitnessQuote(),
+  };
+
+  const headline = substituteVariables(
+    getHeadlineForBias(headlines, source.bias),
+    variables
+  );
+
+  const body = substituteVariables(
+    getBodyForBias(bodies, source.bias),
+    variables
+  );
+
+  return createNewsArticle({
+    headline,
+    body,
+    category: 'superhuman',
+    importance,
+    source,
+    publishTime: gameTime,
+  });
+}
+
+// =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
 

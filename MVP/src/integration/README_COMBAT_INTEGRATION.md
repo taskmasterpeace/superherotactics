@@ -359,11 +359,11 @@ C:\git\sht\MVP\src\
 - [x] Create EnhancedCombatResult interface
 - [x] Create combatResultsHandler.ts
 - [x] Create CombatResultsBuilder.ts
-- [ ] Update CombatScene.ts imports
-- [ ] Add missionContext property to CombatScene
-- [ ] Update declareCombatEnd() method
-- [ ] Wire up event listener in App.tsx
-- [ ] Expose game store to window
+- [x] Update CombatScene.ts imports
+- [x] Add missionContext property to CombatScene
+- [x] Update declareCombatEnd() method
+- [x] Wire up event listener in App.tsx
+- [x] Expose game store to window
 - [ ] Test combat completion flow
 - [ ] Verify strategic layer updates
 - [ ] Verify news generation
@@ -371,5 +371,5 @@ C:\git\sht\MVP\src\
 
 ---
 
-**Status**: Implementation complete, integration pending manual code changes in CombatScene.ts
-**Last Updated**: 2025-12-17
+**Status**: ✅ INTEGRATION COMPLETE - All code changes applied, ready for testing
+**Last Updated**: 2026-01-02
