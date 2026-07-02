@@ -24,7 +24,7 @@ export interface City {
 export const ALL_CITIES: City[] = [
   {
     "id": 1,
-    "sector": "LJ5",
+    "sector": "H27",
     "countryId": 96,
     "countryCode": "AF",
     "countryName": "Afghanistan",
@@ -43,7 +43,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 2,
-    "sector": "LD4",
+    "sector": "H27",
     "countryId": 96,
     "countryCode": "AF",
     "countryName": "Afghanistan",
@@ -63,7 +63,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 3,
-    "sector": "LD4",
+    "sector": "G27",
     "countryId": 96,
     "countryCode": "AF",
     "countryName": "Afghanistan",
@@ -82,7 +82,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 4,
-    "sector": "",
+    "sector": "G20",
     "countryId": 2,
     "countryCode": "DZ",
     "countryName": "Algeria",
@@ -101,7 +101,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 5,
-    "sector": "",
+    "sector": "H20",
     "countryId": 2,
     "countryCode": "DZ",
     "countryName": "Algeria",
@@ -119,7 +119,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 6,
-    "sector": "",
+    "sector": "H20",
     "countryId": 2,
     "countryCode": "DZ",
     "countryName": "Algeria",
@@ -137,7 +137,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 7,
-    "sector": "IV3",
+    "sector": "N21",
     "countryId": 3,
     "countryCode": "AO",
     "countryName": "Angola",
@@ -155,7 +155,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 8,
-    "sector": "IV4",
+    "sector": "N21",
     "countryId": 3,
     "countryCode": "AO",
     "countryName": "Angola",
@@ -174,7 +174,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 9,
-    "sector": "IV3",
+    "sector": "M21",
     "countryId": 3,
     "countryCode": "AO",
     "countryName": "Angola",
@@ -192,7 +192,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 10,
-    "sector": "IV4",
+    "sector": "N21",
     "countryId": 3,
     "countryCode": "AO",
     "countryName": "Angola",
@@ -213,7 +213,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 11,
-    "sector": "IV4",
+    "sector": "N21",
     "countryId": 3,
     "countryCode": "AO",
     "countryName": "Angola",
@@ -231,7 +231,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 12,
-    "sector": "JB4",
+    "sector": "N21",
     "countryId": 3,
     "countryCode": "AO",
     "countryName": "Angola",
@@ -250,7 +250,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 13,
-    "sector": "JB5",
+    "sector": "N22",
     "countryId": 3,
     "countryCode": "AO",
     "countryName": "Angola",
@@ -269,7 +269,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 14,
-    "sector": "IV3",
+    "sector": "M21",
     "countryId": 3,
     "countryCode": "AO",
     "countryName": "Angola",
@@ -287,7 +287,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 15,
-    "sector": "",
+    "sector": "Q13",
     "countryId": 4,
     "countryCode": "AR",
     "countryName": "Argentina",
@@ -308,7 +308,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 16,
-    "sector": "",
+    "sector": "Q12",
     "countryId": 4,
     "countryCode": "AR",
     "countryName": "Argentina",
@@ -328,7 +328,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 17,
-    "sector": "",
+    "sector": "Q13",
     "countryId": 4,
     "countryCode": "AR",
     "countryName": "Argentina",
@@ -349,7 +349,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 18,
-    "sector": "",
+    "sector": "Q12",
     "countryId": 4,
     "countryCode": "AR",
     "countryName": "Argentina",
@@ -368,7 +368,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 19,
-    "sector": "",
+    "sector": "P12",
     "countryId": 4,
     "countryCode": "AR",
     "countryName": "Argentina",
@@ -387,7 +387,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 20,
-    "sector": "",
+    "sector": "Q13",
     "countryId": 4,
     "countryCode": "AR",
     "countryName": "Argentina",
@@ -407,7 +407,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 21,
-    "sector": "",
+    "sector": "P12",
     "countryId": 4,
     "countryCode": "AR",
     "countryName": "Argentina",
@@ -427,7 +427,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 22,
-    "sector": "",
+    "sector": "R13",
     "countryId": 4,
     "countryCode": "AR",
     "countryName": "Argentina",
@@ -446,7 +446,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 23,
-    "sector": "",
+    "sector": "Q13",
     "countryId": 4,
     "countryCode": "AR",
     "countryName": "Argentina",
@@ -465,7 +465,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 24,
-    "sector": "",
+    "sector": "Q12",
     "countryId": 4,
     "countryCode": "AR",
     "countryName": "Argentina",
@@ -484,7 +484,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 25,
-    "sector": "",
+    "sector": "G25",
     "countryId": 5,
     "countryCode": "AM",
     "countryName": "Armenia",
@@ -503,7 +503,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 26,
-    "sector": "",
+    "sector": "G25",
     "countryId": 5,
     "countryCode": "AM",
     "countryName": "Armenia",
@@ -522,7 +522,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 27,
-    "sector": "",
+    "sector": "G25",
     "countryId": 5,
     "countryCode": "AM",
     "countryName": "Armenia",
@@ -541,7 +541,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 28,
-    "sector": "OY5",
+    "sector": "Q36",
     "countryId": 6,
     "countryCode": "AU",
     "countryName": "Australia",
@@ -562,7 +562,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 29,
-    "sector": "PE5",
+    "sector": "Q37",
     "countryId": 6,
     "countryCode": "AU",
     "countryName": "Australia",
@@ -583,7 +583,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 30,
-    "sector": "PE4",
+    "sector": "P37",
     "countryId": 6,
     "countryCode": "AU",
     "countryName": "Australia",
@@ -603,7 +603,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 31,
-    "sector": "NN8",
+    "sector": "Q33",
     "countryId": 6,
     "countryCode": "AU",
     "countryName": "Australia",
@@ -624,7 +624,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 32,
-    "sector": "OM3",
+    "sector": "Q35",
     "countryId": 6,
     "countryCode": "AU",
     "countryName": "Australia",
@@ -643,7 +643,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 33,
-    "sector": "PE4",
+    "sector": "P37",
     "countryId": 6,
     "countryCode": "AU",
     "countryName": "Australia",
@@ -663,7 +663,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 34,
-    "sector": "",
+    "sector": "F21",
     "countryId": 7,
     "countryCode": "HR",
     "countryName": "Austria",
@@ -684,7 +684,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 35,
-    "sector": "",
+    "sector": "G25",
     "countryId": 8,
     "countryCode": "AZ",
     "countryName": "Azerbaijan",
@@ -705,7 +705,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 36,
-    "sector": "",
+    "sector": "I25",
     "countryId": 9,
     "countryCode": "BH",
     "countryName": "Bahrain",
@@ -724,7 +724,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 37,
-    "sector": "",
+    "sector": "I30",
     "countryId": 10,
     "countryCode": "BD",
     "countryName": "Bangladesh",
@@ -745,7 +745,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 38,
-    "sector": "MI2",
+    "sector": "I30",
     "countryId": 10,
     "countryCode": "BD",
     "countryName": "Bangladesh",
@@ -766,7 +766,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 39,
-    "sector": "MI2",
+    "sector": "I30",
     "countryId": 10,
     "countryCode": "BD",
     "countryName": "Bangladesh",
@@ -786,7 +786,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 40,
-    "sector": "MI2",
+    "sector": "I30",
     "countryId": 10,
     "countryCode": "BD",
     "countryName": "Bangladesh",
@@ -805,7 +805,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 41,
-    "sector": "",
+    "sector": "I30",
     "countryId": 10,
     "countryCode": "BD",
     "countryName": "Bangladesh",
@@ -825,7 +825,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 42,
-    "sector": "",
+    "sector": "I30",
     "countryId": 10,
     "countryCode": "BD",
     "countryName": "Bangladesh",
@@ -843,7 +843,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 43,
-    "sector": "",
+    "sector": "I30",
     "countryId": 10,
     "countryCode": "BD",
     "countryName": "Bangladesh",
@@ -863,7 +863,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 44,
-    "sector": "",
+    "sector": "E23",
     "countryId": 11,
     "countryCode": "BY",
     "countryName": "Belarus",
@@ -884,7 +884,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 45,
-    "sector": "",
+    "sector": "E23",
     "countryId": 11,
     "countryCode": "BY",
     "countryName": "Belarus",
@@ -903,7 +903,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 46,
-    "sector": "",
+    "sector": "E20",
     "countryId": 12,
     "countryCode": "BE",
     "countryName": "Belgium",
@@ -922,7 +922,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 47,
-    "sector": "",
+    "sector": "E20",
     "countryId": 12,
     "countryCode": "BE",
     "countryName": "Belgium",
@@ -943,7 +943,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 48,
-    "sector": "",
+    "sector": "E20",
     "countryId": 12,
     "countryCode": "BE",
     "countryName": "Belgium",
@@ -962,7 +962,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 49,
-    "sector": "",
+    "sector": "L20",
     "countryId": 13,
     "countryCode": "BJ",
     "countryName": "Benin",
@@ -982,7 +982,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 50,
-    "sector": "",
+    "sector": "L20",
     "countryId": 13,
     "countryCode": "BJ",
     "countryName": "Benin",
@@ -1003,7 +1003,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 51,
-    "sector": "FB9",
+    "sector": "O12",
     "countryId": 14,
     "countryCode": "BO",
     "countryName": "Bolivia",
@@ -1024,7 +1024,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 52,
-    "sector": "FI0",
+    "sector": "O13",
     "countryId": 14,
     "countryCode": "BO",
     "countryName": "Bolivia",
@@ -1045,7 +1045,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 53,
-    "sector": "FI0",
+    "sector": "O12",
     "countryId": 14,
     "countryCode": "BO",
     "countryName": "Bolivia",
@@ -1065,7 +1065,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 54,
-    "sector": "GA4",
+    "sector": "P14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1086,7 +1086,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 55,
-    "sector": "GG5",
+    "sector": "O15",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1107,7 +1107,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 56,
-    "sector": "",
+    "sector": "O15",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1127,7 +1127,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 57,
-    "sector": "",
+    "sector": "O14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1147,7 +1147,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 58,
-    "sector": "",
+    "sector": "P14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1167,7 +1167,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 59,
-    "sector": "GS4",
+    "sector": "N16",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1188,7 +1188,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 60,
-    "sector": "GM2",
+    "sector": "M15",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1208,7 +1208,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 61,
-    "sector": "GM4",
+    "sector": "N15",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1228,7 +1228,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 62,
-    "sector": "GA5",
+    "sector": "P14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1248,7 +1248,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 63,
-    "sector": "",
+    "sector": "O14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1267,7 +1267,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 64,
-    "sector": "",
+    "sector": "O14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1286,7 +1286,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 65,
-    "sector": "GA0",
+    "sector": "M14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1305,7 +1305,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 66,
-    "sector": "",
+    "sector": "M13",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1326,7 +1326,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 67,
-    "sector": "",
+    "sector": "O15",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1346,7 +1346,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 68,
-    "sector": "GA4",
+    "sector": "P14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1366,7 +1366,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 69,
-    "sector": "GG1",
+    "sector": "M14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1385,7 +1385,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 70,
-    "sector": "GS4",
+    "sector": "N15",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1403,7 +1403,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 71,
-    "sector": "GS4",
+    "sector": "N16",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1422,7 +1422,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 72,
-    "sector": "GM3",
+    "sector": "N16",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1442,7 +1442,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 73,
-    "sector": "GA5",
+    "sector": "P14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1461,7 +1461,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 74,
-    "sector": "GA5",
+    "sector": "P14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1481,7 +1481,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 75,
-    "sector": "GG1",
+    "sector": "M15",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1499,7 +1499,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 76,
-    "sector": "GM4",
+    "sector": "N16",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1519,7 +1519,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 77,
-    "sector": "FU2",
+    "sector": "O14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1538,7 +1538,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 78,
-    "sector": "FU3",
+    "sector": "P14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1554,7 +1554,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 79,
-    "sector": "GA4",
+    "sector": "P14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1573,7 +1573,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 80,
-    "sector": "GG5",
+    "sector": "P15",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1592,7 +1592,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 81,
-    "sector": "GA4",
+    "sector": "O14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1611,7 +1611,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 82,
-    "sector": "GA3",
+    "sector": "O14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1631,7 +1631,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 83,
-    "sector": "GA4",
+    "sector": "P14",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1650,7 +1650,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 84,
-    "sector": "GM4",
+    "sector": "N15",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1670,7 +1670,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 85,
-    "sector": "FU1",
+    "sector": "O13",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1688,7 +1688,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 86,
-    "sector": "GG5",
+    "sector": "O15",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1707,7 +1707,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 87,
-    "sector": "GG4",
+    "sector": "O15",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1725,7 +1725,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 88,
-    "sector": "FH8",
+    "sector": "N12",
     "countryId": 15,
     "countryCode": "BR",
     "countryName": "Brazil",
@@ -1744,7 +1744,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 89,
-    "sector": "",
+    "sector": "G22",
     "countryId": 0,
     "countryCode": "BG",
     "countryName": "Bulgaria",
@@ -1764,7 +1764,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 90,
-    "sector": "",
+    "sector": "K19",
     "countryId": 0,
     "countryCode": "BF",
     "countryName": "Burkina Faso",
@@ -1784,7 +1784,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 91,
-    "sector": "",
+    "sector": "K19",
     "countryId": 0,
     "countryCode": "BF",
     "countryName": "Burkina Faso",
@@ -1804,7 +1804,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 92,
-    "sector": "",
+    "sector": "M23",
     "countryId": 0,
     "countryCode": "BI",
     "countryName": "Burundi",
@@ -1825,7 +1825,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 93,
-    "sector": "",
+    "sector": "K31",
     "countryId": 0,
     "countryCode": "KH",
     "countryName": "Cambodia",
@@ -1846,7 +1846,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 94,
-    "sector": "",
+    "sector": "L21",
     "countryId": 0,
     "countryCode": "CM",
     "countryName": "Cameroon",
@@ -1867,7 +1867,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 95,
-    "sector": "",
+    "sector": "L21",
     "countryId": 0,
     "countryCode": "CM",
     "countryName": "Cameroon",
@@ -1888,7 +1888,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 96,
-    "sector": "",
+    "sector": "L21",
     "countryId": 0,
     "countryCode": "CM",
     "countryName": "Cameroon",
@@ -1908,7 +1908,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 97,
-    "sector": "EO4",
+    "sector": "G11",
     "countryId": 16,
     "countryCode": "CA",
     "countryName": "Canada",
@@ -1929,7 +1929,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 98,
-    "sector": "EU4",
+    "sector": "F11",
     "countryId": 16,
     "countryCode": "CA",
     "countryName": "Canada",
@@ -1950,7 +1950,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 99,
-    "sector": "CR4",
+    "sector": "F6",
     "countryId": 16,
     "countryCode": "CA",
     "countryName": "Canada",
@@ -1971,7 +1971,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 100,
-    "sector": "CX5",
+    "sector": "F7",
     "countryId": 16,
     "countryCode": "CA",
     "countryName": "Canada",
@@ -1992,7 +1992,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 101,
-    "sector": "CX4",
+    "sector": "E7",
     "countryId": 16,
     "countryCode": "CA",
     "countryName": "Canada",
@@ -2012,7 +2012,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 102,
-    "sector": "EU4",
+    "sector": "F11",
     "countryId": 16,
     "countryCode": "CA",
     "countryName": "Canada",
@@ -2032,7 +2032,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 103,
-    "sector": "FA5",
+    "sector": "F12",
     "countryId": 16,
     "countryCode": "CA",
     "countryName": "Canada",
@@ -2052,7 +2052,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 104,
-    "sector": "DV9",
+    "sector": "F9",
     "countryId": 16,
     "countryCode": "CA",
     "countryName": "Canada",
@@ -2071,7 +2071,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 105,
-    "sector": "EO4",
+    "sector": "G11",
     "countryId": 16,
     "countryCode": "CA",
     "countryName": "Canada",
@@ -2091,7 +2091,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 106,
-    "sector": "EO4",
+    "sector": "G11",
     "countryId": 16,
     "countryCode": "CA",
     "countryName": "Canada",
@@ -2110,7 +2110,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 107,
-    "sector": "EO4",
+    "sector": "G11",
     "countryId": 16,
     "countryCode": "CA",
     "countryName": "Canada",
@@ -2130,7 +2130,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 108,
-    "sector": "",
+    "sector": "L22",
     "countryId": 0,
     "countryCode": "CF",
     "countryName": "Central African Republic",
@@ -2150,7 +2150,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 109,
-    "sector": "",
+    "sector": "K21",
     "countryId": 97,
     "countryCode": "TD",
     "countryName": "Chad",
@@ -2169,7 +2169,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 110,
-    "sector": "",
+    "sector": "Q12",
     "countryId": 98,
     "countryCode": "CL",
     "countryName": "Chile",
@@ -2190,7 +2190,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 111,
-    "sector": "",
+    "sector": "Q12",
     "countryId": 98,
     "countryCode": "CL",
     "countryName": "Chile",
@@ -2210,7 +2210,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 112,
-    "sector": "",
+    "sector": "R12",
     "countryId": 98,
     "countryCode": "CL",
     "countryName": "Chile",
@@ -2230,7 +2230,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 113,
-    "sector": "",
+    "sector": "L12",
     "countryId": 18,
     "countryCode": "CO",
     "countryName": "Colombia",
@@ -2251,7 +2251,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 114,
-    "sector": "EV3",
+    "sector": "L12",
     "countryId": 18,
     "countryCode": "CO",
     "countryName": "Colombia",
@@ -2272,7 +2272,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 115,
-    "sector": "EV4",
+    "sector": "L11",
     "countryId": 18,
     "countryCode": "CO",
     "countryName": "Colombia",
@@ -2292,7 +2292,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 116,
-    "sector": "EV2",
+    "sector": "K11",
     "countryId": 18,
     "countryCode": "CO",
     "countryName": "Colombia",
@@ -2313,7 +2313,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 117,
-    "sector": "EV3",
+    "sector": "L12",
     "countryId": 18,
     "countryCode": "CO",
     "countryName": "Colombia",
@@ -2332,7 +2332,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 118,
-    "sector": "EV2",
+    "sector": "K11",
     "countryId": 18,
     "countryCode": "CO",
     "countryName": "Colombia",
@@ -2352,7 +2352,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 119,
-    "sector": "EV3",
+    "sector": "K11",
     "countryId": 18,
     "countryCode": "CO",
     "countryName": "Colombia",
@@ -2371,7 +2371,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 120,
-    "sector": "EV4",
+    "sector": "L11",
     "countryId": 18,
     "countryCode": "CO",
     "countryName": "Colombia",
@@ -2390,7 +2390,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 121,
-    "sector": "EV3",
+    "sector": "L11",
     "countryId": 18,
     "countryCode": "CO",
     "countryName": "Colombia",
@@ -2409,7 +2409,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 122,
-    "sector": "EV4",
+    "sector": "L12",
     "countryId": 18,
     "countryCode": "CO",
     "countryName": "Colombia",
@@ -2427,7 +2427,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 123,
-    "sector": "EV2",
+    "sector": "K11",
     "countryId": 18,
     "countryCode": "CO",
     "countryName": "Colombia",
@@ -2446,7 +2446,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 124,
-    "sector": "EV2",
+    "sector": "K11",
     "countryId": 18,
     "countryCode": "CO",
     "countryName": "Colombia",
@@ -2467,7 +2467,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 125,
-    "sector": "",
+    "sector": "K10",
     "countryId": 0,
     "countryCode": "CR",
     "countryName": "Costa Rica",
@@ -2487,7 +2487,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 126,
-    "sector": "",
+    "sector": "F21",
     "countryId": 0,
     "countryCode": "HR",
     "countryName": "Croatia",
@@ -2506,7 +2506,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 127,
-    "sector": "EI8",
+    "sector": "I10",
     "countryId": 0,
     "countryCode": "CU",
     "countryName": "Cuba",
@@ -2527,7 +2527,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 128,
-    "sector": "IU0",
+    "sector": "F21",
     "countryId": 0,
     "countryCode": "CZ",
     "countryName": "Czech Republic",
@@ -2547,7 +2547,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 129,
-    "sector": "",
+    "sector": "E21",
     "countryId": 0,
     "countryCode": "DK",
     "countryName": "Denmark",
@@ -2567,7 +2567,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 130,
-    "sector": "",
+    "sector": "K24",
     "countryId": 0,
     "countryCode": "DJ",
     "countryName": "Djibouti",
@@ -2587,7 +2587,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 131,
-    "sector": "",
+    "sector": "J12",
     "countryId": 0,
     "countryCode": "DO",
     "countryName": "Dominican Republic",
@@ -2608,7 +2608,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 132,
-    "sector": "",
+    "sector": "J11",
     "countryId": 0,
     "countryCode": "DO",
     "countryName": "Dominican Republic",
@@ -2627,7 +2627,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 133,
-    "sector": "IV2",
+    "sector": "M21",
     "countryId": 19,
     "countryCode": "CD",
     "countryName": "DR Congo",
@@ -2648,7 +2648,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 134,
-    "sector": "",
+    "sector": "M22",
     "countryId": 19,
     "countryCode": "CD",
     "countryName": "DR Congo",
@@ -2667,7 +2667,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 135,
-    "sector": "",
+    "sector": "N23",
     "countryId": 19,
     "countryCode": "CD",
     "countryName": "DR Congo",
@@ -2688,7 +2688,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 136,
-    "sector": "",
+    "sector": "M22",
     "countryId": 19,
     "countryCode": "CD",
     "countryName": "DR Congo",
@@ -2707,7 +2707,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 137,
-    "sector": "JH3",
+    "sector": "L22",
     "countryId": 19,
     "countryCode": "CD",
     "countryName": "DR Congo",
@@ -2726,7 +2726,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 138,
-    "sector": "",
+    "sector": "M23",
     "countryId": 19,
     "countryCode": "CD",
     "countryName": "DR Congo",
@@ -2745,7 +2745,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 139,
-    "sector": "",
+    "sector": "M22",
     "countryId": 19,
     "countryCode": "CD",
     "countryName": "DR Congo",
@@ -2764,7 +2764,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 140,
-    "sector": "",
+    "sector": "L23",
     "countryId": 19,
     "countryCode": "CD",
     "countryName": "DR Congo",
@@ -2783,7 +2783,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 141,
-    "sector": "",
+    "sector": "M23",
     "countryId": 19,
     "countryCode": "CD",
     "countryName": "DR Congo",
@@ -2802,7 +2802,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 142,
-    "sector": "",
+    "sector": "M23",
     "countryId": 19,
     "countryCode": "CD",
     "countryName": "DR Congo",
@@ -2820,7 +2820,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 143,
-    "sector": "",
+    "sector": "N23",
     "countryId": 19,
     "countryCode": "CD",
     "countryName": "DR Congo",
@@ -2840,7 +2840,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 144,
-    "sector": "JB3",
+    "sector": "M22",
     "countryId": 19,
     "countryCode": "CD",
     "countryName": "DR Congo",
@@ -2860,7 +2860,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 145,
-    "sector": "",
+    "sector": "L11",
     "countryId": 0,
     "countryCode": "EC",
     "countryName": "Ecuador",
@@ -2881,7 +2881,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 146,
-    "sector": "",
+    "sector": "L11",
     "countryId": 0,
     "countryCode": "EC",
     "countryName": "Ecuador",
@@ -2900,7 +2900,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 147,
-    "sector": "JM8",
+    "sector": "H23",
     "countryId": 20,
     "countryCode": "EG",
     "countryName": "Egypt",
@@ -2921,7 +2921,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 148,
-    "sector": "JM8",
+    "sector": "H23",
     "countryId": 20,
     "countryCode": "EG",
     "countryName": "Egypt",
@@ -2942,7 +2942,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 149,
-    "sector": "",
+    "sector": "H23",
     "countryId": 20,
     "countryCode": "EG",
     "countryName": "Egypt",
@@ -2961,7 +2961,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 150,
-    "sector": "",
+    "sector": "H23",
     "countryId": 20,
     "countryCode": "EG",
     "countryName": "Egypt",
@@ -2980,7 +2980,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 151,
-    "sector": "",
+    "sector": "H23",
     "countryId": 20,
     "countryCode": "EG",
     "countryName": "Egypt",
@@ -2998,7 +2998,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 152,
-    "sector": "",
+    "sector": "H23",
     "countryId": 20,
     "countryCode": "EG",
     "countryName": "Egypt",
@@ -3017,7 +3017,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 153,
-    "sector": "",
+    "sector": "H23",
     "countryId": 20,
     "countryCode": "EG",
     "countryName": "Egypt",
@@ -3036,7 +3036,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 154,
-    "sector": "",
+    "sector": "K10",
     "countryId": 0,
     "countryCode": "SV",
     "countryName": "El Salvador",
@@ -3056,7 +3056,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 155,
-    "sector": "",
+    "sector": "J24",
     "countryId": 0,
     "countryCode": "ER",
     "countryName": "Eritrea",
@@ -3075,7 +3075,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 156,
-    "sector": "",
+    "sector": "K24",
     "countryId": 21,
     "countryCode": "ET",
     "countryName": "Ethiopia",
@@ -3096,7 +3096,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 157,
-    "sector": "",
+    "sector": "K24",
     "countryId": 21,
     "countryCode": "ET",
     "countryName": "Ethiopia",
@@ -3115,7 +3115,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 158,
-    "sector": "",
+    "sector": "D22",
     "countryId": 0,
     "countryCode": "FI",
     "countryName": "Finland",
@@ -3134,7 +3134,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 159,
-    "sector": "IH9",
+    "sector": "F20",
     "countryId": 22,
     "countryCode": "FR",
     "countryName": "France",
@@ -3155,7 +3155,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 160,
-    "sector": "IH9",
+    "sector": "F20",
     "countryId": 22,
     "countryCode": "FR",
     "countryName": "France",
@@ -3176,7 +3176,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 161,
-    "sector": "II0",
+    "sector": "G20",
     "countryId": 22,
     "countryCode": "FR",
     "countryName": "France",
@@ -3197,7 +3197,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 162,
-    "sector": "",
+    "sector": "E20",
     "countryId": 22,
     "countryCode": "FR",
     "countryName": "France",
@@ -3217,7 +3217,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 163,
-    "sector": "II0",
+    "sector": "G20",
     "countryId": 22,
     "countryCode": "FR",
     "countryName": "France",
@@ -3237,7 +3237,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 164,
-    "sector": "",
+    "sector": "F20",
     "countryId": 22,
     "countryCode": "FR",
     "countryName": "France",
@@ -3256,7 +3256,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 165,
-    "sector": "",
+    "sector": "G20",
     "countryId": 22,
     "countryCode": "FR",
     "countryName": "France",
@@ -3275,7 +3275,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 166,
-    "sector": "",
+    "sector": "F19",
     "countryId": 22,
     "countryCode": "FR",
     "countryName": "France",
@@ -3295,7 +3295,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 167,
-    "sector": "",
+    "sector": "G20",
     "countryId": 22,
     "countryCode": "FR",
     "countryName": "France",
@@ -3315,7 +3315,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 168,
-    "sector": "",
+    "sector": "F20",
     "countryId": 22,
     "countryCode": "FR",
     "countryName": "France",
@@ -3335,7 +3335,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 169,
-    "sector": "",
+    "sector": "E20",
     "countryId": 22,
     "countryCode": "FR",
     "countryName": "France",
@@ -3354,7 +3354,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 170,
-    "sector": "",
+    "sector": "L21",
     "countryId": 0,
     "countryCode": "GA",
     "countryName": "Gabon",
@@ -3373,7 +3373,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 171,
-    "sector": "",
+    "sector": "G25",
     "countryId": 0,
     "countryCode": "GE",
     "countryName": "Georgia",
@@ -3393,7 +3393,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 172,
-    "sector": "",
+    "sector": "E21",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3414,7 +3414,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 173,
-    "sector": "IN8",
+    "sector": "E21",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3434,7 +3434,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 174,
-    "sector": "",
+    "sector": "F21",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3454,7 +3454,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 175,
-    "sector": "IN9",
+    "sector": "F20",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3473,7 +3473,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 176,
-    "sector": "IN9",
+    "sector": "F21",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3492,7 +3492,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 177,
-    "sector": "",
+    "sector": "F21",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3511,7 +3511,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 178,
-    "sector": "",
+    "sector": "E20",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3530,7 +3530,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 179,
-    "sector": "IU0",
+    "sector": "F21",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3549,7 +3549,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 180,
-    "sector": "",
+    "sector": "F20",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3569,7 +3569,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 181,
-    "sector": "IN9",
+    "sector": "E20",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3588,7 +3588,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 182,
-    "sector": "IU0",
+    "sector": "F21",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3607,7 +3607,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 183,
-    "sector": "IN8",
+    "sector": "E21",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3626,7 +3626,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 184,
-    "sector": "IN8",
+    "sector": "E21",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3645,7 +3645,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 185,
-    "sector": "",
+    "sector": "E20",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3664,7 +3664,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 186,
-    "sector": "",
+    "sector": "F21",
     "countryId": 23,
     "countryCode": "DE",
     "countryName": "Germany",
@@ -3683,7 +3683,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 187,
-    "sector": "",
+    "sector": "L19",
     "countryId": 24,
     "countryCode": "GH",
     "countryName": "Ghana",
@@ -3704,7 +3704,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 188,
-    "sector": "",
+    "sector": "L20",
     "countryId": 24,
     "countryCode": "GH",
     "countryName": "Ghana",
@@ -3724,7 +3724,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 189,
-    "sector": "",
+    "sector": "L19",
     "countryId": 24,
     "countryCode": "GH",
     "countryName": "Ghana",
@@ -3744,7 +3744,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 190,
-    "sector": "",
+    "sector": "K20",
     "countryId": 24,
     "countryCode": "GH",
     "countryName": "Ghana",
@@ -3764,7 +3764,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 191,
-    "sector": "",
+    "sector": "G22",
     "countryId": 93,
     "countryCode": "GR",
     "countryName": "Greece",
@@ -3784,7 +3784,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 192,
-    "sector": "",
+    "sector": "G22",
     "countryId": 93,
     "countryCode": "GR",
     "countryName": "Greece",
@@ -3803,7 +3803,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 193,
-    "sector": "",
+    "sector": "K9",
     "countryId": 0,
     "countryCode": "GT",
     "countryName": "Guatemala",
@@ -3822,7 +3822,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 194,
-    "sector": "",
+    "sector": "K18",
     "countryId": 94,
     "countryCode": "GN",
     "countryName": "Guinea",
@@ -3843,7 +3843,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 195,
-    "sector": "",
+    "sector": "K18",
     "countryId": 0,
     "countryCode": "GW",
     "countryName": "Guinea-Bissau",
@@ -3862,7 +3862,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 196,
-    "sector": "",
+    "sector": "J11",
     "countryId": 0,
     "countryCode": "HT",
     "countryName": "Haiti",
@@ -3883,7 +3883,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 197,
-    "sector": "",
+    "sector": "K10",
     "countryId": 95,
     "countryCode": "HN",
     "countryName": "Honduras",
@@ -3902,7 +3902,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 198,
-    "sector": "",
+    "sector": "K10",
     "countryId": 95,
     "countryCode": "HN",
     "countryName": "Honduras",
@@ -3921,7 +3921,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 199,
-    "sector": "",
+    "sector": "I32",
     "countryId": 92,
     "countryCode": "HK",
     "countryName": "Hong Kong",
@@ -3941,7 +3941,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 200,
-    "sector": "",
+    "sector": "F22",
     "countryId": 0,
     "countryCode": "HU",
     "countryName": "Hungary",
@@ -3961,7 +3961,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 201,
-    "sector": "LP8",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -3982,7 +3982,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 202,
-    "sector": "LQ0",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4003,7 +4003,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 203,
-    "sector": "",
+    "sector": "I30",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4024,7 +4024,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 204,
-    "sector": "",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4045,7 +4045,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 205,
-    "sector": "LW2",
+    "sector": "K29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4066,7 +4066,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 206,
-    "sector": "",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4087,7 +4087,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 207,
-    "sector": "",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4108,7 +4108,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 208,
-    "sector": "LP9",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4129,7 +4129,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 209,
-    "sector": "LQ0",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4150,7 +4150,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 210,
-    "sector": "",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4171,7 +4171,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 211,
-    "sector": "LV9",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4192,7 +4192,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 212,
-    "sector": "",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4212,7 +4212,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 213,
-    "sector": "",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4233,7 +4233,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 214,
-    "sector": "",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4253,7 +4253,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 215,
-    "sector": "LQ1",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4273,7 +4273,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 216,
-    "sector": "",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4293,7 +4293,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 217,
-    "sector": "LP9",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4314,7 +4314,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 218,
-    "sector": "LW0",
+    "sector": "J29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4334,7 +4334,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 219,
-    "sector": "",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4354,7 +4354,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 220,
-    "sector": "LQ2",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4374,7 +4374,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 221,
-    "sector": "MC0",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4394,7 +4394,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 222,
-    "sector": "",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4414,7 +4414,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 223,
-    "sector": "LV9",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4435,7 +4435,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 224,
-    "sector": "",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4455,7 +4455,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 225,
-    "sector": "MC2",
+    "sector": "J29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4475,7 +4475,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 226,
-    "sector": "",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4496,7 +4496,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 227,
-    "sector": "LP9",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4517,7 +4517,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 228,
-    "sector": "LW1",
+    "sector": "J29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4537,7 +4537,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 229,
-    "sector": "LJ8",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4557,7 +4557,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 230,
-    "sector": "",
+    "sector": "H28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4578,7 +4578,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 231,
-    "sector": "",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4598,7 +4598,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 232,
-    "sector": "LW2",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4617,7 +4617,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 233,
-    "sector": "",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4637,7 +4637,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 234,
-    "sector": "",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4657,7 +4657,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 235,
-    "sector": "LW0",
+    "sector": "J29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4677,7 +4677,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 236,
-    "sector": "MC1",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4698,7 +4698,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 237,
-    "sector": "",
+    "sector": "H28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4719,7 +4719,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 238,
-    "sector": "LP9",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4739,7 +4739,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 239,
-    "sector": "",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4759,7 +4759,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 240,
-    "sector": "LP8",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4779,7 +4779,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 241,
-    "sector": "",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4800,7 +4800,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 242,
-    "sector": "",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4821,7 +4821,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 243,
-    "sector": "",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4840,7 +4840,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 244,
-    "sector": "",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4859,7 +4859,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 245,
-    "sector": "LP8",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4878,7 +4878,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 246,
-    "sector": "LV9",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4897,7 +4897,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 247,
-    "sector": "",
+    "sector": "H28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4917,7 +4917,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 248,
-    "sector": "",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4936,7 +4936,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 249,
-    "sector": "LV9",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4955,7 +4955,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 250,
-    "sector": "",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4974,7 +4974,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 251,
-    "sector": "",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -4993,7 +4993,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 252,
-    "sector": "",
+    "sector": "J29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5013,7 +5013,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 253,
-    "sector": "",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5032,7 +5032,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 254,
-    "sector": "LW2",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5051,7 +5051,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 255,
-    "sector": "",
+    "sector": "J29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5070,7 +5070,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 256,
-    "sector": "",
+    "sector": "H28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5090,7 +5090,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 257,
-    "sector": "",
+    "sector": "I30",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5109,7 +5109,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 258,
-    "sector": "LQ0",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5129,7 +5129,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 259,
-    "sector": "",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5149,7 +5149,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 260,
-    "sector": "",
+    "sector": "H28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5169,7 +5169,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 261,
-    "sector": "",
+    "sector": "H28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5188,7 +5188,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 262,
-    "sector": "",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5208,7 +5208,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 263,
-    "sector": "",
+    "sector": "I30",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5228,7 +5228,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 264,
-    "sector": "",
+    "sector": "J29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5248,7 +5248,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 265,
-    "sector": "",
+    "sector": "H28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5268,7 +5268,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 266,
-    "sector": "",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5287,7 +5287,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 267,
-    "sector": "",
+    "sector": "J29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5307,7 +5307,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 268,
-    "sector": "",
+    "sector": "K29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5326,7 +5326,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 269,
-    "sector": "",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5345,7 +5345,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 270,
-    "sector": "LP8",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5365,7 +5365,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 271,
-    "sector": "",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5385,7 +5385,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 272,
-    "sector": "",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5404,7 +5404,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 273,
-    "sector": "",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5424,7 +5424,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 274,
-    "sector": "",
+    "sector": "J29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5443,7 +5443,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 275,
-    "sector": "",
+    "sector": "J29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5462,7 +5462,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 276,
-    "sector": "LQ0",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5481,7 +5481,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 277,
-    "sector": "",
+    "sector": "H28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5500,7 +5500,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 278,
-    "sector": "",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5519,7 +5519,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 279,
-    "sector": "",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5538,7 +5538,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 280,
-    "sector": "",
+    "sector": "H28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5557,7 +5557,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 281,
-    "sector": "LJ8",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5577,7 +5577,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 282,
-    "sector": "LQ1",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5597,7 +5597,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 283,
-    "sector": "",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5617,7 +5617,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 284,
-    "sector": "",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5637,7 +5637,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 285,
-    "sector": "",
+    "sector": "K29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5656,7 +5656,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 286,
-    "sector": "",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5675,7 +5675,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 287,
-    "sector": "LQ0",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5694,7 +5694,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 288,
-    "sector": "",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5713,7 +5713,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 289,
-    "sector": "",
+    "sector": "I27",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5732,7 +5732,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 290,
-    "sector": "",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5752,7 +5752,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 291,
-    "sector": "",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5772,7 +5772,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 292,
-    "sector": "",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5792,7 +5792,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 293,
-    "sector": "",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5812,7 +5812,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 294,
-    "sector": "LQ0",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5831,7 +5831,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 295,
-    "sector": "",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5850,7 +5850,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 296,
-    "sector": "LP9",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5869,7 +5869,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 297,
-    "sector": "",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5890,7 +5890,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 298,
-    "sector": "",
+    "sector": "H28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5910,7 +5910,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 299,
-    "sector": "LP8",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5930,7 +5930,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 300,
-    "sector": "LQ0",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5949,7 +5949,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 301,
-    "sector": "MO2",
+    "sector": "I30",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5968,7 +5968,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 302,
-    "sector": "MI2",
+    "sector": "I30",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -5987,7 +5987,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 303,
-    "sector": "LP8",
+    "sector": "I28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -6006,7 +6006,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 304,
-    "sector": "LW2",
+    "sector": "K29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -6025,7 +6025,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 305,
-    "sector": "LP9",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -6044,7 +6044,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 306,
-    "sector": "MC0",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -6063,7 +6063,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 307,
-    "sector": "LP9",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -6083,7 +6083,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 308,
-    "sector": "LW3",
+    "sector": "K28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -6103,7 +6103,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 309,
-    "sector": "LP7",
+    "sector": "H28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -6121,7 +6121,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 310,
-    "sector": "LW1",
+    "sector": "J29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -6141,7 +6141,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 311,
-    "sector": "LQ0",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -6159,7 +6159,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 312,
-    "sector": "LW1",
+    "sector": "J29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -6179,7 +6179,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 313,
-    "sector": "LQ1",
+    "sector": "J28",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -6198,7 +6198,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 314,
-    "sector": "NC0",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "India",
@@ -6217,7 +6217,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 315,
-    "sector": "",
+    "sector": "M31",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6238,7 +6238,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 316,
-    "sector": "",
+    "sector": "M32",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6259,7 +6259,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 317,
-    "sector": "",
+    "sector": "M32",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6279,7 +6279,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 318,
-    "sector": "",
+    "sector": "M31",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6299,7 +6299,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 319,
-    "sector": "",
+    "sector": "M32",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6319,7 +6319,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 320,
-    "sector": "",
+    "sector": "M32",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6339,7 +6339,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 321,
-    "sector": "",
+    "sector": "L31",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6358,7 +6358,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 322,
-    "sector": "",
+    "sector": "M32",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6378,7 +6378,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 323,
-    "sector": "",
+    "sector": "M31",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6398,7 +6398,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 324,
-    "sector": "",
+    "sector": "M33",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6419,7 +6419,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 325,
-    "sector": "",
+    "sector": "L31",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6439,7 +6439,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 326,
-    "sector": "",
+    "sector": "L31",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6458,7 +6458,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 327,
-    "sector": "",
+    "sector": "M31",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6478,7 +6478,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 328,
-    "sector": "",
+    "sector": "M31",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6498,7 +6498,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 329,
-    "sector": "",
+    "sector": "M32",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6518,7 +6518,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 330,
-    "sector": "",
+    "sector": "L33",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6538,7 +6538,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 331,
-    "sector": "",
+    "sector": "N33",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6558,7 +6558,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 332,
-    "sector": "",
+    "sector": "M31",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6578,7 +6578,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 333,
-    "sector": "",
+    "sector": "M32",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6598,7 +6598,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 334,
-    "sector": "",
+    "sector": "M32",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6617,7 +6617,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 335,
-    "sector": "",
+    "sector": "N33",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6636,7 +6636,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 336,
-    "sector": "",
+    "sector": "M32",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6655,7 +6655,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 337,
-    "sector": "",
+    "sector": "M31",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6674,7 +6674,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 338,
-    "sector": "",
+    "sector": "M32",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6693,7 +6693,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 339,
-    "sector": "",
+    "sector": "M34",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6712,7 +6712,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 340,
-    "sector": "",
+    "sector": "N33",
     "countryId": 26,
     "countryCode": "ID",
     "countryName": "Indonesia",
@@ -6732,7 +6732,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 341,
-    "sector": "",
+    "sector": "H25",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -6752,7 +6752,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 342,
-    "sector": "",
+    "sector": "H26",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -6773,7 +6773,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 343,
-    "sector": "",
+    "sector": "H26",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -6793,7 +6793,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 344,
-    "sector": "",
+    "sector": "I26",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -6813,7 +6813,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 345,
-    "sector": "",
+    "sector": "G25",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -6833,7 +6833,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 346,
-    "sector": "",
+    "sector": "H25",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -6854,7 +6854,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 347,
-    "sector": "",
+    "sector": "H25",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -6874,7 +6874,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 348,
-    "sector": "",
+    "sector": "H25",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -6894,7 +6894,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 349,
-    "sector": "",
+    "sector": "H25",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -6914,7 +6914,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 350,
-    "sector": "",
+    "sector": "G25",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -6933,7 +6933,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 351,
-    "sector": "",
+    "sector": "G25",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -6952,7 +6952,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 352,
-    "sector": "",
+    "sector": "H26",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -6971,7 +6971,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 353,
-    "sector": "",
+    "sector": "I26",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -6990,7 +6990,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 354,
-    "sector": "",
+    "sector": "H25",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -7009,7 +7009,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 355,
-    "sector": "",
+    "sector": "G25",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -7028,7 +7028,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 356,
-    "sector": "",
+    "sector": "H26",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -7047,7 +7047,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 357,
-    "sector": "",
+    "sector": "H25",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -7066,7 +7066,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 358,
-    "sector": "",
+    "sector": "H26",
     "countryId": 27,
     "countryCode": "IR",
     "countryName": "Iran",
@@ -7085,7 +7085,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 359,
-    "sector": "KF1",
+    "sector": "H25",
     "countryId": 28,
     "countryCode": "IQ",
     "countryName": "Iraq",
@@ -7105,7 +7105,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 360,
-    "sector": "",
+    "sector": "H24",
     "countryId": 28,
     "countryCode": "IQ",
     "countryName": "Iraq",
@@ -7126,7 +7126,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 361,
-    "sector": "KL2",
+    "sector": "H25",
     "countryId": 28,
     "countryCode": "IQ",
     "countryName": "Iraq",
@@ -7145,7 +7145,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 362,
-    "sector": "",
+    "sector": "H25",
     "countryId": 28,
     "countryCode": "IQ",
     "countryName": "Iraq",
@@ -7164,7 +7164,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 363,
-    "sector": "KF1",
+    "sector": "H25",
     "countryId": 28,
     "countryCode": "IQ",
     "countryName": "Iraq",
@@ -7184,7 +7184,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 364,
-    "sector": "KF0",
+    "sector": "H25",
     "countryId": 28,
     "countryCode": "IQ",
     "countryName": "Iraq",
@@ -7203,7 +7203,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 365,
-    "sector": "KF0",
+    "sector": "H25",
     "countryId": 28,
     "countryCode": "IQ",
     "countryName": "Iraq",
@@ -7223,7 +7223,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 366,
-    "sector": "KL2",
+    "sector": "H25",
     "countryId": 28,
     "countryCode": "IQ",
     "countryName": "Iraq",
@@ -7242,7 +7242,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 367,
-    "sector": "KF1",
+    "sector": "H25",
     "countryId": 28,
     "countryCode": "IQ",
     "countryName": "Iraq",
@@ -7261,7 +7261,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 368,
-    "sector": "KF1",
+    "sector": "H25",
     "countryId": 28,
     "countryCode": "IQ",
     "countryName": "Iraq",
@@ -7280,7 +7280,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 369,
-    "sector": "KF1",
+    "sector": "H25",
     "countryId": 28,
     "countryCode": "IQ",
     "countryName": "Iraq",
@@ -7299,7 +7299,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 370,
-    "sector": "",
+    "sector": "H25",
     "countryId": 28,
     "countryCode": "IQ",
     "countryName": "Iraq",
@@ -7318,7 +7318,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 371,
-    "sector": "HV5",
+    "sector": "F19",
     "countryId": 29,
     "countryCode": "IE",
     "countryName": "Ireland",
@@ -7338,7 +7338,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 372,
-    "sector": "JS9",
+    "sector": "H24",
     "countryId": 30,
     "countryCode": "IL",
     "countryName": "Israel",
@@ -7359,7 +7359,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 373,
-    "sector": "JS9",
+    "sector": "H24",
     "countryId": 30,
     "countryCode": "IL",
     "countryName": "Israel",
@@ -7379,7 +7379,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 374,
-    "sector": "JS9",
+    "sector": "H24",
     "countryId": 30,
     "countryCode": "IL",
     "countryName": "Israel",
@@ -7398,7 +7398,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 375,
-    "sector": "JS9",
+    "sector": "H24",
     "countryId": 30,
     "countryCode": "IL",
     "countryName": "Israel",
@@ -7417,7 +7417,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 376,
-    "sector": "IU2",
+    "sector": "G21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7438,7 +7438,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 377,
-    "sector": "IO0",
+    "sector": "F21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7458,7 +7458,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 378,
-    "sector": "IU3",
+    "sector": "G21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7479,7 +7479,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 379,
-    "sector": "IO1",
+    "sector": "F21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7500,7 +7500,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 380,
-    "sector": "",
+    "sector": "F21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7519,7 +7519,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 381,
-    "sector": "IU3",
+    "sector": "G21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7538,7 +7538,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 382,
-    "sector": "IU2",
+    "sector": "F21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7557,7 +7557,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 383,
-    "sector": "IU2",
+    "sector": "G21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7577,7 +7577,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 384,
-    "sector": "",
+    "sector": "F21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7597,7 +7597,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 385,
-    "sector": "IO2",
+    "sector": "F21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7616,7 +7616,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 386,
-    "sector": "",
+    "sector": "F21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7635,7 +7635,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 387,
-    "sector": "",
+    "sector": "F21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7655,7 +7655,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 388,
-    "sector": "IU2",
+    "sector": "F21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7675,7 +7675,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 389,
-    "sector": "JA4",
+    "sector": "G22",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7694,7 +7694,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 390,
-    "sector": "",
+    "sector": "F21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7713,7 +7713,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 391,
-    "sector": "",
+    "sector": "G21",
     "countryId": 31,
     "countryCode": "IT",
     "countryName": "Italy",
@@ -7733,7 +7733,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 392,
-    "sector": "",
+    "sector": "L19",
     "countryId": 32,
     "countryCode": "CI",
     "countryName": "Ivory Coast",
@@ -7754,7 +7754,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 393,
-    "sector": "",
+    "sector": "K19",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "Ivory Coast",
@@ -7773,7 +7773,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 394,
-    "sector": "",
+    "sector": "J11",
     "countryId": 34,
     "countryCode": "JM",
     "countryName": "Jamaica",
@@ -7792,7 +7792,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 395,
-    "sector": "OQ9",
+    "sector": "H35",
     "countryId": 35,
     "countryCode": "JP",
     "countryName": "Japan",
@@ -7813,7 +7813,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 396,
-    "sector": "OK8",
+    "sector": "H35",
     "countryId": 35,
     "countryCode": "JP",
     "countryName": "Japan",
@@ -7834,7 +7834,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 397,
-    "sector": "OK8",
+    "sector": "H35",
     "countryId": 35,
     "countryCode": "JP",
     "countryName": "Japan",
@@ -7854,7 +7854,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 398,
-    "sector": "OE7",
+    "sector": "H34",
     "countryId": 35,
     "countryCode": "JP",
     "countryName": "Japan",
@@ -7875,7 +7875,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 399,
-    "sector": "",
+    "sector": "H35",
     "countryId": 35,
     "countryCode": "JP",
     "countryName": "Japan",
@@ -7896,7 +7896,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 400,
-    "sector": "OQ7",
+    "sector": "G35",
     "countryId": 35,
     "countryCode": "JP",
     "countryName": "Japan",
@@ -7916,7 +7916,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 401,
-    "sector": "OQ8",
+    "sector": "G35",
     "countryId": 35,
     "countryCode": "JP",
     "countryName": "Japan",
@@ -7936,7 +7936,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 402,
-    "sector": "OE7",
+    "sector": "H34",
     "countryId": 35,
     "countryCode": "JP",
     "countryName": "Japan",
@@ -7956,7 +7956,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 403,
-    "sector": "OK7",
+    "sector": "G35",
     "countryId": 35,
     "countryCode": "JP",
     "countryName": "Japan",
@@ -7975,7 +7975,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 404,
-    "sector": "OE8",
+    "sector": "H34",
     "countryId": 35,
     "countryCode": "JP",
     "countryName": "Japan",
@@ -7994,7 +7994,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 405,
-    "sector": "",
+    "sector": "H35",
     "countryId": 35,
     "countryCode": "JP",
     "countryName": "Japan",
@@ -8013,7 +8013,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 406,
-    "sector": "OE8",
+    "sector": "H34",
     "countryId": 35,
     "countryCode": "JP",
     "countryName": "Japan",
@@ -8032,7 +8032,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 407,
-    "sector": "",
+    "sector": "G35",
     "countryId": 35,
     "countryCode": "JP",
     "countryName": "Japan",
@@ -8051,7 +8051,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 408,
-    "sector": "OE7",
+    "sector": "H35",
     "countryId": 35,
     "countryCode": "JP",
     "countryName": "Japan",
@@ -8070,7 +8070,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 409,
-    "sector": "",
+    "sector": "H24",
     "countryId": 84,
     "countryCode": "JO",
     "countryName": "Jordan",
@@ -8091,7 +8091,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 410,
-    "sector": "",
+    "sector": "H24",
     "countryId": 84,
     "countryCode": "JO",
     "countryName": "Jordan",
@@ -8110,7 +8110,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 411,
-    "sector": "",
+    "sector": "H24",
     "countryId": 84,
     "countryCode": "JO",
     "countryName": "Jordan",
@@ -8129,7 +8129,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 412,
-    "sector": "",
+    "sector": "H24",
     "countryId": 84,
     "countryCode": "JO",
     "countryName": "Jordan",
@@ -8149,7 +8149,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 413,
-    "sector": "LP4",
+    "sector": "G28",
     "countryId": 83,
     "countryCode": "KZ",
     "countryName": "Kazakhstan",
@@ -8170,7 +8170,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 414,
-    "sector": "",
+    "sector": "F28",
     "countryId": 83,
     "countryCode": "KZ",
     "countryName": "Kazakhstan",
@@ -8189,7 +8189,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 415,
-    "sector": "",
+    "sector": "G27",
     "countryId": 83,
     "countryCode": "KZ",
     "countryName": "Kazakhstan",
@@ -8209,7 +8209,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 416,
-    "sector": "",
+    "sector": "F28",
     "countryId": 83,
     "countryCode": "KZ",
     "countryName": "Kazakhstan",
@@ -8228,7 +8228,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 417,
-    "sector": "",
+    "sector": "M24",
     "countryId": 85,
     "countryCode": "KE",
     "countryName": "Kenya",
@@ -8249,7 +8249,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 418,
-    "sector": "",
+    "sector": "M24",
     "countryId": 85,
     "countryCode": "KE",
     "countryName": "Kenya",
@@ -8269,7 +8269,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 419,
-    "sector": "",
+    "sector": "H25",
     "countryId": 86,
     "countryCode": "KW",
     "countryName": "Kuwait",
@@ -8290,7 +8290,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 420,
-    "sector": "",
+    "sector": "G28",
     "countryId": 84,
     "countryCode": "JO",
     "countryName": "Kyrgyzstan",
@@ -8310,7 +8310,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 421,
-    "sector": "",
+    "sector": "J31",
     "countryId": 0,
     "countryCode": "LA",
     "countryName": "Laos",
@@ -8329,7 +8329,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 422,
-    "sector": "",
+    "sector": "E22",
     "countryId": 0,
     "countryCode": "LV",
     "countryName": "Latvia",
@@ -8348,7 +8348,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 423,
-    "sector": "",
+    "sector": "H24",
     "countryId": 88,
     "countryCode": "LB",
     "countryName": "Lebanon",
@@ -8369,7 +8369,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 424,
-    "sector": "",
+    "sector": "L18",
     "countryId": 87,
     "countryCode": "LR",
     "countryName": "Liberia",
@@ -8390,7 +8390,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 425,
-    "sector": "IU5",
+    "sector": "H21",
     "countryId": 82,
     "countryCode": "LY",
     "countryName": "Libya",
@@ -8410,7 +8410,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 426,
-    "sector": "IU5",
+    "sector": "H21",
     "countryId": 82,
     "countryCode": "LY",
     "countryName": "Libya",
@@ -8430,7 +8430,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 427,
-    "sector": "JA6",
+    "sector": "H22",
     "countryId": 82,
     "countryCode": "LY",
     "countryName": "Libya",
@@ -8449,7 +8449,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 428,
-    "sector": "",
+    "sector": "E22",
     "countryId": 0,
     "countryCode": "LT",
     "countryName": "Lithuania",
@@ -8469,7 +8469,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 429,
-    "sector": "",
+    "sector": "O25",
     "countryId": 0,
     "countryCode": "MG",
     "countryName": "Madagascar",
@@ -8490,7 +8490,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 430,
-    "sector": "JT8",
+    "sector": "N23",
     "countryId": 0,
     "countryCode": "MW",
     "countryName": "Malawi",
@@ -8510,7 +8510,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 431,
-    "sector": "JT8",
+    "sector": "O24",
     "countryId": 0,
     "countryCode": "MW",
     "countryName": "Malawi",
@@ -8529,7 +8529,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 432,
-    "sector": "",
+    "sector": "L31",
     "countryId": 81,
     "countryCode": "MY",
     "countryName": "Malaysia",
@@ -8550,7 +8550,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 433,
-    "sector": "",
+    "sector": "L31",
     "countryId": 81,
     "countryCode": "MY",
     "countryName": "Malaysia",
@@ -8570,7 +8570,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 434,
-    "sector": "",
+    "sector": "L31",
     "countryId": 81,
     "countryCode": "MY",
     "countryName": "Malaysia",
@@ -8589,7 +8589,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 435,
-    "sector": "",
+    "sector": "L32",
     "countryId": 81,
     "countryCode": "MY",
     "countryName": "Malaysia",
@@ -8608,7 +8608,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 436,
-    "sector": "",
+    "sector": "L33",
     "countryId": 81,
     "countryCode": "MY",
     "countryName": "Malaysia",
@@ -8627,7 +8627,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 437,
-    "sector": "",
+    "sector": "L31",
     "countryId": 81,
     "countryCode": "MY",
     "countryName": "Malaysia",
@@ -8647,7 +8647,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 438,
-    "sector": "",
+    "sector": "K19",
     "countryId": 0,
     "countryCode": "ML",
     "countryName": "Mali",
@@ -8667,7 +8667,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 439,
-    "sector": "",
+    "sector": "J18",
     "countryId": 0,
     "countryCode": "MR",
     "countryName": "Mauritania",
@@ -8686,7 +8686,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 440,
-    "sector": "DQ6",
+    "sector": "J9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8707,7 +8707,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 441,
-    "sector": "DK4",
+    "sector": "J8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8728,7 +8728,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 442,
-    "sector": "DQ4",
+    "sector": "I8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8748,7 +8748,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 443,
-    "sector": "DQ6",
+    "sector": "J9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8768,7 +8768,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 444,
-    "sector": "DQ6",
+    "sector": "J8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8788,7 +8788,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 445,
-    "sector": "CY0",
+    "sector": "H7",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8809,7 +8809,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 446,
-    "sector": "",
+    "sector": "J8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8829,7 +8829,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 447,
-    "sector": "",
+    "sector": "I8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8849,7 +8849,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 448,
-    "sector": "",
+    "sector": "H8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8870,7 +8870,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 449,
-    "sector": "",
+    "sector": "J8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8889,7 +8889,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 450,
-    "sector": "",
+    "sector": "I8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8908,7 +8908,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 451,
-    "sector": "EC7",
+    "sector": "J10",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8927,7 +8927,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 452,
-    "sector": "CY0",
+    "sector": "H7",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8947,7 +8947,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 453,
-    "sector": "DQ5",
+    "sector": "I8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8967,7 +8967,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 454,
-    "sector": "DQ6",
+    "sector": "J9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -8987,7 +8987,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 455,
-    "sector": "DK3",
+    "sector": "I8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9007,7 +9007,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 456,
-    "sector": "DQ5",
+    "sector": "I9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9028,7 +9028,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 457,
-    "sector": "DQ4",
+    "sector": "I8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9047,7 +9047,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 458,
-    "sector": "DQ6",
+    "sector": "J8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9066,7 +9066,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 459,
-    "sector": "",
+    "sector": "J8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9085,7 +9085,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 460,
-    "sector": "EI8",
+    "sector": "J10",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9105,7 +9105,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 461,
-    "sector": "DW7",
+    "sector": "J9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9125,7 +9125,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 462,
-    "sector": "",
+    "sector": "I9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9144,7 +9144,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 463,
-    "sector": "DW7",
+    "sector": "J9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9164,7 +9164,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 464,
-    "sector": "DE2",
+    "sector": "I7",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9183,7 +9183,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 465,
-    "sector": "DW7",
+    "sector": "J9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9202,7 +9202,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 466,
-    "sector": "DK3",
+    "sector": "I8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9221,7 +9221,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 467,
-    "sector": "DW7",
+    "sector": "J9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9240,7 +9240,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 468,
-    "sector": "",
+    "sector": "J9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9260,7 +9260,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 469,
-    "sector": "",
+    "sector": "J8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9279,7 +9279,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 470,
-    "sector": "",
+    "sector": "J9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9299,7 +9299,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 471,
-    "sector": "",
+    "sector": "I8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9319,7 +9319,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 472,
-    "sector": "",
+    "sector": "J9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9338,7 +9338,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 473,
-    "sector": "",
+    "sector": "J9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9357,7 +9357,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 474,
-    "sector": "",
+    "sector": "I9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9376,7 +9376,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 475,
-    "sector": "dk4",
+    "sector": "J8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9396,7 +9396,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 476,
-    "sector": "",
+    "sector": "J9",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9416,7 +9416,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 477,
-    "sector": "DK4",
+    "sector": "J8",
     "countryId": 36,
     "countryCode": "MX",
     "countryName": "Mexico",
@@ -9436,7 +9436,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 478,
-    "sector": "",
+    "sector": "F32",
     "countryId": 37,
     "countryCode": "MN",
     "countryName": "Mongolia",
@@ -9457,7 +9457,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 479,
-    "sector": "HW1",
+    "sector": "H19",
     "countryId": 38,
     "countryCode": "MA",
     "countryName": "Morocco",
@@ -9478,7 +9478,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 480,
-    "sector": "HW0",
+    "sector": "H19",
     "countryId": 38,
     "countryCode": "MA",
     "countryName": "Morocco",
@@ -9498,7 +9498,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 481,
-    "sector": "HW0",
+    "sector": "H19",
     "countryId": 38,
     "countryCode": "MA",
     "countryName": "Morocco",
@@ -9517,7 +9517,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 482,
-    "sector": "HW0",
+    "sector": "H19",
     "countryId": 38,
     "countryCode": "MA",
     "countryName": "Morocco",
@@ -9537,7 +9537,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 483,
-    "sector": "HW1",
+    "sector": "H19",
     "countryId": 38,
     "countryCode": "MA",
     "countryName": "Morocco",
@@ -9557,7 +9557,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 484,
-    "sector": "HW1",
+    "sector": "H19",
     "countryId": 38,
     "countryCode": "MA",
     "countryName": "Morocco",
@@ -9578,7 +9578,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 485,
-    "sector": "IC1",
+    "sector": "H19",
     "countryId": 38,
     "countryCode": "MA",
     "countryName": "Morocco",
@@ -9597,7 +9597,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 486,
-    "sector": "HW0",
+    "sector": "H19",
     "countryId": 38,
     "countryCode": "MA",
     "countryName": "Morocco",
@@ -9617,7 +9617,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 487,
-    "sector": "",
+    "sector": "P23",
     "countryId": 39,
     "countryCode": "MZ",
     "countryName": "Mozambique",
@@ -9638,7 +9638,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 488,
-    "sector": "JU1",
+    "sector": "P23",
     "countryId": 39,
     "countryCode": "MZ",
     "countryName": "Mozambique",
@@ -9658,7 +9658,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 489,
-    "sector": "JZ9",
+    "sector": "N24",
     "countryId": 39,
     "countryCode": "MZ",
     "countryName": "Mozambique",
@@ -9677,7 +9677,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 490,
-    "sector": "JT9",
+    "sector": "O24",
     "countryId": 39,
     "countryCode": "MZ",
     "countryName": "Mozambique",
@@ -9697,7 +9697,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 491,
-    "sector": "MO4",
+    "sector": "J30",
     "countryId": 90,
     "countryCode": "MM",
     "countryName": "Myanmar",
@@ -9718,7 +9718,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 492,
-    "sector": "MO3",
+    "sector": "I30",
     "countryId": 90,
     "countryCode": "MM",
     "countryName": "Myanmar",
@@ -9738,7 +9738,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 493,
-    "sector": "MO3",
+    "sector": "J30",
     "countryId": 90,
     "countryCode": "MM",
     "countryName": "Myanmar",
@@ -9758,7 +9758,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 494,
-    "sector": "MC0",
+    "sector": "I29",
     "countryId": 25,
     "countryCode": "IN",
     "countryName": "Nepal",
@@ -9777,7 +9777,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 495,
-    "sector": "",
+    "sector": "E20",
     "countryId": 89,
     "countryCode": "NL",
     "countryName": "Netherlands",
@@ -9796,7 +9796,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 496,
-    "sector": "",
+    "sector": "E20",
     "countryId": 89,
     "countryCode": "NL",
     "countryName": "Netherlands",
@@ -9816,7 +9816,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 497,
-    "sector": "",
+    "sector": "E20",
     "countryId": 89,
     "countryCode": "NL",
     "countryName": "Netherlands",
@@ -9836,7 +9836,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 498,
-    "sector": "",
+    "sector": "E20",
     "countryId": 89,
     "countryCode": "NL",
     "countryName": "Netherlands",
@@ -9855,7 +9855,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 499,
-    "sector": "",
+    "sector": "R39",
     "countryId": 0,
     "countryCode": "NZ",
     "countryName": "New Zealand",
@@ -9874,7 +9874,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 500,
-    "sector": "",
+    "sector": "K10",
     "countryId": 0,
     "countryCode": "NI",
     "countryName": "Nicaragua",
@@ -9894,7 +9894,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 501,
-    "sector": "",
+    "sector": "K20",
     "countryId": 91,
     "countryCode": "NE",
     "countryName": "Niger",
@@ -9910,7 +9910,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 502,
-    "sector": "",
+    "sector": "L20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -9928,7 +9928,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 503,
-    "sector": "",
+    "sector": "K21",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -9944,7 +9944,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 504,
-    "sector": "",
+    "sector": "K20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -9960,7 +9960,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 505,
-    "sector": "",
+    "sector": "K20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -9978,7 +9978,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 506,
-    "sector": "",
+    "sector": "K21",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -9994,7 +9994,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 507,
-    "sector": "",
+    "sector": "L20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10012,7 +10012,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 508,
-    "sector": "",
+    "sector": "L20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10028,7 +10028,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 509,
-    "sector": "",
+    "sector": "L20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10044,7 +10044,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 510,
-    "sector": "",
+    "sector": "L21",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10060,7 +10060,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 511,
-    "sector": "",
+    "sector": "K20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10076,7 +10076,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 512,
-    "sector": "",
+    "sector": "K21",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10092,7 +10092,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 513,
-    "sector": "",
+    "sector": "L20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10108,7 +10108,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 514,
-    "sector": "",
+    "sector": "L20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10124,7 +10124,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 515,
-    "sector": "",
+    "sector": "K20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10140,7 +10140,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 516,
-    "sector": "",
+    "sector": "L20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10156,7 +10156,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 517,
-    "sector": "",
+    "sector": "K21",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10172,7 +10172,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 518,
-    "sector": "",
+    "sector": "L20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10190,7 +10190,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 519,
-    "sector": "",
+    "sector": "L20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10208,7 +10208,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 520,
-    "sector": "",
+    "sector": "K21",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10224,7 +10224,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 521,
-    "sector": "",
+    "sector": "L20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10240,7 +10240,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 522,
-    "sector": "",
+    "sector": "L21",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10259,7 +10259,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 523,
-    "sector": "",
+    "sector": "K21",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10275,7 +10275,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 524,
-    "sector": "",
+    "sector": "K20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10291,7 +10291,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 525,
-    "sector": "",
+    "sector": "K20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10307,7 +10307,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 526,
-    "sector": "",
+    "sector": "K20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10325,7 +10325,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 527,
-    "sector": "",
+    "sector": "K20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10341,7 +10341,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 528,
-    "sector": "",
+    "sector": "K21",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10357,7 +10357,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 529,
-    "sector": "",
+    "sector": "L21",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10376,7 +10376,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 530,
-    "sector": "",
+    "sector": "L21",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10392,7 +10392,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 531,
-    "sector": "",
+    "sector": "K20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10408,7 +10408,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 532,
-    "sector": "",
+    "sector": "K20",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10424,7 +10424,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 533,
-    "sector": "",
+    "sector": "K21",
     "countryId": 40,
     "countryCode": "NG",
     "countryName": "Nigeria",
@@ -10440,7 +10440,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 534,
-    "sector": "",
+    "sector": "G34",
     "countryId": 41,
     "countryCode": "KP",
     "countryName": "North Korea",
@@ -10456,7 +10456,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 535,
-    "sector": "",
+    "sector": "G34",
     "countryId": 41,
     "countryCode": "KP",
     "countryName": "North Korea",
@@ -10472,7 +10472,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 536,
-    "sector": "",
+    "sector": "G34",
     "countryId": 41,
     "countryCode": "KP",
     "countryName": "North Korea",
@@ -10488,7 +10488,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 537,
-    "sector": "IN6",
+    "sector": "D21",
     "countryId": 0,
     "countryCode": "NO",
     "countryName": "Norway",
@@ -10504,7 +10504,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 538,
-    "sector": "IN6",
+    "sector": "D21",
     "countryId": 0,
     "countryCode": "NO",
     "countryName": "Norway",
@@ -10525,7 +10525,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 539,
-    "sector": "",
+    "sector": "I26",
     "countryId": 0,
     "countryCode": "OM",
     "countryName": "Oman",
@@ -10541,7 +10541,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 540,
-    "sector": "LD6",
+    "sector": "I27",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10557,7 +10557,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 541,
-    "sector": "LP7",
+    "sector": "H28",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10573,7 +10573,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 542,
-    "sector": "LP7",
+    "sector": "H28",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10589,7 +10589,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 543,
-    "sector": "",
+    "sector": "H28",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10605,7 +10605,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 544,
-    "sector": "",
+    "sector": "H28",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10621,7 +10621,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 545,
-    "sector": "",
+    "sector": "H28",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10637,7 +10637,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 546,
-    "sector": "LJ6",
+    "sector": "H28",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10653,7 +10653,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 547,
-    "sector": "LJ7",
+    "sector": "I27",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10672,7 +10672,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 548,
-    "sector": "LP6",
+    "sector": "H28",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10690,7 +10690,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 549,
-    "sector": "LD5",
+    "sector": "H27",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10710,7 +10710,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 550,
-    "sector": "LJ6",
+    "sector": "H28",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10728,7 +10728,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 551,
-    "sector": "",
+    "sector": "H28",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10744,7 +10744,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 552,
-    "sector": "",
+    "sector": "H28",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10760,7 +10760,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 553,
-    "sector": "",
+    "sector": "I27",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10776,7 +10776,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 554,
-    "sector": "",
+    "sector": "I27",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10792,7 +10792,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 555,
-    "sector": "",
+    "sector": "H28",
     "countryId": 42,
     "countryCode": "PK",
     "countryName": "Pakistan",
@@ -10808,7 +10808,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 556,
-    "sector": "",
+    "sector": "H24",
     "countryId": 0,
     "countryCode": "PS",
     "countryName": "Palestine",
@@ -10824,7 +10824,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 557,
-    "sector": "",
+    "sector": "K11",
     "countryId": 0,
     "countryCode": "PA",
     "countryName": "Panama",
@@ -10840,7 +10840,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 558,
-    "sector": "",
+    "sector": "P13",
     "countryId": 0,
     "countryCode": "PY",
     "countryName": "Paraguay",
@@ -10856,7 +10856,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 559,
-    "sector": "",
+    "sector": "N11",
     "countryId": 43,
     "countryCode": "PE",
     "countryName": "Peru",
@@ -10872,7 +10872,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 560,
-    "sector": "",
+    "sector": "O12",
     "countryId": 43,
     "countryCode": "PE",
     "countryName": "Peru",
@@ -10888,7 +10888,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 561,
-    "sector": "",
+    "sector": "M11",
     "countryId": 43,
     "countryCode": "PE",
     "countryName": "Peru",
@@ -10904,7 +10904,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 562,
-    "sector": "",
+    "sector": "M11",
     "countryId": 43,
     "countryCode": "PE",
     "countryName": "Peru",
@@ -10920,7 +10920,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 563,
-    "sector": "",
+    "sector": "J33",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -10936,7 +10936,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 564,
-    "sector": "",
+    "sector": "K34",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -10952,7 +10952,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 565,
-    "sector": "",
+    "sector": "K33",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -10968,7 +10968,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 566,
-    "sector": "",
+    "sector": "L33",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -10984,7 +10984,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 567,
-    "sector": "",
+    "sector": "J33",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -11000,7 +11000,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 568,
-    "sector": "",
+    "sector": "L34",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -11016,7 +11016,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 569,
-    "sector": "",
+    "sector": "J33",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -11032,7 +11032,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 570,
-    "sector": "",
+    "sector": "J33",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -11048,7 +11048,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 571,
-    "sector": "",
+    "sector": "L34",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -11064,7 +11064,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 572,
-    "sector": "",
+    "sector": "K33",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -11080,7 +11080,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 573,
-    "sector": "",
+    "sector": "J33",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -11096,7 +11096,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 574,
-    "sector": "",
+    "sector": "L33",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -11112,7 +11112,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 575,
-    "sector": "",
+    "sector": "J33",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -11128,7 +11128,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 576,
-    "sector": "",
+    "sector": "K33",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -11144,7 +11144,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 577,
-    "sector": "",
+    "sector": "J33",
     "countryId": 44,
     "countryCode": "PH",
     "countryName": "Philippines",
@@ -11160,7 +11160,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 578,
-    "sector": "",
+    "sector": "F22",
     "countryId": 77,
     "countryCode": "PL",
     "countryName": "Poland",
@@ -11176,7 +11176,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 579,
-    "sector": "",
+    "sector": "F22",
     "countryId": 77,
     "countryCode": "PL",
     "countryName": "Poland",
@@ -11192,7 +11192,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 580,
-    "sector": "",
+    "sector": "F22",
     "countryId": 77,
     "countryCode": "PL",
     "countryName": "Poland",
@@ -11208,7 +11208,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 581,
-    "sector": "",
+    "sector": "F22",
     "countryId": 77,
     "countryCode": "PL",
     "countryName": "Poland",
@@ -11224,7 +11224,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 582,
-    "sector": "",
+    "sector": "E22",
     "countryId": 77,
     "countryCode": "PL",
     "countryName": "Poland",
@@ -11240,7 +11240,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 583,
-    "sector": "",
+    "sector": "H19",
     "countryId": 78,
     "countryCode": "PT",
     "countryName": "Portugal",
@@ -11256,7 +11256,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 584,
-    "sector": "",
+    "sector": "G19",
     "countryId": 78,
     "countryCode": "PT",
     "countryName": "Portugal",
@@ -11272,7 +11272,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 585,
-    "sector": "",
+    "sector": "K12",
     "countryId": 76,
     "countryCode": "PR",
     "countryName": "Puerto Rico",
@@ -11288,7 +11288,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 586,
-    "sector": "",
+    "sector": "I25",
     "countryId": 79,
     "countryCode": "QA",
     "countryName": "Qatar",
@@ -11304,7 +11304,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 587,
-    "sector": "",
+    "sector": "I25",
     "countryId": 79,
     "countryCode": "QA",
     "countryName": "Qatar",
@@ -11320,7 +11320,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 588,
-    "sector": "",
+    "sector": "M21",
     "countryId": 75,
     "countryCode": "CG",
     "countryName": "Republic of the Congo",
@@ -11336,7 +11336,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 589,
-    "sector": "",
+    "sector": "M21",
     "countryId": 75,
     "countryCode": "CG",
     "countryName": "Republic of the Congo",
@@ -11352,7 +11352,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 590,
-    "sector": "",
+    "sector": "F23",
     "countryId": 80,
     "countryCode": "RO",
     "countryName": "Romania",
@@ -11368,7 +11368,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 591,
-    "sector": "JY3",
+    "sector": "E24",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11389,7 +11389,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 592,
-    "sector": "JM0",
+    "sector": "D23",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11408,7 +11408,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 593,
-    "sector": "MB3",
+    "sector": "E29",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11427,7 +11427,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 594,
-    "sector": "KW7",
+    "sector": "E26",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11446,7 +11446,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 595,
-    "sector": "",
+    "sector": "E24",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11464,7 +11464,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 596,
-    "sector": "KK5",
+    "sector": "E25",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11484,7 +11484,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 597,
-    "sector": "",
+    "sector": "E25",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11500,7 +11500,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 598,
-    "sector": "",
+    "sector": "E27",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11516,7 +11516,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 599,
-    "sector": "",
+    "sector": "E28",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11535,7 +11535,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 600,
-    "sector": "",
+    "sector": "E25",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11551,7 +11551,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 601,
-    "sector": "",
+    "sector": "E30",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11567,7 +11567,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 602,
-    "sector": "",
+    "sector": "E26",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11583,7 +11583,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 603,
-    "sector": "",
+    "sector": "F24",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11599,7 +11599,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 604,
-    "sector": "",
+    "sector": "E26",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11615,7 +11615,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 605,
-    "sector": "",
+    "sector": "E24",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11631,7 +11631,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 606,
-    "sector": "",
+    "sector": "F25",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11647,7 +11647,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 607,
-    "sector": "",
+    "sector": "F24",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11663,7 +11663,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 608,
-    "sector": "",
+    "sector": "E27",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11679,7 +11679,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 609,
-    "sector": "",
+    "sector": "F25",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11695,7 +11695,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 610,
-    "sector": "",
+    "sector": "E25",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11711,7 +11711,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 611,
-    "sector": "",
+    "sector": "E26",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11727,7 +11727,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 612,
-    "sector": "",
+    "sector": "E29",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11743,7 +11743,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 613,
-    "sector": "",
+    "sector": "E31",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11759,7 +11759,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 614,
-    "sector": "OK5",
+    "sector": "F35",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11775,7 +11775,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 615,
-    "sector": "",
+    "sector": "C23",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11794,7 +11794,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 616,
-    "sector": "",
+    "sector": "E25",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11810,7 +11810,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 617,
-    "sector": "",
+    "sector": "E24",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11826,7 +11826,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 618,
-    "sector": "OE5",
+    "sector": "G34",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11845,7 +11845,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 619,
-    "sector": "",
+    "sector": "G25",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11861,7 +11861,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 620,
-    "sector": "",
+    "sector": "E29",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11877,7 +11877,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 621,
-    "sector": "",
+    "sector": "E26",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11893,7 +11893,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 622,
-    "sector": "",
+    "sector": "E29",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11909,7 +11909,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 623,
-    "sector": "JA0",
+    "sector": "E22",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11927,7 +11927,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 624,
-    "sector": "KQ6",
+    "sector": "E29",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11945,7 +11945,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 625,
-    "sector": "",
+    "sector": "E24",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11961,7 +11961,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 626,
-    "sector": "",
+    "sector": "F25",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11977,7 +11977,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 627,
-    "sector": "",
+    "sector": "E26",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -11993,7 +11993,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 628,
-    "sector": "",
+    "sector": "E25",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -12009,7 +12009,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 629,
-    "sector": "",
+    "sector": "E24",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -12025,7 +12025,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 630,
-    "sector": "",
+    "sector": "E25",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -12041,7 +12041,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 631,
-    "sector": "",
+    "sector": "E24",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -12057,7 +12057,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 632,
-    "sector": "",
+    "sector": "E25",
     "countryId": 45,
     "countryCode": "RU",
     "countryName": "Russia",
@@ -12073,7 +12073,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 633,
-    "sector": "",
+    "sector": "M23",
     "countryId": 46,
     "countryCode": "RW",
     "countryName": "Rwanda",
@@ -12089,7 +12089,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 634,
-    "sector": "KF2",
+    "sector": "I25",
     "countryId": 47,
     "countryCode": "SA",
     "countryName": "Saudi Arabia",
@@ -12109,7 +12109,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 635,
-    "sector": "JZ2",
+    "sector": "J24",
     "countryId": 47,
     "countryCode": "SA",
     "countryName": "Saudi Arabia",
@@ -12128,7 +12128,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 636,
-    "sector": "JZ2",
+    "sector": "J24",
     "countryId": 47,
     "countryCode": "SA",
     "countryName": "Saudi Arabia",
@@ -12146,7 +12146,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 637,
-    "sector": "JZ2",
+    "sector": "I24",
     "countryId": 47,
     "countryCode": "SA",
     "countryName": "Saudi Arabia",
@@ -12162,7 +12162,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 638,
-    "sector": "JZ0",
+    "sector": "I25",
     "countryId": 47,
     "countryCode": "SA",
     "countryName": "Saudi Arabia",
@@ -12181,7 +12181,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 639,
-    "sector": "KF4",
+    "sector": "I25",
     "countryId": 47,
     "countryCode": "SA",
     "countryName": "Saudi Arabia",
@@ -12197,7 +12197,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 640,
-    "sector": "JZ2",
+    "sector": "J24",
     "countryId": 47,
     "countryCode": "SA",
     "countryName": "Saudi Arabia",
@@ -12215,7 +12215,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 641,
-    "sector": "KF2",
+    "sector": "I25",
     "countryId": 47,
     "countryCode": "SA",
     "countryName": "Saudi Arabia",
@@ -12233,7 +12233,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 642,
-    "sector": "JZ1",
+    "sector": "I24",
     "countryId": 47,
     "countryCode": "SA",
     "countryName": "Saudi Arabia",
@@ -12252,7 +12252,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 643,
-    "sector": "JZ1",
+    "sector": "I25",
     "countryId": 47,
     "countryCode": "SA",
     "countryName": "Saudi Arabia",
@@ -12271,7 +12271,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 644,
-    "sector": "",
+    "sector": "J24",
     "countryId": 47,
     "countryCode": "SA",
     "countryName": "Saudi Arabia",
@@ -12287,7 +12287,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 645,
-    "sector": "HK3",
+    "sector": "K18",
     "countryId": 48,
     "countryCode": "SN",
     "countryName": "Senegal",
@@ -12303,7 +12303,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 646,
-    "sector": "",
+    "sector": "F22",
     "countryId": 49,
     "countryCode": "RS",
     "countryName": "Serbia",
@@ -12319,7 +12319,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 647,
-    "sector": "",
+    "sector": "K18",
     "countryId": 50,
     "countryCode": "SL",
     "countryName": "Sierra Leone",
@@ -12335,7 +12335,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 648,
-    "sector": "",
+    "sector": "L31",
     "countryId": 51,
     "countryCode": "SG",
     "countryName": "Singapore",
@@ -12351,7 +12351,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 649,
-    "sector": "",
+    "sector": "L25",
     "countryId": 52,
     "countryCode": "SO",
     "countryName": "Somalia",
@@ -12369,7 +12369,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 650,
-    "sector": "",
+    "sector": "L24",
     "countryId": 52,
     "countryCode": "SO",
     "countryName": "Somalia",
@@ -12387,7 +12387,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 651,
-    "sector": "",
+    "sector": "K25",
     "countryId": 52,
     "countryCode": "SO",
     "countryName": "Somalia",
@@ -12405,7 +12405,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 652,
-    "sector": "",
+    "sector": "K25",
     "countryId": 52,
     "countryCode": "SO",
     "countryName": "Somalia",
@@ -12421,7 +12421,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 653,
-    "sector": "",
+    "sector": "K25",
     "countryId": 52,
     "countryCode": "SO",
     "countryName": "Somalia",
@@ -12437,7 +12437,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 654,
-    "sector": "",
+    "sector": "K25",
     "countryId": 52,
     "countryCode": "SO",
     "countryName": "Somalia",
@@ -12455,7 +12455,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 655,
-    "sector": "",
+    "sector": "K25",
     "countryId": 52,
     "countryCode": "SO",
     "countryName": "Somalia",
@@ -12471,7 +12471,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 656,
-    "sector": "",
+    "sector": "L25",
     "countryId": 52,
     "countryCode": "SO",
     "countryName": "Somalia",
@@ -12487,7 +12487,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 657,
-    "sector": "",
+    "sector": "P23",
     "countryId": 53,
     "countryCode": "ZA",
     "countryName": "South Africa",
@@ -12503,7 +12503,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 658,
-    "sector": "JB9",
+    "sector": "Q22",
     "countryId": 53,
     "countryCode": "ZA",
     "countryName": "South Africa",
@@ -12519,7 +12519,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 659,
-    "sector": "",
+    "sector": "P23",
     "countryId": 53,
     "countryCode": "ZA",
     "countryName": "South Africa",
@@ -12535,7 +12535,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 660,
-    "sector": "JO0",
+    "sector": "P23",
     "countryId": 53,
     "countryCode": "ZA",
     "countryName": "South Africa",
@@ -12551,7 +12551,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 661,
-    "sector": "JO0",
+    "sector": "P23",
     "countryId": 53,
     "countryCode": "ZA",
     "countryName": "South Africa",
@@ -12567,7 +12567,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 662,
-    "sector": "JI0",
+    "sector": "Q23",
     "countryId": 53,
     "countryCode": "ZA",
     "countryName": "South Africa",
@@ -12583,7 +12583,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 663,
-    "sector": "",
+    "sector": "P23",
     "countryId": 53,
     "countryCode": "ZA",
     "countryName": "South Africa",
@@ -12599,7 +12599,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 664,
-    "sector": "",
+    "sector": "P23",
     "countryId": 53,
     "countryCode": "ZA",
     "countryName": "South Africa",
@@ -12615,7 +12615,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 665,
-    "sector": "",
+    "sector": "P23",
     "countryId": 53,
     "countryCode": "ZA",
     "countryName": "South Africa",
@@ -12631,7 +12631,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 666,
-    "sector": "",
+    "sector": "Q23",
     "countryId": 53,
     "countryCode": "ZA",
     "countryName": "South Africa",
@@ -12647,7 +12647,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 667,
-    "sector": "JH9",
+    "sector": "P23",
     "countryId": 53,
     "countryCode": "ZA",
     "countryName": "South Africa",
@@ -12663,7 +12663,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 668,
-    "sector": "",
+    "sector": "P23",
     "countryId": 53,
     "countryCode": "ZA",
     "countryName": "South Africa",
@@ -12679,7 +12679,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 669,
-    "sector": "",
+    "sector": "P23",
     "countryId": 53,
     "countryCode": "ZA",
     "countryName": "South Africa",
@@ -12695,7 +12695,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 670,
-    "sector": "",
+    "sector": "G34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12711,7 +12711,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 671,
-    "sector": "",
+    "sector": "H34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12727,7 +12727,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 672,
-    "sector": "",
+    "sector": "G34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12743,7 +12743,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 673,
-    "sector": "",
+    "sector": "H34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12759,7 +12759,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 674,
-    "sector": "",
+    "sector": "H34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12775,7 +12775,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 675,
-    "sector": "",
+    "sector": "H34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12791,7 +12791,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 676,
-    "sector": "",
+    "sector": "G34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12807,7 +12807,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 677,
-    "sector": "",
+    "sector": "G34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12823,7 +12823,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 678,
-    "sector": "",
+    "sector": "G34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12839,7 +12839,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 679,
-    "sector": "",
+    "sector": "H34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12855,7 +12855,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 680,
-    "sector": "",
+    "sector": "G34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12871,7 +12871,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 681,
-    "sector": "",
+    "sector": "H34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12887,7 +12887,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 682,
-    "sector": "",
+    "sector": "G34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12903,7 +12903,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 683,
-    "sector": "",
+    "sector": "G34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12919,7 +12919,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 684,
-    "sector": "",
+    "sector": "H34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12935,7 +12935,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 685,
-    "sector": "",
+    "sector": "G34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12951,7 +12951,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 686,
-    "sector": "",
+    "sector": "H34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12967,7 +12967,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 687,
-    "sector": "",
+    "sector": "G34",
     "countryId": 54,
     "countryCode": "KR",
     "countryName": "South Korea",
@@ -12983,7 +12983,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 688,
-    "sector": "",
+    "sector": "G19",
     "countryId": 55,
     "countryCode": "ES",
     "countryName": "Spain",
@@ -12999,7 +12999,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 689,
-    "sector": "",
+    "sector": "G20",
     "countryId": 55,
     "countryCode": "ES",
     "countryName": "Spain",
@@ -13015,7 +13015,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 690,
-    "sector": "",
+    "sector": "G20",
     "countryId": 55,
     "countryCode": "ES",
     "countryName": "Spain",
@@ -13031,7 +13031,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 691,
-    "sector": "",
+    "sector": "G20",
     "countryId": 55,
     "countryCode": "ES",
     "countryName": "Spain",
@@ -13047,7 +13047,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 692,
-    "sector": "",
+    "sector": "H19",
     "countryId": 55,
     "countryCode": "ES",
     "countryName": "Spain",
@@ -13063,7 +13063,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 693,
-    "sector": "",
+    "sector": "H19",
     "countryId": 55,
     "countryCode": "ES",
     "countryName": "Spain",
@@ -13079,7 +13079,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 694,
-    "sector": "",
+    "sector": "L29",
     "countryId": 56,
     "countryCode": "LK",
     "countryName": "Sri Lanka",
@@ -13099,7 +13099,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 695,
-    "sector": "",
+    "sector": "J23",
     "countryId": 57,
     "countryCode": "SD",
     "countryName": "Sudan",
@@ -13115,7 +13115,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 696,
-    "sector": "JH1",
+    "sector": "K22",
     "countryId": 57,
     "countryCode": "SD",
     "countryName": "Sudan",
@@ -13131,7 +13131,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 697,
-    "sector": "IZ8",
+    "sector": "D22",
     "countryId": 58,
     "countryCode": "SE",
     "countryName": "Sweden",
@@ -13147,7 +13147,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 698,
-    "sector": "IT8",
+    "sector": "E21",
     "countryId": 58,
     "countryCode": "SE",
     "countryName": "Sweden",
@@ -13163,7 +13163,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 699,
-    "sector": "",
+    "sector": "F21",
     "countryId": 59,
     "countryCode": "CH",
     "countryName": "Switzerland",
@@ -13181,7 +13181,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 700,
-    "sector": "",
+    "sector": "F20",
     "countryId": 59,
     "countryCode": "CH",
     "countryName": "Switzerland",
@@ -13200,7 +13200,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 701,
-    "sector": "",
+    "sector": "F21",
     "countryId": 59,
     "countryCode": "CH",
     "countryName": "Switzerland",
@@ -13218,7 +13218,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 702,
-    "sector": "",
+    "sector": "H24",
     "countryId": 60,
     "countryCode": "SY",
     "countryName": "Syria",
@@ -13234,7 +13234,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 703,
-    "sector": "",
+    "sector": "G24",
     "countryId": 60,
     "countryCode": "SY",
     "countryName": "Syria",
@@ -13250,7 +13250,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 704,
-    "sector": "",
+    "sector": "H24",
     "countryId": 60,
     "countryCode": "SY",
     "countryName": "Syria",
@@ -13266,7 +13266,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 705,
-    "sector": "",
+    "sector": "H24",
     "countryId": 60,
     "countryCode": "SY",
     "countryName": "Syria",
@@ -13282,7 +13282,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 706,
-    "sector": "",
+    "sector": "H24",
     "countryId": 60,
     "countryCode": "SY",
     "countryName": "Syria",
@@ -13298,7 +13298,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 707,
-    "sector": "",
+    "sector": "H24",
     "countryId": 60,
     "countryCode": "SY",
     "countryName": "Syria",
@@ -13314,7 +13314,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 708,
-    "sector": "",
+    "sector": "I33",
     "countryId": 61,
     "countryCode": "TW",
     "countryName": "Taiwan",
@@ -13330,7 +13330,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 709,
-    "sector": "",
+    "sector": "I33",
     "countryId": 61,
     "countryCode": "TW",
     "countryName": "Taiwan",
@@ -13346,7 +13346,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 710,
-    "sector": "",
+    "sector": "I33",
     "countryId": 61,
     "countryCode": "TW",
     "countryName": "Taiwan",
@@ -13362,7 +13362,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 711,
-    "sector": "",
+    "sector": "I33",
     "countryId": 61,
     "countryCode": "TW",
     "countryName": "Taiwan",
@@ -13378,7 +13378,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 712,
-    "sector": "",
+    "sector": "I33",
     "countryId": 61,
     "countryCode": "TW",
     "countryName": "Taiwan",
@@ -13394,7 +13394,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 713,
-    "sector": "",
+    "sector": "I33",
     "countryId": 61,
     "countryCode": "TW",
     "countryName": "Taiwan",
@@ -13410,7 +13410,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 714,
-    "sector": "",
+    "sector": "G27",
     "countryId": 62,
     "countryCode": "TJ",
     "countryName": "Tajikistan",
@@ -13426,7 +13426,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 715,
-    "sector": "",
+    "sector": "M24",
     "countryId": 63,
     "countryCode": "TZ",
     "countryName": "Tanzania",
@@ -13442,7 +13442,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 716,
-    "sector": "",
+    "sector": "M23",
     "countryId": 63,
     "countryCode": "TZ",
     "countryName": "Tanzania",
@@ -13458,7 +13458,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 717,
-    "sector": "",
+    "sector": "M24",
     "countryId": 63,
     "countryCode": "TZ",
     "countryName": "Tanzania",
@@ -13474,7 +13474,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 718,
-    "sector": "",
+    "sector": "N23",
     "countryId": 63,
     "countryCode": "TZ",
     "countryName": "Tanzania",
@@ -13490,7 +13490,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 719,
-    "sector": "",
+    "sector": "K31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13506,7 +13506,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 720,
-    "sector": "",
+    "sector": "K31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13522,7 +13522,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 721,
-    "sector": "",
+    "sector": "K31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13538,7 +13538,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 722,
-    "sector": "",
+    "sector": "J31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13554,7 +13554,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 723,
-    "sector": "",
+    "sector": "K31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13570,7 +13570,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 724,
-    "sector": "",
+    "sector": "K31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13586,7 +13586,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 725,
-    "sector": "",
+    "sector": "K31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13602,7 +13602,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 726,
-    "sector": "",
+    "sector": "J31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13618,7 +13618,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 727,
-    "sector": "",
+    "sector": "K31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13634,7 +13634,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 728,
-    "sector": "",
+    "sector": "J31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13650,7 +13650,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 729,
-    "sector": "",
+    "sector": "J31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13666,7 +13666,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 730,
-    "sector": "",
+    "sector": "K31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13682,7 +13682,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 731,
-    "sector": "",
+    "sector": "J31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13698,7 +13698,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 732,
-    "sector": "",
+    "sector": "K31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13714,7 +13714,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 733,
-    "sector": "",
+    "sector": "J31",
     "countryId": 64,
     "countryCode": "TH",
     "countryName": "Thailand",
@@ -13730,7 +13730,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 734,
-    "sector": "",
+    "sector": "L20",
     "countryId": 0,
     "countryCode": "TG",
     "countryName": "Togo",
@@ -13746,7 +13746,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 735,
-    "sector": "",
+    "sector": "K13",
     "countryId": 0,
     "countryCode": "TT",
     "countryName": "Trinidad and Tobago",
@@ -13762,7 +13762,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 736,
-    "sector": "",
+    "sector": "G21",
     "countryId": 99,
     "countryCode": "TN",
     "countryName": "Tunisia",
@@ -13778,7 +13778,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 737,
-    "sector": "",
+    "sector": "H21",
     "countryId": 99,
     "countryCode": "TN",
     "countryName": "Tunisia",
@@ -13794,7 +13794,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 738,
-    "sector": "",
+    "sector": "G23",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -13810,7 +13810,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 739,
-    "sector": "",
+    "sector": "G23",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -13826,7 +13826,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 740,
-    "sector": "",
+    "sector": "G23",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -13842,7 +13842,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 741,
-    "sector": "",
+    "sector": "G23",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -13858,7 +13858,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 742,
-    "sector": "",
+    "sector": "G24",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -13874,7 +13874,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 743,
-    "sector": "",
+    "sector": "G24",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -13890,7 +13890,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 744,
-    "sector": "",
+    "sector": "G23",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -13906,7 +13906,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 745,
-    "sector": "",
+    "sector": "G23",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -13922,7 +13922,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 746,
-    "sector": "",
+    "sector": "G24",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -13938,7 +13938,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 747,
-    "sector": "",
+    "sector": "G24",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -13954,7 +13954,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 748,
-    "sector": "",
+    "sector": "G24",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -13970,7 +13970,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 749,
-    "sector": "",
+    "sector": "G23",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -13986,7 +13986,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 750,
-    "sector": "",
+    "sector": "G23",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -14002,7 +14002,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 751,
-    "sector": "",
+    "sector": "G23",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -14018,7 +14018,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 752,
-    "sector": "",
+    "sector": "G24",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -14034,7 +14034,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 753,
-    "sector": "",
+    "sector": "G24",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -14050,7 +14050,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 754,
-    "sector": "",
+    "sector": "G24",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -14066,7 +14066,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 755,
-    "sector": "",
+    "sector": "G23",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -14082,7 +14082,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 756,
-    "sector": "",
+    "sector": "G25",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Turkey",
@@ -14098,7 +14098,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 757,
-    "sector": "",
+    "sector": "G26",
     "countryId": 0,
     "countryCode": "TM",
     "countryName": "Turkmenistan",
@@ -14114,7 +14114,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 758,
-    "sector": "JT5",
+    "sector": "L23",
     "countryId": 65,
     "countryCode": "TR",
     "countryName": "Uganda",
@@ -14132,7 +14132,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 759,
-    "sector": "",
+    "sector": "F23",
     "countryId": 66,
     "countryCode": "UA",
     "countryName": "Ukraine",
@@ -14148,7 +14148,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 760,
-    "sector": "",
+    "sector": "F24",
     "countryId": 66,
     "countryCode": "UA",
     "countryName": "Ukraine",
@@ -14164,7 +14164,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 761,
-    "sector": "",
+    "sector": "F23",
     "countryId": 66,
     "countryCode": "UA",
     "countryName": "Ukraine",
@@ -14180,7 +14180,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 762,
-    "sector": "",
+    "sector": "F24",
     "countryId": 66,
     "countryCode": "UA",
     "countryName": "Ukraine",
@@ -14196,7 +14196,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 763,
-    "sector": "",
+    "sector": "F24",
     "countryId": 66,
     "countryCode": "UA",
     "countryName": "Ukraine",
@@ -14212,7 +14212,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 764,
-    "sector": "",
+    "sector": "F24",
     "countryId": 66,
     "countryCode": "UA",
     "countryName": "Ukraine",
@@ -14228,7 +14228,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 765,
-    "sector": "",
+    "sector": "F22",
     "countryId": 66,
     "countryCode": "UA",
     "countryName": "Ukraine",
@@ -14244,7 +14244,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 766,
-    "sector": "",
+    "sector": "F23",
     "countryId": 66,
     "countryCode": "UA",
     "countryName": "Ukraine",
@@ -14260,7 +14260,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 767,
-    "sector": "",
+    "sector": "I26",
     "countryId": 67,
     "countryCode": "AE",
     "countryName": "United Arab Emirates",
@@ -14276,7 +14276,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 768,
-    "sector": "",
+    "sector": "I26",
     "countryId": 67,
     "countryCode": "AE",
     "countryName": "United Arab Emirates",
@@ -14292,7 +14292,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 769,
-    "sector": "",
+    "sector": "I26",
     "countryId": 67,
     "countryCode": "AE",
     "countryName": "United Arab Emirates",
@@ -14308,7 +14308,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 770,
-    "sector": "",
+    "sector": "I26",
     "countryId": 67,
     "countryCode": "AE",
     "countryName": "United Arab Emirates",
@@ -14324,7 +14324,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 771,
-    "sector": "IB7",
+    "sector": "F20",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14340,7 +14340,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 772,
-    "sector": "IB6",
+    "sector": "E19",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14356,7 +14356,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 773,
-    "sector": "IB6",
+    "sector": "E20",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14372,7 +14372,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 774,
-    "sector": "IB6",
+    "sector": "E19",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14388,7 +14388,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 775,
-    "sector": "IB6",
+    "sector": "E20",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14404,7 +14404,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 776,
-    "sector": "IB5",
+    "sector": "E20",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14422,7 +14422,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 777,
-    "sector": "IB7",
+    "sector": "F19",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14438,7 +14438,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 778,
-    "sector": "IB6",
+    "sector": "E19",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14454,7 +14454,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 779,
-    "sector": "",
+    "sector": "E20",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14470,7 +14470,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 780,
-    "sector": "",
+    "sector": "E19",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14486,7 +14486,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 781,
-    "sector": "",
+    "sector": "E19",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14502,7 +14502,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 782,
-    "sector": "IB7",
+    "sector": "F19",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14518,7 +14518,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 783,
-    "sector": "HV5",
+    "sector": "E19",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14534,7 +14534,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 784,
-    "sector": "IB7",
+    "sector": "F20",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14550,7 +14550,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 785,
-    "sector": "",
+    "sector": "E19",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14566,7 +14566,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 786,
-    "sector": "IB5",
+    "sector": "E20",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14582,7 +14582,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 787,
-    "sector": "IB7",
+    "sector": "F19",
     "countryId": 68,
     "countryCode": "GB",
     "countryName": "United Kingdom",
@@ -14598,7 +14598,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 788,
-    "sector": "EU6",
+    "sector": "G11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14617,7 +14617,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 789,
-    "sector": "CR8",
+    "sector": "H6",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14636,7 +14636,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 790,
-    "sector": "FA6",
+    "sector": "G12",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14654,7 +14654,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 791,
-    "sector": "EC2",
+    "sector": "G10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14670,7 +14670,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 792,
-    "sector": "DW4",
+    "sector": "H9",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14688,7 +14688,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 793,
-    "sector": "DE1",
+    "sector": "H7",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14706,7 +14706,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 794,
-    "sector": "EU6",
+    "sector": "G11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14722,7 +14722,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 795,
-    "sector": "DQ3",
+    "sector": "H9",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14738,7 +14738,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 796,
-    "sector": "CY0",
+    "sector": "H7",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14754,7 +14754,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 797,
-    "sector": "DW4",
+    "sector": "H9",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14772,7 +14772,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 798,
-    "sector": "DQ3",
+    "sector": "H6",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14792,7 +14792,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 799,
-    "sector": "DQ3",
+    "sector": "H9",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14811,7 +14811,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 800,
-    "sector": "DW4",
+    "sector": "H9",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14829,7 +14829,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 801,
-    "sector": "EO7",
+    "sector": "H11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14845,7 +14845,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 802,
-    "sector": "EI4",
+    "sector": "G10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14863,7 +14863,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 803,
-    "sector": "EO6",
+    "sector": "H11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14879,7 +14879,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 804,
-    "sector": "CR7",
+    "sector": "G6",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14900,7 +14900,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 805,
-    "sector": "EI4",
+    "sector": "G10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14918,7 +14918,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 806,
-    "sector": "CR5",
+    "sector": "F6",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14936,7 +14936,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 807,
-    "sector": "DK0",
+    "sector": "G8",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14952,7 +14952,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 808,
-    "sector": "EO5",
+    "sector": "G11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14972,7 +14972,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 809,
-    "sector": "FA6",
+    "sector": "G12",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -14988,7 +14988,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 810,
-    "sector": "DK2",
+    "sector": "H8",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15004,7 +15004,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 811,
-    "sector": "EI5",
+    "sector": "H10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15020,7 +15020,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 812,
-    "sector": "EO5",
+    "sector": "G11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15036,7 +15036,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 813,
-    "sector": "EI5",
+    "sector": "H10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15052,7 +15052,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 814,
-    "sector": "EO8",
+    "sector": "I11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15070,7 +15070,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 815,
-    "sector": "EI3",
+    "sector": "G10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15088,7 +15088,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 816,
-    "sector": "CR5",
+    "sector": "F6",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15104,7 +15104,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 817,
-    "sector": "CX9",
+    "sector": "H7",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15122,7 +15122,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 818,
-    "sector": "DW3",
+    "sector": "H9",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15138,7 +15138,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 819,
-    "sector": "EU7",
+    "sector": "G9",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15154,7 +15154,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 820,
-    "sector": "EC4",
+    "sector": "H10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15170,7 +15170,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 821,
-    "sector": "EI4",
+    "sector": "G10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15186,7 +15186,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 822,
-    "sector": "EU6",
+    "sector": "G11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15204,7 +15204,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 823,
-    "sector": "DW4",
+    "sector": "I9",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15223,7 +15223,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 824,
-    "sector": "DW4",
+    "sector": "H9",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15241,7 +15241,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 825,
-    "sector": "EC5",
+    "sector": "H10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15260,7 +15260,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 826,
-    "sector": "EC5",
+    "sector": "H10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15276,7 +15276,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 827,
-    "sector": "EC5",
+    "sector": "H10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15295,7 +15295,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 828,
-    "sector": "EI6",
+    "sector": "H10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15311,7 +15311,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 829,
-    "sector": "EI6",
+    "sector": "H10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15330,7 +15330,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 830,
-    "sector": "EO7",
+    "sector": "H11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15348,7 +15348,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 831,
-    "sector": "EO7",
+    "sector": "I11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15366,7 +15366,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 832,
-    "sector": "EO7",
+    "sector": "H11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15382,7 +15382,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 833,
-    "sector": "EI4",
+    "sector": "H10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15398,7 +15398,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 834,
-    "sector": "EI5",
+    "sector": "H10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15417,7 +15417,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 835,
-    "sector": "DK2",
+    "sector": "H8",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15433,7 +15433,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 836,
-    "sector": "DE1",
+    "sector": "H7",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15449,7 +15449,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 837,
-    "sector": "DE1",
+    "sector": "H7",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15468,7 +15468,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 838,
-    "sector": "CY0",
+    "sector": "H7",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15489,7 +15489,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 839,
-    "sector": "CR8",
+    "sector": "H6",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15507,7 +15507,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 840,
-    "sector": "CX9",
+    "sector": "H6",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15526,7 +15526,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 841,
-    "sector": "CR6",
+    "sector": "G6",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15542,7 +15542,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 842,
-    "sector": "CR6",
+    "sector": "F6",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15560,7 +15560,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 843,
-    "sector": "DD9",
+    "sector": "G7",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15578,7 +15578,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 844,
-    "sector": "DD9",
+    "sector": "G7",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15596,7 +15596,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 845,
-    "sector": "DW3",
+    "sector": "G10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15612,7 +15612,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 846,
-    "sector": "EC3",
+    "sector": "G10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15630,7 +15630,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 847,
-    "sector": "EC3",
+    "sector": "G10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15646,7 +15646,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 848,
-    "sector": "DK0",
+    "sector": "G8",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15664,7 +15664,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 849,
-    "sector": "EU7",
+    "sector": "G11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15683,7 +15683,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 850,
-    "sector": "EO6",
+    "sector": "G11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15702,7 +15702,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 851,
-    "sector": "EI5",
+    "sector": "H10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15721,7 +15721,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 852,
-    "sector": "EI4",
+    "sector": "G10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15739,7 +15739,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 853,
-    "sector": "EI3",
+    "sector": "G10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15758,7 +15758,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 854,
-    "sector": "DK1",
+    "sector": "H8",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15777,7 +15777,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 855,
-    "sector": "DQ2",
+    "sector": "H8",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15796,7 +15796,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 856,
-    "sector": "DW3",
+    "sector": "H9",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15812,7 +15812,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 857,
-    "sector": "DQ2",
+    "sector": "H8",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15830,7 +15830,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 858,
-    "sector": "EI5",
+    "sector": "H10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15846,7 +15846,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 859,
-    "sector": "EI5",
+    "sector": "H10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15865,7 +15865,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 860,
-    "sector": "E07",
+    "sector": "H11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15883,7 +15883,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 861,
-    "sector": "DK1",
+    "sector": "H8",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15899,7 +15899,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 862,
-    "sector": "DE1",
+    "sector": "H7",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15917,7 +15917,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 863,
-    "sector": "CR8",
+    "sector": "G6",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15935,7 +15935,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 864,
-    "sector": "E08",
+    "sector": "I11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15954,7 +15954,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 865,
-    "sector": "EO8",
+    "sector": "I11",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15972,7 +15972,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 866,
-    "sector": "EI5",
+    "sector": "H10",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -15992,7 +15992,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 867,
-    "sector": "CR7",
+    "sector": "G6",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -16010,7 +16010,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 868,
-    "sector": "DW2",
+    "sector": "G9",
     "countryId": 69,
     "countryCode": "US",
     "countryName": "United States",
@@ -16029,7 +16029,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 869,
-    "sector": "",
+    "sector": "Q13",
     "countryId": 0,
     "countryCode": "UY",
     "countryName": "Uruguay",
@@ -16045,7 +16045,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 870,
-    "sector": "LJ4",
+    "sector": "G27",
     "countryId": 0,
     "countryCode": "UZ",
     "countryName": "Uzbekistan",
@@ -16061,7 +16061,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 871,
-    "sector": "LD3",
+    "sector": "G27",
     "countryId": 0,
     "countryCode": "UZ",
     "countryName": "Uzbekistan",
@@ -16077,7 +16077,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 872,
-    "sector": "LJ4",
+    "sector": "G28",
     "countryId": 0,
     "countryCode": "UZ",
     "countryName": "Uzbekistan",
@@ -16093,7 +16093,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 873,
-    "sector": "FB3",
+    "sector": "K12",
     "countryId": 70,
     "countryCode": "VE",
     "countryName": "Venezuela",
@@ -16112,7 +16112,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 874,
-    "sector": "FB3",
+    "sector": "K12",
     "countryId": 70,
     "countryCode": "VE",
     "countryName": "Venezuela",
@@ -16132,7 +16132,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 875,
-    "sector": "EV3",
+    "sector": "K11",
     "countryId": 70,
     "countryCode": "VE",
     "countryName": "Venezuela",
@@ -16150,7 +16150,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 876,
-    "sector": "FB3",
+    "sector": "K12",
     "countryId": 70,
     "countryCode": "VE",
     "countryName": "Venezuela",
@@ -16170,7 +16170,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 877,
-    "sector": "FB3",
+    "sector": "K12",
     "countryId": 70,
     "countryCode": "VE",
     "countryName": "Venezuela",
@@ -16189,7 +16189,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 878,
-    "sector": "FB3",
+    "sector": "K12",
     "countryId": 70,
     "countryCode": "VE",
     "countryName": "Venezuela",
@@ -16208,7 +16208,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 879,
-    "sector": "FH5",
+    "sector": "K13",
     "countryId": 70,
     "countryCode": "VE",
     "countryName": "Venezuela",
@@ -16224,7 +16224,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 880,
-    "sector": "FH4",
+    "sector": "K12",
     "countryId": 70,
     "countryCode": "VE",
     "countryName": "Venezuela",
@@ -16240,7 +16240,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 881,
-    "sector": "FH5",
+    "sector": "K13",
     "countryId": 70,
     "countryCode": "VE",
     "countryName": "Venezuela",
@@ -16258,7 +16258,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 882,
-    "sector": "FB3",
+    "sector": "K12",
     "countryId": 70,
     "countryCode": "VE",
     "countryName": "Venezuela",
@@ -16277,7 +16277,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 883,
-    "sector": "NA7",
+    "sector": "K32",
     "countryId": 71,
     "countryCode": "VN",
     "countryName": "Vietnam",
@@ -16295,7 +16295,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 884,
-    "sector": "NA5",
+    "sector": "J31",
     "countryId": 71,
     "countryCode": "VN",
     "countryName": "Vietnam",
@@ -16311,7 +16311,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 885,
-    "sector": "NA7",
+    "sector": "K31",
     "countryId": 71,
     "countryCode": "VN",
     "countryName": "Vietnam",
@@ -16327,7 +16327,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 886,
-    "sector": "NA5",
+    "sector": "J32",
     "countryId": 71,
     "countryCode": "VN",
     "countryName": "Vietnam",
@@ -16343,7 +16343,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 887,
-    "sector": "NA6",
+    "sector": "J32",
     "countryId": 71,
     "countryCode": "VN",
     "countryName": "Vietnam",
@@ -16359,7 +16359,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 888,
-    "sector": "NA7",
+    "sector": "K32",
     "countryId": 71,
     "countryCode": "VN",
     "countryName": "Vietnam",
@@ -16377,7 +16377,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 889,
-    "sector": "KF4",
+    "sector": "J25",
     "countryId": 72,
     "countryCode": "YE",
     "countryName": "Yemen",
@@ -16393,7 +16393,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 890,
-    "sector": "KF5",
+    "sector": "K25",
     "countryId": 72,
     "countryCode": "YE",
     "countryName": "Yemen",
@@ -16412,7 +16412,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 891,
-    "sector": "KF5",
+    "sector": "K25",
     "countryId": 72,
     "countryCode": "YE",
     "countryName": "Yemen",
@@ -16430,7 +16430,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 892,
-    "sector": "KF5",
+    "sector": "J24",
     "countryId": 72,
     "countryCode": "YE",
     "countryName": "Yemen",
@@ -16449,7 +16449,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 893,
-    "sector": "KF5",
+    "sector": "K25",
     "countryId": 72,
     "countryCode": "YE",
     "countryName": "Yemen",
@@ -16465,7 +16465,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 894,
-    "sector": "KL6",
+    "sector": "J25",
     "countryId": 72,
     "countryCode": "YE",
     "countryName": "Yemen",
@@ -16481,7 +16481,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 895,
-    "sector": "JT8",
+    "sector": "N23",
     "countryId": 73,
     "countryCode": "ZM",
     "countryName": "Zambia",
@@ -16500,7 +16500,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 896,
-    "sector": "JN7",
+    "sector": "N23",
     "countryId": 73,
     "countryCode": "ZM",
     "countryName": "Zambia",
@@ -16518,7 +16518,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 897,
-    "sector": "JN7",
+    "sector": "N23",
     "countryId": 73,
     "countryCode": "ZM",
     "countryName": "Zambia",
@@ -16537,7 +16537,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 898,
-    "sector": "JN7",
+    "sector": "N23",
     "countryId": 73,
     "countryCode": "ZM",
     "countryName": "Zambia",
@@ -16555,7 +16555,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 899,
-    "sector": "JN8",
+    "sector": "O23",
     "countryId": 73,
     "countryCode": "ZM",
     "countryName": "Zambia",
@@ -16573,7 +16573,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 900,
-    "sector": "JN8",
+    "sector": "O23",
     "countryId": 73,
     "countryCode": "ZM",
     "countryName": "Zambia",
@@ -16591,7 +16591,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 901,
-    "sector": "JN8",
+    "sector": "O23",
     "countryId": 73,
     "countryCode": "ZM",
     "countryName": "Zambia",
@@ -16609,7 +16609,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 902,
-    "sector": "JN8",
+    "sector": "O23",
     "countryId": 73,
     "countryCode": "ZM",
     "countryName": "Zambia",
@@ -16627,7 +16627,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 903,
-    "sector": "JH6",
+    "sector": "N22",
     "countryId": 73,
     "countryCode": "ZM",
     "countryName": "Zambia",
@@ -16645,7 +16645,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 904,
-    "sector": "JN7",
+    "sector": "N23",
     "countryId": 73,
     "countryCode": "ZM",
     "countryName": "Zambia",
@@ -16663,7 +16663,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 905,
-    "sector": "JN8",
+    "sector": "O23",
     "countryId": 74,
     "countryCode": "ZW",
     "countryName": "Zimbabwe",
@@ -16682,7 +16682,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 906,
-    "sector": "JN8",
+    "sector": "O23",
     "countryId": 74,
     "countryCode": "ZW",
     "countryName": "Zimbabwe",
@@ -16700,7 +16700,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 907,
-    "sector": "JN8",
+    "sector": "O23",
     "countryId": 74,
     "countryCode": "ZW",
     "countryName": "Zimbabwe",
@@ -16718,7 +16718,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 908,
-    "sector": "",
+    "sector": "G29",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16736,7 +16736,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 909,
-    "sector": "",
+    "sector": "G29",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16754,7 +16754,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 910,
-    "sector": "",
+    "sector": "G28",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16773,7 +16773,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 911,
-    "sector": "",
+    "sector": "F29",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16792,7 +16792,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 912,
-    "sector": "",
+    "sector": "F29",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16810,7 +16810,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 913,
-    "sector": "",
+    "sector": "G29",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16831,7 +16831,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 914,
-    "sector": "",
+    "sector": "G29",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16850,7 +16850,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 915,
-    "sector": "MH6",
+    "sector": "F30",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16868,7 +16868,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 916,
-    "sector": "MH7",
+    "sector": "G30",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16886,7 +16886,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 917,
-    "sector": "MI0",
+    "sector": "H30",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16905,7 +16905,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 918,
-    "sector": "MN8",
+    "sector": "G30",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16924,7 +16924,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 919,
-    "sector": "MO0",
+    "sector": "G31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16940,7 +16940,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 920,
-    "sector": "MO1",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16958,7 +16958,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 921,
-    "sector": "MO1",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16976,7 +16976,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 922,
-    "sector": "MO1",
+    "sector": "H30",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -16994,7 +16994,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 923,
-    "sector": "MU0",
+    "sector": "G31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17012,7 +17012,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 924,
-    "sector": "MU0",
+    "sector": "G31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17030,7 +17030,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 925,
-    "sector": "MU0",
+    "sector": "G31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17049,7 +17049,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 926,
-    "sector": "MU0",
+    "sector": "G31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17065,7 +17065,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 927,
-    "sector": "MU1",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17085,7 +17085,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 928,
-    "sector": "MU1",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17103,7 +17103,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 929,
-    "sector": "MU1",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17121,7 +17121,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 930,
-    "sector": "MU1",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17137,7 +17137,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 931,
-    "sector": "MU2",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17155,7 +17155,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 932,
-    "sector": "MU2",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17173,7 +17173,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 933,
-    "sector": "MU2",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17189,7 +17189,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 934,
-    "sector": "MU3",
+    "sector": "I31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17210,7 +17210,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 935,
-    "sector": "MU3",
+    "sector": "I31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17228,7 +17228,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 936,
-    "sector": "MU3",
+    "sector": "I31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17247,7 +17247,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 937,
-    "sector": "MU3",
+    "sector": "I31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17268,7 +17268,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 938,
-    "sector": "MU3",
+    "sector": "I31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17286,7 +17286,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 939,
-    "sector": "MU4",
+    "sector": "I31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17306,7 +17306,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 940,
-    "sector": "MU4",
+    "sector": "I31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17324,7 +17324,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 941,
-    "sector": "MU4",
+    "sector": "I31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17343,7 +17343,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 942,
-    "sector": "MU4",
+    "sector": "I31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17361,7 +17361,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 943,
-    "sector": "MU4",
+    "sector": "I31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17377,7 +17377,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 944,
-    "sector": "NA1",
+    "sector": "G32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17393,7 +17393,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 945,
-    "sector": "NA1",
+    "sector": "G32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17413,7 +17413,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 946,
-    "sector": "NA1",
+    "sector": "G32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17433,7 +17433,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 947,
-    "sector": "NA1",
+    "sector": "G32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17452,7 +17452,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 948,
-    "sector": "NA1",
+    "sector": "G31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17471,7 +17471,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 949,
-    "sector": "NA2",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17491,7 +17491,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 950,
-    "sector": "NA2",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17511,7 +17511,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 951,
-    "sector": "NA2",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17529,7 +17529,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 952,
-    "sector": "NA2",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17547,7 +17547,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 953,
-    "sector": "NA2",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17568,7 +17568,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 954,
-    "sector": "NA3",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17589,7 +17589,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 955,
-    "sector": "NA3",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17610,7 +17610,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 956,
-    "sector": "NA3",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17630,7 +17630,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 957,
-    "sector": "NA3",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17649,7 +17649,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 958,
-    "sector": "NA3",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17669,7 +17669,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 959,
-    "sector": "NA4",
+    "sector": "I32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17688,7 +17688,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 960,
-    "sector": "NA4",
+    "sector": "I32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17708,7 +17708,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 961,
-    "sector": "NA4",
+    "sector": "I31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17727,7 +17727,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 962,
-    "sector": "NA4",
+    "sector": "I31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17745,7 +17745,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 963,
-    "sector": "NA4",
+    "sector": "I32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17761,7 +17761,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 964,
-    "sector": "NA5",
+    "sector": "I32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17782,7 +17782,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 965,
-    "sector": "NA5",
+    "sector": "H31",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17801,7 +17801,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 966,
-    "sector": "NA6",
+    "sector": "I32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17820,7 +17820,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 967,
-    "sector": "NG2",
+    "sector": "G32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17841,7 +17841,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 968,
-    "sector": "NG2",
+    "sector": "G32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17860,7 +17860,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 969,
-    "sector": "NG2",
+    "sector": "G32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17879,7 +17879,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 970,
-    "sector": "NG2",
+    "sector": "G32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17898,7 +17898,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 971,
-    "sector": "NG2",
+    "sector": "G32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17914,7 +17914,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 972,
-    "sector": "NG3",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17935,7 +17935,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 973,
-    "sector": "NG3",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17951,7 +17951,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 974,
-    "sector": "NG3",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17967,7 +17967,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 975,
-    "sector": "NG3",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -17987,7 +17987,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 976,
-    "sector": "NG3",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18008,7 +18008,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 977,
-    "sector": "NG4",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18027,7 +18027,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 978,
-    "sector": "NG4",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18047,7 +18047,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 979,
-    "sector": "NG4",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18066,7 +18066,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 980,
-    "sector": "NG4",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18084,7 +18084,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 981,
-    "sector": "NG5",
+    "sector": "I32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18104,7 +18104,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 982,
-    "sector": "NG5",
+    "sector": "I32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18125,7 +18125,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 983,
-    "sector": "NG5",
+    "sector": "I32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18146,7 +18146,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 984,
-    "sector": "NG5",
+    "sector": "I32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18165,7 +18165,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 985,
-    "sector": "NG5",
+    "sector": "I32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18183,7 +18183,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 986,
-    "sector": "NG6",
+    "sector": "I32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18204,7 +18204,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 987,
-    "sector": "NG6",
+    "sector": "J32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18225,7 +18225,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 988,
-    "sector": "NG6",
+    "sector": "J32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18246,7 +18246,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 989,
-    "sector": "NG6",
+    "sector": "I32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18264,7 +18264,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 990,
-    "sector": "NG6",
+    "sector": "J32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18283,7 +18283,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 991,
-    "sector": "NG7",
+    "sector": "J32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18303,7 +18303,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 992,
-    "sector": "NM2",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18321,7 +18321,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 993,
-    "sector": "NM2",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18342,7 +18342,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 994,
-    "sector": "NM3",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18363,7 +18363,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 995,
-    "sector": "NM3",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18383,7 +18383,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 996,
-    "sector": "NM3",
+    "sector": "G32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18403,7 +18403,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 997,
-    "sector": "NM3",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18424,7 +18424,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 998,
-    "sector": "NM3",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18444,7 +18444,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 999,
-    "sector": "NM4",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18464,7 +18464,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1000,
-    "sector": "NM4",
+    "sector": "H33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18482,7 +18482,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1001,
-    "sector": "NM4",
+    "sector": "H33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18503,7 +18503,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1002,
-    "sector": "NM4",
+    "sector": "H33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18524,7 +18524,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1003,
-    "sector": "NM5",
+    "sector": "H32",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18544,7 +18544,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1004,
-    "sector": "NM5",
+    "sector": "H33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18564,7 +18564,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1005,
-    "sector": "NM5",
+    "sector": "H33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18585,7 +18585,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1006,
-    "sector": "NM5",
+    "sector": "H33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18605,7 +18605,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1007,
-    "sector": "NM5",
+    "sector": "H33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18626,7 +18626,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1008,
-    "sector": "NM6",
+    "sector": "I33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18645,7 +18645,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1009,
-    "sector": "NM6",
+    "sector": "I33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18665,7 +18665,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1010,
-    "sector": "NM6",
+    "sector": "I33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18683,7 +18683,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1011,
-    "sector": "NM6",
+    "sector": "I33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18702,7 +18702,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1012,
-    "sector": "NM7",
+    "sector": "I33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18723,7 +18723,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1013,
-    "sector": "NM7",
+    "sector": "I33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18743,7 +18743,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1014,
-    "sector": "NM7",
+    "sector": "I33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18761,7 +18761,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1015,
-    "sector": "NS1",
+    "sector": "F33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18777,7 +18777,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1016,
-    "sector": "NS2",
+    "sector": "F33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18795,7 +18795,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1017,
-    "sector": "NS2",
+    "sector": "F33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18811,7 +18811,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1018,
-    "sector": "NS2",
+    "sector": "F34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18832,7 +18832,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1019,
-    "sector": "NS3",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18853,7 +18853,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1020,
-    "sector": "NS3",
+    "sector": "G34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18871,7 +18871,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1021,
-    "sector": "NS3",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18889,7 +18889,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1022,
-    "sector": "NS3",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18909,7 +18909,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1023,
-    "sector": "NS4",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18930,7 +18930,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1024,
-    "sector": "NS4",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18951,7 +18951,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1025,
-    "sector": "NS4",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18971,7 +18971,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1026,
-    "sector": "NS5",
+    "sector": "H33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -18991,7 +18991,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1027,
-    "sector": "NS5",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19011,7 +19011,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1028,
-    "sector": "NS5",
+    "sector": "G33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19032,7 +19032,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1029,
-    "sector": "NS5",
+    "sector": "H33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19053,7 +19053,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1030,
-    "sector": "NS6",
+    "sector": "H33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19073,7 +19073,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1031,
-    "sector": "NS6",
+    "sector": "H33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19094,7 +19094,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1032,
-    "sector": "NS6",
+    "sector": "H33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19115,7 +19115,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1033,
-    "sector": "NS6",
+    "sector": "H33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19136,7 +19136,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1034,
-    "sector": "NS7",
+    "sector": "I33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19155,7 +19155,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1035,
-    "sector": "NS7",
+    "sector": "I33",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19176,7 +19176,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1036,
-    "sector": "NY1",
+    "sector": "E34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19192,7 +19192,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1037,
-    "sector": "NY3",
+    "sector": "F34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19213,7 +19213,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1038,
-    "sector": "NY3",
+    "sector": "F34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19231,7 +19231,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1039,
-    "sector": "NY3",
+    "sector": "F34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19250,7 +19250,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1040,
-    "sector": "NY3",
+    "sector": "F34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19268,7 +19268,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1041,
-    "sector": "NY4",
+    "sector": "G34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19288,7 +19288,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1042,
-    "sector": "NY4",
+    "sector": "G34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19306,7 +19306,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1043,
-    "sector": "NY4",
+    "sector": "F34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19324,7 +19324,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1044,
-    "sector": "NY4",
+    "sector": "G34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19345,7 +19345,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1045,
-    "sector": "OE4",
+    "sector": "F34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19364,7 +19364,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1046,
-    "sector": "OE4",
+    "sector": "F34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19383,7 +19383,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1047,
-    "sector": "OE4",
+    "sector": "F34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19402,7 +19402,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1048,
-    "sector": "OE5",
+    "sector": "G34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19421,7 +19421,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1049,
-    "sector": "OE5",
+    "sector": "F34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",
@@ -19441,7 +19441,7 @@ export const ALL_CITIES: City[] = [
   },
   {
     "id": 1050,
-    "sector": "OE5",
+    "sector": "F34",
     "countryId": 33,
     "countryCode": "CN",
     "countryName": "China",

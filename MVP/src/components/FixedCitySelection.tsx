@@ -1,26 +1,248 @@
 import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '../stores/enhancedGameStore'
-import { ArrowLeft, MapPin, Users, Shield, AlertTriangle, Building, ChevronRight, Search } from 'lucide-react'
+import {
+  ArrowLeft,
+  MapPin,
+  Shield,
+  AlertTriangle,
+  Building,
+  ChevronRight,
+  Search,
+  ArrowUp,
+  ArrowDown,
+  Crosshair,
+  Star,
+} from 'lucide-react'
 import { getCitiesByCountry, type City } from '../data/allCities'
 import { getCountryByName, codeToFlag } from '../data/allCountries'
+import { RetroPanel, RetroButton, RetroBadge, RetroInput } from './ui'
+
+// ─────────────────────────────────────────────────────────────────────────────
+// City type bonus mapping — single source of truth shared by the comparison
+// table (compact badges) and the expanded detail strip (full text).
+// ─────────────────────────────────────────────────────────────────────────────
+export const CITY_TYPE_BONUSES: Record<string, { short: string; full: string }> = {
+  Political: { short: '+2CS Diplomatic', full: '+2CS Political/Diplomatic investigations' },
+  Military: { short: '+2CS Military', full: '+2CS Military/Security investigations, +3CS military recruitment' },
+  Company: { short: '+2CS Corporate', full: '+2CS Corporate/Financial investigations' },
+  Industrial: { short: '+2CS Sabotage', full: '+2CS Corporate/Sabotage investigations' },
+  Educational: { short: '+3CS Recruiting', full: '+3CS recruiting intelligent LSWs, +2CS Academic investigations' },
+  Temple: { short: '+2CS Mystical', full: '+2CS Religious/Mystical investigations' },
+  Resort: { short: '+1CS Social', full: '+1CS Social/Surveillance investigations' },
+  Seaport: { short: '+2CS Smuggling', full: '+2CS Smuggling/Maritime investigations' },
+  Mining: { short: '+2CS Environmental', full: '+2CS Environmental/Industrial investigations' },
+}
+
+const CITY_TYPE_ICONS: Record<string, string> = {
+  Political: '🏛️',
+  Military: '⚔️',
+  Company: '🏢',
+  Industrial: '🏭',
+  Educational: '🎓',
+  Temple: '⛩️',
+  Resort: '🏖️',
+  Seaport: '⚓',
+  Mining: '⛏️',
+}
+
+const POP_TYPE_ICONS: Record<string, string> = {
+  'Mega City': '🏙️',
+  'Large City': '🌆',
+  City: '🏢',
+  Town: '🏘️',
+  'Small Town': '🏡',
+}
+
+type SortKey = 'name' | 'population' | 'crime' | 'safety'
+type SortDir = 'asc' | 'desc'
+
+// Compact population formatting so numbers stop looking "samey"
+function formatPop(pop: number): string {
+  if (pop >= 1_000_000) return `${(pop / 1_000_000).toFixed(1)}M`
+  if (pop >= 1_000) return `${Math.round(pop / 1_000)}K`
+  return pop.toLocaleString()
+}
+
+function getCrimeLevel(crimeIndex: number): string {
+  if (crimeIndex < 20) return 'Very Low'
+  if (crimeIndex < 40) return 'Low'
+  if (crimeIndex < 60) return 'Moderate'
+  if (crimeIndex < 80) return 'High'
+  return 'Very High'
+}
+
+// Continuous green→red color scale so stat differences pop.
+// invert=true means high value is BAD (crime); false means high is GOOD (safety).
+function statHue(value: number, invert: boolean): number {
+  const clamped = Math.max(0, Math.min(100, value))
+  return invert ? 120 - clamped * 1.2 : clamped * 1.2
+}
+
+function StatBar({ value, invert, best }: { value: number; invert: boolean; best: boolean }) {
+  const hue = statHue(value, invert)
+  return (
+    <div className="flex items-center gap-2">
+      <div className="w-20 h-2.5 rounded-full bg-black/60 border border-black overflow-hidden flex-shrink-0">
+        <div
+          className="h-full rounded-full transition-all duration-200"
+          style={{
+            width: `${Math.max(4, Math.min(100, value))}%`,
+            backgroundColor: `hsl(${hue} 75% 50%)`,
+          }}
+        />
+      </div>
+      <span
+        className={`text-sm tabular-nums w-9 text-right ${
+          best ? 'font-bold text-primary-light' : 'text-foreground/80'
+        }`}
+        style={{ color: best ? undefined : `hsl(${hue} 75% 60%)` }}
+      >
+        {Math.round(value)}
+      </span>
+      {best && <Star size={12} className="text-primary-light flex-shrink-0" fill="currentColor" />}
+    </div>
+  )
+}
+
+function RatingDots({ rating }: { rating: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {Array.from({ length: 7 }, (_, i) => (
+        <span
+          key={i}
+          className={`w-1.5 h-1.5 rounded-full transition-colors duration-200 ${
+            i < rating ? 'bg-primary' : 'bg-muted'
+          }`}
+        />
+      ))}
+    </div>
+  )
+}
+
+function SortHeader({
+  label,
+  sortKey,
+  activeKey,
+  dir,
+  onSort,
+  align = 'left',
+}: {
+  label: string
+  sortKey: SortKey
+  activeKey: SortKey
+  dir: SortDir
+  onSort: (key: SortKey) => void
+  align?: 'left' | 'right'
+}) {
+  const active = activeKey === sortKey
+  return (
+    <button
+      onClick={() => onSort(sortKey)}
+      className={`flex items-center gap-1 text-xs font-bold uppercase tracking-wider transition-colors duration-200 ${
+        active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+      } ${align === 'right' ? 'ml-auto' : ''}`}
+    >
+      {label}
+      {active ? (
+        dir === 'asc' ? (
+          <ArrowUp size={12} />
+        ) : (
+          <ArrowDown size={12} />
+        )
+      ) : (
+        <span className="w-3" />
+      )}
+    </button>
+  )
+}
 
 export default function FixedCitySelection() {
   const { selectedCountry, setGamePhase, selectCity } = useGameStore()
   const [selectedCityData, setSelectedCityData] = useState<City | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set())
+  const [sortKey, setSortKey] = useState<SortKey>('population')
+  const [sortDir, setSortDir] = useState<SortDir>('desc')
 
   const country = getCountryByName(selectedCountry)
 
-  // Get cities for the selected country (linked by ISO code), filtered by search
-  const availableCities = useMemo(() => {
-    const cities = country ? getCitiesByCountry(country.code) : []
-    if (!searchTerm) return cities
-    return cities.filter(city =>
-      city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      city.cityTypes.some(t => t?.toLowerCase().includes(searchTerm.toLowerCase()))
-    )
-  }, [country, searchTerm])
+  // Full city list for this country (unfiltered) — used for best-in-country math
+  const countryCities = useMemo(
+    () => (country ? getCitiesByCountry(country.code) : []),
+    [country]
+  )
+
+  // Best-in-country values per column (bolded in the table)
+  const best = useMemo(() => {
+    if (countryCities.length === 0) return null
+    return {
+      population: Math.max(...countryCities.map(c => c.population)),
+      crime: Math.min(...countryCities.map(c => c.crimeIndex)),
+      safety: Math.max(...countryCities.map(c => c.safetyIndex)),
+    }
+  }, [countryCities])
+
+  // City types present in this country, in canonical order — filter chips
+  const availableTypes = useMemo(() => {
+    const present = new Set<string>()
+    countryCities.forEach(c => c.cityTypes.forEach(t => t && present.add(t)))
+    return Object.keys(CITY_TYPE_BONUSES).filter(t => present.has(t))
+  }, [countryCities])
+
+  // Search + type filter + sort
+  const visibleCities = useMemo(() => {
+    let cities = countryCities
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase()
+      cities = cities.filter(
+        city =>
+          city.name.toLowerCase().includes(q) ||
+          city.cityTypes.some(t => t?.toLowerCase().includes(q))
+      )
+    }
+    if (activeTypes.size > 0) {
+      cities = cities.filter(city => city.cityTypes.some(t => activeTypes.has(t)))
+    }
+    const dir = sortDir === 'asc' ? 1 : -1
+    return [...cities].sort((a, b) => {
+      switch (sortKey) {
+        case 'name':
+          return a.name.localeCompare(b.name) * dir
+        case 'population':
+          return (a.population - b.population) * dir
+        case 'crime':
+          return (a.crimeIndex - b.crimeIndex) * dir
+        case 'safety':
+          return (a.safetyIndex - b.safetyIndex) * dir
+        default:
+          return 0
+      }
+    })
+  }, [countryCities, searchTerm, activeTypes, sortKey, sortDir])
+
+  const handleSort = (key: SortKey) => {
+    if (key === sortKey) {
+      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      // Sensible default direction per column: low crime is good, high pop/safety is good
+      setSortDir(key === 'name' || key === 'crime' ? 'asc' : 'desc')
+    }
+  }
+
+  const toggleType = (type: string) => {
+    setActiveTypes(prev => {
+      const next = new Set(prev)
+      if (next.has(type)) next.delete(type)
+      else next.add(type)
+      return next
+    })
+  }
+
+  const handleRowClick = (city: City) => {
+    setSelectedCityData(prev => (prev?.name === city.name ? null : city))
+  }
 
   const handleConfirmCity = () => {
     if (selectedCityData) {
@@ -28,309 +250,393 @@ export default function FixedCitySelection() {
     }
   }
 
-  // Get crime level color
-  const getCrimeColor = (crimeIndex: number) => {
-    if (crimeIndex < 30) return 'text-green-400'
-    if (crimeIndex < 50) return 'text-yellow-400'
-    if (crimeIndex < 70) return 'text-orange-400'
-    return 'text-red-400'
-  }
+  const makePlaceholderCity = (): City => ({
+    id: -1,
+    sector: '',
+    countryId: country?.id ?? 0,
+    countryCode: country?.code ?? '',
+    countryName: selectedCountry,
+    cultureCode: country?.cultureCode ?? 0,
+    name: `${selectedCountry} Capital`,
+    population: 1000000,
+    populationRating: 5,
+    populationType: 'City',
+    cityTypes: ['Political'],
+    hvt: '',
+    crimeIndex: 50,
+    safetyIndex: 50,
+  })
 
-  // Get crime level text
-  const getCrimeLevel = (crimeIndex: number) => {
-    if (crimeIndex < 20) return 'Very Low'
-    if (crimeIndex < 40) return 'Low'
-    if (crimeIndex < 60) return 'Moderate'
-    if (crimeIndex < 80) return 'High'
-    return 'Very High'
-  }
+  // Expanded detail strip content — shared by table rows and placeholder panel
+  const renderDetailStrip = (city: City) => (
+    <motion.div
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+      className="border-2 border-black rounded-lg bg-surface-light/60 p-4"
+    >
+      <div className="flex flex-col md:flex-row md:items-start gap-4">
+        {/* Full bonus breakdown */}
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-bold uppercase tracking-wider text-primary mb-2">
+            City Bonuses
+          </div>
+          <div className="space-y-1.5">
+            {city.cityTypes.filter(t => t && CITY_TYPE_BONUSES[t]).map(type => (
+              <div key={type} className="flex items-start gap-2 text-sm">
+                <span className="flex-shrink-0">{CITY_TYPE_ICONS[type] ?? '🏠'}</span>
+                <span>
+                  <span className="text-primary-light font-semibold">{type}:</span>{' '}
+                  <span className="text-foreground/90">{CITY_TYPE_BONUSES[type].full}</span>
+                </span>
+              </div>
+            ))}
+            {city.cityTypes.filter(t => t && CITY_TYPE_BONUSES[t]).length === 0 && (
+              <div className="text-sm text-muted-foreground">No special bonuses</div>
+            )}
+          </div>
+        </div>
 
-  // Get population type icon
-  const getPopIcon = (popType: string) => {
-    switch (popType) {
-      case 'Mega City': return '🏙️'
-      case 'Large City': return '🌆'
-      case 'City': return '🏢'
-      case 'Town': return '🏘️'
-      case 'Small Town': return '🏡'
-      default: return '🏠'
-    }
-  }
+        {/* Intel column: pop type, HVT, sector */}
+        <div className="md:w-56 flex-shrink-0 space-y-2">
+          <div className="flex items-center gap-2 text-sm">
+            <span>{POP_TYPE_ICONS[city.populationType] ?? '🏠'}</span>
+            <span className="text-muted-foreground">Classification:</span>
+            <span className="font-semibold text-foreground">{city.populationType}</span>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            Crime: <span className="font-semibold" style={{ color: `hsl(${statHue(city.crimeIndex, true)} 75% 60%)` }}>{getCrimeLevel(city.crimeIndex)}</span>
+          </div>
+          {city.hvt && (
+            <RetroBadge variant="destructive" size="md" icon={<Crosshair size={12} />}>
+              HVT: {city.hvt}
+            </RetroBadge>
+          )}
+          {city.sector && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <MapPin size={12} />
+              Grid Sector {city.sector}
+            </div>
+          )}
+        </div>
+      </div>
 
-  // Get city type icon
-  const getCityTypeIcon = (type: string) => {
-    switch (type) {
-      case 'Political': return '🏛️'
-      case 'Military': return '⚔️'
-      case 'Company': return '🏢'
-      case 'Industrial': return '🏭'
-      case 'Educational': return '🎓'
-      case 'Temple': return '⛩️'
-      case 'Resort': return '🏖️'
-      case 'Seaport': return '⚓'
-      case 'Mining': return '⛏️'
-      default: return '🏠'
-    }
-  }
+      {/* Establish HQ — prominent, on the selected row itself */}
+      <div className="mt-4">
+        <RetroButton
+          variant="primary"
+          size="lg"
+          className="w-full"
+          onClick={handleConfirmCity}
+        >
+          ESTABLISH HQ IN {city.name.toUpperCase()}
+          <ChevronRight size={20} />
+        </RetroButton>
+      </div>
+    </motion.div>
+  )
 
   return (
-    <div className="h-screen flex items-center justify-center p-6 overflow-auto">
+    <div className="min-h-screen flex items-start justify-center p-6 overflow-auto">
       <motion.div
         className="max-w-6xl w-full"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <button
+        <div className="flex justify-between items-center mb-6">
+          <RetroButton
+            variant="ghost"
+            size="sm"
+            shadow="none"
             onClick={() => setGamePhase('country-selection')}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
             Back to Countries
-          </button>
+          </RetroButton>
 
           <div className="text-center">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight text-primary uppercase">
               Select Your City
             </h1>
-            <p className="text-gray-400 mt-2">
+            <p className="text-muted-foreground mt-1">
               Establish headquarters in {selectedCountry}
             </p>
           </div>
 
           <div className="text-right">
-            <div className="text-sm text-gray-400">Step 2 of 3</div>
-            <div className="text-xs text-gray-500 flex items-center gap-1">
+            <RetroBadge variant="outline" size="md">Step 2 of 3</RetroBadge>
+            <div className="text-xs text-muted-foreground mt-1.5">
               {country ? codeToFlag(country.code) : ''} {selectedCountry}
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* City List */}
-          <motion.div
-            className="lg:col-span-2 bg-gray-800/50 rounded-xl p-6 border border-gray-700"
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <Building className="text-cyan-400" size={24} />
-                Cities ({availableCities.length})
-              </h2>
-              <div className="relative">
-                <Search className="absolute left-2 top-2 text-gray-500" size={16} />
-                <input
-                  type="text"
+        {countryCities.length > 0 ? (
+          <RetroPanel
+            variant="default"
+            padding="md"
+            title={`Cities (${visibleCities.length}/${countryCities.length})`}
+            icon={<Building size={20} />}
+            actions={
+              <div className="w-52">
+                <RetroInput
+                  size="sm"
+                  shadow="none"
                   placeholder="Search cities..."
-                  className="pl-8 pr-3 py-1.5 text-sm bg-gray-900 border border-gray-700 rounded-lg focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 w-40"
+                  leftIcon={<Search size={14} />}
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                 />
               </div>
+            }
+          >
+            {/* City-type filter chips */}
+            {availableTypes.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mr-1">
+                  Filter:
+                </span>
+                {availableTypes.map(type => {
+                  const active = activeTypes.has(type)
+                  return (
+                    <button
+                      key={type}
+                      onClick={() => toggleType(type)}
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold border-2 border-black rounded-md transition-all duration-200 ${
+                        active
+                          ? 'bg-primary text-primary-foreground shadow-retro-sm -translate-y-0.5'
+                          : 'bg-surface-light text-foreground/80 hover:bg-primary/20 hover:text-foreground hover:-translate-y-0.5'
+                      }`}
+                    >
+                      {CITY_TYPE_ICONS[type] ?? '🏠'} {type}
+                    </button>
+                  )
+                })}
+                {activeTypes.size > 0 && (
+                  <button
+                    onClick={() => setActiveTypes(new Set())}
+                    className="text-xs text-muted-foreground hover:text-primary underline underline-offset-2 transition-colors duration-200"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Comparison table — all stats visible, no click required */}
+            <div className="overflow-x-auto max-h-[62vh] overflow-y-auto rounded-lg border-2 border-black">
+              <table className="w-full border-collapse text-left">
+                <thead className="sticky top-0 z-10">
+                  <tr className="bg-surface-light border-b-2 border-black">
+                    <th className="px-3 py-2.5">
+                      <SortHeader label="City" sortKey="name" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
+                    </th>
+                    <th className="px-3 py-2.5">
+                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Type</span>
+                    </th>
+                    <th className="px-3 py-2.5">
+                      <SortHeader label="Population" sortKey="population" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
+                    </th>
+                    <th className="px-3 py-2.5">
+                      <SortHeader label="Crime" sortKey="crime" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
+                    </th>
+                    <th className="px-3 py-2.5">
+                      <SortHeader label="Safety" sortKey="safety" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
+                    </th>
+                    <th className="px-3 py-2.5">
+                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Bonuses</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleCities.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="px-3 py-10 text-center">
+                        <MapPin size={32} className="mx-auto mb-2 text-muted-foreground" />
+                        <p className="text-muted-foreground text-sm">
+                          No cities match your filters
+                        </p>
+                        <button
+                          onClick={() => {
+                            setSearchTerm('')
+                            setActiveTypes(new Set())
+                          }}
+                          className="mt-2 text-sm text-primary hover:text-primary-light underline underline-offset-2 transition-colors duration-200"
+                        >
+                          Clear search & filters
+                        </button>
+                      </td>
+                    </tr>
+                  )}
+                  {visibleCities.map(city => {
+                    const isSelected = selectedCityData?.name === city.name
+                    const bonusTypes = city.cityTypes.filter(t => t && CITY_TYPE_BONUSES[t])
+                    return (
+                      <React.Fragment key={city.id}>
+                        <tr
+                          onClick={() => handleRowClick(city)}
+                          className={`cursor-pointer border-b border-black/40 transition-colors duration-200 ${
+                            isSelected
+                              ? 'bg-primary/15'
+                              : 'bg-surface even:bg-surface/60 hover:bg-surface-light'
+                          }`}
+                        >
+                          {/* City name */}
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">{POP_TYPE_ICONS[city.populationType] ?? '🏠'}</span>
+                              <div>
+                                <div className={`font-bold leading-tight ${isSelected ? 'text-primary-light' : 'text-foreground'}`}>
+                                  {city.name}
+                                </div>
+                                {city.hvt && (
+                                  <div className="text-[10px] text-destructive font-semibold uppercase tracking-wide">
+                                    HVT Present
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          {/* Type badges */}
+                          <td className="px-3 py-2.5">
+                            <div className="flex flex-wrap gap-1 max-w-[130px]">
+                              {city.cityTypes.filter(t => t).map(type => (
+                                <span
+                                  key={type}
+                                  title={CITY_TYPE_BONUSES[type]?.full ?? type}
+                                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-semibold bg-black/40 border border-black rounded text-foreground/80"
+                                >
+                                  {CITY_TYPE_ICONS[type] ?? '🏠'} {type}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          {/* Population: formatted + rating dots */}
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className={`text-sm tabular-nums ${
+                                  best && city.population === best.population
+                                    ? 'font-bold text-primary-light'
+                                    : 'text-foreground/90'
+                                }`}
+                              >
+                                {formatPop(city.population)}
+                              </span>
+                              {best && city.population === best.population && (
+                                <Star size={12} className="text-primary-light" fill="currentColor" />
+                              )}
+                            </div>
+                            <RatingDots rating={city.populationRating} />
+                          </td>
+                          {/* Crime bar (low = good = green) */}
+                          <td className="px-3 py-2.5">
+                            <StatBar
+                              value={city.crimeIndex}
+                              invert
+                              best={best ? city.crimeIndex === best.crime : false}
+                            />
+                          </td>
+                          {/* Safety bar (high = good = green) */}
+                          <td className="px-3 py-2.5">
+                            <StatBar
+                              value={city.safetyIndex}
+                              invert={false}
+                              best={best ? city.safetyIndex === best.safety : false}
+                            />
+                          </td>
+                          {/* Compact bonus badges */}
+                          <td className="px-3 py-2.5">
+                            <div className="flex flex-wrap gap-1 max-w-[170px]">
+                              {bonusTypes.slice(0, 2).map(type => (
+                                <span
+                                  key={type}
+                                  title={CITY_TYPE_BONUSES[type].full}
+                                  className="px-1.5 py-0.5 text-[10px] font-bold bg-primary/15 border border-primary/50 rounded text-primary-light whitespace-nowrap"
+                                >
+                                  {CITY_TYPE_BONUSES[type].short}
+                                </span>
+                              ))}
+                              {bonusTypes.length > 2 && (
+                                <span
+                                  title={bonusTypes.slice(2).map(t => CITY_TYPE_BONUSES[t].full).join(' • ')}
+                                  className="px-1.5 py-0.5 text-[10px] font-bold bg-black/40 border border-black rounded text-muted-foreground"
+                                >
+                                  +{bonusTypes.length - 2}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                        {/* Inline expanded detail strip — directly under the row */}
+                        <AnimatePresence>
+                          {isSelected && (
+                            <tr className="bg-primary/5">
+                              <td colSpan={6} className="px-3 py-3 border-b-2 border-black">
+                                {renderDetailStrip(city)}
+                              </td>
+                            </tr>
+                          )}
+                        </AnimatePresence>
+                      </React.Fragment>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
 
-            {availableCities.length > 0 ? (
-              <div className="grid gap-3 max-h-[60vh] overflow-y-auto pr-2">
-                {availableCities.map((city, index) => (
-                  <motion.button
-                    key={city.name}
-                    className={`w-full p-4 rounded-lg border transition-all text-left ${
-                      selectedCityData?.name === city.name
-                        ? 'bg-cyan-600/30 border-cyan-400'
-                        : 'bg-gray-900/50 border-gray-700 hover:border-gray-500'
-                    }`}
-                    onClick={() => setSelectedCityData(city)}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    whileHover={{ scale: 1.01 }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{getPopIcon(city.populationType)}</span>
-                        <div>
-                          <div className="font-bold text-white text-lg">{city.name}</div>
-                          <div className="text-sm text-gray-400">
-                            {city.populationType} • Pop: {city.population.toLocaleString()}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className={`font-bold ${getCrimeColor(city.crimeIndex)}`}>
-                          {getCrimeLevel(city.crimeIndex)}
-                        </div>
-                        <div className="text-xs text-gray-500">Crime: {Math.round(city.crimeIndex)}%</div>
-                      </div>
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {city.cityTypes.filter(t => t).map(type => (
-                        <span key={type} className="px-2 py-0.5 text-xs bg-gray-700 rounded text-gray-300 flex items-center gap-1">
-                          {getCityTypeIcon(type)} {type}
-                        </span>
-                      ))}
-                    </div>
-                  </motion.button>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <MapPin size={48} className="mx-auto mb-4 text-gray-600" />
-                <p className="text-gray-400">No cities available for {selectedCountry}</p>
-                <p className="text-sm text-gray-500 mt-2">City data may not be loaded for this country yet.</p>
-                <button
-                  onClick={() => {
-                    // Create a placeholder city
-                    const placeholder: City = {
-                      id: -1,
-                      sector: '',
-                      countryId: country?.id ?? 0,
-                      countryCode: country?.code ?? '',
-                      countryName: selectedCountry,
-                      cultureCode: country?.cultureCode ?? 0,
-                      name: `${selectedCountry} Capital`,
-                      population: 1000000,
-                      populationRating: 5,
-                      populationType: 'City',
-                      cityTypes: ['Political'],
-                      hvt: '',
-                      crimeIndex: 50,
-                      safetyIndex: 50
-                    }
-                    setSelectedCityData(placeholder)
-                  }}
-                  className="mt-4 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-sm"
+            {/* Legend */}
+            <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Star size={11} className="text-primary-light" fill="currentColor" /> Best in country
+              </span>
+              <span className="flex items-center gap-1">
+                <AlertTriangle size={11} /> Crime: lower is better
+              </span>
+              <span className="flex items-center gap-1">
+                <Shield size={11} /> Safety: higher is better
+              </span>
+              <span>Click a row for full intel &amp; HQ placement</span>
+            </div>
+          </RetroPanel>
+        ) : (
+          /* Placeholder-city fallback for countries with no city data */
+          <RetroPanel variant="default" padding="lg" title="No City Data" icon={<MapPin size={20} />}>
+            <div className="text-center py-8">
+              <MapPin size={48} className="mx-auto mb-4 text-muted-foreground" />
+              <p className="text-foreground/90">No cities available for {selectedCountry}</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                City data may not be loaded for this country yet.
+              </p>
+              {!selectedCityData && (
+                <RetroButton
+                  variant="secondary"
+                  size="md"
+                  className="mt-4"
+                  onClick={() => setSelectedCityData(makePlaceholderCity())}
                 >
                   Use Placeholder City
-                </button>
+                </RetroButton>
+              )}
+            </div>
+            {selectedCityData && (
+              <div className="mt-2">
+                <div className="text-sm font-bold text-foreground mb-2">
+                  {POP_TYPE_ICONS[selectedCityData.populationType] ?? '🏠'} {selectedCityData.name}
+                </div>
+                {renderDetailStrip(selectedCityData)}
               </div>
             )}
-          </motion.div>
-
-          {/* City Details Panel */}
-          <motion.div
-            className="bg-gray-800/50 rounded-xl p-6 border border-gray-700"
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            {selectedCityData ? (
-              <>
-                {/* City Header */}
-                <div className="text-center mb-6">
-                  <span className="text-5xl mb-2 block">{getPopIcon(selectedCityData.populationType)}</span>
-                  <h2 className="text-2xl font-bold text-white">{selectedCityData.name}</h2>
-                  <p className="text-gray-400">{selectedCityData.populationType}</p>
-                </div>
-
-                {/* Stats */}
-                <div className="space-y-4 mb-6">
-                  <div className="bg-gray-900/50 rounded-lg p-3">
-                    <div className="flex items-center gap-2 text-gray-400 mb-1">
-                      <Users size={18} />
-                      <span className="text-sm">Population</span>
-                    </div>
-                    <div className="text-xl font-bold text-white">
-                      {selectedCityData.population.toLocaleString()}
-                    </div>
-                    <div className="text-xs text-gray-500">Rating: {selectedCityData.populationRating}/7</div>
-                  </div>
-
-                  <div className="bg-gray-900/50 rounded-lg p-3">
-                    <div className="flex items-center gap-2 text-gray-400 mb-1">
-                      <AlertTriangle size={18} />
-                      <span className="text-sm">Crime Index</span>
-                    </div>
-                    <div className={`text-xl font-bold ${getCrimeColor(selectedCityData.crimeIndex)}`}>
-                      {Math.round(selectedCityData.crimeIndex)}%
-                    </div>
-                    <div className="text-xs text-gray-500">{getCrimeLevel(selectedCityData.crimeIndex)} Crime</div>
-                  </div>
-
-                  <div className="bg-gray-900/50 rounded-lg p-3">
-                    <div className="flex items-center gap-2 text-gray-400 mb-1">
-                      <Shield size={18} />
-                      <span className="text-sm">Safety Index</span>
-                    </div>
-                    <div className={`text-xl font-bold ${
-                      selectedCityData.safetyIndex > 60 ? 'text-green-400' :
-                      selectedCityData.safetyIndex > 40 ? 'text-yellow-400' :
-                      'text-red-400'
-                    }`}>
-                      {Math.round(selectedCityData.safetyIndex)}%
-                    </div>
-                  </div>
-                </div>
-
-                {/* City Types */}
-                <div className="mb-6">
-                  <h3 className="text-sm text-gray-400 mb-2">City Types</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedCityData.cityTypes.filter(t => t).map(type => (
-                      <span key={type} className="px-3 py-1 bg-cyan-600/20 border border-cyan-500 rounded-full text-sm text-cyan-300 flex items-center gap-1">
-                        {getCityTypeIcon(type)} {type}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* City Type Bonuses */}
-                <div className="mb-6 bg-gray-900/30 rounded-lg p-3">
-                  <h3 className="text-sm text-yellow-400 mb-2 font-bold">City Bonuses</h3>
-                  <div className="space-y-1 text-xs">
-                    {selectedCityData.cityTypes.filter(t => t).map(type => (
-                      <div key={type} className="text-gray-300">
-                        <span className="text-cyan-400">{type}:</span>
-                        {type === 'Political' && ' +2CS Political/Diplomatic investigations'}
-                        {type === 'Military' && ' +2CS Military/Security investigations, +3CS military recruitment'}
-                        {type === 'Company' && ' +2CS Corporate/Financial investigations'}
-                        {type === 'Industrial' && ' +2CS Corporate/Sabotage investigations'}
-                        {type === 'Educational' && ' +3CS recruiting intelligent LSWs, +2CS Academic investigations'}
-                        {type === 'Temple' && ' +2CS Religious/Mystical investigations'}
-                        {type === 'Resort' && ' +1CS Social/Surveillance investigations'}
-                        {type === 'Seaport' && ' +2CS Smuggling/Maritime investigations'}
-                        {type === 'Mining' && ' +2CS Environmental/Industrial investigations'}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Sector Info */}
-                {selectedCityData.sector && (
-                  <div className="mb-6 text-sm text-gray-500">
-                    <span>Sector: {selectedCityData.sector}</span>
-                  </div>
-                )}
-
-                {/* Confirm Button */}
-                <motion.button
-                  className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-lg font-bold text-lg text-white shadow-lg transition-all flex items-center justify-center gap-2"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleConfirmCity}
-                >
-                  ESTABLISH HQ IN {selectedCityData.name.toUpperCase()}
-                  <ChevronRight size={20} />
-                </motion.button>
-              </>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-gray-400">
-                <Building size={64} className="mb-4 opacity-50" />
-                <p className="text-lg">Select a city</p>
-                <p className="text-sm mt-2 text-center">Click on a city to view details and establish your headquarters</p>
-              </div>
-            )}
-          </motion.div>
-        </div>
+          </RetroPanel>
+        )}
 
         {/* Info Footer */}
         <motion.div
-          className="text-center mt-6 text-gray-500 text-sm"
+          className="text-center mt-4 text-muted-foreground text-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.4 }}
         >
           <p>City type affects available investigations, recruitment options, and facility bonuses</p>
         </motion.div>

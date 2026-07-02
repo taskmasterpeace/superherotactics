@@ -1052,6 +1052,29 @@ export function filterPoolByRole(
   return pool.filter(c => c.role === role);
 }
 
+/**
+ * Compute the one-time signing cost for a recruit, derived from quality.
+ *
+ * Drivers:
+ * - Total of the 7 primary stats (typical human recruit: ~210-420)
+ * - Number of education fields (1-3)
+ *
+ * Output is clamped to a 500-5000 range and rounded to the nearest 50 so
+ * price tags read cleanly. Deterministic for a given character.
+ */
+export function computeSigningCost(char: ProfiledCharacter): number {
+  const statTotal =
+    char.stats.MEL + char.stats.AGL + char.stats.STR + char.stats.STA +
+    char.stats.INT + char.stats.INS + char.stats.CON;
+
+  const statCost = Math.max(0, statTotal - 200) * 16; // ~0-3500 for human ranges
+  const eduCost = char.education.length * 350;         // 350-1050
+
+  const raw = 500 + statCost + eduCost;
+  const rounded = Math.round(raw / 50) * 50;
+  return Math.min(5000, Math.max(500, rounded));
+}
+
 // =============================================================================
 // DEBUG / TESTING
 // =============================================================================
@@ -1124,6 +1147,7 @@ export default {
   generateCharacterWithProfile,
   generateRecruitingPool,
   filterPoolByRole,
+  computeSigningCost,
   debugFamiliarityDistribution,
   debugCultureDistribution,
   CULTURE_NEIGHBORS,

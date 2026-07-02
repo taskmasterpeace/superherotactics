@@ -53,10 +53,13 @@ import {
   Trash2,
   Plus,
   Pencil,
+  Home,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { RetroButton, RetroBadge, RetroTabs, RetroTabPanel, cn } from '../ui';
 import { Squad, PERSONALITIES } from '../../data/squadSystem';
+import { getActiveBase } from '../../data/baseSystem';
+import { getSectorTerrain } from '../../data/sectorTerrain';
 
 // Grid configuration - 40 columns x 24 rows (matches V0)
 const GRID_COLS = 40;
@@ -94,6 +97,32 @@ function parseCitySector(sector: string): { row: number; col: number } | null {
   const colIndex = Math.round(colLetterIndex * (39 / 25));
 
   return { row: rowIndex, col: colIndex };
+}
+
+// Initial zoom applied when centering on the player's base (owner feedback: ~1.5x)
+const HOME_ZOOM = 1.5;
+
+/**
+ * Resolve ANY sector code to a grid cell.
+ * Handles both formats used across the game:
+ * - Grid format: [Row Letter][Column Number] e.g. "K3" (store currentSector, base locations)
+ * - City format: [Row Letter][Column Letter][SubSector] e.g. "LJ5" (city data)
+ */
+function resolveSectorToCell(sector: string): { row: number; col: number } | null {
+  if (!sector || sector.length < 2) return null;
+
+  const rowIndex = ROW_LABELS.indexOf(sector.charAt(0).toUpperCase());
+  if (rowIndex < 0) return null;
+
+  const rest = sector.slice(1);
+  if (/^\d+$/.test(rest)) {
+    const colIndex = parseInt(rest, 10) - 1;
+    if (colIndex < 0 || colIndex >= GRID_COLS) return null;
+    return { row: rowIndex, col: colIndex };
+  }
+
+  // Fall back to city-style sector parsing ("LJ5")
+  return parseCitySector(sector);
 }
 
 interface GridCell {
@@ -1340,6 +1369,9 @@ export const WorldMapGrid: React.FC = () => {
     removeFromSquad,
     deploySquad,
     assignVehicle,
+    // Base location (for initial HOME centering)
+    baseState,
+    currentSector,
   } = useGameStore();
 
   // Selected characters for travel
@@ -1412,13 +1444,12 @@ export const WorldMapGrid: React.FC = () => {
       for (let col = 0; col < GRID_COLS; col++) {
         const id = `${ROW_LABELS[row]}${col + 1}`;
 
-        // Find cities that might be in this sector
-        // Parse city sector codes (e.g., "LJ5" = Row L, Col J scaled to grid)
+        // City sector codes are now exact grid codes ("G12") generated from
+        // real coordinates (data/cityCoordinates.ts) — match cells exactly.
         const citiesInSector = cities.filter(city => {
-          const parsed = parseCitySector(city.sector);
+          const parsed = resolveSectorToCell(city.sector);
           if (!parsed) return false;
-          // Match if city is in this row and within 1 column of this cell
-          return parsed.row === row && Math.abs(parsed.col - col) <= 1;
+          return parsed.row === row && parsed.col === col;
         });
 
         const countriesInSector = [...new Set(citiesInSector.map(c => c.country))];
@@ -1459,7 +1490,7 @@ export const WorldMapGrid: React.FC = () => {
           region,
           countries: countriesInSector,
           cities: citiesInSector,
-          terrain: citiesInSector.length > 0 ? 'Urban/Mixed' : 'Wilderness',
+          terrain: getSectorTerrain(id).name,
           climate: y < 0.2 ? 'Polar' : y < 0.4 ? 'Temperate' : y < 0.6 ? 'Subtropical' : y < 0.8 ? 'Tropical' : 'Polar',
         });
       }
@@ -1485,6 +1516,71 @@ export const WorldMapGrid: React.FC = () => {
       y: Math.max(minY, Math.min(0, y)),
     };
   }, []);
+
+  // HOME sector = active base location, falling back to the squad's current sector
+  const baseSector = useMemo(
+    () => getActiveBase(baseState)?.location || currentSector,
+    [baseState, currentSector]
+  );
+  const baseCell = useMemo(() => resolveSectorToCell(baseSector), [baseSector]);
+
+  // Center the map on a sector at a given zoom (used for initial view + HOME button)
+  const centerOnSector = useCallback((sector: string, scale: number) => {
+    const cell = resolveSectorToCell(sector);
+    const container = mapContainerRef.current;
+    if (!cell || !container || container.clientWidth === 0) return false;
+
+    const viewportWidth = container.clientWidth - ROW_LABEL_WIDTH;
+    const viewportHeight = container.clientHeight - COL_LABEL_HEIGHT;
+    const cellCenterX = (cell.col * GRID_CELL_SIZE + GRID_CELL_SIZE / 2) * scale;
+    const cellCenterY = (cell.row * GRID_CELL_SIZE + GRID_CELL_SIZE / 2) * scale;
+
+    const constrained = constrainMapPosition(
+      viewportWidth / 2 - cellCenterX,
+      viewportHeight / 2 - cellCenterY,
+      scale
+    );
+    setMapScale(scale);
+    setMapPosition(constrained);
+    return true;
+  }, [constrainMapPosition]);
+
+  const handleCenterHome = useCallback(() => {
+    centerOnSector(baseSector, HOME_ZOOM);
+  }, [centerOnSector, baseSector]);
+
+  // On mount: open the map centered on the player's base at ~1.5x zoom.
+  // Tries synchronously (layout is complete by effect time); if the container
+  // is zero-sized (view swap-in), retries via timer + ResizeObserver. Avoids
+  // requestAnimationFrame, which never fires in hidden/background tabs.
+  const didInitialCenter = useRef(false);
+  useEffect(() => {
+    if (didInitialCenter.current) return;
+
+    let cancelled = false;
+    let attempts = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const tryCenter = () => {
+      if (cancelled || didInitialCenter.current) return;
+      if (centerOnSector(baseSector, HOME_ZOOM)) {
+        didInitialCenter.current = true;
+        observer.disconnect();
+      } else if (attempts++ < 20) {
+        timer = setTimeout(tryCenter, 250);
+      }
+    };
+
+    const observer = new ResizeObserver(() => tryCenter());
+    if (mapContainerRef.current) observer.observe(mapContainerRef.current);
+    tryCenter();
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [baseSector, centerOnSector]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
@@ -1904,6 +2000,29 @@ export const WorldMapGrid: React.FC = () => {
                   </div>
                 )}
 
+                {/* HOME base marker - pulsing ring so the base is always findable */}
+                {baseCell && (
+                  <div
+                    className="absolute pointer-events-none z-10"
+                    style={{
+                      left: baseCell.col * GRID_CELL_SIZE,
+                      top: baseCell.row * GRID_CELL_SIZE,
+                      width: `${GRID_CELL_SIZE}px`,
+                      height: `${GRID_CELL_SIZE}px`,
+                    }}
+                    title={`Home Base (${baseSector})`}
+                  >
+                    {/* Radar pulse ring */}
+                    <div className="absolute inset-1 rounded-md border-2 border-primary animate-ping opacity-50" />
+                    {/* Steady ring */}
+                    <div className="absolute inset-0.5 rounded-md border-2 border-primary/90 shadow-[0_0_8px_hsl(var(--primary)/0.6)]" />
+                    {/* Home glyph badge */}
+                    <div className="absolute -top-2 -left-2 w-4 h-4 bg-primary border border-black rounded-sm flex items-center justify-center shadow-retro-sm">
+                      <Home className="w-2.5 h-2.5 text-black" />
+                    </div>
+                  </div>
+                )}
+
                 {/* Character markers on map - only show characters NOT traveling */}
                 {characters.filter(char => char.status !== 'traveling').map((char) => {
                   if (!char.sector) return null;
@@ -2160,6 +2279,15 @@ export const WorldMapGrid: React.FC = () => {
 
             {/* Map Controls - Retro Style */}
             <div className="absolute z-20 flex flex-col items-end gap-1" style={{ bottom: '8px', right: '8px' }}>
+              {/* HOME - recenter on base (always visible) */}
+              <button
+                onClick={handleCenterHome}
+                title={`Center on base (${baseSector})`}
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-card/90 border-2 border-black text-primary hover:bg-primary hover:text-primary-foreground transition-colors shadow-retro-sm"
+              >
+                <Home className="w-3 h-3" />
+                <span className="text-[9px] font-mono font-bold">HOME</span>
+              </button>
               {controlsMinimized ? (
                 <button
                   onClick={() => setControlsMinimized(false)}

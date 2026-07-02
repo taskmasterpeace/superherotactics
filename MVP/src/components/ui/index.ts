@@ -77,3 +77,7 @@ import { twMerge } from 'tailwind-merge';
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+// Country flag with graceful fallback (art: /public/assets/flags)
+export { CountryFlag } from './CountryFlag';
+export type { CountryFlagProps } from './CountryFlag';

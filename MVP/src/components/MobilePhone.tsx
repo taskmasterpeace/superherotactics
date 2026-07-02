@@ -16,6 +16,8 @@ import {
   X,
   MessageSquare,
   Phone,
+  PhoneCall,
+  PhoneOutgoing,
   Mail,
   User,
   MapPin,
@@ -45,6 +47,70 @@ import { FactionType, FACTION_NAMES, FACTION_ICONS, getStandingLabel } from '../
 // Message types that appear on the phone
 const PHONE_MESSAGE_TYPES = ['idle_warning', 'call_incoming', 'arrival', 'handler'];
 
+// Contact enriched with live unlock/cooldown status (shape of contactsWithStatus entries)
+type ContactStatus = Contact & {
+  unlocked: boolean;
+  currentStanding: number;
+  standingNeeded: number;
+  cooldownRemaining: number;
+  canUse: boolean;
+};
+
+// Session call log entry (Calls tab)
+interface CallLogEntry {
+  id: string;
+  contactId: string;
+  alias: string;
+  icon: string;
+  day: number;
+  minutes: number;
+}
+
+// Contact effect types that navigate the player away from the phone
+const NAV_EFFECT_TYPES: string[] = ['shop_access', 'heal_bonus'];
+
+// Format in-game minutes-since-midnight as HH:MM
+const formatGameClock = (minutes: number): string => {
+  const h = Math.floor(minutes / 60) % 24;
+  const m = minutes % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+};
+
+// Diegetic line the contact says when you call them
+const getCallLine = (contact: Contact): string => {
+  const shopEffect = contact.effects.find(e => e.type === 'shop_access');
+  if (shopEffect) {
+    switch (shopEffect.value) {
+      case 'black_market':
+        return 'Got what you need. Meet me at the market — ask for the back room.';
+      case 'weapon_mods':
+        return "Bench is open. Bring your hardware and I'll make it sing.";
+      case 'military_gear':
+        return 'Requisition cleared. Come see what fell off the truck.';
+      default:
+        return 'Got what you need. Come see me.';
+    }
+  }
+  if (contact.effects.some(e => e.type === 'heal_bonus')) {
+    return 'Bring your wounded around back. No names, no charts, no questions.';
+  }
+  return "I'm ready when you are.";
+};
+
+// Plain-words summary of what a shop_access perk actually unlocks
+const getShopUnlockMessage = (shopType: string): string => {
+  switch (shopType) {
+    case 'black_market':
+      return 'Black Market unlocked — Equipment Shop now shows illegal weapons and restricted gear.';
+    case 'weapon_mods':
+      return 'Weapon Mods unlocked — Equipment Shop now offers weapon modifications.';
+    case 'military_gear':
+      return 'Military Hardware unlocked — Equipment Shop now stocks military-grade weapons and armor.';
+    default:
+      return `New gear access unlocked — check the Equipment Shop (${shopType.replace(/_/g, ' ')}).`;
+  }
+};
+
 export const MobilePhone: React.FC = () => {
   const {
     notifications,
@@ -60,10 +126,12 @@ export const MobilePhone: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVibrating, setIsVibrating] = useState(false);
   const [lastNotificationCount, setLastNotificationCount] = useState(0);
-  const [activeTab, setActiveTab] = useState<'messages' | 'email' | 'contacts'>('messages');
+  const [activeTab, setActiveTab] = useState<'messages' | 'email' | 'contacts' | 'calls'>('messages');
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [contactLastUsed, setContactLastUsed] = useState<Map<string, number>>(new Map());
+  const [activeCall, setActiveCall] = useState<ContactStatus | null>(null);
+  const [callHistory, setCallHistory] = useState<CallLogEntry[]>([]);
   const [selectedAttachment, setSelectedAttachment] = useState<EmailAttachment | null>(null);
   const [attachmentZoomed, setAttachmentZoomed] = useState(false);
 
@@ -119,10 +187,8 @@ export const MobilePhone: React.FC = () => {
 
   const unlockedContactsCount = contactsWithStatus.filter(c => c.unlocked).length;
 
-  // Handle using a contact service
-  const handleUseContact = (contact: typeof contactsWithStatus[0]) => {
-    if (!contact.canUse) return;
-
+  // Consume a contact's service: pay, start cooldown, log the call, fire effects
+  const executeContactEffects = (contact: ContactStatus) => {
     // Deduct cost
     if (contact.baseCost > 0) {
       modifyBudget(-contact.baseCost, `Used contact: ${contact.alias}`);
@@ -132,6 +198,19 @@ export const MobilePhone: React.FC = () => {
     const currentHour = (gameTime?.day ?? 0) * 24 + (gameTime?.hour ?? 0);
     setContactLastUsed(prev => new Map(prev).set(contact.id, currentHour));
 
+    // Log the call for the Calls tab (session history)
+    setCallHistory(prev => [
+      {
+        id: `call-${Date.now()}-${contact.id}`,
+        contactId: contact.id,
+        alias: contact.alias,
+        icon: contact.icon,
+        day: gameTime?.day ?? 1,
+        minutes: gameTime?.minutes ?? 0,
+      },
+      ...prev,
+    ]);
+
     // Process contact effects
     contact.effects.forEach(effect => {
       switch (effect.type) {
@@ -140,7 +219,7 @@ export const MobilePhone: React.FC = () => {
           addNotification({
             type: 'handler',
             title: `${contact.alias} connected`,
-            message: `Access granted: ${effect.description}`,
+            message: getShopUnlockMessage(effect.value as string),
             priority: 'medium',
           });
           setIsOpen(false);
@@ -219,6 +298,21 @@ export const MobilePhone: React.FC = () => {
     setSelectedContact(null);
   };
 
+  // Handle using a contact service.
+  // Contacts whose effects navigate away (shop/hospital) get an in-phone call
+  // screen first — nothing is paid or consumed until the player picks GO NOW.
+  const handleUseContact = (contact: ContactStatus) => {
+    if (!contact.canUse) return;
+
+    const navigatesAway = contact.effects.some(e => NAV_EFFECT_TYPES.includes(e.type));
+    if (navigatesAway) {
+      setActiveCall(contact);
+      return;
+    }
+
+    executeContactEffects(contact);
+  };
+
   // Handle email reply action
   const handleEmailReply = (email: Email, option: EmailReplyOption) => {
     const store = useGameStore.getState();
@@ -282,6 +376,13 @@ export const MobilePhone: React.FC = () => {
         return 'Intel received.';
     }
   };
+
+  // Hang up any pending call screen when the phone closes (effect stays unconsumed)
+  useEffect(() => {
+    if (!isOpen) {
+      setActiveCall(null);
+    }
+  }, [isOpen]);
 
   // Vibrate effect when new message arrives
   useEffect(() => {
@@ -424,10 +525,10 @@ export const MobilePhone: React.FC = () => {
                   <div className="w-2 h-2 rounded-full bg-gray-900 border border-gray-600" />
                 </div>
 
-                {/* Screen */}
-                <div className="w-80 bg-background border-2 border-black rounded-2xl overflow-hidden">
+                {/* Screen - true 9:16 portrait, same height on every tab (guarded for short viewports) */}
+                <div className="w-[340px] h-[min(604px,72vh)] bg-background border-2 border-black rounded-2xl overflow-hidden flex flex-col">
                   {/* Status Bar */}
-                  <div className="bg-black text-white px-4 py-1.5 flex justify-between items-center text-xs font-bold">
+                  <div className="flex-shrink-0 bg-black text-white px-4 py-1.5 flex justify-between items-center text-xs font-bold">
                     <div className="flex items-center gap-2">
                       <div className="flex gap-0.5">
                         {[1, 2, 3, 4].map((bar) => (
@@ -444,14 +545,14 @@ export const MobilePhone: React.FC = () => {
                   </div>
 
                   {/* Header */}
-                  <div className="bg-surface px-4 py-3 flex justify-between items-center border-b-2 border-black">
-                    {selectedEmail || selectedContact ? (
+                  <div className="flex-shrink-0 bg-surface px-4 py-3 flex justify-between items-center border-b-2 border-black">
+                    {selectedEmail || selectedContact || activeCall ? (
                       <button
-                        onClick={() => { setSelectedEmail(null); setSelectedContact(null); }}
+                        onClick={() => { setSelectedEmail(null); setSelectedContact(null); setActiveCall(null); }}
                         className="text-foreground font-bold flex items-center gap-2 hover:text-primary transition-colors"
                       >
                         <ChevronLeft className="w-5 h-5" />
-                        Back
+                        {activeCall ? 'Hang Up' : 'Back'}
                       </button>
                     ) : (
                       <h2 className="text-foreground font-bold flex items-center gap-2">
@@ -472,6 +573,16 @@ export const MobilePhone: React.FC = () => {
                             <RetroBadge variant="secondary" size="sm">
                               {unlockedContactsCount}/{CONTACTS.length}
                             </RetroBadge>
+                          </>
+                        ) : activeTab === 'calls' ? (
+                          <>
+                            <Phone className="w-5 h-5 text-primary" />
+                            Calls
+                            {callHistory.length > 0 && (
+                              <RetroBadge variant="secondary" size="sm">
+                                {callHistory.length}
+                              </RetroBadge>
+                            )}
                           </>
                         ) : (
                           <>
@@ -496,12 +607,58 @@ export const MobilePhone: React.FC = () => {
                     </RetroButton>
                   </div>
 
-                  {/* Content Area */}
-                  <div className="max-h-96 overflow-y-auto bg-background">
-                    {activeTab === 'messages' ? (
+                  {/* Content Area - flexes to fill the 9:16 screen on every tab */}
+                  <div className="flex-1 min-h-0 overflow-y-auto bg-background">
+                    {activeCall ? (
+                      /* In-Phone Call Screen - shown before navigation effects fire */
+                      <div className="h-full flex flex-col items-center justify-center p-6 text-center">
+                        <motion.div
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          className="w-20 h-20 rounded-2xl bg-surface border-2 border-black flex items-center justify-center shadow-retro text-4xl mb-3"
+                        >
+                          {activeCall.icon}
+                        </motion.div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <PhoneCall className="w-4 h-4 text-success animate-pulse" />
+                          <span className="text-xs font-bold text-success uppercase tracking-wider">Connected</span>
+                        </div>
+                        <h3 className="font-bold text-lg text-foreground">{activeCall.alias}</h3>
+                        <RetroBadge variant="secondary" size="sm" className="mt-1">
+                          {FACTION_ICONS[activeCall.factionType]} {FACTION_NAMES[activeCall.factionType]}
+                        </RetroBadge>
+
+                        <div className="mt-4 w-full bg-surface border-2 border-black rounded-lg p-3 shadow-retro-sm">
+                          <p className="text-sm text-foreground italic">
+                            "{getCallLine(activeCall)}"
+                          </p>
+                        </div>
+
+                        <div className="mt-5 w-full flex flex-col gap-2">
+                          <RetroButton
+                            variant="success"
+                            className="w-full"
+                            onClick={() => {
+                              const contact = activeCall;
+                              setActiveCall(null);
+                              if (contact) executeContactEffects(contact);
+                            }}
+                          >
+                            GO NOW -&gt;
+                          </RetroButton>
+                          <RetroButton
+                            variant="ghost"
+                            className="w-full"
+                            onClick={() => setActiveCall(null)}
+                          >
+                            LATER
+                          </RetroButton>
+                        </div>
+                      </div>
+                    ) : activeTab === 'messages' ? (
                       /* Messages List */
                       phoneMessages.length === 0 ? (
-                        <div className="p-8 text-center">
+                        <div className="h-full flex flex-col items-center justify-center p-8 text-center">
                           <div className="w-16 h-16 mx-auto mb-3 rounded-xl bg-surface border-2 border-black flex items-center justify-center shadow-retro-sm">
                             <Smartphone className="w-8 h-8 text-muted-foreground" />
                           </div>
@@ -661,7 +818,7 @@ export const MobilePhone: React.FC = () => {
                       ) : (
                         /* Email List */
                       emails.length === 0 ? (
-                        <div className="p-8 text-center">
+                        <div className="h-full flex flex-col items-center justify-center p-8 text-center">
                           <div className="w-16 h-16 mx-auto mb-3 rounded-xl bg-surface border-2 border-black flex items-center justify-center shadow-retro-sm">
                             <Inbox className="w-8 h-8 text-muted-foreground" />
                           </div>
@@ -822,7 +979,7 @@ export const MobilePhone: React.FC = () => {
                     ) : (
                       /* Contacts List */
                       contactsWithStatus.length === 0 ? (
-                        <div className="p-8 text-center">
+                        <div className="h-full flex flex-col items-center justify-center p-8 text-center">
                           <div className="w-16 h-16 mx-auto mb-3 rounded-xl bg-surface border-2 border-black flex items-center justify-center shadow-retro-sm">
                             <User className="w-8 h-8 text-muted-foreground" />
                           </div>
@@ -888,16 +1045,62 @@ export const MobilePhone: React.FC = () => {
                         </div>
                       )
                     )
+                    ) : activeTab === 'calls' ? (
+                      /* Calls Tab - session call history */
+                      callHistory.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center p-8 text-center">
+                          <div className="w-16 h-16 mb-3 rounded-xl bg-surface border-2 border-black flex items-center justify-center shadow-retro-sm">
+                            <Phone className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                          <p className="text-muted-foreground font-semibold">No calls yet</p>
+                          <p className="text-sm text-muted-foreground/60 mt-1">Call a contact from the Contacts tab</p>
+                        </div>
+                      ) : (
+                        <div className="divide-y-2 divide-black/20">
+                          {callHistory.map((call) => (
+                            <motion.div
+                              key={call.id}
+                              initial={{ opacity: 0, x: 20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              className="p-4 flex items-center gap-3 cursor-pointer hover:bg-surface transition-colors"
+                              onClick={() => {
+                                const contact = contactsWithStatus.find(c => c.id === call.contactId);
+                                if (contact) {
+                                  setActiveTab('contacts');
+                                  setSelectedContact(contact);
+                                }
+                              }}
+                            >
+                              <div className="w-10 h-10 rounded-xl border-2 border-black flex items-center justify-center shadow-retro-sm text-lg bg-surface">
+                                {call.icon}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex justify-between items-center gap-2">
+                                  <p className="font-bold text-sm text-foreground truncate">{call.alias}</p>
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">
+                                    <PhoneOutgoing className="w-3 h-3 text-success" />
+                                    Outgoing
+                                  </span>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  Day {call.day} · {formatGameClock(call.minutes)}
+                                </p>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )
                     ) : null}
                   </div>
 
                   {/* Bottom Nav */}
-                  <div className="bg-surface px-2 py-2 flex justify-around border-t-2 border-black">
+                  <div className="flex-shrink-0 bg-surface px-2 py-2 flex justify-around border-t-2 border-black">
                     <button
                       className={`flex flex-col items-center p-2 rounded-lg transition-colors ${
                         activeTab === 'messages' ? 'bg-primary/10' : 'hover:bg-surface-light'
                       }`}
-                      onClick={() => { setActiveTab('messages'); setSelectedEmail(null); }}
+                      onClick={() => { setActiveTab('messages'); setSelectedEmail(null); setActiveCall(null); }}
                     >
                       <MessageSquare className={`w-5 h-5 ${activeTab === 'messages' ? 'text-primary' : 'text-muted-foreground'}`} />
                       <span className={`text-xs mt-1 ${activeTab === 'messages' ? 'font-semibold text-primary' : 'text-muted-foreground'}`}>Messages</span>
@@ -905,15 +1108,20 @@ export const MobilePhone: React.FC = () => {
                         <div className="absolute -top-1 -right-1 w-2 h-2 bg-destructive rounded-full" />
                       )}
                     </button>
-                    <button className="flex flex-col items-center p-2 rounded-lg hover:bg-surface-light transition-colors opacity-50 cursor-not-allowed">
-                      <Phone className="w-5 h-5 text-muted-foreground" />
-                      <span className="text-xs mt-1 text-muted-foreground">Calls</span>
+                    <button
+                      className={`flex flex-col items-center p-2 rounded-lg transition-colors relative ${
+                        activeTab === 'calls' ? 'bg-primary/10' : 'hover:bg-surface-light'
+                      }`}
+                      onClick={() => { setActiveTab('calls'); setSelectedEmail(null); setSelectedContact(null); setActiveCall(null); }}
+                    >
+                      <Phone className={`w-5 h-5 ${activeTab === 'calls' ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <span className={`text-xs mt-1 ${activeTab === 'calls' ? 'font-semibold text-primary' : 'text-muted-foreground'}`}>Calls</span>
                     </button>
                     <button
                       className={`flex flex-col items-center p-2 rounded-lg transition-colors relative ${
                         activeTab === 'email' ? 'bg-primary/10' : 'hover:bg-surface-light'
                       }`}
-                      onClick={() => { setActiveTab('email'); setSelectedEmail(null); }}
+                      onClick={() => { setActiveTab('email'); setSelectedEmail(null); setActiveCall(null); }}
                     >
                       <Mail className={`w-5 h-5 ${activeTab === 'email' ? 'text-primary' : 'text-muted-foreground'}`} />
                       <span className={`text-xs mt-1 ${activeTab === 'email' ? 'font-semibold text-primary' : 'text-muted-foreground'}`}>Email</span>
@@ -925,7 +1133,7 @@ export const MobilePhone: React.FC = () => {
                       className={`flex flex-col items-center p-2 rounded-lg transition-colors relative ${
                         activeTab === 'contacts' ? 'bg-primary/10' : 'hover:bg-surface-light'
                       }`}
-                      onClick={() => { setActiveTab('contacts'); setSelectedEmail(null); setSelectedContact(null); }}
+                      onClick={() => { setActiveTab('contacts'); setSelectedEmail(null); setSelectedContact(null); setActiveCall(null); }}
                     >
                       <User className={`w-5 h-5 ${activeTab === 'contacts' ? 'text-primary' : 'text-muted-foreground'}`} />
                       <span className={`text-xs mt-1 ${activeTab === 'contacts' ? 'font-semibold text-primary' : 'text-muted-foreground'}`}>Contacts</span>

@@ -6,7 +6,7 @@ import {
   DollarSign,
   Users,
   Map,
-  Monitor,
+  FlaskConical,
   Settings,
   GraduationCap,
   Building2,
@@ -89,8 +89,8 @@ export default function GameHUD() {
               onClick={() => setCurrentView('world-map')}
             />
             <NavButton
-              icon={<Monitor size={14} />}
-              label="Computer"
+              icon={<FlaskConical size={14} />}
+              label="Sim Lab"
               active={currentView === 'combat-lab'}
               onClick={() => setCurrentView('combat-lab')}
             />
