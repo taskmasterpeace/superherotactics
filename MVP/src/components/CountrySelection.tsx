@@ -10,9 +10,14 @@ import { getCitiesByCountry } from '../data/allCities'
 import { getEducationLevel } from '../data/worldData'
 import { CULTURE_CODES } from '../data/cities'
 import {
-  RetroPanel, RetroInput, RetroButton, RetroBadge, RetroTabs, RetroTabPanel, RetroModal,
+  RetroPanel, RetroInput, RetroButton, RetroBadge, RetroModal,
   CountryFlag, type RetroBadgeProps,
 } from './ui'
+import {
+  calculateMedicalSystem, calculateBlackMarket, calculateMercenarySystem,
+  calculateResearchSystem, calculateCloningSystem,
+} from '../data/combinedEffects'
+import { calculateCountryFunding } from '../data/economySystem'
 import CountryCompareTable from './CountryCompareTable'
 
 // ---------- Region filter chips (derived from cultureCode 1-14) ----------
@@ -101,6 +106,38 @@ function InfoRow({ label, children }: { label: string; children: React.ReactNode
   )
 }
 
+function StatSection({ icon, title, className = '', children }: {
+  icon: React.ReactNode; title: string; className?: string; children: React.ReactNode
+}) {
+  return (
+    <div className={`rounded-lg border-2 border-black/50 bg-surface/60 p-3 ${className}`}>
+      <div className="flex items-center gap-1.5 mb-2 text-muted-foreground">
+        {icon}
+        <span className="text-[11px] font-bold uppercase tracking-wider">{title}</span>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+const IMPACT_TONES = {
+  good: 'text-success border-success/50',
+  mid: 'text-primary border-primary/50',
+  bad: 'text-destructive border-destructive/50',
+} as const
+
+function ImpactCard({ label, value, note, tone }: {
+  label: string; value: string; note: string; tone: keyof typeof IMPACT_TONES
+}) {
+  return (
+    <div className={`rounded-md border bg-black/30 px-2.5 py-2 ${IMPACT_TONES[tone]}`}>
+      <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="text-sm font-bold capitalize leading-tight">{value}</div>
+      <div className="text-[10px] text-muted-foreground leading-tight mt-0.5">{note}</div>
+    </div>
+  )
+}
+
 // ---------- Main screen ----------
 export default function CountrySelection() {
   const { selectCountry } = useGameStore()
@@ -110,7 +147,6 @@ export default function CountrySelection() {
   const [sortId, setSortId] = useState('name')
   const [desc, setDesc] = useState(false)
   const [selected, setSelected] = useState<Country | null>(null)
-  const [activeTab, setActiveTab] = useState('govt')
   const [pinned, setPinned] = useState<number[]>([])
   const [compareOpen, setCompareOpen] = useState(false)
 
@@ -196,6 +232,23 @@ export default function CountrySelection() {
 
   const cities = selected ? getCitiesByCountry(selected.code) : []
   const terrorismNum = selected ? Number(selected.terrorismActivity) : NaN
+
+  // Gameplay consequences derived from the country's stats — the same
+  // combined-effects systems the live game runs on (funding, hospitals,
+  // black market, mercs, research, cloning).
+  const impact = useMemo(() => {
+    if (!selected) return null
+    const funding = calculateCountryFunding(selected)
+    return {
+      funding,
+      netFunding: Math.floor(funding.baseFunding * (1 - funding.corruptionTax / 100)),
+      medical: calculateMedicalSystem(selected),
+      blackMarket: calculateBlackMarket(selected),
+      mercs: calculateMercenarySystem(selected),
+      research: calculateResearchSystem(selected),
+      cloning: calculateCloningSystem(selected),
+    }
+  }, [selected])
 
   const listMetric = (c: Country): string => {
     if (sortId === 'population' || sortId === 'name') return fmtPop(c.population)
@@ -436,112 +489,127 @@ export default function CountrySelection() {
                   </div>
                 </div>
 
-                {/* Stat tabs */}
-                <RetroTabs
-                  className="mt-4 flex-1 min-h-0 flex flex-col"
-                  variant="default"
-                  size="sm"
-                  activeTab={activeTab}
-                  onTabChange={setActiveTab}
-                  tabs={[
-                    { id: 'govt', label: 'GOVT', icon: <Landmark size={14} /> },
-                    { id: 'economy', label: 'ECONOMY', icon: <Coins size={14} /> },
-                    { id: 'forces', label: 'FORCES', icon: <Shield size={14} /> },
-                    { id: 'tech', label: 'TECH & MEDIA', icon: <Cpu size={14} /> },
-                    { id: 'supers', label: 'SUPERS', icon: <Zap size={14} /> },
-                  ]}
-                >
-                  <div className="flex-1 min-h-0 overflow-y-auto">
-                    <RetroTabPanel id="govt" activeTab={activeTab} padding="sm">
-                      <InfoRow label="Government Type">{selected.governmentType}</InfoRow>
+                {/* Everything visible at once — no tabs. Operational impact first
+                    (what the numbers DO), then all stat groups stacked. */}
+                <div className="mt-4 flex-1 min-h-0 overflow-y-auto pr-1 space-y-3">
+                  {impact && (
+                  <div className="rounded-lg border-2 border-primary/60 bg-primary/5 p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Zap size={14} className="text-primary" />
+                      <span className="text-xs font-bold uppercase tracking-wider text-primary">Operational Impact</span>
+                      <span className="text-[10px] text-muted-foreground">— what these stats do for your operation</span>
+                    </div>
+                    <div className="grid grid-cols-2 xl:grid-cols-3 gap-2">
+                      <ImpactCard
+                        label="Weekly Funding"
+                        value={`$${impact.netFunding.toLocaleString()}/wk`}
+                        tone={impact.funding.fundingLevel === 'minimal' ? 'bad' : impact.funding.fundingLevel === 'standard' ? 'mid' : 'good'}
+                        note={`${impact.funding.fundingLevel} · ${impact.funding.corruptionTax}% lost to corruption`}
+                      />
+                      <ImpactCard
+                        label="Hospitals"
+                        value={`Tier ${impact.medical.hospitalTier}/4`}
+                        tone={impact.medical.hospitalTier >= 3 ? 'good' : impact.medical.hospitalTier === 2 ? 'mid' : 'bad'}
+                        note={`${impact.medical.recoverySpeedMultiplier.toFixed(1)}x recovery speed`}
+                      />
+                      <ImpactCard
+                        label="Black Market"
+                        value={impact.blackMarket.available ? impact.blackMarket.accessDifficulty.replace(/_/g, ' ') : 'none'}
+                        tone={impact.blackMarket.available ? (impact.blackMarket.accessDifficulty === 'open' ? 'good' : 'mid') : 'bad'}
+                        note={impact.blackMarket.available
+                          ? `weapons ${impact.blackMarket.weaponPriceModifier.toFixed(1)}x price · ${impact.blackMarket.policeRaidChance}% raid risk`
+                          : 'no illegal gear access'}
+                      />
+                      <ImpactCard
+                        label="Mercenaries"
+                        value={impact.mercs.poolSize}
+                        tone={impact.mercs.poolSize === 'abundant' || impact.mercs.poolSize === 'moderate' ? 'good' : impact.mercs.poolSize === 'none' ? 'bad' : 'mid'}
+                        note={impact.mercs.canHireElite ? 'elite for hire' : impact.mercs.canHireVeterans ? 'veterans for hire' : impact.mercs.canHireThugs ? 'thugs only' : 'no market'}
+                      />
+                      <ImpactCard
+                        label="Research"
+                        value={`Tier ${impact.research.researchTier}/4`}
+                        tone={impact.research.researchTier >= 3 ? 'good' : impact.research.researchTier === 2 ? 'mid' : 'bad'}
+                        note={`${impact.research.researchSpeedMultiplier.toFixed(1)}x speed · training ${impact.research.trainingQuality.toFixed(1)}x`}
+                      />
+                      <ImpactCard
+                        label="Cloning"
+                        value={impact.cloning.available ? impact.cloning.regulation : 'banned'}
+                        tone={impact.cloning.available ? (impact.cloning.regulation === 'legal' ? 'good' : 'mid') : 'bad'}
+                        note={impact.cloning.available
+                          ? `quality ${impact.cloning.cloneQuality}/100 · ${impact.cloning.waitTime}d wait`
+                          : 'death is permanent here'}
+                      />
+                    </div>
+                  </div>
+                  )}
+
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+                    <StatSection icon={<Landmark size={13} />} title="Government">
+                      <InfoRow label="Type">{selected.governmentType}</InfoRow>
                       <InfoRow label="Leader">
                         {selected.leaderTitle || 'Leader'} {selected.president}
                       </InfoRow>
-                      <InfoRow label="Term Length">{selected.presidentialTerm} years</InfoRow>
-                      <InfoRow label="Perception">
-                        <RetroBadge variant={perceptionVariant(selected.governmentPerception)} size="sm">
-                          {selected.governmentPerception}
-                        </RetroBadge>
-                      </InfoRow>
+                      <InfoRow label="Term">{selected.presidentialTerm} years</InfoRow>
                       <InfoRow label="Capital Punishment">
                         <RetroBadge variant={severityVariant(selected.capitalPunishment)} size="sm">
                           {selected.capitalPunishment || 'Unknown'}
                         </RetroBadge>
                       </InfoRow>
-                      <div className="mt-3">
+                      <div className="mt-2">
                         <StatBar label="Corruption" value={selected.governmentCorruption} invert />
                       </div>
-                    </RetroTabPanel>
+                    </StatSection>
 
-                    <RetroTabPanel id="economy" activeTab={activeTab} padding="sm">
-                      <InfoRow label="Population">
-                        {selected.population.toLocaleString()} (rating {selected.populationRating}/100)
-                      </InfoRow>
-                      <div className="mt-3 space-y-0.5">
-                        <StatBar label="National GDP" value={selected.gdpNational} />
-                        <StatBar label="GDP Per Capita" value={selected.gdpPerCapita} />
-                        <StatBar label="Social Development" value={selected.socialDevelopment} />
-                        <StatBar label="Lifestyle" value={selected.lifestyle} />
-                      </div>
-                    </RetroTabPanel>
+                    <StatSection icon={<Coins size={13} />} title="Economy">
+                      <StatBar label="National GDP" value={selected.gdpNational} />
+                      <StatBar label="GDP Per Capita" value={selected.gdpPerCapita} />
+                      <StatBar label="Social Development" value={selected.socialDevelopment} />
+                      <StatBar label="Lifestyle" value={selected.lifestyle} />
+                    </StatSection>
 
-                    <RetroTabPanel id="forces" activeTab={activeTab} padding="sm">
-                      <div className="space-y-0.5">
-                        <StatBar label="Military Budget" value={selected.militaryBudget} />
-                        <StatBar label="Military Services" value={selected.militaryServices} />
-                        <StatBar label="Intel Budget" value={selected.intelligenceBudget} />
-                        <StatBar label="Intel Services" value={selected.intelligenceServices} />
-                        <StatBar label="Law Enforcement" value={selected.lawEnforcement} />
-                        <StatBar label="Law Budget" value={selected.lawEnforcementBudget} />
-                      </div>
-                    </RetroTabPanel>
+                    <StatSection icon={<Shield size={13} />} title="Forces">
+                      <StatBar label="Military Budget" value={selected.militaryBudget} />
+                      <StatBar label="Military Services" value={selected.militaryServices} />
+                      <StatBar label="Intel Budget" value={selected.intelligenceBudget} />
+                      <StatBar label="Intel Services" value={selected.intelligenceServices} />
+                      <StatBar label="Law Enforcement" value={selected.lawEnforcement} />
+                      <StatBar label="Law Budget" value={selected.lawEnforcementBudget} />
+                    </StatSection>
 
-                    <RetroTabPanel id="tech" activeTab={activeTab} padding="sm">
-                      <InfoRow label="Education Level">
-                        {getEducationLevel(selected.higherEducation)}
-                      </InfoRow>
-                      <div className="mt-3 space-y-0.5">
-                        <StatBar label="Science" value={selected.science} />
-                        <StatBar label="Cyber Capabilities" value={selected.cyberCapabilities} />
-                        <StatBar label="Digital Development" value={selected.digitalDevelopment} />
-                        <StatBar label="Media Freedom" value={selected.mediaFreedom} />
-                        <StatBar label="Higher Education" value={selected.higherEducation} />
-                        <StatBar label="Healthcare" value={selected.healthcare} />
-                      </div>
-                    </RetroTabPanel>
+                    <StatSection icon={<Cpu size={13} />} title="Tech & Media">
+                      <StatBar label="Science" value={selected.science} />
+                      <StatBar label="Cyber" value={selected.cyberCapabilities} />
+                      <StatBar label="Digital Dev" value={selected.digitalDevelopment} />
+                      <StatBar label="Media Freedom" value={selected.mediaFreedom} />
+                      <StatBar label={`Education (${getEducationLevel(selected.higherEducation)})`} value={selected.higherEducation} />
+                      <StatBar label="Healthcare" value={selected.healthcare} />
+                    </StatSection>
 
-                    <RetroTabPanel id="supers" activeTab={activeTab} padding="sm">
-                      <InfoRow label="LSW Regulations">
+                    <StatSection icon={<Zap size={13} />} title="Superhumans" className="xl:col-span-2">
+                      <div className="flex items-center gap-2 flex-wrap mb-2">
                         <RetroBadge variant={legalityVariant(selected.lswRegulations)} size="sm">
-                          {selected.lswRegulations}
+                          LSW {selected.lswRegulations}
                         </RetroBadge>
-                      </InfoRow>
-                      <InfoRow label="Vigilantism">
                         <RetroBadge variant={legalityVariant(selected.vigilantism)} size="sm">
-                          {selected.vigilantism}
+                          Vigilantism {selected.vigilantism}
                         </RetroBadge>
-                      </InfoRow>
-                      <InfoRow label="Cloning">
                         <RetroBadge variant={legalityVariant(selected.cloning)} size="sm">
-                          {selected.cloning}
+                          Cloning {selected.cloning}
                         </RetroBadge>
-                      </InfoRow>
-                      {!Number.isFinite(terrorismNum) && (
-                        <InfoRow label="Terrorism">
+                        {!Number.isFinite(terrorismNum) && (
                           <RetroBadge variant={severityVariant(selected.terrorismActivity)} size="sm">
-                            {selected.terrorismActivity}
+                            Terrorism {selected.terrorismActivity}
                           </RetroBadge>
-                        </InfoRow>
-                      )}
-                      <div className="mt-3 space-y-0.5">
-                        <StatBar label="LSW Activity" value={selected.lswActivity} />
-                        {Number.isFinite(terrorismNum) && (
-                          <StatBar label="Terrorism" value={terrorismNum} invert />
                         )}
                       </div>
-                    </RetroTabPanel>
+                      <StatBar label="LSW Activity" value={selected.lswActivity} />
+                      {Number.isFinite(terrorismNum) && (
+                        <StatBar label="Terrorism" value={terrorismNum} invert />
+                      )}
+                    </StatSection>
                   </div>
-                </RetroTabs>
+                </div>
 
                 {/* Cities + confirm */}
                 <div className="shrink-0 mt-3 pt-3 border-t-2 border-black/30">

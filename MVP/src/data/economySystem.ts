@@ -810,11 +810,11 @@ export function calculateCountryFunding(country: {
   // Performance bonus (higher for poorer countries - they need results)
   const performanceBonus = Math.floor(2000 + ((100 - gdpFactor * 100) * 50));
 
-  // Funding level label
+  // Funding level label (thresholds match the $1k-$15k weekly base scale)
   let fundingLevel: CountryFundingConfig['fundingLevel'];
-  if (adjustedFunding < 20000) fundingLevel = 'minimal';
-  else if (adjustedFunding < 50000) fundingLevel = 'standard';
-  else if (adjustedFunding < 100000) fundingLevel = 'generous';
+  if (adjustedFunding < 4000) fundingLevel = 'minimal';
+  else if (adjustedFunding < 8000) fundingLevel = 'standard';
+  else if (adjustedFunding < 13000) fundingLevel = 'generous';
   else fundingLevel = 'lavish';
 
   return {
