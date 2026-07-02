@@ -63,3 +63,66 @@
 4. **World meta:** UN/nuclear (#7), HVTs/hunters (#8), multi-map base (#11), interactive fast combat (#12).
 
 Combat stays confirm-only unless the owner reprioritizes. Every item above has its data/spec confirmed present — this is a wiring-and-UI roadmap, not a from-scratch one.
+
+---
+
+# Round 2 — deep-character direction (2026-07-02 owner dump #2)
+
+> New vision layer: characters **age**, go to the **hospital**, have **personalities**, and eventually **talk to you on the phone** (portrait on the side + comic bubble + accept/decline choices, LLM-driven later). Every character should be **effective at something** — investigator, base-builder, field-deployer — so nothing is dead weight; everything is weighted and means something, and once the simulator runs we can ballot/balance it. Directive: **fix the injury-table contradictions with subagents**, and **reserve portraits now**.
+
+## A. Injury & mental-state system + the color-coded report
+
+**The report the owner wants:** a Personnel/roster screen where each character's **physical injury state** and **mental state** read at a glance by **color** (green healthy, amber hurt, red critical; calm, stressed, panic/broken), with the character's **portrait**. Some injuries are visible immediately after combat; others are **revealed later at the hospital** (a diagnosis reveal). This is the post-combat injury display (#1) elevated to a persistent, color-coded health + psyche board.
+
+**The d100 table is a 5e master-guide, not runtime-ready.** Specs 23 (crit-injury) + 24 (status/treatment ladder) are the SHT-native authority. A subagent contradiction hunt confirmed the owner's instinct — it is riddled with issues:
+- **Duplicates / same-effect rows:** "Pulled thigh" in two tiers with different effects (rows 50 and 66); "Broken spine" equals "Fractured spine" verbatim-identical effect but a 6th-vs-4th-level cure inversion (rows 16 and 24); "Severed muscles" equals "Overstretched muscle", "Ruptured" equals "Bruised liver", "Dislocated shoulder" equals "finger" (identical -2 attack, different cure).
+- **Cure/severity inversions:** cure tier does not scale within a tier and even inverts (mild concussion costs more than minor; a full **Paralysed** sits in the mild "Injury" tier healing on a long rest, while spine breaks take 2d8 weeks).
+- **Mis-placed permanence:** "Amnesia" (Forever/uncurable) filed under the lower Mental-trauma tier, below curable "Severe mental trauma."
+- **Non-monotonic boon band:** the high-roll survivability/boon rows (86-101) are lateral, not ascending — a higher roll can give a weaker boon.
+- **Wall-to-wall 5e:** DC saves, spell slots ("Nth-level healing spell"), exhaustion levels, death saving throws, advantage/disadvantage, concentration, long/short rest, prone/frightened/paralysed conditions, hit dice, even "prestidigitation" and "the pesky rogue." None exist in 4CS.
+- **Missing SHT gates:** no row consumes **origin** (a Construct should Malfunction, not Bleed) or the **spine** (Healthcare/Cloning gating cure availability) — both mandatory per specs 23/24.
+
+**Translation rules (to SHT-native):** cure column to the spec-24 TreatmentTier ladder (None/Rest/FirstAid/FieldSurgery/HospitalCare/AdvancedMedical/PowerHealing/Regeneration/CloneReplacement); advantage/disadvantage and flat plus/minus N to **Column Shift** (disadvantage -1CS, "all" -2CS, advantage +1CS); ability map CON to CON, STR to STR, DEX to AGL, INT to INT, **WIS to INS** and **Charisma to FAME** (OWNER-FORKS, see below); "Until short rest" to "until end of combat", "Long rest" to strategic Hours/Days; add an **origin gate** and **spine note** to every relevant row; re-order to one **monotonic severity axis** (low d100 worse, high better).
+
+**Deliverable in flight:** a subagent workflow is translating all 100 rows + reconciling them into a clean **SHT-native injury table** (`docs/design/source/injury_table_sht.md`) — the new starting point the owner reacts to, deduped and 4CS-native, **not yet wired to runtime** (wiring is a later phase). Keeps the owner's "it is a starting point, I don't know if that is exactly how I want it."
+
+**OWNER-FORKS (need a ruling):** (1) **WIS to INS?** (5e Wisdom maps to Instinct?) (2) **Charisma to FAME?** (or to a social stat?) (3) do "quicker death" social rows ("enemies take pity") stay as flavor or get cut? (4) which thin categories to expand from the crit table (Finger/Ear/throat/tendon/rib)?
+
+## B. Education to roles ("everyone effective at something")
+
+**Finding:** education is a **major designed power system** that is almost entirely unwired. The source (`educationSystem.ts` + `Education_Career_Complete.csv`) designs **four effects**: (1) permanent **stat bonuses** scaling by degree level x field; (2) **skill + equipment unlocks** per specialization (some gated by restricted field / INT / origin / reputation); (3) a full **jobs/careers tree** — ~85 ranked jobs + ~18 day-jobs giving **weekly income, cover identity, workplace/info access, research capability, and per-career investigation bonuses**; (4) **training/research speed** (stat x institution). This IS the owner's "everyone effective at something" backbone — a doctorate makes a cybersurgeon, a military track makes a squad-leader/sniper, an investigation field makes a detective, engineering makes a base-builder.
+
+**But it is broken/unwired today** — only ~investigations are partly wired, and there are real bugs:
+- **Three conflicting `EducationLevel` types** (`data/educationSystem` DegreeLevel vs `worldSystems/educationSystem` vs `db/types`) + a **broken import** in characterSheet (imports a name the file does not export; assigns literals matching none). **Unify this first.**
+- TrainingCenter fabricates hard-coded stat bonuses ({stat:5,int:3}) and reads `optimalStat` when the field defines `optimalStatValue` — so per-field/level bonuses never apply; a doctorate equals an associate.
+- `DAY_JOBS`, `getAvailableJobs`, exams (`rollExam`), dropout, `calculateLearningSpeed` are all exported but **never called** — no income, no cover, no real training speed.
+- Generation seeds a **4th education vocabulary** (`EducationField[]`) never reconciled with the degree system.
+
+**Integration plan (priority order):** (1) **unify `EducationLevel`** into one type + fix the broken import; (2) author a real `DEGREES` dataset (FieldOfStudy x level to concrete statBonuses/skillUnlocks/equipmentUnlocks/jobUnlocks); (3) fix TrainingCenter enroll to use real field/level data; (4) make runtime training speed real (`calculateLearningSpeed` x facility bonus); (5) wire **exams + dropout**; (6) persist completion to a single source of truth (`completedDegrees[]`, apply stat bonuses to the sheet); (7) wire **jobs/careers** (`getAvailableJobs` to day-job assignment to income/cover/access, shown with the pay schedule from #14); (8) wire **skill/equipment unlocks** to loadout/combat gates; (9) deepen investigation gating beyond the ~12 templates. Files: `educationSystem.ts`, `worldSystems/educationSystem.ts`, `db/types.ts`, `characterSheet.ts`, `characterGeneration.ts`, `TrainingCenter.tsx`, `enhancedGameStore.ts`, `investigationSystem.ts`.
+
+## C. Phone-call dialogue (portrait + bubble + choices)
+
+**Vision to build.** Today `MobilePhone.tsx:612-657` is a one-shot call screen (the dealer GO NOW/LATER). Target: **call a contact/character, their portrait on the side + a comic `<SpeechBubble>` of what they say + accept/decline (or richer) choices**, eventually LLM-driven from their personality.
+
+- **Portraits: art already exists** — `public/assets/images/status_icons/portrait_01..12.png` (+ metadata). Wire contacts/recruits to a `portrait?: PortraitInfo` (mirroring the new CharacterSheet slot) with a seeded fallback to those PNGs. The `resolvePortrait()` + `CharacterPortrait` built this round render it.
+- **Choices: reuse the email-reply pattern** — `emailSystem` already has `replyOptions?: EmailReplyOption[]` with effects (reputation/relationship/triggersMission) and `handleEmailReply`. A call's choices equal the same structure; each fires `executeContactEffects()`.
+- **Bubble: mode from personality** — `resolveBubbleMode({ emotion, volume })` picks the look from the caller's mood (nervous merc to whisper, panicked to negative, angry to jagged).
+- **Build order:** (1) add `portrait? / personality? / choices?` to the `Contact` interface + seed existing contacts; (2) `CallScreen` = portrait side panel + `<SpeechBubble>` + choice buttons (extract from MobilePhone activeCall block); (3) wire choices to `executeContactEffects`; (4) later: LLM prompt from MBTI/calling/mood to dynamic line + multi-turn, cached.
+
+## D. Portraits, aging, hospital, LLM readiness
+
+- **Portraits:** slot reserved this round (`PortraitInfo` on CharacterSheet + `resolvePortrait()` + `CharacterPortrait.tsx`; 12 stock PNGs available). Real art / LLM-described faces drop into `portrait.url` with no call-site changes.
+- **Aging:** `AgingInfo` already exists on the character; needs birthdays + aging events wired to the world clock (stat drift with age, per the owner's "characters age").
+- **Hospital:** the recovery loop is specced (108) and the status/treatment ladder exists (24); connect injury records to hospital admission to recovery timeline to the color-coded report (A).
+- **LLM talking (future):** personality attributes (MBTI, calling, volatility, harm-avoidance, mood) + portrait + the bubble engine are the display + prompt substrate; drop in an LLM to generate lines when ready.
+
+## E. Covert ops & patrols = "what characters DO in the city"
+
+Owner reframed #2/#3: covert ops and patrols are the **city-action menu** — when a character is in a city, what do they do there. Covert-ops list (Destroy Ammo Depot, Disable Aircraft, Capture Officer, Cut Pipeline, KO Radar, Disable SAM, Liberate POW, Photograph Aircraft, Free Hostages, Create Diversion, Delayed Sabotage) + patrol sub-choices become a submenu **driven by the country dynamic**, using character **skills/education/roles** (B) to grant weighted bonuses. Net build; source = spec 06 activities + `Investigation_Methods.csv`. (Owner will add more detail.)
+
+## Master-table updates (this round)
+
+- **#1 Injuries** verdict now **"reconcile first (subagent workflow), then wire display + color report"**; d100 table is a flawed master-guide, specs 23/24 are authority.
+- **#9 Moods** the mood/emotion layer feeds BOTH the color-report (A) and the bubble mode resolver (C) — one signal, two consumers.
+- **#13 Education** upgraded from "wire it" to a **9-step integration plan** (unify types first); it is the roles/effectiveness backbone.
+- **Portraits** slot + placeholder renderer **DONE** this round.
