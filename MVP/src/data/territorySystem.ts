@@ -693,4 +693,26 @@ export function completeDefenseMission(
   }
 }
 
+// ============================================================================
+// CHRONOS SNAPSHOT SUPPORT (time-travel save/restore of module state)
+// ============================================================================
+
+export interface TerritorySnapshot {
+  territoryControl: [string, TerritoryControl][]
+  militiaUnits: MilitiaUnit[]
+}
+
+export function getTerritorySnapshot(): TerritorySnapshot {
+  return {
+    territoryControl: Array.from(state.territoryControl.entries()),
+    militiaUnits: state.militiaUnits.map(unit => ({ ...unit }))
+  }
+}
+
+export function restoreTerritorySnapshot(snapshot: TerritorySnapshot): void {
+  if (!snapshot) return
+  state.territoryControl = new Map(snapshot.territoryControl || [])
+  state.militiaUnits = (snapshot.militiaUnits || []).map(unit => ({ ...unit }))
+}
+
 export default initTerritorySystem
