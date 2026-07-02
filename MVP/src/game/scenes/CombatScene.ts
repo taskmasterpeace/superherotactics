@@ -78,6 +78,7 @@ import {
   KnockbackResult,
 } from '../../data/knockbackSystem';
 import { getCharacterWeight } from '../../data/strengthSystem';
+import { MORALE_EFFECTS, getMoraleLevel } from '../../data/characterSheet';
 import { getWeaponByName, getWeaponById } from '../../data/weapons';
 // Escalation system imports
 import {
@@ -953,6 +954,9 @@ interface Unit {
   movementPenalty?: number; // Multiplier for movement cost (0.5 = half speed)
   accuracyPenalty?: number; // Flat accuracy modifier (negative = worse)
   apPenalty?: number; // AP reduction per turn
+  // Strategic morale modifiers (from MORALE_EFFECTS based on character morale)
+  moraleAccuracyMod?: number; // % accuracy modifier (+15 ecstatic to -30 broken)
+  moraleDamageMod?: number; // % damage modifier (+10 ecstatic to -15 broken)
   origin?: number; // Origin type for immunity checks (1-9)
   factionType?: string; // For escalation tracking: 'police' | 'swat' | 'military' | undefined
   // Martial arts training
@@ -2560,6 +2564,9 @@ export class CombatScene extends Phaser.Scene {
       // Get armor data from database integration
       const armorData = getArmorForUnit(char);
 
+      // Morale carries into combat (morale 50 = 'good' = no modifier)
+      const moraleEffects = MORALE_EFFECTS[getMoraleLevel(char.morale ?? 50)];
+
       this.spawnUnit({
         id: char.id,
         name: char.name,
@@ -2583,6 +2590,8 @@ export class CombatScene extends Phaser.Scene {
         mel: char.stats.MEL,
         dr: armorData.dr,           // Damage reduction from armor database
         stoppingPower: armorData.stoppingPower, // Armor stopping power from database
+        moraleAccuracyMod: moraleEffects.accuracyMod,
+        moraleDamageMod: moraleEffects.damageMod,
         acted: false,
         visible: true,
         spriteId,
@@ -2617,6 +2626,9 @@ export class CombatScene extends Phaser.Scene {
       // Get armor data - use database if equipped, otherwise generate based on tier
       const armorData = getArmorForUnit(char);
 
+      // Morale carries into combat (morale 50 = 'good' = no modifier)
+      const moraleEffects = MORALE_EFFECTS[getMoraleLevel(char.morale ?? 50)];
+
       this.spawnUnit({
         id: char.id,
         name: char.name,
@@ -2640,6 +2652,8 @@ export class CombatScene extends Phaser.Scene {
         mel: char.stats.MEL,
         dr: armorData.dr,           // Damage reduction from armor database
         stoppingPower: armorData.stoppingPower, // Armor stopping power from database
+        moraleAccuracyMod: moraleEffects.accuracyMod,
+        moraleDamageMod: moraleEffects.damageMod,
         acted: false,
         visible: true,
         spriteId,
@@ -2706,6 +2720,8 @@ export class CombatScene extends Phaser.Scene {
       powerCooldowns: unitData.powerCooldowns ?? {},
       overwatching: unitData.overwatching ?? false,
       spriteId: unitData.spriteId,
+      moraleAccuracyMod: unitData.moraleAccuracyMod ?? 0,
+      moraleDamageMod: unitData.moraleDamageMod ?? 0,
       // Vision cone for flanking calculations (default: human 120° FOV)
       // INS affects detection range: base 12 + INS/10 (so INS 50 = 17 tiles, INS 80 = 20 tiles)
       vision: unitData.vision ?? {
@@ -5230,6 +5246,11 @@ export class CombatScene extends Phaser.Scene {
       hitChance += attacker.accuracyPenalty; // Usually negative
     }
 
+    // Strategic morale modifier (+15% ecstatic to -30% broken)
+    if (attacker.moraleAccuracyMod) {
+      hitChance += attacker.moraleAccuracyMod;
+    }
+
     // CON bonus for stability under fire (reduces suppression/fear effects)
     // High constitution = steady hands, better focus despite chaos
     // Every 10 CON above 50 = +2% accuracy (max +10% at CON 100)
@@ -6598,7 +6619,9 @@ export class CombatScene extends Phaser.Scene {
       const roll = Math.random() * 100;
       // Check if attacker is suppressed (-20% accuracy from suppression status)
       const suppressedPenalty = attacker.statusEffects?.some(e => e.id === 'suppressed') ? -20 : 0;
-      const effectiveAccuracy = weapon.accuracy + (attacker.agl - 50) * 0.3 + fireModeConfig.accuracyPenalty + suppressedPenalty;
+      // Strategic morale modifier (+15% ecstatic to -30% broken)
+      const moraleAccMod = attacker.moraleAccuracyMod || 0;
+      const effectiveAccuracy = weapon.accuracy + (attacker.agl - 50) * 0.3 + fireModeConfig.accuracyPenalty + suppressedPenalty + moraleAccMod;
       const hitResult = getHitResult(roll, effectiveAccuracy);
 
       // Get full damage definition from damage system
@@ -6635,6 +6658,11 @@ export class CombatScene extends Phaser.Scene {
       const isMeleeWeapon = weapon.visual?.type === 'melee' || weapon.range <= 2;
       if (isMeleeWeapon && attacker.mel > 50) {
         baseDamage += Math.floor((attacker.mel - 50) / 10) * 2;
+      }
+
+      // Strategic morale damage modifier (+10% ecstatic to -15% broken)
+      if (attacker.moraleDamageMod) {
+        baseDamage = Math.floor(baseDamage * (1 + attacker.moraleDamageMod / 100));
       }
 
       if (finalHitResult === 'crit') {

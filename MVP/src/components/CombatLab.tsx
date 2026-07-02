@@ -22,6 +22,7 @@ import { ALL_ARMOR, getArmorByName } from '../data/armor';
 // Fast Combat - Streamlined combat viewer
 import FastCombat from './FastCombat';
 import { SimUnit } from '../combat/types';
+import { MORALE_EFFECTS, getMoraleLevel } from '../data/characterSheet';
 // Escalation HUD - Heat/wanted level display
 import { EscalationHUD, EscalationChoiceModal } from './EscalationHUD';
 import { EscapeOption, CharacterEscalationOpinion } from '../game/EventBridge';
@@ -217,6 +218,7 @@ export const CombatLab: React.FC = () => {
         equipment: char.equipment || [],
         threatLevel: char.threatLevel,
         origin: char.origin,
+        morale: char.morale,
       }));
   };
 
@@ -232,6 +234,8 @@ export const CombatLab: React.FC = () => {
     const weapon = getWeaponByName(weaponName);
     const armorName = char.equipment?.[1];
     const armor = armorName ? getArmorByName(armorName) : undefined;
+    // Morale carries into combat (morale 50 = 'good' = no modifier)
+    const moraleEffects = MORALE_EFFECTS[getMoraleLevel(char.morale ?? 50)];
 
     return {
       id: char.id,
@@ -257,6 +261,8 @@ export const CombatLab: React.FC = () => {
       cover: 'none',
       statusEffects: [],
       accuracyPenalty: 0,
+      moraleAccuracyMod: moraleEffects.accuracyMod,
+      moraleDamageMod: moraleEffects.damageMod,
       weapon: {
         name: weapon?.name || weaponName,
         damage: weapon?.damage || 20,

@@ -593,6 +593,10 @@ export interface SimUnit {
 
   // Morale/Panic system
   panicLevel?: 'steady' | 'shaken' | 'panicked' | 'broken';
+
+  // Strategic morale carried into combat (from MORALE_EFFECTS in characterSheet)
+  moraleAccuracyMod?: number;  // % accuracy modifier (+15 ecstatic to -30 broken)
+  moraleDamageMod?: number;    // % damage modifier (+10 ecstatic to -15 broken)
 }
 
 // ============ SHIELD REGENERATION ============

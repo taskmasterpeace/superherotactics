@@ -114,6 +114,8 @@ export interface CombatCharacter {
   equippedShield?: string;
   // Character calling (motivation) - affects combat bonuses
   calling?: string;
+  // Strategic morale (0-100) - converts to accuracy/damage mods in combat
+  morale?: number;
   // NPC System Integration - links combat unit to NPC registry
   npcId?: string;  // Links to NPC/merc system for death consequences
   isMercenary?: boolean;  // True if this is a hired mercenary

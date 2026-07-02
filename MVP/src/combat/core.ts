@@ -452,6 +452,13 @@ export function calculateAccuracy(
   const targetPanicMods = getPanicModifiers(target.panicLevel || 'steady');
   accuracy -= targetPanicMods.evasionMod;
 
+  // STRATEGIC MORALE MODIFIER (Attacker)
+  // Morale from the strategic layer carries into combat.
+  // Ecstatic: +15%, High: +10%, Low: -10%, Very Low: -20%, Broken: -30%
+  if (attacker.moraleAccuracyMod) {
+    accuracy += attacker.moraleAccuracyMod;
+  }
+
   // BELT BONUS (Martial Arts Training)
   // Trained martial artists are more accurate in melee combat.
   // Belt 1 (White) = +1, Belt 10 (Black II) = +10 accuracy
@@ -498,6 +505,13 @@ export function getBaseDamage(weapon: SimWeapon, attacker: SimUnit): number {
   if (isMeleeWeapon && attacker.stats.MEL) {
     const meleeBonus = Math.floor((attacker.stats.MEL - 15) / 3);
     damage += Math.max(0, meleeBonus);
+  }
+
+  // STRATEGIC MORALE DAMAGE MODIFIER
+  // High morale fights harder, broken morale pulls punches.
+  // Ecstatic: +10%, High: +5%, Low: -5%, Very Low: -10%, Broken: -15%
+  if (attacker.moraleDamageMod) {
+    damage = Math.floor(damage * (1 + attacker.moraleDamageMod / 100));
   }
 
   return damage;
