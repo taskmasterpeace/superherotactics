@@ -54,6 +54,7 @@ import {
   Plus,
   Pencil,
   Home,
+  X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { RetroButton, RetroBadge, RetroTabs, RetroTabPanel, cn } from '../ui';
@@ -1524,6 +1525,36 @@ export const WorldMapGrid: React.FC = () => {
   );
   const baseCell = useMemo(() => resolveSectorToCell(baseSector), [baseSector]);
 
+  // Country -> set of its grid sectors (built once from every city's sector).
+  // Lets the map answer "where is the United States / Cuba / ..." at a glance.
+  const countrySectors = useMemo(() => {
+    const m = new Map<string, Set<string>>();
+    for (const c of cities) {
+      if (!c.sector) continue;
+      let set = m.get(c.country);
+      if (!set) { set = new Set(); m.set(c.country, set); }
+      set.add(c.sector.toUpperCase());
+    }
+    return m;
+  }, []);
+
+  // The player's home country is always subtly outlined; a clicked/picked
+  // country is brightly highlighted so US vs Cuba read correctly on the map.
+  const homeCountrySectors = useMemo(
+    () => countrySectors.get(selectedCountry) ?? null,
+    [countrySectors, selectedCountry]
+  );
+  const [focusedCountry, setFocusedCountry] = useState<string | null>(null);
+  const [countryQuery, setCountryQuery] = useState('');
+  const focusedCountrySectors = useMemo(
+    () => (focusedCountry ? countrySectors.get(focusedCountry) ?? null : null),
+    [countrySectors, focusedCountry]
+  );
+  const countryNames = useMemo(
+    () => Array.from(countrySectors.keys()).sort((a, b) => a.localeCompare(b)),
+    [countrySectors]
+  );
+
   // Center the map on a sector at a given zoom (used for initial view + HOME button)
   const centerOnSector = useCallback((sector: string, scale: number) => {
     const cell = resolveSectorToCell(sector);
@@ -1548,6 +1579,24 @@ export const WorldMapGrid: React.FC = () => {
   const handleCenterHome = useCallback(() => {
     centerOnSector(baseSector, HOME_ZOOM);
   }, [centerOnSector, baseSector]);
+
+  // Focus a country: highlight its sectors and pan to its centroid sector.
+  const focusCountry = useCallback((countryName: string | null) => {
+    setFocusedCountry(countryName);
+    if (!countryName) return;
+    const sectors = countrySectors.get(countryName);
+    if (!sectors || sectors.size === 0) return;
+    // Pan to the centroid of the country's sectors (average row/col).
+    let sumRow = 0, sumCol = 0, n = 0;
+    for (const s of sectors) {
+      const cell = resolveSectorToCell(s);
+      if (cell) { sumRow += cell.row; sumCol += cell.col; n++; }
+    }
+    if (n === 0) return;
+    const midRow = Math.round(sumRow / n);
+    const midCol = Math.round(sumCol / n);
+    centerOnSector(`${ROW_LABELS[midRow]}${midCol + 1}`, Math.max(mapScale, 1.25));
+  }, [countrySectors, centerOnSector, mapScale]);
 
   // On mount: open the map centered on the player's base at ~1.5x zoom.
   // Tries synchronously (layout is complete by effect time); if the container
@@ -1632,6 +1681,8 @@ export const WorldMapGrid: React.FC = () => {
   const handleCellClick = useCallback((cell: GridCell) => {
     setSelectedCell(cell);
     setActiveTab('map');
+    // Highlight the country that owns this cell (its most-represented country).
+    if (cell.countries.length > 0) setFocusedCountry(cell.countries[0]);
   }, []);
 
   const handleMoveCharacter = (charId: string, targetSector: string) => {
@@ -1955,6 +2006,10 @@ export const WorldMapGrid: React.FC = () => {
                         : null;
                       const bgOpacity = territoryControl ? territoryControl.controlPercent / 400 : 0; // Max 25% opacity
 
+                      // Country overlays: home country (persistent gold) + focused country (bright cyan)
+                      const inHomeCountry = homeCountrySectors?.has(cell.id) ?? false;
+                      const inFocusedCountry = focusedCountrySectors?.has(cell.id) ?? false;
+
                       return (
                         <div
                           key={cell.id}
@@ -1978,10 +2033,17 @@ export const WorldMapGrid: React.FC = () => {
                           onMouseEnter={() => setHoveredCell(cell)}
                           onMouseLeave={() => setHoveredCell(null)}
                         >
+                          {/* Country overlays (non-interactive tint on top of the cell) */}
+                          {inHomeCountry && (
+                            <div className="absolute inset-0 pointer-events-none bg-amber-400/25 border border-amber-300/60" />
+                          )}
+                          {inFocusedCountry && !inHomeCountry && (
+                            <div className="absolute inset-0 pointer-events-none bg-cyan-400/30 border border-cyan-300/70" />
+                          )}
                           {/* City indicator - always visible when cities exist */}
                           {cell.cities.length > 0 && (
                             <div className={cn(
-                              "absolute top-0.5 right-0.5 flex items-center justify-center rounded-sm text-[8px] font-bold shadow-md",
+                              "absolute top-0.5 right-0.5 flex items-center justify-center rounded-sm text-[8px] font-bold shadow-md z-10",
                               cell.cities.length === 1
                                 ? "w-3 h-3 bg-emerald-500 text-white"
                                 : "min-w-3 h-3 px-0.5 bg-amber-500 text-black",
@@ -2276,6 +2338,47 @@ export const WorldMapGrid: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Country locator - top-left. Type/pick a country to see where it is. */}
+            <div className="absolute z-20 flex flex-col items-start gap-1" style={{ top: '8px', left: '8px' }}>
+              <div className="flex items-center gap-1 bg-card/90 border-2 border-black rounded-lg shadow-retro-sm px-2 py-1">
+                <MapPin className="w-3 h-3 text-primary shrink-0" />
+                <input
+                  list="wm-country-list"
+                  value={countryQuery}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setCountryQuery(v);
+                    if (countrySectors.has(v)) focusCountry(v);
+                  }}
+                  placeholder="Find a country…"
+                  className="w-40 bg-transparent text-xs text-foreground placeholder:text-muted-foreground focus:outline-none"
+                />
+                <datalist id="wm-country-list">
+                  {countryNames.map((n) => <option key={n} value={n} />)}
+                </datalist>
+                {focusedCountry && (
+                  <button
+                    onClick={() => { focusCountry(null); setCountryQuery(''); }}
+                    title="Clear country highlight"
+                    className="text-muted-foreground hover:text-destructive transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+              {focusedCountry && (
+                <div className="flex items-center gap-1.5 bg-cyan-500/20 border border-cyan-300/60 rounded-md px-2 py-0.5 text-[10px] font-bold text-cyan-100">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-300" />
+                  {focusedCountry} — {focusedCountrySectors?.size ?? 0} sectors
+                </div>
+              )}
+              {selectedCountry && (
+                <div className="flex items-center gap-1.5 bg-amber-500/20 border border-amber-300/60 rounded-md px-2 py-0.5 text-[10px] font-bold text-amber-100">
+                  <Home className="w-2.5 h-2.5" /> Home: {selectedCountry}
+                </div>
+              )}
+            </div>
 
             {/* Map Controls - Retro Style */}
             <div className="absolute z-20 flex flex-col items-end gap-1" style={{ bottom: '8px', right: '8px' }}>
