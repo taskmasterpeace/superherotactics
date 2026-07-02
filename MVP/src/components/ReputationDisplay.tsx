@@ -30,6 +30,8 @@ import {
 } from '../data/heatSystem';
 import { getHuntMissionManager, HuntMission } from '../data/factionHuntMissions';
 import { getAllyManager, AvailableBenefit, getBenefitTypeIcon } from '../data/factionAllies';
+import { calculatePoliticalSystem, PoliticalSystem } from '../data/combinedEffects';
+import { getCountryByCode, getCountryByName } from '../data/countries';
 
 // =============================================================================
 // STANDING BAR COMPONENT
@@ -366,6 +368,94 @@ export const AllyBenefitsPanel: React.FC<AllyBenefitsPanelProps> = ({
 };
 
 // =============================================================================
+// GOVERNMENT RELATIONS SECTION
+// =============================================================================
+
+const COUP_RISK_COLORS: Record<PoliticalSystem['coupRisk'], string> = {
+  none: '#22c55e',
+  low: '#eab308',
+  moderate: '#f97316',
+  high: '#ef4444',
+  imminent: '#dc2626',
+};
+
+interface GovernmentRelationsSectionProps {
+  countryCode: string;
+  countryName: string;
+  className?: string;
+}
+
+export const GovernmentRelationsSection: React.FC<GovernmentRelationsSectionProps> = ({
+  countryCode,
+  countryName,
+  className = '',
+}) => {
+  const [expanded, setExpanded] = useState(false);
+  const country = getCountryByCode(countryCode) ?? getCountryByName(countryName);
+
+  if (!country) return null;
+
+  const politics = calculatePoliticalSystem(country);
+  const coupColor = COUP_RISK_COLORS[politics.coupRisk];
+
+  return (
+    <div className={`p-3 rounded bg-gray-800/70 border border-gray-700/30 ${className}`}>
+      <button
+        className="w-full flex items-center justify-between"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <span className="text-sm text-gray-400">🏛️ Government Relations</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium capitalize" style={{ color: coupColor }}>
+            Coup risk: {politics.coupRisk}
+          </span>
+          <span className="text-gray-400">{expanded ? '▾' : '▸'}</span>
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="mt-2 pt-2 border-t border-gray-700/30 space-y-1 text-xs text-gray-400">
+          <div className="flex justify-between">
+            <span>Lobbying</span>
+            <span className={politics.canLobby ? 'text-green-400' : 'text-red-400'}>
+              {politics.canLobby ? `$${politics.lobbyCost.toLocaleString()}` : 'No access'}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span>Bribe politicians</span>
+            <span className={politics.canBribePoliticians ? 'text-green-400' : 'text-red-400'}>
+              {politics.canBribePoliticians
+                ? `$${politics.politicianBribeCost.toLocaleString()}`
+                : 'Not possible'}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span>Government contracts</span>
+            <span className={politics.canGetGovernmentContracts ? 'text-green-400' : 'text-red-400'}>
+              {politics.canGetGovernmentContracts
+                ? `Available (${Math.round((politics.contractCorruptionMultiplier - 1) * 100)}% kickback)`
+                : 'Unavailable'}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span>Stability</span>
+            <span className="text-white">{politics.stabilityRating}/100</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Coup risk</span>
+            <span className="font-medium capitalize" style={{ color: coupColor }}>
+              {politics.coupRisk}
+              {politics.canStageCoup &&
+                ` (${Math.round(politics.coupSuccessChance)}% success, $${politics.coupCost.toLocaleString()})`}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// =============================================================================
 // COUNTRY REPUTATION CARD
 // =============================================================================
 
@@ -438,6 +528,13 @@ export const CountryReputationCard: React.FC<CountryReputationCardProps> = ({
           <div className="text-red-400 font-bold mt-1">⚠️ Cannot enter legally</div>
         )}
       </div>
+
+      {/* Government relations */}
+      <GovernmentRelationsSection
+        countryCode={countryCode}
+        countryName={countryName}
+        className="mt-3"
+      />
     </div>
   );
 };
@@ -570,6 +667,7 @@ export default {
   BountyAlert,
   HuntWarning,
   AllyBenefitsPanel,
+  GovernmentRelationsSection,
   CountryReputationCard,
   ReputationPanel,
   ReputationHUD,

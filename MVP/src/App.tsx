@@ -74,6 +74,11 @@ import { initCombatResultsHandler, cleanupCombatResultsHandler } from './stores/
 // Faction Event Handler - updates faction standings based on mission outcomes
 import { initFactionEventHandler, cleanupFactionEventHandler } from './data/factionEventHandler'
 
+// Chronos System - diegetic time-travel save/load (timeline anchors, rewinds)
+import { initChronoSystem, cleanupChronoSystem } from './data/chronoSystem'
+import ChronosDevice from './components/ChronosDevice'
+import ReputationScreen from './components/ReputationScreen'
+
 // World Systems - central initialization for all simulation systems
 import { initWorldSystems, cleanupWorldSystems } from './data/worldSystemsInit'
 
@@ -154,6 +159,9 @@ function App() {
     // Initialize faction event handler (standings update from missions)
     initFactionEventHandler()
 
+    // Initialize Chronos (timeline anchors at day rollover / pre-combat / mission end)
+    initChronoSystem()
+
     // Handle resize - track both mobile and minimum width
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768)
@@ -220,6 +228,12 @@ function App() {
           case 'e':
             if (!e.ctrlKey && !e.metaKey) setCurrentView('equipment-shop')
             break
+          case 't':
+            if (!e.ctrlKey && !e.metaKey) setCurrentView('chronos')
+            break
+          case 'r':
+            if (!e.ctrlKey && !e.metaKey) setCurrentView('reputation')
+            break
         }
       }
     }
@@ -242,6 +256,7 @@ function App() {
       cleanupEmailSystem()
       cleanupCombatResultsHandler()
       cleanupFactionEventHandler()
+      cleanupChronoSystem()
       cleanupWorldSystems()
     }
   }, [checkIdleCharacters])
@@ -519,6 +534,8 @@ function App() {
             {currentView === 'world-data' && <WorldDataEditor onClose={() => setCurrentView('world-map')} />}
             {currentView === 'training' && <TrainingCenter />}
             {currentView === 'base' && <BaseManager />}
+            {currentView === 'chronos' && <ChronosDevice />}
+            {currentView === 'reputation' && <ReputationScreen />}
           </div>
         </>
       )}

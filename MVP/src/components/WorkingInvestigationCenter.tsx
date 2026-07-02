@@ -7,14 +7,17 @@ import { getCityByName } from '../data/cities'
 import { getCountryByCity } from '../data/countries'
 
 export default function WorkingInvestigationCenter() {
-  const { 
-    investigations, 
-    characters, 
+  const {
+    investigations,
+    characters,
     assignInvestigation,
-    setCurrentView
+    setCurrentView,
+    getBaseBonuses
   } = useGameStore()
-  
+
   const [selectedInvestigation, setSelectedInvestigation] = useState<any>(null)
+
+  const baseInvestigationBonus = getBaseBonuses().investigation
 
   return (
     <div className="h-full flex">
@@ -36,7 +39,13 @@ export default function WorkingInvestigationCenter() {
             🔙 Back
           </button>
         </div>
-        
+
+        {baseInvestigationBonus > 0 && (
+          <div className="mb-4 text-sm text-green-400">
+            +{baseInvestigationBonus}% investigation progress from base facilities
+          </div>
+        )}
+
         <div className="space-y-3">
           {investigations.map((investigation, index) => (
             <motion.div

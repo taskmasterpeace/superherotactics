@@ -33,6 +33,9 @@ export const TrainingCenter: React.FC = () => {
   const trainingEnrollments = useGameStore((state) => state.trainingEnrollments)
   const enrollCharacter = useGameStore((state) => state.enrollCharacter)
   const dropTraining = useGameStore((state) => state.dropTraining)
+  const getBaseBonuses = useGameStore((state) => state.getBaseBonuses)
+
+  const baseEducationBonus = getBaseBonuses().education
 
   // Local state for selection UI
   const [selectedTrack, setSelectedTrack] = useState<EducationTrack | 'all'>('all')
@@ -142,6 +145,12 @@ export const TrainingCenter: React.FC = () => {
   return (
     <div className="bg-gray-900 text-white p-6 min-h-full">
       <h1 className="text-2xl font-bold mb-6 text-cyan-400">Training Center</h1>
+
+      {baseEducationBonus > 0 && (
+        <div className="mb-4 text-sm text-cyan-400">
+          +{baseEducationBonus}% training speed from base facilities
+        </div>
+      )}
 
       {/* Current Enrollments */}
       {enrollments.length > 0 && (
@@ -408,7 +417,7 @@ export const TrainingCenter: React.FC = () => {
               budget < estimatedCost
             }
             className={`w-full py-3 rounded font-semibold ${
-              selectedField && selectedInstitution && selectedCharacter && money >= estimatedCost
+              selectedField && selectedInstitution && selectedCharacter && budget >= estimatedCost
                 ? 'bg-cyan-600 hover:bg-cyan-500 text-white'
                 : 'bg-gray-600 text-gray-400 cursor-not-allowed'
             }`}

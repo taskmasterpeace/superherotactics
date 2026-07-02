@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { cities, City } from '../../data/cities';
 import { getCountryByName } from '../../data/countries';
+import { calculateBorderControl } from '../../data/combinedEffects';
 import { useGameStore, TravelingUnit, FleetVehicle, TIME_SPEEDS, TimeSpeed } from '../../stores/enhancedGameStore';
 import CityActionsPanel from './CityActionsPanel';
 import { CityAction } from '../../data/cityActions';
@@ -51,7 +52,9 @@ import {
   Star,
   Trash2,
   Plus,
+  Pencil,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { RetroButton, RetroBadge, RetroTabs, RetroTabPanel, cn } from '../ui';
 import { Squad, PERSONALITIES } from '../../data/squadSystem';
 
@@ -210,10 +213,12 @@ const MessagesPanel: React.FC<{
   squads: Squad[];
   onCreateSquad: (name: string, characterIds: string[]) => Squad | null;
   onDisbandSquad: (squadId: string) => boolean;
+  onRenameSquad: (squadId: string, name: string) => boolean;
   onSetActiveSquad: (squadId: string) => void;
   onAssignToSquad: (characterId: string, squadId: string) => boolean;
   onRemoveFromSquad: (characterId: string, squadId: string) => boolean;
   onDeploySquad: (squadId: string, sector: string) => void;
+  onAssignVehicle: (squadId: string, vehicleId: string) => { success: boolean; reason?: string; warnings?: string[] };
 }> = ({
   characters,
   selectedCell,
@@ -249,14 +254,18 @@ const MessagesPanel: React.FC<{
   squads,
   onCreateSquad,
   onDisbandSquad,
+  onRenameSquad,
   onSetActiveSquad,
   onAssignToSquad,
   onRemoveFromSquad,
   onDeploySquad,
+  onAssignVehicle,
 }) => {
   const [isMessagesExpanded, setIsMessagesExpanded] = useState(true);
   const [newSquadName, setNewSquadName] = useState('');
   const [selectedSquadId, setSelectedSquadId] = useState<string | null>(null);
+  const [editingSquadId, setEditingSquadId] = useState<string | null>(null);
+  const [editSquadName, setEditSquadName] = useState('');
   const [squadMemberSelection, setSquadMemberSelection] = useState<string[]>([]);
   const [expandedVehicleId, setExpandedVehicleId] = useState<string | null>(null);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
@@ -518,7 +527,35 @@ const MessagesPanel: React.FC<{
                   {selectedCell.countries.length > 0 && (
                     <div className="bg-surface rounded-lg px-3 py-2 border-2 border-black">
                       <p className="text-xs text-muted-foreground uppercase">Countries</p>
-                      <p className="text-foreground text-sm">{selectedCell.countries.join(', ')}</p>
+                      <div className="space-y-1 mt-1 max-h-32 overflow-y-auto">
+                        {selectedCell.countries.map((countryName) => {
+                          const countryData = getCountryByName(countryName);
+                          const border = countryData ? calculateBorderControl(countryData) : null;
+                          return (
+                            <div key={countryName}>
+                              <div className="flex items-center justify-between">
+                                <span className="text-foreground text-sm">{countryName}</span>
+                                {border && (
+                                  <span className={cn(
+                                    "text-[10px] font-medium capitalize",
+                                    border.borderSecurityLevel >= 60 ? "text-red-400" :
+                                    border.borderSecurityLevel >= 40 ? "text-yellow-400" : "text-green-400"
+                                  )}>
+                                    {border.porosity} border
+                                  </span>
+                                )}
+                              </div>
+                              {border && (
+                                <p className="text-[10px] text-muted-foreground">
+                                  Visa: {border.visaRequired ? `$${border.visaCost} · ${border.visaWaitDays}d` : 'none'}
+                                  {' · '}Smuggle: {border.smugglerAvailable ? `$${border.illegalEntryCost.toLocaleString()}` : 'n/a'}
+                                  {' · '}Bribe: {border.bribeBorderGuards ? `$${border.bribeCost.toLocaleString()}` : 'n/a'}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
 
@@ -847,6 +884,10 @@ const MessagesPanel: React.FC<{
                       const isExpanded = selectedSquadId === squad.id;
                       const leader = squad.members.find(m => m.role === 'leader');
                       const leaderPersonality = leader ? PERSONALITIES[leader.personality] : null;
+                      const assignedVehicle = squad.vehicleId
+                        ? vehicles.find(v => v.vehicleTemplateId === squad.vehicleId)
+                        : null;
+                      const assignedVehicleName = assignedVehicle?.name || squad.vehicle?.name;
 
                       // Get status color
                       const getStatusColor = (status: string) => {
@@ -875,7 +916,43 @@ const MessagesPanel: React.FC<{
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <p className="text-foreground font-bold text-sm truncate">{squad.name}</p>
+                                {editingSquadId === squad.id ? (
+                                  <input
+                                    type="text"
+                                    value={editSquadName}
+                                    autoFocus
+                                    onClick={(e) => e.stopPropagation()}
+                                    onChange={(e) => setEditSquadName(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        onRenameSquad(squad.id, editSquadName);
+                                        setEditingSquadId(null);
+                                      } else if (e.key === 'Escape') {
+                                        setEditingSquadId(null);
+                                      }
+                                    }}
+                                    onBlur={() => {
+                                      onRenameSquad(squad.id, editSquadName);
+                                      setEditingSquadId(null);
+                                    }}
+                                    className="flex-1 min-w-0 px-1.5 py-0.5 text-sm font-bold bg-background border-2 border-black rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                  />
+                                ) : (
+                                  <>
+                                    <p className="text-foreground font-bold text-sm truncate">{squad.name}</p>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditingSquadId(squad.id);
+                                        setEditSquadName(squad.name);
+                                      }}
+                                      className="p-0.5 rounded text-muted-foreground hover:text-foreground hover:bg-primary/20 transition-colors flex-shrink-0"
+                                      title="Rename squad"
+                                    >
+                                      <Pencil className="w-3 h-3" />
+                                    </button>
+                                  </>
+                                )}
                                 <div className={cn("w-2 h-2 rounded-full border border-black", getStatusColor(squad.status))} />
                               </div>
                               <div className="flex items-center gap-2 text-muted-foreground text-[10px]">
@@ -886,6 +963,12 @@ const MessagesPanel: React.FC<{
                                 </span>
                                 <span>•</span>
                                 <span>{squad.currentSector}</span>
+                                {assignedVehicleName && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="truncate">{assignedVehicleName}</span>
+                                  </>
+                                )}
                               </div>
                             </div>
                             <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", isExpanded && 'rotate-180')} />
@@ -970,6 +1053,54 @@ const MessagesPanel: React.FC<{
                                   </div>
                                 );
                               })()}
+
+                              {/* Vehicle Assignment */}
+                              <div className="mb-2">
+                                <p className="text-[10px] text-muted-foreground uppercase font-bold mb-1">Vehicle</p>
+                                {assignedVehicleName ? (
+                                  <div className="flex items-center justify-between bg-secondary/20 rounded-lg px-2 py-1 border border-black/30">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-secondary">
+                                        {getVehicleIcon(assignedVehicle?.type || (squad.travelMode === 'air' ? 'aircraft' : squad.travelMode === 'water' ? 'sea' : 'ground'))}
+                                      </span>
+                                      <span className="text-foreground text-xs font-medium">{assignedVehicleName}</span>
+                                    </div>
+                                    <span className="text-muted-foreground text-[10px] uppercase font-bold">{squad.travelMode || 'ground'}</span>
+                                  </div>
+                                ) : (
+                                  <p className="text-muted-foreground/50 text-xs italic">No vehicle assigned (on foot)</p>
+                                )}
+                                {(() => {
+                                  const availableVehicles = vehicles.filter(v =>
+                                    v.status === 'available' && v.vehicleTemplateId !== squad.vehicleId
+                                  );
+                                  if (availableVehicles.length === 0) return null;
+                                  return (
+                                    <div className="mt-1 space-y-1 max-h-20 overflow-y-auto">
+                                      {availableVehicles.map(vehicle => (
+                                        <div key={vehicle.id} className="flex items-center justify-between bg-surface rounded-lg px-2 py-1 border border-black/30 hover:border-primary transition-colors">
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-foreground/80">{getVehicleIcon(vehicle.type)}</span>
+                                            <span className="text-foreground text-xs">{vehicle.name}</span>
+                                            <span className="text-muted-foreground text-[10px]">{vehicle.capacity} seats</span>
+                                          </div>
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              const result = onAssignVehicle(squad.id, vehicle.vehicleTemplateId);
+                                              result.warnings?.forEach(warning => toast(warning, { icon: '⚠️' }));
+                                            }}
+                                            className="p-0.5 rounded bg-secondary hover:bg-secondary/80 text-white border border-black"
+                                            title="Assign vehicle to squad"
+                                          >
+                                            <Plus className="w-3 h-3" />
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  );
+                                })()}
+                              </div>
 
                               {/* Squad Actions */}
                               <div className="flex gap-2 mt-2">
@@ -1203,10 +1334,12 @@ export const WorldMapGrid: React.FC = () => {
     squads,
     createNewSquad,
     disbandSquad,
+    renameSquad,
     setActiveSquad,
     assignToSquad,
     removeFromSquad,
     deploySquad,
+    assignVehicle,
   } = useGameStore();
 
   // Selected characters for travel
@@ -2127,10 +2260,12 @@ export const WorldMapGrid: React.FC = () => {
             squads={squads}
             onCreateSquad={createNewSquad}
             onDisbandSquad={disbandSquad}
+            onRenameSquad={renameSquad}
             onSetActiveSquad={setActiveSquad}
             onAssignToSquad={assignToSquad}
             onRemoveFromSquad={removeFromSquad}
             onDeploySquad={deploySquad}
+            onAssignVehicle={assignVehicle}
           />
         </div>
       </div>

@@ -28,8 +28,16 @@ export const HEAT_THRESHOLDS: Array<{ min: number; max: number; level: HeatLevel
   { min: 20, max: 39, level: 'warm', color: '#eab308' },      // Yellow - being watched
   { min: 40, max: 59, level: 'hot', color: '#f97316' },       // Orange - active interest
   { min: 60, max: 79, level: 'blazing', color: '#ef4444' },   // Red - manhunt
-  { min: 80, max: 100, level: 'inferno', color: '#a855f7' },  // Purple - kill on sight
+  { min: 80, max: 100, level: 'inferno', color: '#991b1b' },  // Blood red - kill on sight
 ];
+
+export const HEAT_LEVEL_DISPLAY: Record<HeatLevel, { label: string; icon: string; color: string }> = {
+  cold: { label: 'Cold', icon: '❄️', color: '#22c55e' },
+  warm: { label: 'Warm', icon: '🌡️', color: '#eab308' },
+  hot: { label: 'Hot', icon: '🔥', color: '#f97316' },
+  blazing: { label: 'Blazing', icon: '🚨', color: '#ef4444' },
+  inferno: { label: 'Inferno', icon: '💀', color: '#991b1b' },
+};
 
 export function getHeatLevel(heat: number): HeatLevel {
   const bracket = HEAT_THRESHOLDS.find(t => heat >= t.min && heat <= t.max);

@@ -13,13 +13,17 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import toast from 'react-hot-toast';
 import { useGameStore } from '../stores/enhancedGameStore';
 import { NewsArticle, NewsCategory, NewsBias } from '../data/newsTemplates';
 import {
   ClassifiedAd,
   WantedPoster,
   LetterToEditor,
+  generateNewspaperName,
 } from '../data/newspaperExpansion';
+import { getCountryByName, getCountryByCode } from '../data/allCountries';
+import { calculateMediaSystem } from '../data/combinedEffects';
 import type { GeneratedMission } from '../data/missionSystem';
 
 // =============================================================================
@@ -27,7 +31,7 @@ import type { GeneratedMission } from '../data/missionSystem';
 // =============================================================================
 
 type SortOption = 'newest' | 'oldest' | 'most-impactful';
-type MainSection = 'news' | 'classifieds' | 'wanted' | 'letters';
+type MainSection = 'news' | 'classifieds' | 'wanted' | 'letters' | 'media';
 
 // =============================================================================
 // MISSION-TO-CLASSIFIED CONVERSION
@@ -371,6 +375,15 @@ const DEMO_LETTERS: LetterToEditor[] = [
   },
 ];
 
+// Headlines available when planting a positive story (picked by game day for determinism)
+const PLANTED_STORY_HEADLINES = [
+  'Sources Praise Masked Operatives for Quiet Heroism',
+  'Editorial: The Vigilantes Keeping Our Streets Safe',
+  'Community Leaders Credit Local Heroes for Drop in Crime',
+  'Opinion: Superhuman Operatives Are an Asset, Not a Threat',
+  'Witnesses Describe Daring Rescue by Unknown Heroes',
+];
+
 // =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
@@ -509,6 +522,12 @@ export default function NewsBrowser() {
   const markArticleRead = useGameStore(state => state.markArticleRead);
   const availableMissions = useGameStore(state => state.availableMissions);
   const gameTime = useGameStore(state => state.gameTime);
+  const selectedCountry = useGameStore(state => state.selectedCountry);
+  const selectedCity = useGameStore(state => state.selectedCity);
+  const budget = useGameStore(state => state.budget);
+  const recordTransaction = useGameStore(state => state.recordTransaction);
+  const addNewsArticle = useGameStore(state => state.addNewsArticle);
+  const updatePublicOpinion = useGameStore(state => state.updatePublicOpinion);
 
   // Handler to select and mark article as read
   const handleArticleClick = (article: NewsArticle) => {
@@ -566,6 +585,64 @@ export default function NewsBrowser() {
     // If no articles generated letters, use demo data
     return generated.length > 0 ? generated : DEMO_LETTERS;
   }, [newsArticles]);
+
+  // Media operations in the player's home country (MediaFreedom + Corruption + GDP + Cyber)
+  const playerCountry = useMemo(
+    () => getCountryByName(selectedCountry) || getCountryByCode(selectedCountry),
+    [selectedCountry]
+  );
+  const mediaSystem = useMemo(
+    () => (playerCountry ? calculateMediaSystem(playerCountry) : null),
+    [playerCountry]
+  );
+
+  // Limit story planting to once per game day (planted articles persist in the store)
+  const plantedToday = useMemo(() => {
+    const gameDay = gameTime?.day || 1;
+    return newsArticles.some(a => a.id.startsWith('planted_') && Math.floor(a.timestamp / 1440) === gameDay);
+  }, [newsArticles, gameTime?.day]);
+
+  const handlePlantStory = () => {
+    if (!playerCountry || !mediaSystem || !mediaSystem.canPlantStories || plantedToday) return;
+
+    const cost = mediaSystem.storyPlantCost;
+    if (budget < cost) {
+      toast.error(`Insufficient funds! Need $${cost.toLocaleString()} but have $${budget.toLocaleString()}`);
+      return;
+    }
+
+    const gameDay = gameTime?.day || 1;
+    const gameMinutes = gameTime?.minutes || 0;
+    const fameGain = Math.max(3, Math.round(mediaSystem.viralSpreadRate / 8));
+    const opinionShift = Math.max(2, Math.round(mediaSystem.fakenewsEffectiveness / 15));
+    const sourceName = generateNewspaperName(selectedCity || playerCountry.name, playerCountry.cultureCode);
+    const headline = PLANTED_STORY_HEADLINES[gameDay % PLANTED_STORY_HEADLINES.length];
+
+    recordTransaction('expense', 'bribe', cost, `Planted positive story in ${playerCountry.name} press`);
+
+    const article = {
+      id: `planted_${gameDay}_${gameMinutes}`,
+      headline,
+      source: sourceName,
+      bias: 'pro-player',
+      timestamp: gameDay * 1440 + gameMinutes,
+      category: 'local',
+      fameImpact: fameGain,
+      publicOpinionShift: { [playerCountry.name]: opinionShift },
+      relatedCountries: [playerCountry.name],
+      relatedFactions: [],
+      fullText: `In a story circulating widely today, local sources spoke favorably of the masked operatives active in the region.\n\n"They've done more for this neighborhood than anyone gives them credit for," one resident told reporters. Officials declined to comment, but public sentiment appears to be shifting.\n\nAnalysts note the coverage has spread rapidly across social media.`,
+      isRead: false,
+    } as NewsArticle;
+
+    addNewsArticle(article);
+    useGameStore.setState({
+      playerFame: Math.max(0, Math.min(1000, useGameStore.getState().playerFame + fameGain)),
+    });
+    updatePublicOpinion(playerCountry.name, opinionShift);
+
+    toast.success(`Story planted in ${sourceName}! +${fameGain} fame`);
+  };
 
   // =============================================================================
   // FILTERING AND SORTING
@@ -786,6 +863,7 @@ export default function NewsBrowser() {
     { id: 'classifieds', label: 'Classifieds', icon: '📋', count: classifieds.length },
     { id: 'wanted', label: 'Wanted', icon: '🎯', count: wantedPosters.length },
     { id: 'letters', label: 'Letters', icon: '✉️', count: letters.length },
+    { id: 'media', label: 'Media Ops', icon: '📡' },
   ];
 
   // =============================================================================
@@ -939,6 +1017,160 @@ export default function NewsBrowser() {
   );
 
   // =============================================================================
+  // RENDER MEDIA OPERATIONS SECTION
+  // =============================================================================
+
+  const renderMediaOps = () => {
+    if (!playerCountry || !mediaSystem) {
+      return (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center text-gray-500">
+            <div className="text-6xl mb-4">📡</div>
+            <div className="text-xl font-semibold mb-2">No Media Access</div>
+            <p className="text-gray-600">Select a home country to run media operations.</p>
+          </div>
+        </div>
+      );
+    }
+
+    const canAffordPlant = budget >= mediaSystem.storyPlantCost;
+    const plantDisabled = !mediaSystem.canPlantStories || plantedToday;
+
+    const environmentStats = [
+      { label: 'Press Freedom', value: `${mediaSystem.pressFreedom}/100` },
+      { label: 'Viral Spread', value: `${Math.round(mediaSystem.viralSpreadRate)}%` },
+      { label: 'Fact-Checking', value: `${Math.round(mediaSystem.factCheckingStrength)}/100` },
+      { label: 'Social Media Reach', value: `${Math.round(mediaSystem.socialMediaPenetration)}%` },
+    ];
+
+    return (
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-4 bg-cyan-900/20 border-b border-cyan-700">
+          <h2 className="text-xl font-bold text-cyan-300">📡 Media Operations — {playerCountry.name}</h2>
+          <p className="text-cyan-200/70 text-sm">
+            Shape the narrative. Local journalism quality:{' '}
+            <span className="capitalize font-semibold">{mediaSystem.journalismQuality}</span>.
+          </p>
+        </div>
+
+        {/* Media environment */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 border-b border-gray-800">
+          {environmentStats.map(stat => (
+            <div key={stat.label} className="bg-gray-800 rounded p-3 border border-gray-700">
+              <div className="text-xs text-gray-400 mb-1">{stat.label}</div>
+              <div className="text-lg font-bold text-cyan-300">{stat.value}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Operations */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+          {/* Plant Positive Story - active operation */}
+          <div className={`bg-gray-800 border rounded-lg p-4 ${
+            mediaSystem.canPlantStories ? 'border-cyan-600' : 'border-gray-700'
+          }`}>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold text-white">📝 Plant Positive Story</h3>
+              <span className={`text-xs px-2 py-0.5 rounded ${
+                mediaSystem.canPlantStories ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
+              }`}>
+                {mediaSystem.canPlantStories ? 'Available' : 'Unavailable'}
+              </span>
+            </div>
+            <p className="text-gray-400 text-sm mb-3">
+              Bribe an editor to run a favorable piece about your operatives. Boosts fame and public opinion.
+            </p>
+            <div className="flex items-center justify-between text-sm mb-1">
+              <span className="text-gray-500">Cost:</span>
+              <span className={canAffordPlant ? 'text-green-400 font-semibold' : 'text-red-400 font-semibold'}>
+                ${mediaSystem.storyPlantCost.toLocaleString()}
+              </span>
+            </div>
+            {!mediaSystem.canPlantStories ? (
+              <p className="text-xs text-gray-500 italic mt-2">
+                The press here is too independent to plant stories.
+              </p>
+            ) : (
+              <button
+                onClick={handlePlantStory}
+                disabled={plantDisabled}
+                className={`mt-2 w-full px-4 py-2 rounded-lg font-semibold transition-colors ${
+                  plantDisabled
+                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                    : 'bg-cyan-700 hover:bg-cyan-600 text-white'
+                }`}
+              >
+                {plantedToday ? 'Story Already Planted Today' : 'Plant Story'}
+              </button>
+            )}
+          </div>
+
+          {/* Bury Story */}
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold text-white">🗑️ Bury Negative Story</h3>
+              <span className={`text-xs px-2 py-0.5 rounded ${
+                mediaSystem.canBuryStories ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
+              }`}>
+                {mediaSystem.canBuryStories ? 'Available' : 'Unavailable'}
+              </span>
+            </div>
+            <p className="text-gray-400 text-sm mb-3">
+              Suppress an unfavorable article before it spreads. Effectiveness depends on press independence.
+            </p>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500">Cost:</span>
+              <span className="text-yellow-400 font-semibold">${mediaSystem.storyBuryCost.toLocaleString()}</span>
+            </div>
+          </div>
+
+          {/* Troll Farm */}
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold text-white">🤖 Troll Farm</h3>
+              <span className={`text-xs px-2 py-0.5 rounded ${
+                mediaSystem.trollFarmAvailable ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
+              }`}>
+                {mediaSystem.trollFarmAvailable ? 'Available' : 'Unavailable'}
+              </span>
+            </div>
+            <p className="text-gray-400 text-sm mb-3">
+              Coordinated bot campaigns to sway public opinion. Requires local cyber infrastructure and corruption.
+            </p>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500">Cost per campaign:</span>
+              <span className="text-yellow-400 font-semibold">${mediaSystem.trollFarmCost.toLocaleString()}</span>
+            </div>
+          </div>
+
+          {/* Censorship */}
+          <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold text-white">🚫 State Censorship</h3>
+              <span className={`text-xs px-2 py-0.5 rounded ${
+                mediaSystem.canCensorStories ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
+              }`}>
+                {mediaSystem.canCensorStories ? 'Active' : 'None'}
+              </span>
+            </div>
+            <p className="text-gray-400 text-sm mb-3">
+              {mediaSystem.canCensorStories
+                ? `State channels can suppress coverage within ${Math.round(mediaSystem.censorshipSpeed)} hours.`
+                : 'A free press means no state censorship apparatus to exploit here.'}
+            </p>
+            {mediaSystem.canCensorStories && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">Cost:</span>
+                <span className="text-yellow-400 font-semibold">${mediaSystem.censorshipCost.toLocaleString()}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // =============================================================================
   // RENDER HEADLINES LIST
   // =============================================================================
 
@@ -1026,6 +1258,7 @@ export default function NewsBrowser() {
       {mainSection === 'classifieds' && renderClassifieds()}
       {mainSection === 'wanted' && renderWanted()}
       {mainSection === 'letters' && renderLetters()}
+      {mainSection === 'media' && renderMediaOps()}
 
       {/* HEADLINES LIST - Only show for news section */}
       {mainSection === 'news' && <div className="flex-1 overflow-y-auto">

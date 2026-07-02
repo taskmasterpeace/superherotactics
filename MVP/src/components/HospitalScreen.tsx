@@ -14,10 +14,11 @@ import {
   Syringe,
   Bone,
   Zap,
+  Dna,
 } from 'lucide-react';
 import { useGameStore } from '../stores/enhancedGameStore';
-import { getCountryByCode, ALL_COUNTRIES } from '../data/countries';
-import { calculateMedicalSystem } from '../data/combinedEffects';
+import { getCountryByCode, getCountryByName, ALL_COUNTRIES } from '../data/countries';
+import { calculateMedicalSystem, calculateCloningSystem } from '../data/combinedEffects';
 import {
   getOriginHealing,
   getMaxHealingPercent,
@@ -33,7 +34,11 @@ const HospitalScreen: React.FC = () => {
     budget,
     getHospitalQuality,
     transferToHospital,
+    getBaseBonuses,
+    selectedCountry,
   } = useGameStore();
+
+  const baseHealingBonus = getBaseBonuses().healing;
 
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
   const [showTransferModal, setShowTransferModal] = useState(false);
@@ -95,6 +100,27 @@ const HospitalScreen: React.FC = () => {
     }
   };
 
+  // Clone services quote for the current country
+  const currentCountry = getCountryByName(selectedCountry) || getCountryByCode(selectedCountry);
+  const cloningSystem = currentCountry ? calculateCloningSystem(currentCountry) : null;
+
+  const getCloneQualityTier = (quality: number): { tier: number; label: string } => {
+    if (quality >= 80) return { tier: 4, label: 'Premium' };
+    if (quality >= 60) return { tier: 3, label: 'Standard' };
+    if (quality >= 40) return { tier: 2, label: 'Budget' };
+    return { tier: 1, label: 'Back-Alley' };
+  };
+
+  const getRegulationColor = (regulation: string): string => {
+    switch (regulation) {
+      case 'legal': return 'bg-green-500/20 text-green-400';
+      case 'regulated': return 'bg-yellow-500/20 text-yellow-400';
+      case 'restricted': return 'bg-orange-500/20 text-orange-400';
+      case 'banned': return 'bg-red-500/20 text-red-400';
+      default: return 'bg-gray-500/20 text-gray-400';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
@@ -129,6 +155,13 @@ const HospitalScreen: React.FC = () => {
               <span className="text-blue-300">Ready:</span>
               <span className="text-white font-bold">{characters.filter(c => c.status === 'ready').length}</span>
             </div>
+            {baseHealingBonus > 0 && (
+              <div className="bg-slate-800/50 px-4 py-2 rounded-lg border border-cyan-500/30 flex items-center gap-2">
+                <Zap size={18} className="text-cyan-400" />
+                <span className="text-cyan-300">Base Facilities:</span>
+                <span className="text-white font-bold">+{baseHealingBonus}% recovery</span>
+              </div>
+            )}
             {contactHealingBonus > 0 && (
               <motion.div
                 className="bg-green-800/50 px-4 py-2 rounded-lg border border-green-500/50 flex items-center gap-2"
@@ -223,6 +256,11 @@ const HospitalScreen: React.FC = () => {
                                   }}
                                 />
                               </div>
+                              {baseHealingBonus > 0 && (
+                                <div className="text-cyan-400 text-xs mt-1">
+                                  +{baseHealingBonus}% recovery from base facilities
+                                </div>
+                              )}
                             </div>
 
                             {/* Injuries */}
@@ -426,6 +464,112 @@ const HospitalScreen: React.FC = () => {
                 ))}
               </div>
             </div>
+
+            {/* Clone Services */}
+            {currentCountry && cloningSystem && (
+              <div className="bg-slate-800/80 rounded-lg border border-cyan-500/30 p-6 mt-6">
+                <div className="flex items-center gap-2 mb-1">
+                  <Dna size={20} className="text-cyan-400" />
+                  <h2 className="text-xl font-bold text-white">Clone Services</h2>
+                </div>
+                <p className="text-sm text-blue-300 mb-4">Quote for {currentCountry.name}</p>
+
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-gray-400 text-sm">Regulation:</span>
+                  <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${getRegulationColor(cloningSystem.regulation)}`}>
+                    {cloningSystem.regulation}
+                  </span>
+                </div>
+
+                {cloningSystem.available ? (
+                  <>
+                    {(() => {
+                      const qualityTier = getCloneQualityTier(cloningSystem.cloneQuality);
+                      return (
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-gray-400 text-sm">Clone Quality:</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-white font-semibold text-sm">{qualityTier.label}</span>
+                            <div className="flex gap-1">
+                              {[1, 2, 3, 4].map(tier => (
+                                <div
+                                  key={tier}
+                                  className={`w-1.5 h-1.5 rounded-full ${
+                                    tier <= qualityTier.tier
+                                      ? 'bg-cyan-500'
+                                      : 'bg-gray-600'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                      <div>
+                        <span className="text-gray-400">Base Clone:</span>
+                        <span className="ml-1 text-white">${cloningSystem.baseCost.toLocaleString()}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Premium:</span>
+                        <span className="ml-1 text-white">${cloningSystem.premiumCost.toLocaleString()}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Wait Time:</span>
+                        <span className="ml-1 text-white">{cloningSystem.waitTime} days</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Defect Risk:</span>
+                        <span className={`ml-1 ${cloningSystem.cloneDefectChance >= 15 ? 'text-red-400' : 'text-white'}`}>
+                          {Math.round(cloningSystem.cloneDefectChance)}%
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Facilities:</span>
+                        <span className="ml-1 text-white capitalize">{cloningSystem.facilityCount}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Degradation:</span>
+                        <span className="ml-1 text-white">{Math.round(cloningSystem.degradationRate)}%/gen</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs border-t border-cyan-500/20 pt-2">
+                      <span className="text-gray-400">Memory Transfer:</span>
+                      <span className={cloningSystem.memoryTransfer ? 'text-green-400 font-bold' : 'text-gray-500'}>
+                        {cloningSystem.memoryTransfer
+                          ? `${Math.round(100 - cloningSystem.cloneDefectChance)}% fidelity`
+                          : 'Unavailable'}
+                      </span>
+                    </div>
+
+                    {cloningSystem.canCloneSupers && (
+                      <div className="mt-2 text-xs text-cyan-400">
+                        Powered individuals can be cloned
+                      </div>
+                    )}
+                    {cloningSystem.blackMarketClones && (
+                      <div className="mt-2 text-xs text-red-400 flex items-center gap-1">
+                        <AlertTriangle size={12} />
+                        Black market operation - no legal recourse
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-4">
+                    <div className="text-4xl mb-2">🧬</div>
+                    <p className="text-red-400 font-semibold text-sm">
+                      No cloning services in {currentCountry.name}
+                    </p>
+                    <p className="text-gray-400 text-xs mt-1">
+                      Requires legal or regulated cloning facilities
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

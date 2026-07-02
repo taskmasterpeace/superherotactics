@@ -17,6 +17,7 @@ import {
   isActionAvailable,
   formatDuration,
 } from '../../data/cityActions';
+import { calculateBorderControl } from '../../data/combinedEffects';
 import { RetroButton, RetroBadge, cn } from '../ui';
 import {
   Building2,
@@ -91,6 +92,23 @@ const CityActionsPanel: React.FC<CityActionsPanelProps> = ({
     ].filter(type => type && type !== '');
   }, [selectedCity]);
 
+  // Border control for the destination country
+  const borderControl = useMemo(() => {
+    if (!country) return null;
+    return calculateBorderControl(country);
+  }, [country]);
+
+  // Smuggling routes summary (tunnel/sea/air, overland fallback)
+  const smugglingRoutes = useMemo(() => {
+    if (!borderControl || !borderControl.smugglerAvailable) return '';
+    const routes = [
+      borderControl.tunnelRoutes && 'tunnel',
+      borderControl.seaRoutes && 'sea',
+      borderControl.airRoutes && 'air',
+    ].filter(Boolean);
+    return routes.length > 0 ? routes.join('/') : 'overland';
+  }, [borderControl]);
+
   // Get available actions for this city
   const availableActions = useMemo(() => {
     if (!selectedCity) return [];
@@ -162,6 +180,63 @@ const CityActionsPanel: React.FC<CityActionsPanelProps> = ({
           )}
         </div>
       </div>
+
+      {/* Border Control */}
+      {country && borderControl && (
+        <div className="px-3 py-2 border-b-2 border-black/20 bg-background">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs text-muted-foreground uppercase flex items-center gap-1">
+              <Shield className="w-3 h-3" /> Border Control · {country.name}
+            </p>
+            <span className={cn(
+              "px-1.5 py-0.5 rounded text-[10px] font-medium border capitalize",
+              borderControl.borderSecurityLevel >= 60
+                ? "bg-red-500/20 text-red-400 border-red-500/40"
+                : borderControl.borderSecurityLevel >= 40
+                  ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/40"
+                  : "bg-green-500/20 text-green-400 border-green-500/40"
+            )}>
+              {borderControl.porosity}
+            </span>
+          </div>
+          <div className="space-y-0.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Visa</span>
+              <span className={cn(
+                "font-medium",
+                !borderControl.visaRequired ? "text-green-400" :
+                borderControl.legalEntryDifficulty >= 60 ? "text-red-400" : "text-yellow-400"
+              )}>
+                {borderControl.visaRequired
+                  ? `$${borderControl.visaCost} · ${borderControl.visaWaitDays}d wait`
+                  : 'Not required'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Smuggling</span>
+              <span className={cn(
+                "font-medium",
+                borderControl.smugglerAvailable ? "text-green-400" : "text-red-400"
+              )}>
+                {borderControl.smugglerAvailable
+                  ? `$${borderControl.illegalEntryCost.toLocaleString()} · ${borderControl.illegalEntryRisk}% risk · ${smugglingRoutes}`
+                  : 'No routes'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">Bribe Guards</span>
+              <span className={cn(
+                "font-medium",
+                borderControl.bribeBorderGuards ? "text-green-400" : "text-red-400"
+              )}>
+                {borderControl.bribeBorderGuards
+                  ? `$${borderControl.bribeCost.toLocaleString()}`
+                  : 'Incorruptible'}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Category Filter */}
       {categories.length > 1 && (

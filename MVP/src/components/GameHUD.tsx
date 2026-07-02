@@ -10,6 +10,8 @@ import {
   Settings,
   GraduationCap,
   Building2,
+  History,
+  Award,
   Home,
   Bell,
   Volume2,
@@ -103,6 +105,18 @@ export default function GameHUD() {
               label="Base"
               active={currentView === 'base'}
               onClick={() => setCurrentView('base')}
+            />
+            <NavButton
+              icon={<History size={14} />}
+              label="Chronos"
+              active={currentView === 'chronos'}
+              onClick={() => setCurrentView('chronos')}
+            />
+            <NavButton
+              icon={<Award size={14} />}
+              label="Standing"
+              active={currentView === 'reputation'}
+              onClick={() => setCurrentView('reputation')}
             />
           </div>
 

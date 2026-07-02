@@ -11,6 +11,8 @@
 
 import React, { useState, useMemo } from 'react'
 import { useGameStore } from '../stores/enhancedGameStore'
+import { getCountryByName, getCountryByCode } from '../data/countries'
+import { calculateSafeHouseSystem, SafeHouseSystem } from '../data/combinedEffects'
 import {
   BASE_TYPES,
   FACILITIES,
@@ -100,12 +102,90 @@ function getFacilityBonusText(facilityType: FacilityType, level: number): string
   return bonuses.length > 0 ? bonuses.join(', ') : 'No bonuses'
 }
 
+/**
+ * Color class for safe house availability rating
+ */
+function getSafeHouseAvailabilityColor(availability: SafeHouseSystem['availability']): string {
+  switch (availability) {
+    case 'plentiful': return 'text-green-400'
+    case 'common': return 'text-green-400'
+    case 'uncommon': return 'text-yellow-400'
+    case 'rare': return 'text-amber-400'
+    default: return 'text-red-400'
+  }
+}
+
+// ============================================================================
+// SAFE HOUSE PANEL
+// ============================================================================
+
+const SafeHousePanel: React.FC<{ safeHouses: SafeHouseSystem; countryName: string }> = ({ safeHouses, countryName }) => {
+  const tiers = [
+    { name: 'Flophouse', icon: '🏚️', available: safeHouses.flophouseAvailable, cost: safeHouses.flophouseCost, security: safeHouses.flophouseSecurity },
+    { name: 'Apartment', icon: '🏢', available: safeHouses.apartmentAvailable, cost: safeHouses.apartmentCost, security: safeHouses.apartmentSecurity },
+    { name: 'Safehouse', icon: '🏠', available: safeHouses.safehouseAvailable, cost: safeHouses.safehouseCost, security: safeHouses.safehouseSecurity },
+    { name: 'Fortress', icon: '🏰', available: safeHouses.fortressAvailable, cost: safeHouses.fortressCost, security: safeHouses.fortressSecurity },
+  ]
+
+  const features = [
+    safeHouses.canBribeForInfo && 'Landlord tips',
+    safeHouses.tunnelNetworkAccess && 'Tunnel network',
+    safeHouses.falseWallsAvailable && 'False walls',
+    safeHouses.antiSurveillanceAvailable && 'Anti-surveillance',
+  ].filter(Boolean) as string[]
+
+  return (
+    <div className="bg-gray-800 rounded-lg p-4">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="font-semibold text-gray-300">Safe Houses</h3>
+        <span className={`text-xs uppercase ${getSafeHouseAvailabilityColor(safeHouses.availability)}`}>
+          {safeHouses.availability}
+        </span>
+      </div>
+      <p className="text-xs text-gray-500 mb-3">Weekly rentals in {countryName}</p>
+      {safeHouses.safeHousesAvailable ? (
+        <div className="space-y-2 text-sm">
+          {tiers.map((tier) => (
+            <div key={tier.name} className="flex justify-between items-center">
+              <span className={tier.available ? 'text-gray-300' : 'text-gray-600'}>
+                <span className="mr-1">{tier.icon}</span>{tier.name}
+              </span>
+              {tier.available ? (
+                <span>
+                  <span className="text-yellow-400">${tier.cost.toLocaleString()}/wk</span>
+                  <span className="text-cyan-400 ml-2">{Math.round(tier.security)}% secure</span>
+                </span>
+              ) : (
+                <span className="text-gray-600 text-xs">Unavailable</span>
+              )}
+            </div>
+          ))}
+          {features.length > 0 && (
+            <div className="flex flex-wrap gap-1 pt-2 border-t border-gray-700">
+              {features.map((feature) => (
+                <span key={feature} className="px-2 py-0.5 bg-gray-700 rounded text-xs text-green-400">
+                  {feature}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <p className="text-gray-500 italic text-sm">
+          No safe house network - law enforcement and surveillance too strong here.
+        </p>
+      )}
+    </div>
+  )
+}
+
 // ============================================================================
 // COMPONENT
 // ============================================================================
 
 export const BaseManager: React.FC = () => {
-  const money = useGameStore((state) => state.money)
+  const money = useGameStore((state) => state.budget)
+  const selectedCountry = useGameStore((state) => state.selectedCountry)
   const baseState = useGameStore((state) => state.baseState)
   const purchaseBase = useGameStore((state) => state.purchaseBase)
   const buildFacility = useGameStore((state) => state.buildFacility)
@@ -130,6 +210,13 @@ export const BaseManager: React.FC = () => {
   const activeBase = useMemo(() => {
     return getActiveBase(baseState)
   }, [baseState])
+
+  // Safe house rentals for the player's current country
+  const safeHouseInfo = useMemo(() => {
+    const country = getCountryByName(selectedCountry) || getCountryByCode(selectedCountry)
+    if (!country) return null
+    return { countryName: country.name, system: calculateSafeHouseSystem(country) }
+  }, [selectedCountry])
 
   // Calculate stats for active base
   const baseStats = useMemo(() => {
@@ -212,14 +299,21 @@ export const BaseManager: React.FC = () => {
 
       {/* No Bases State */}
       {baseState.bases.length === 0 && (
-        <div className="text-center py-12 bg-gray-800 rounded-lg">
-          <p className="text-xl text-gray-400 mb-4">No bases established</p>
-          <button
-            onClick={() => setShowPurchaseModal(true)}
-            className="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 rounded font-semibold text-lg"
-          >
-            Purchase Your First Base
-          </button>
+        <div className="space-y-4">
+          <div className="text-center py-12 bg-gray-800 rounded-lg">
+            <p className="text-xl text-gray-400 mb-4">No bases established</p>
+            <button
+              onClick={() => setShowPurchaseModal(true)}
+              className="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 rounded font-semibold text-lg"
+            >
+              Purchase Your First Base
+            </button>
+          </div>
+          {safeHouseInfo && (
+            <div className="max-w-md">
+              <SafeHousePanel safeHouses={safeHouseInfo.system} countryName={safeHouseInfo.countryName} />
+            </div>
+          )}
         </div>
       )}
 
@@ -532,9 +626,14 @@ export const BaseManager: React.FC = () => {
                   </div>
                 )}
                 {baseStats.craftingBonus > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Crafting:</span>
-                    <span className="text-green-400">+{baseStats.craftingBonus}%</span>
+                  <div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Crafting:</span>
+                      <span className="text-green-400">+{baseStats.craftingBonus}%</span>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Reduces weekly equipment maintenance by {Math.min(75, baseStats.craftingBonus)}%
+                    </p>
                   </div>
                 )}
                 {baseStats.teamCapacity > 0 && (
@@ -555,6 +654,11 @@ export const BaseManager: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {/* Safe Houses */}
+            {safeHouseInfo && (
+              <SafeHousePanel safeHouses={safeHouseInfo.system} countryName={safeHouseInfo.countryName} />
+            )}
 
             {/* Base List */}
             {baseState.bases.length > 1 && (
