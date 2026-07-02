@@ -131,7 +131,7 @@ export const ALL_COUNTRIES: Country[] = [
     lswRegulations: "Banned",
     vigilantism: "Regulated",
     leaderGender: "",
-    cultureCode: 2,
+    cultureCode: 3,
     cultureGroup: 'A'
   },
   {
@@ -1451,7 +1451,7 @@ export const ALL_COUNTRIES: Country[] = [
     lswRegulations: "Regulated",
     vigilantism: "Banned",
     leaderGender: "Male",
-    cultureCode: 13,
+    cultureCode: 8,
     cultureGroup: 'D'
   },
   {
@@ -1611,7 +1611,7 @@ export const ALL_COUNTRIES: Country[] = [
     lswRegulations: "Banned",
     vigilantism: "Regulated",
     leaderGender: "Male",
-    cultureCode: 4,
+    cultureCode: 2,
     cultureGroup: 'A'
   },
   {
@@ -2251,7 +2251,7 @@ export const ALL_COUNTRIES: Country[] = [
     lswRegulations: "Regulated",
     vigilantism: "Legal",
     leaderGender: "",
-    cultureCode: 2,
+    cultureCode: 1,
     cultureGroup: 'A'
   },
   {
@@ -3691,7 +3691,7 @@ export const ALL_COUNTRIES: Country[] = [
     lswRegulations: "Legal",
     vigilantism: "Legal",
     leaderGender: "",
-    cultureCode: 10,
+    cultureCode: 9,
     cultureGroup: 'E'
   },
   {
@@ -3811,7 +3811,7 @@ export const ALL_COUNTRIES: Country[] = [
     lswRegulations: "Banned",
     vigilantism: "Banned",
     leaderGender: "",
-    cultureCode: 5,
+    cultureCode: 4,
     cultureGroup: 'B'
   },
   {
@@ -5491,7 +5491,7 @@ export const ALL_COUNTRIES: Country[] = [
     lswRegulations: "Regulated",
     vigilantism: "Regulated",
     leaderGender: "Male",
-    cultureCode: 2,
+    cultureCode: 1,
     cultureGroup: 'A'
   },
   {

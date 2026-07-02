@@ -8,6 +8,7 @@
 import { Country } from './allCountries';
 import { City } from './cities';
 import { CallingId } from './callingSystem';
+import { getRegionForCountryCode } from './regions';
 
 // ============ ORGANIZATION TYPES ============
 
@@ -324,29 +325,15 @@ export function blendRegionalSpecialties(cultureCode: number, citySpecialties: C
   return [...new Set([...citySpecialties, ...profile.specialtyBias])].slice(0, 3);
 }
 
-// Authored crime-region map by ISO code — the source cultureCode fields are inconsistent
-// (e.g. Mexico's country record is mis-coded 13), so this map is the authority for crime flavor.
-export const CRIME_REGION_BY_COUNTRY: Record<string, number> = {
-  US: 13, CA: 13,                                                              // North America
-  MX: 8, GT: 8, HN: 8, SV: 8, NI: 8, PA: 8, BZ: 8, CR: 8,                      // Central America (cartels)
-  BR: 12, CO: 12, PE: 12, VE: 12, EC: 12, BO: 12, PY: 12, CL: 12, AR: 12, UY: 12, // South America (comandos)
-  JM: 7, HT: 7, CU: 7, DO: 7, TT: 7, BS: 7,                                    // Caribbean (posses)
-  CN: 6, JP: 6, KR: 6, TW: 6, HK: 6, TH: 6, VN: 6, MY: 6, SG: 6, ID: 6, PH: 6, MM: 6, KH: 6, LA: 6, // E/SE Asia (triads)
-  IN: 5, PK: 5, BD: 5, LK: 5, NP: 5, BT: 5,                                    // South Asia (companies)
-  KZ: 4, UZ: 4, TM: 4, KG: 4, TJ: 4, AF: 4,                                    // Central Asia (brotherhoods)
-  IT: 9, FR: 9, ES: 9, DE: 9, NL: 9, BE: 9, GB: 9, IE: 9, PT: 9, CH: 9, AT: 9, GR: 9, // W Europe (families)
-  RU: 10, UA: 10, BY: 10, PL: 10, RO: 10, BG: 10, RS: 10, HU: 10, CZ: 10, SK: 10, HR: 10, AL: 10, MD: 10, GE: 10, AM: 10, AZ: 10, BA: 10, MK: 10, // E Europe (bratva)
-  EG: 1, DZ: 1, MA: 1, TN: 1, LY: 1, SD: 1,                                    // North Africa (networks)
-  NG: 2, GH: 2, CD: 2, CG: 2, CM: 2, CI: 2, KE: 2, ET: 2, SN: 2, ML: 2, UG: 2, TZ: 2, // Central/W Africa (militias)
-  ZA: 3, ZW: 3, NA: 3, BW: 3, MZ: 3, ZM: 3, AO: 3,                             // Southern Africa (syndicates)
-  SA: 14, IR: 14, IQ: 14, TR: 14, IL: 14, AE: 14, SY: 14, JO: 14, LB: 14, YE: 14, OM: 14, QA: 14, KW: 14, BH: 14, // Middle East (networks)
-  AU: 11, NZ: 11, FJ: 11, PG: 11,                                             // Oceania (outfits)
-};
+// Region resolution is now centralized in data/regions.ts (the owner's canonical
+// 14-region taxonomy, complete for all 167 countries). Re-exported here for the
+// crime-flavor call sites that historically imported CRIME_REGION_BY_COUNTRY.
+export { COUNTRY_REGION as CRIME_REGION_BY_COUNTRY } from './regions';
 
-/** Authoritative crime region for a country: the curated map (by ISO code) over the buggy cultureCode. */
+/** Authoritative crime region for a country: the curated ISO map over the buggy cultureCode. */
 export function getCrimeRegion(country: { code?: string; cultureCode?: number } | null | undefined): number {
   if (!country) return 13;
-  const byCode = country.code ? CRIME_REGION_BY_COUNTRY[country.code.toUpperCase()] : undefined;
+  const byCode = country.code ? getRegionForCountryCode(country.code) : undefined;
   return byCode ?? country.cultureCode ?? 13;
 }
 
