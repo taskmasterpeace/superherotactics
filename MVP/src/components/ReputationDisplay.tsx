@@ -26,6 +26,7 @@ import {
 import {
   HeatLevel,
   getHeatManager,
+  getHeatLevel,
   HEAT_LEVEL_DISPLAY,
 } from '../data/heatSystem';
 import { getHuntMissionManager, HuntMission } from '../data/factionHuntMissions';
@@ -153,22 +154,23 @@ export const HeatIndicator: React.FC<HeatIndicatorProps> = ({
   className = '',
 }) => {
   const heatManager = getHeatManager();
-  const levels = heatManager.getHeatLevels(countryCode);
 
   // Get highest heat level
   const allFactions: FactionType[] = ['police', 'military', 'government', 'media', 'corporations', 'underworld'];
+  const levels: Record<string, number> = {};
   let maxHeat = 0;
   let maxFaction: FactionType = 'police';
 
   for (const faction of allFactions) {
-    const heat = levels[faction] || 0;
+    const heat = heatManager.getFactionHeat(countryCode, faction) || 0;
+    levels[faction] = heat;
     if (heat > maxHeat) {
       maxHeat = heat;
       maxFaction = faction;
     }
   }
 
-  const heatLevel = heatManager.getHeatLevel(maxHeat);
+  const heatLevel = getHeatLevel(maxHeat);
   const display = HEAT_LEVEL_DISPLAY[heatLevel];
 
   if (compact) {

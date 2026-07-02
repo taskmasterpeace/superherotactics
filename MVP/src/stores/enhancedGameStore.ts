@@ -3554,12 +3554,19 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
     // === GAP 1 — crimes -> investigations (RULING-INV-WIRE §8.2: <=2 new/week) ===
     const newInvestigations: Investigation[] = []
+    const investigatedOrgs = new Set<string>()
     for (const ctx of result.activityResults) {
       if (newInvestigations.length >= 2) break
+      if (investigatedOrgs.has(ctx.org.id)) continue
       const generated = generateInvestigationFromCrime(
         ctx.org, ctx.result, country, ctx.city, state.gameTime.day
       )
-      if (generated) newInvestigations.push(generated.investigation)
+      if (generated) {
+        // Same-millisecond generation for one org produces colliding ids
+        generated.investigation.id = `${generated.investigation.id}_${newInvestigations.length}`
+        investigatedOrgs.add(ctx.org.id)
+        newInvestigations.push(generated.investigation)
+      }
     }
 
     // === GAP 2 — crimes -> underworld raid missions (RULING-MISSION-WIRE §8.4: <=1 per org/4wks) ===

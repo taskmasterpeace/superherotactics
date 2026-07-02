@@ -388,7 +388,16 @@ const PLANTED_STORY_HEADLINES = [
 // HELPER FUNCTIONS
 // =============================================================================
 
-function formatGameTime(timestamp: number): string {
+function formatGameTime(timestamp: number, article?: any): string {
+  if (typeof timestamp !== 'number' || isNaN(timestamp)) {
+    // newsSystem-shape articles carry publishedDay/publishedHour instead
+    if (article && typeof article.publishedDay === 'number') {
+      const h = article.publishedHour ?? 0;
+      const period = h < 12 ? 'AM' : 'PM';
+      return `Day ${article.publishedDay}, ${h % 12 || 12}:00 ${period}`;
+    }
+    return 'Today';
+  }
   const days = Math.floor(timestamp / 1440);
   const hours = Math.floor((timestamp % 1440) / 60);
   const minutes = timestamp % 60;
@@ -397,6 +406,12 @@ function formatGameTime(timestamp: number): string {
   const hours12 = hours % 12 || 12;
 
   return `Day ${days}, ${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+}
+
+// Articles come from two producers: the legacy display shape (string source)
+// and newsSystem's createNewsArticle (NewsSource object). Render either.
+function sourceName(source: any): string {
+  return typeof source === 'string' ? source : source?.name || 'Newswire';
 }
 
 function getBiasColor(bias: NewsBias): string {
@@ -705,13 +720,13 @@ export default function NewsBrowser() {
           <div className="flex items-center justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-3 text-sm text-blue-300 mb-2">
-                <span className="font-semibold">{selectedArticle.source}</span>
+                <span className="font-semibold">{sourceName(selectedArticle.source)}</span>
                 <span className="text-gray-400">•</span>
                 <span className={getBiasColor(selectedArticle.bias)}>
                   {getBiasLabel(selectedArticle.bias)}
                 </span>
                 <span className="text-gray-400">•</span>
-                <span>{formatGameTime(selectedArticle.timestamp)}</span>
+                <span>{formatGameTime(selectedArticle.timestamp, selectedArticle)}</span>
               </div>
               <h1 className="text-3xl font-bold text-white mb-2">
                 {selectedArticle.headline}
@@ -1293,13 +1308,13 @@ export default function NewsBrowser() {
                 >
                   {/* Article Metadata */}
                   <div className="flex items-center gap-3 text-xs text-gray-500 mb-2">
-                    <span className="font-semibold text-blue-400">{article.source}</span>
+                    <span className="font-semibold text-blue-400">{sourceName(article.source)}</span>
                     <span>•</span>
                     <span className={getBiasColor(article.bias)}>
                       {getBiasLabel(article.bias)}
                     </span>
                     <span>•</span>
-                    <span>{formatGameTime(article.timestamp)}</span>
+                    <span>{formatGameTime(article.timestamp, article)}</span>
                     <span>•</span>
                     <span className="uppercase font-semibold text-gray-400">
                       {article.category}

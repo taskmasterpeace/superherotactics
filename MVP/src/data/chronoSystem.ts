@@ -14,6 +14,7 @@ import { useGameStore } from '../stores/enhancedGameStore'
 import { useUnderworldStore } from '../stores/underworldStore'
 import { EventBus, TimePassedEvent } from './eventBus'
 import { getTerritorySnapshot, restoreTerritorySnapshot } from './territorySystem'
+import { resetTimeEventClock } from './timeEventGenerator'
 import { createNewsArticle } from './newsSystem'
 
 // ============================================================================
@@ -292,6 +293,12 @@ export function rewind(snapshotId: string): RewindResult {
   useGameStore.setState(restored)
   useUnderworldStore.setState(decodeValue(snapshot.underworld))
   restoreTerritorySnapshot(decodeValue(snapshot.territory))
+
+  // Module-level clocks are not part of the snapshot — rewind them by hand so
+  // re-lived days fire their daily/weekly events and anchors again.
+  resetTimeEventClock(snapshot.gameDay)
+  chrono.lastDailyCaptureDay = snapshot.gameDay
+  chrono.walker.lastSeenDay = snapshot.gameDay
   persist()
 
   // The jump lives inside the fiction: anomaly news + notification.

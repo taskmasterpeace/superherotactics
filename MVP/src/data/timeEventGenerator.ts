@@ -18,7 +18,6 @@ import {
   GameTime,
   TimeOfDay,
   hasDayChanged,
-  hasWeekChanged,
   isPayday,
   getTimeOfDay,
   isWeekend
@@ -33,12 +32,26 @@ interface TimeEventGeneratorState {
   initialized: boolean
   subscriptionIds: string[]
   lastProcessedTime: GameTime | null
+  lastProcessedDay: number
+  lastProcessedWeek: number
 }
 
 const state: TimeEventGeneratorState = {
   initialized: false,
   subscriptionIds: [],
-  lastProcessedTime: null
+  lastProcessedTime: null,
+  lastProcessedDay: 0,
+  lastProcessedWeek: 0
+}
+
+/**
+ * Reset the day/week dedupe clock after a Chronos rewind, so re-lived days
+ * fire their daily/weekly events (payday, recovery, deadlines) again.
+ */
+export function resetTimeEventClock(day: number): void {
+  state.lastProcessedDay = day
+  state.lastProcessedWeek = Math.floor((day - 1) / 7)
+  state.lastProcessedTime = null
 }
 
 // ============================================================================
@@ -237,13 +250,20 @@ function handleTimePassed(event: TimePassedEvent): void {
     emitTimeOfDayChanged(previousProcessed.timeOfDay, newTime.timeOfDay)
   }
 
-  // Check for day change (already handled by eventBus, but add effects)
-  if (oldTime && hasDayChanged(oldTime, newTime)) {
+  // Check for day change. Deduped by day number: midnight-crossing batches
+  // emit one hour-passed event per hour, and every post-midnight event has a
+  // newer day, so hasDayChanged alone would fire this many times per rollover.
+  if (oldTime && hasDayChanged(oldTime, newTime) && newTime.day > state.lastProcessedDay) {
+    state.lastProcessedDay = newTime.day
     processDayChange(newTime)
   }
 
-  // Check for week change
-  if (oldTime && hasWeekChanged(oldTime, newTime)) {
+  // Check for week change (same dedupe rationale). Computed from the day
+  // counter because hasWeekChanged needs the calendar date the live gameTime
+  // doesn't carry (day 1 = Monday, so a new week starts every 7th day).
+  const newWeek = Math.floor((newTime.day - 1) / 7)
+  if (oldTime && newWeek > state.lastProcessedWeek) {
+    state.lastProcessedWeek = newWeek
     processWeekChange(newTime)
   }
 
@@ -276,8 +296,10 @@ function processDayChange(newTime: GameTime): void {
     }
   })
 
-  // Check for payday
-  if (isPayday(newTime.date)) {
+  // Check for payday. The store's live gameTime carries no calendar date,
+  // so fall back to the day counter (day 1 = Monday -> payday every 7th day).
+  const paydayToday = newTime.date ? isPayday(newTime.date) : newTime.day % 7 === 1
+  if (paydayToday) {
     emitPayday(newTime)
   }
 

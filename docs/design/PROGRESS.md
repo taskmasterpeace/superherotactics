@@ -62,7 +62,20 @@ Status legend: `TODO` · `DRAFTING` · `IN-REVIEW` · `NEEDS-OWNER` · `APPROVED
 | 29 | Time-travel save (diegetic-only; per-nation travelers; rewind economy; dimension=MP stub) | 5 Meta | TODO | — | — |
 | 30 | Story / factions / content framework | 5 Meta | TODO | — | — |
 
-## ▶ RESUME HERE (state as of 2026-06-25)
+## ▶ RESUME HERE (state as of 2026-07-02)
+
+**GAME_COMPLETION_CRITERIA.md = APPROVED.** The build-the-game contract is complete:
+Phase-5 wiring (factions↔missions, territory income, base bonuses, squad UI, economy
+closed w/ bankruptcy), **Chronos time-travel save LIVE** (chronoSystem.ts + ChronosDevice,
+sanity economy per spec #29, browser-verified rewind), all 12 combined-effect systems
+reachable in UI, morale+INT stat wiring, test battery green (`npm run test:battery`),
+0 console errors, docs updated, pushed. See GAME_COMPLETION_CRITERIA.md for evidence.
+**Next frontier:** human playtest feedback; then the remaining spec-loop items below
+(these specs describe systems BEYOND what's built — implementation backlog).
+
+---
+
+## ▶ prior resume point (2026-06-25)
 
 **Spec corpus: ~31 / 42 systems APPROVED.** Spec files live in `docs/design/NN-*.md` (glob to see exactly which).
 **Pending 11 — re-run the spec loop after session/rate limits reset (3:40pm ET):** #26 wrestling-martial-arts · #27 powers-bampi · #29 time-travel-save · #30 story-content · #101 tutorial · #103 audio-voice · #104 ai-director · #106 modding · #107 mp-dimension-stub · #108 hospital-cloning · #109 prisoners.

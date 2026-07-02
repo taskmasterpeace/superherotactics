@@ -9,6 +9,7 @@ import { EventBus, MissionCompletedEvent, GameEvent } from './eventBus';
 import { useGameStore } from '../stores/enhancedGameStore';
 import { FactionType, FACTION_NAMES, getRelatedFactionEffects, checkBountyStatus } from './factionSystem';
 import { getMissionFactionEffects, calculateMissionFactionChanges } from './missionFactionEffects';
+import { getCountryByName, getCountryByCode } from './allCountries';
 import { createNewsArticle, pickRandomSource } from './newsSystem';
 import {
   EscalationCombatOutcome,
@@ -46,8 +47,11 @@ function handleMissionCompleted(event: MissionCompletedEvent): void {
   const store = useGameStore.getState();
   const { missionType, success, missionName } = event.data;
 
-  // Get current country (where mission took place)
-  const countryCode = store.selectedCountry || 'US';
+  // Get current country (where mission took place). selectedCountry and the
+  // event location carry a country NAME; standings are keyed by ISO code.
+  const countryRaw = event.location?.country || store.selectedCountry || 'US';
+  const country = getCountryByName(countryRaw) || getCountryByCode(countryRaw);
+  const countryCode = country?.code || countryRaw;
 
   // Calculate faction changes for this mission
   const changes = calculateMissionFactionChanges(missionType, success);

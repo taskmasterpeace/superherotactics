@@ -6,6 +6,19 @@ import { EventBridge, LocationContext } from '../game/EventBridge'
 import { getCityByName } from '../data/cities'
 import { getCountryByCity } from '../data/countries'
 
+// Investigations come in two shapes: the legacy UI shape ({location, timeLimit,
+// priority}) and the crime-sim shape ({city, country, hoursRemaining, dangerLevel}).
+function investigationView(inv: any) {
+  const danger = inv.dangerLevel ?? inv.difficulty ?? 3
+  return {
+    city: inv.location?.city ?? inv.city ?? 'Unknown',
+    country: inv.location?.country ?? inv.country ?? '',
+    hours: inv.timeLimit ?? inv.hoursRemaining ?? 0,
+    priority: inv.priority ?? (danger >= 7 ? 'critical' : danger >= 5 ? 'high' : 'medium'),
+    assigned: inv.assignedCharacters ?? [],
+  }
+}
+
 export default function WorkingInvestigationCenter() {
   const {
     investigations,
@@ -32,7 +45,7 @@ export default function WorkingInvestigationCenter() {
           <button 
             onClick={() => {
               setCurrentView('world-map')
-              toast.info('Returning to world map')
+              toast('Returning to world map')
             }}
             className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm"
           >
@@ -47,17 +60,19 @@ export default function WorkingInvestigationCenter() {
         )}
 
         <div className="space-y-3">
-          {investigations.map((investigation, index) => (
+          {investigations.map((investigation, index) => {
+            const view = investigationView(investigation)
+            return (
             <motion.div
               key={investigation.id}
               className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                selectedInvestigation?.id === investigation.id 
-                  ? 'border-sht-primary-400 bg-sht-primary-400 bg-opacity-10' 
+                selectedInvestigation?.id === investigation.id
+                  ? 'border-sht-primary-400 bg-sht-primary-400 bg-opacity-10'
                   : 'border-gray-600 hover:border-gray-500 bg-gray-800'
               }`}
               onClick={() => {
                 setSelectedInvestigation(investigation)
-                toast.info(`Selected: ${investigation.title}`)
+                toast(`Selected: ${investigation.title}`)
               }}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -66,19 +81,19 @@ export default function WorkingInvestigationCenter() {
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-bold text-white text-sm">{investigation.title}</h3>
                 <div className={`px-2 py-1 rounded text-xs font-bold ${
-                  investigation.priority === 'critical' ? 'bg-red-600 text-white' :
-                  investigation.priority === 'high' ? 'bg-orange-600 text-white' :
+                  view.priority === 'critical' ? 'bg-red-600 text-white' :
+                  view.priority === 'high' ? 'bg-orange-600 text-white' :
                   'bg-yellow-600 text-black'
                 }`}>
-                  {investigation.priority}
+                  {view.priority}
                 </div>
               </div>
-              
+
               <p className="text-xs text-gray-300 mb-3">{investigation.description}</p>
-              
+
               <div className="flex justify-between text-xs">
-                <span className="text-blue-400">{investigation.location.city}, {investigation.location.country}</span>
-                <span className="text-orange-400">{investigation.timeLimit}h</span>
+                <span className="text-blue-400">{view.city}{view.country ? `, ${view.country}` : ''}</span>
+                <span className="text-orange-400">{Math.round(view.hours)}h</span>
               </div>
 
               {/* Progress Bar */}
@@ -88,7 +103,7 @@ export default function WorkingInvestigationCenter() {
                   <span className="text-green-400">{investigation.progress}%</span>
                 </div>
                 <div className="w-full bg-gray-700 h-2 rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-300"
                     style={{ width: `${investigation.progress}%` }}
                   />
@@ -96,15 +111,16 @@ export default function WorkingInvestigationCenter() {
               </div>
 
               {/* Assigned Characters */}
-              {investigation.assignedCharacters.length > 0 && (
+              {view.assigned.length > 0 && (
                 <div className="mt-2 text-xs">
                   <span className="text-green-400">
-                    Assigned: {investigation.assignedCharacters.length} operative(s)
+                    Assigned: {view.assigned.length} operative(s)
                   </span>
                 </div>
               )}
             </motion.div>
-          ))}
+            )
+          })}
         </div>
       </motion.div>
 
@@ -125,7 +141,7 @@ export default function WorkingInvestigationCenter() {
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div className="text-center">
                   <div className="text-gray-400">Location</div>
-                  <div className="font-bold text-blue-400">{selectedInvestigation.location.city}</div>
+                  <div className="font-bold text-blue-400">{investigationView(selectedInvestigation).city}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-gray-400">Difficulty</div>
@@ -133,7 +149,7 @@ export default function WorkingInvestigationCenter() {
                 </div>
                 <div className="text-center">
                   <div className="text-gray-400">Time Limit</div>
-                  <div className="font-bold text-orange-400">{selectedInvestigation.timeLimit}h</div>
+                  <div className="font-bold text-orange-400">{Math.round(investigationView(selectedInvestigation).hours)}h</div>
                 </div>
               </div>
             </div>

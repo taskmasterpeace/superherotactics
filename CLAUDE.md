@@ -47,10 +47,12 @@ The meta-game interface - like a phone/laptop the player uses.
 | Investigations | WORKING | `InvestigationCenter.tsx` - education bonuses wired |
 | Hospital | **WORKING** | `HospitalScreen.tsx` - origin healing, transfers |
 | Time Display | **WORKING** | `TimeDisplay.tsx` - day/night, speed controls |
-| Education/Training | PARTIAL | Education fields in recruiting, not skill learning |
-| Email System | NOT DONE | Mission briefings |
+| Education/Training | **WORKING** | `TrainingCenter.tsx` - base education bonus speeds training |
+| Email System | **WORKING** | `emailSystem.ts` - briefings, faction reactions, bankruptcy warnings |
 | Character Management | PARTIAL | CharacterScreen exists |
-| Base Overview | NOT DONE | See Base Building below |
+| Base Overview | **WORKING** | `BaseManager.tsx` - facilities, bonuses, safe houses panel |
+| Chronos (time-travel save) | **WORKING** | `ChronosDevice.tsx` - anchors, sanity economy, rewind (hotkey T) |
+| Standings & Relations | **WORKING** | `ReputationScreen.tsx` - factions, bounties, government relations (hotkey R) |
 
 ### 2. WORLD MAP LAYER (Strategic)
 Grid-based global operations.
@@ -250,12 +252,19 @@ npm run build    # Production build
 - [x] Multiple squads - `squadSystem.ts`, `createSquad()`, `deploySquadToSector()`, vehicle assignment
 - [x] Base building - `baseSystem.ts`, `BaseManager.tsx`, 6 base types, 13 facility types, grid placement
 
-### Phase 5: Polish & Integration (NEXT)
-- [ ] Wire faction standings to mission rewards/consequences
-- [ ] Add squad management UI in world map
-- [ ] Wire base bonuses to game systems (healing, investigation, etc.)
-- [ ] Territory control system (militia training, sector defense)
+### Phase 5: Polish & Integration ✅ COMPLETE
+- [x] Wire faction standings to mission rewards/consequences - `missionStore.ts` emits `mission:completed`, `factionEventHandler.ts` applies standings + cascades + bounty at -25 + faction news
+- [x] Add squad management UI in world map - create/rename/disband/assign, MBTI morale, vehicle assignment with pilot warnings, deploy (WorldMapGrid squads tab)
+- [x] Wire base bonuses to game systems - healing (recovery multiplier), investigation (progress), education (training speed), crafting (maintenance discount); shown in Hospital/Training/Investigation screens
+- [x] Territory control system - `initTerritorySystem()` in App, map overlay, combat shifts control, income+fame applied on payday
+
+### Phase 6: Chronos & Living Economy ✅ COMPLETE (July 2026)
+- [x] Chronos time-travel save - `chronoSystem.ts` + `ChronosDevice.tsx`: diegetic-only save/load, sanity economy (20/rewind, madness floor 20), destination horizon, 20-anchor localStorage ring buffer, anomaly news on jump. Nav: HUD button or `T`
+- [x] Economy loop closed - weekly payday (deduped), country funding ($1k-$15k scaled by GDP/corruption), territory income, mission rewards credited to both ledgers, base/facility purchases cost money, bankruptcy check + warning email
+- [x] Combined effects surfaced - all 12 systems reachable: Safe Houses (BaseManager), Border Control (CityActionsPanel/world map), Media Ops (NewsBrowser), Government Relations (Standings screen, `R`), Clone Services (Hospital), plus the 3 already live
+- [x] Stats wired - morale accuracy/damage mods in combat core, INT modifies investigation progress; full audit in `docs/STAT_AUDIT.md`
+- [x] Balance battery - `npm run test:battery` (mechanics/integration/belt/grenade, headless via tsx); results in `MVP/BALANCE_NOTES.md`
 
 ---
 
-*Updated: January 2026 - Phases 1-4 complete, all core systems implemented*
+*Updated: July 2026 - Phases 1-6 complete. GAME_COMPLETION_CRITERIA.md APPROVED; game is feature-complete for testing.*

@@ -51,6 +51,14 @@ export const MISSION_FACTION_EFFECTS: Record<string, FactionEffect[]> = {
     { faction: 'government', successMod: +5, failureMod: -3, reason: 'Law and order' },
   ],
 
+  // Underworld HQ raids (capture/hold the org's headquarters)
+  'capture_hold': [
+    { faction: 'police', successMod: +12, failureMod: -4, reason: 'Criminal HQ raided' },
+    { faction: 'media', successMod: +8, failureMod: -8, reason: 'Raid coverage' },
+    { faction: 'underworld', successMod: -15, failureMod: +8, reason: 'Organization crippled' },
+    { faction: 'government', successMod: +4, failureMod: -2, reason: 'Organized crime setback' },
+  ],
+
   // Hostage rescue
   'rescue_hostage': [
     { faction: 'police', successMod: +12, failureMod: -8, reason: 'Hostage situation' },

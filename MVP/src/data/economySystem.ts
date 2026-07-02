@@ -773,9 +773,11 @@ export function calculateCountryFunding(country: {
   governmentCorruption?: number;
   governmentPerception?: string;
 }): CountryFundingConfig {
-  // Base funding from GDP (scale: $5k-$200k per week)
+  // Base funding from GDP (scale: $1k-$15k per week — big enough to sponsor
+  // operations, small enough that bases/squads stay meaningful purchases and
+  // a shunned team can still go broke)
   const gdpFactor = (country.gdpPerCapita || 50) / 100;
-  const baseFunding = Math.floor(5000 + (gdpFactor * 195000));
+  const baseFunding = Math.floor(1000 + (gdpFactor * 14000));
 
   // Military + Intelligence budget affects total resources
   const milBudget = country.militaryBudget || 50;
