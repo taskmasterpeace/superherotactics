@@ -1,0 +1,101 @@
+Category,d100,Injury Type,Description,Lowest level cure(s),Duration (if untreated),Additional notes
+Death,1,Crushed skull/Decapitation,Death.,Resurrection/Reincarnate,Forever,
+Facial scarring,2,Lose an eye,Disadvantage on perception checks involving sight and ranged attack rolls.,Regenerate,Forever,
+Facial scarring,3,Lose nose,Disadvantage on Charisma checks and perception checks involving smell.,Regenerate,Forever,
+Facial scarring,4,Lose ear,Disadvantage on Charisma checks and perception checks involving hearing.,Regenerate,Forever,
+Facial scarring,5,Lose teeth,Disadvantage on Charisma checks.,Regenerate,Forever,
+Lose a limb,6,Lose an arm,Can only use one arm to use an item/weapon.,Regenerate,Forever,
+Lose a limb,7,Lose a leg,Moving more than 10ft requires a DC15 acrobatics check or fall prone.,Regenerate,Forever,
+Lose a limb,8,Lose a hand,Cannot use two handed melee weapons or bows.,Prosthetic or Regenerate,Forever,Shields and crossbows allowed
+Lose a limb,9,Lose a foot,Walking speed is halved.,Prosthetic or Regenerate,Forever,
+Quicker death,10,Ending your misery+,"All enemies within 10ft make a DC10 WIS save. On a fail, they take pity and want to put you out of your misery.",N/A,Until concious,
+Quicker death,11,Ending your misery,"You attacker makes a DC10 WIS save. On a fail, they take pity and want to put you out of your misery.",N/A,Until concious,
+Quicker death,12,Ruptured aorta,Disadvantage on death saving throws and instantly suffer one failed death save.,DC 25 Medicine check,Until stable,
+Quicker death,13,Arm artery cut,Disadvantage on death saving throws.,DC 20 Medicine check,Until stable,
+Quicker death,14,Leg artery cut,Instantly suffer one failed death save.,DC 20 Medicine check,Until stable,
+Severe injury,15,Broken spine,The target is permanently restrained as they are unable to use muscles below the neck.,Greater restoration or 6th level heal,2d8 weeks,
+Severe injury,16,Severed muscles,Disadvantage on all strength based checks and attacks.,5th level healing spell,2d8 weeks,
+Severe injury,17,Severed tendons,Disadvantage on all dexterity based checks and attacks.,5th level healing spell,2d8 weeks,
+Severe injury,18,Broken arm,Can only use one arm to use an item/weapon.,4th level healing spell,2d8 weeks,
+Severe injury,19,Broken leg,Moving more than 5ft per round requires a DC15 acrobatics check or fall prone.,4th level healing spell,2d8 weeks,
+Severe injury,20,Internal bleeding,"Every hour, remove 1HP from your hit point maximum.",4th level healing spell,2d8 weeks,
+Severe injury,21,Punctured lung,Gain one level of exhaustion. Completing a long rest does not remove this status until 2d8 days have passed.,4th level healing spell,2d8 weeks,
+Severe injury,22,Broken Rib,"You must make a DC15 CON save. On a failure, you can take an action or a bonus action on your turns but not both.",4th level healing spell,2d8 weeks,
+Severe injury,23,Fractured spine,The target is permanently restrained as they are unable to use muscles below the neck.,Lesser restoration or 4th level heal,2d8 weeks,"Lesser restoration cures ""paralysed"" condition"
+Severe injury,24,Busted kidney,"Whenever an action is performed, make a DC 15 CON save. On a failure, fall prone.",4th level healing spell,2d8 weeks,
+Major Injury,25,Severe concussion,Disadvantage on concentration checks. Maintaining a spell requires a DC10 concentration check at the end of each of your turns.,4th level healing spell,2d6 days,
+Major Injury,26,Ruptured jugular,Cannot speak.,Lesser restoration or 3rd level heal,2d6 days,
+Major Injury,27,Ruptured Liver,Poisoned status.,Lesser restoration or 3rd level heal,2d6 days,
+Major Injury,28,Busted kneecap,Movement speed is halved. Jumping or using the Dash action requires a DC 15 CON save or fall prone.,3rd level heal,2d6 days,
+Major Injury,29,Major Concussion,Maintaining a spell requires a concentration check at the end of each of your turns.,3rd level heal,2d6 days,
+Major Injury,30,Overstretched Muscle,Disadvantage on all strength based checks and attacks.,3rd level heal,2d6 days,
+Major Injury,31,Overstretched Tendon,Disadvantage on all dexterity based checks and attacks.,3rd level heal,2d6 days,
+Major Injury,32,Fractured hand,Cannot use two handed melee weapons or bows.,3rd level heal,2d6 days,
+Major Injury,33,Fractured foot,Movement speed is halved.,3rd level heal,2d6 days,
+Major Injury,34,Ruptured intestines,Performing the attack or dash action incurs 1d6 slashing damage.,3rd level heal,2d6 days,
+Injury,35,Mild concussion,Maintaining a spell requires a DC10 concentration check at the end of each of your turns.,3rd level heal,1d4 days,
+Injury,36,Minor concussion,Disadvantage on all perception checks.,2nd level healing spell,1d4 days,
+Injury,37,Broken nose,Disadvantage on perception checks involving smell.,2nd level healing spell,1d4 days,
+Injury,38,Bleeding gut,"Whenever an attack is performed, make a DC 10 CON save. On a failure, fall unconcious.",2nd level healing spell,1d4 days,
+Injury,39,Bruised kidney,"Whenever an attack is performed, make a DC 10 CON save. On a failure, fall prone.",2nd level healing spell,1d4 days,
+Injury,40,Trapped spinal nerve,Paralysed status,Lesser restoration or 3rd level heal,Long rest,
+Injury,41,Bruised liver,Poisoned status.,Lesser restoration or 3rd level heal,Long rest,
+Injury,42,Blurred vision,You are blinded.,Lesser restoration,Long rest,
+Injury,43,Deafness,You are deafened.,Lesser restoration,Long rest,
+Injury,44,Bruised rib,"When you take a reaction, make a DC12 CON save. On a failure, you waste your reaction.",Magical healing,Long rest,
+Injury,45,Open wound,"At the end of each turn that you are concious, you incur 1d6 slashing damage.",Magical healing,Long rest,
+Injury,46,Sprained wrist,"You must make a DC10 CON save when casting a spell with a somatic component. On a fail, you fail to cast the spell.",Magical healing,Long rest,"On a fail, you do not use a spell slot."
+Injury,47,Sprained ankle,"Movement speed is halved. When using the Dash action, make a DC 15 acrobatics check. On a failure, you fall prone.",Magical healing,Long rest,
+Injury,48,Pulled bicep,You have disadvantage on all contested grapple checks.,Magical healing,Long rest,
+Injury,49,Pulled thigh,You have disadvantage on all saving throws that resist being knocked prone. Being moved against your will imposes such a save.,Magical healing,Long rest,"DEX save, DC at DM's discretion"
+Severe mental trauma,50,New Phobia,"You must make a DC 10 WIS check if encountering a similar foe in the future. On a failure, you are frightened.",DC25 Medicine check,Until cured,One medicine check per day.
+Severe mental trauma,51,Severe Depression,Disadvantage on Wisdom saving throws.,DC20 Medicine check,Until cured,One medicine check per day.
+Severe mental trauma,52,Insomnia,"You must make a DC 15 Intelligence save before every Long Rest. On a failure, you gain one exhaustion at the end of the rest.",DC20 Medicine check,Until cured,One medicine check per day.
+Severe mental trauma,53,Nightmares,"You must make a DC 12 Intelligence save before every Long Rest. On a failure, you gain one exhaustion at the end of the rest.",DC20 Medicine check,Until cured,One medicine check per day.
+Severe mental trauma,54,Alcoholism,Add this to your flaws.,DC20 Medicine check,Until cured,One medicine check per day.
+Mental trauma,55,Amnesia,You will not remember anything that happened during combat once out of initiative.,None,Forever,
+Mental trauma,56,Catatonic,Your movement speed is zero and cannot take any actions or reactions other than a Medicine check on yourself.,None,Until short rest,
+Mental trauma,57,Flee,"You must make a DC15 WIS save. On a fail, you are frightenened of all enemies until you are in full cover.",None,Until short rest,"If no creatures in sight, no effect."
+Mental trauma,58,Depression,Disadvantage on Wisdom saving throws.,None,Until short rest,
+Mental trauma,59,Uncontrollable tremble,Disadvantage on Dexterity skill checks.,None,Until short rest,
+Mental trauma,60,Nervous twitch,"At the end of your turn make a DC12 STR save. On a fail, you drop an item in your hand.",None,Until short rest,"On a success, this effect ends."
+Mental trauma,61,Freeze,"You must make a DC15 WIS at the start of your turns. On a failure, your movement speed is 0.",None,Until short rest,"On a success, this effect ends."
+Mental trauma,62,Paranoia,"You must make a DC12 WIS at the start of your turns. On a failure, you attack the nearest creature in range.",None,Until short rest,"If no creatures in sight, no effect."
+Mental trauma,63,Seek cover,"You must make a DC15 WIS save. On a fail, you must use all your movement and the dash action to move away from the fight.",None,1 round,"On a success, this effect ends."
+Mental trauma,64,Beserk,"You must make a DC12 WIS save. On a failure, you must attack the nearest creature in range.",None,1 round,"On a success, this effect ends."
+Minor injury,65,Pulled thigh,Movement speed is reduced by 10ft.,Magical healing,1 minute,
+Minor injury,66,Limp,Movement speed is reduced by 5ft.,Magical healing,1 minute,
+Minor injury,67,Ringing in ears,Disadvantage on perception checks involving hearing.,Magical healing,1 minute,
+Minor injury,68,Bitten tongue,Cannot speak,Magical healing,1 minute,
+Minor injury,69,Crotch hit,"When concious, make a DC 15 CON save at start of each turn. On a failure, your movement speed reduced to 0.",Special,1 minute,"On a success, this effect ends."
+Minor injury,70,Painful scar,"When you take a reaction, make a DC10 CON save. On a failure, you waste your reaction.",Magical healing,1 minute,
+Minor injury,71,Headache,You have disadvantage on checks made to keep concentration on spells.,Magical healing,1 minute,
+Minor injury,72,Dislocated shoulder,Incur a -2 modifier to all attack rolls.,DC15 Medicine check or healing,Until cured,
+Minor injury,73,Dislocated finger,Incur a -2 modifier to all attack rolls.,DC10 Medicine check or healing,Until cured,
+Minor injury,74,Blood in eyes,You have disadvantage on perception checks made with sight and range attack rolls.,DC5 Medicine check,Until cured,"Alternatively, cured via prestidigitation."
+Flavour effect,75,Shredded clothing,No other effects.,,Instant,
+Flavour effect,76,Hair cut,No other effects.,,Instant,
+Flavour effect,77,Minor scar on body,Something to show off... if you make it out alive.,,Instant,
+Flavour effect,78,Minor scar on armour,Something to show off... if you make it out alive.,,Instant,
+Special effect,79,Convenient fall,Your body conveniently falls atop most of your valuables. A DC15 sleight of hand check is required to loot you whilst unconcious.,,Until concious,Can never be too careful around that pesky rogue
+Special effect,80,Break item,A random potion or non-magical item in your inventory breaks.,,Instant,"A sword, shield or perhaps a grenade?"
+Special effect,81,Activate magic item,Activate a random magic item that you are either attuned to or have in your inventory.,,Instant,"A wand, artefact or perhaps a grenade?"
+Special effect,82,Muscle memory,"Whilst you are unconcious, an ally feed you a potion as a bonus action.",,Until concious,
+Special effect,83,Reactive armour,"If you are wearing armour, the attacker takes 1d8 piercing damage as a result of attacking you.",,Instant,Example: shrapnel from your armour
+Special effect,84,Death grip,Make a grapple check contested with your attacker. On a success they are knocked prone next to you.,,Instant,
+Minor boon,85,Remember me?,You have advantage on the next attack roll against the creature that just incapacitated you.,,Until short/long rest,
+Minor boon,86,I thought you were dead,The creature that just incapacitated you will have disadvantage on their next attack roll against you.,,Until short/long rest,
+Minor boon,87,Confident comeback,The next attack has disadvantage on you.,,Until short/long rest,
+Minor boon,88,Dead-eye,You have advantage on your next attack roll.,,Until short/long rest,
+Minor boon,89,Ready for round two,You have advantage on your next saving throw.,,Until short/long rest,
+Memorable Scars,90,Memorable scar on body,Advantage on appropriate Intimidation checks.,,Forever,
+Memorable Scars,91,Impressive scar on body,Advantage on appropriate Intimidation checks and persuasion checks.,,Forever,
+Memorable Scars,92,Impressive scar on armour,Advantage on appropriate Intimidation checks and persuasion checks.,,Forever,Must be weaing said armour.
+Survivability,93,Exaggerated Wound,Your attacker assumes the worst for you. They will not attack you whilst you are incapacitated.,,Until concious,
+Survivability,94,Exaggerated Wound+,Enemies assume the worst for you. They will not attack you whilst you are incapacitated.,,Until concious,
+Survivability,95,Second Wind-,Start with one successful death save.,,Until stable/concious,
+Survivability,96,Second Wind,Advantage on death saving throws,,Until stable/concious,
+Survivability,97,Second Wind+,Advantage on death saving throws and start with one successful death save.,,Until stable/concious,
+Survivability+,98,Unexpected KO,You will be stabilised after one successful death save.,,Until stable,
+Survivability+,99,Unexpected KO+,You are instantly stabilised,,Instant,You will naturally regain conciousness in 1d4 hours
+Resist Death,100,Adrenaline Rush,"At the start of your turn, you regain health equal to 1 hit dice + CON modifier",,Until your turn,"You're back in the fight, but prone."

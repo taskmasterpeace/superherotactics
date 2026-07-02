@@ -80,6 +80,7 @@ import { initChronoSystem, cleanupChronoSystem } from './data/chronoSystem'
 import ChronosDevice from './components/ChronosDevice'
 import ReputationScreen from './components/ReputationScreen'
 import LaptopShell from './components/LaptopShell'
+import { BubbleLab } from './speech-bubbles'
 
 // World Systems - central initialization for all simulation systems
 import { initWorldSystems, cleanupWorldSystems } from './data/worldSystemsInit'
@@ -565,6 +566,7 @@ function App() {
               {currentView === 'loadout-editor' && <LoadoutEditor />}
               {currentView === 'sector-editor' && <SectorEditor onClose={() => setCurrentView('world-map')} />}
               {currentView === 'world-data' && <WorldDataEditor onClose={() => setCurrentView('world-map')} />}
+              {currentView === 'bubble-lab' && <BubbleLab />}
             </div>
           </>
         )

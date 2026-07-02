@@ -244,6 +244,10 @@ export default function GameHUD() {
               <h3 className="text-xs font-bold text-yellow-400 mb-2">DEV TOOLS</h3>
               <div className="flex flex-col gap-1">
                 <DevButton
+                  label="💬 Bubble Lab"
+                  onClick={() => { setCurrentView('bubble-lab'); setShowDevTools(false); }}
+                />
+                <DevButton
                   label="Sector Editor"
                   onClick={() => { setCurrentView('sector-editor'); setShowDevTools(false); }}
                 />
