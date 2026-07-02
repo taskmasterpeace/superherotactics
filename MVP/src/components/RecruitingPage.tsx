@@ -2,7 +2,8 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '../stores/enhancedGameStore'
 import { ArrowLeft, Users, Check, Star, Shield, Zap, DollarSign, GraduationCap, MapPin, ChevronRight, Search, Filter, Shuffle, Globe, Target, Cpu, FlaskConical, Microscope, Eye, HeartPulse, RefreshCw, Info } from 'lucide-react'
-import { getCountryByName, getEducationLevel } from '../data/worldData'
+import { getEducationLevel } from '../data/worldData'
+import { getCountryByName, codeToFlag } from '../data/allCountries'
 import { RECRUITABLE_CHARACTERS, RecruitableCharacter } from '../data/recruitableCharacters'
 import {
   generateRecruitingPool,
@@ -125,9 +126,12 @@ export default function RecruitingPage() {
 
       useGameStore.setState({
         characters: selectedChars,
+        squads: [],            // clear any placeholder squad before rebuilding
         gamePhase: 'playing',
         currentView: 'world-map'
       })
+      // Form the starting squad (Alpha Squad) from the recruited operatives
+      useGameStore.getState().initializeSquads()
     }
   }
 
@@ -160,7 +164,7 @@ export default function RecruitingPage() {
         <div className="text-right">
           <div className="text-sm text-gray-400">Step 3 of 3</div>
           <div className="text-xs text-gray-500 flex items-center gap-1">
-            {countryData?.flag} Selected: {selectedRecruits.size}/5
+            {countryData ? codeToFlag(countryData.code) : ''} Selected: {selectedRecruits.size}/5
           </div>
         </div>
       </div>
@@ -171,7 +175,7 @@ export default function RecruitingPage() {
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                {countryData?.flag} {selectedCountry}
+                {countryData ? codeToFlag(countryData.code) : ''} {selectedCountry}
                 <span className="text-sm font-normal text-blue-300">({selectedCity})</span>
               </h2>
               <p className="text-sm text-gray-400 mt-1">{countryProfile.tagline}</p>

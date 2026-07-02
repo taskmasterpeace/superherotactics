@@ -3,7 +3,11 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import App from './App'
+import { useGameStore } from './stores/enhancedGameStore'
 import './index.css'
+
+// Dev hook: expose the game store on window for debugging / end-to-end verification
+;(window as any).__gameStore = useGameStore
 
 // Initialize game data from CSV files
 import { initializeGameData } from './utils/gameDataLoader'

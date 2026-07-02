@@ -251,6 +251,9 @@ export interface CriminalOrganization {
   territoryLost: number;
   totalProfit: number;
   totalHeatGenerated: number;
+
+  // Auto-mission throttle (RULING-MISSION-WIRE: <=1 auto-mission per org / 4 weeks)
+  lastAutoMissionWeek?: number;
 }
 
 // ============ HEAT SYSTEM ============
@@ -265,6 +268,86 @@ export const HEAT_LEVELS = [
 
 export function getHeatLevel(heat: number): typeof HEAT_LEVELS[number] {
   return HEAT_LEVELS.find(level => heat >= level.min && heat <= level.max) || HEAT_LEVELS[0];
+}
+
+// ============ REGIONAL ORG FLAVOR (culture/region code 1-14) ============
+// Owner directive: crime org TYPES, names & specialties derive from the country's
+// culture region — same region => same kind of organization. City stats still tune it.
+
+export interface RegionalOrgProfile {
+  archetype: string;          // display label (Cartel, Triad, Bratva, ...)
+  heavyType: OrgType;         // mechanical type when crime is serious
+  nameTemplates: string[];    // use {word} and {place}
+  words: string[];
+  specialtyBias: CrimeSpecialty[];
+}
+
+export const REGIONAL_ORG_PROFILES: Record<number, RegionalOrgProfile> = {
+  1:  { archetype: 'Smuggling Network', heavyType: 'syndicate',     nameTemplates: ['The {word} Network', 'The {place} Brotherhood'], words: ['Crescent','Sahara','Atlas','Maghreb','Sirocco'], specialtyBias: ['smuggling','arms','theft'] },
+  2:  { archetype: 'Militia',           heavyType: 'shadow_network', nameTemplates: ['The {word} Militia', 'The {word} Coalition'],   words: ['Ivory','Congo','Lion','Cobalt','Ember'],         specialtyBias: ['arms','smuggling','kidnapping'] },
+  3:  { archetype: 'Syndicate',         heavyType: 'syndicate',     nameTemplates: ['The {place} Syndicate', 'The {word} Cartel'],   words: ['Diamond','Gold','Cape','Veld','Rand'],           specialtyBias: ['theft','smuggling','fraud'] },
+  4:  { archetype: 'Brotherhood',       heavyType: 'syndicate',     nameTemplates: ['The {word} Brotherhood', 'The {word} Road'],    words: ['Silk','Steppe','Khan','Caspian','Altai'],        specialtyBias: ['smuggling','drugs','arms'] },
+  5:  { archetype: 'Company',           heavyType: 'syndicate',     nameTemplates: ['The {word} Company', 'The {place} Mafia'],      words: ['Naga','Ganga','Monsoon','Kali','Cobra'],         specialtyBias: ['extortion','smuggling','fraud'] },
+  6:  { archetype: 'Triad',             heavyType: 'syndicate',     nameTemplates: ['The {word} Triad', 'The {place} Triad'],        words: ['Jade','Dragon','Lotus','Bamboo','Phoenix'],      specialtyBias: ['drugs','cyber_crime','gambling','smuggling'] },
+  7:  { archetype: 'Posse',             heavyType: 'street_gang',   nameTemplates: ['The {word} Posse', 'The {word} Yardies'],       words: ['Reef','Spice','Island','Rum','Tide'],            specialtyBias: ['drugs','smuggling','piracy'] },
+  8:  { archetype: 'Cartel',            heavyType: 'cartel',        nameTemplates: ['Cartel del {word}', 'The {word} Cartel'],       words: ['Sol','Sangre','Norte','Sombra','Lobo'],          specialtyBias: ['drugs','kidnapping','assassination','human_trafficking'] },
+  9:  { archetype: 'Family',            heavyType: 'syndicate',     nameTemplates: ['The {word} Family', 'The {word} Camorra'],      words: ['Cosa','Marseille','Corsa','Falcone','Rossi'],    specialtyBias: ['fraud','smuggling','extortion'] },
+  10: { archetype: 'Bratva',           heavyType: 'shadow_network', nameTemplates: ['The {word} Bratva', 'The {word} Mafiya'],      words: ['Volk','Krov','Zveri','Vor','Sokol'],             specialtyBias: ['cyber_crime','arms','human_trafficking','fraud'] },
+  11: { archetype: 'Outfit',            heavyType: 'street_gang',   nameTemplates: ['The {word} MC', 'The {word} Outfit'],           words: ['Rebels','Coast','Reef','Outback','Dingo'],       specialtyBias: ['drugs','smuggling','arms'] },
+  12: { archetype: 'Comando',           heavyType: 'cartel',        nameTemplates: ['Comando {word}', 'The {word} Cartel'],          words: ['Selva','Norte','Sangre','Vermelho','Sol'],       specialtyBias: ['drugs','smuggling','kidnapping'] },
+  13: { archetype: 'Outfit',            heavyType: 'syndicate',     nameTemplates: ['The {word} {place} Mob', 'The {word} Family', 'The {word} Kings'], words: ['Steel','Iron','Saints','Cobra','Scarlet'], specialtyBias: ['drugs','theft','extortion','fraud'] },
+  14: { archetype: 'Network',           heavyType: 'shadow_network', nameTemplates: ['The {word} Network', 'The {word} Caravan'],    words: ['Falcon','Sand','Oasis','Cedar','Mirage'],        specialtyBias: ['smuggling','arms','corruption'] },
+};
+
+export function getRegionalOrgProfile(cultureCode: number): RegionalOrgProfile {
+  return REGIONAL_ORG_PROFILES[cultureCode] || REGIONAL_ORG_PROFILES[13];
+}
+
+/** Mechanical type: petty crime stays a street gang; serious crime takes the region's heavy form. */
+export function getRegionalOrgType(cultureCode: number, crimeIndex: number): OrgType {
+  const profile = getRegionalOrgProfile(cultureCode);
+  if (crimeIndex < 35) return 'street_gang';
+  if (crimeIndex >= 65) return profile.heavyType;
+  return profile.heavyType === 'street_gang' ? 'street_gang' : 'syndicate';
+}
+
+export function generateRegionalOrgName(cultureCode: number, cityName: string): string {
+  const profile = getRegionalOrgProfile(cultureCode);
+  const template = profile.nameTemplates[Math.floor(Math.random() * profile.nameTemplates.length)];
+  const word = profile.words[Math.floor(Math.random() * profile.words.length)];
+  return template.replace('{word}', word).replace('{place}', cityName).replace(/\s+/g, ' ').trim();
+}
+
+/** Blend the city's type-driven specialties (city stats) with the region's bias (country). */
+export function blendRegionalSpecialties(cultureCode: number, citySpecialties: CrimeSpecialty[]): CrimeSpecialty[] {
+  const profile = getRegionalOrgProfile(cultureCode);
+  return [...new Set([...citySpecialties, ...profile.specialtyBias])].slice(0, 3);
+}
+
+// Authored crime-region map by ISO code — the source cultureCode fields are inconsistent
+// (e.g. Mexico's country record is mis-coded 13), so this map is the authority for crime flavor.
+export const CRIME_REGION_BY_COUNTRY: Record<string, number> = {
+  US: 13, CA: 13,                                                              // North America
+  MX: 8, GT: 8, HN: 8, SV: 8, NI: 8, PA: 8, BZ: 8, CR: 8,                      // Central America (cartels)
+  BR: 12, CO: 12, PE: 12, VE: 12, EC: 12, BO: 12, PY: 12, CL: 12, AR: 12, UY: 12, // South America (comandos)
+  JM: 7, HT: 7, CU: 7, DO: 7, TT: 7, BS: 7,                                    // Caribbean (posses)
+  CN: 6, JP: 6, KR: 6, TW: 6, HK: 6, TH: 6, VN: 6, MY: 6, SG: 6, ID: 6, PH: 6, MM: 6, KH: 6, LA: 6, // E/SE Asia (triads)
+  IN: 5, PK: 5, BD: 5, LK: 5, NP: 5, BT: 5,                                    // South Asia (companies)
+  KZ: 4, UZ: 4, TM: 4, KG: 4, TJ: 4, AF: 4,                                    // Central Asia (brotherhoods)
+  IT: 9, FR: 9, ES: 9, DE: 9, NL: 9, BE: 9, GB: 9, IE: 9, PT: 9, CH: 9, AT: 9, GR: 9, // W Europe (families)
+  RU: 10, UA: 10, BY: 10, PL: 10, RO: 10, BG: 10, RS: 10, HU: 10, CZ: 10, SK: 10, HR: 10, AL: 10, MD: 10, GE: 10, AM: 10, AZ: 10, BA: 10, MK: 10, // E Europe (bratva)
+  EG: 1, DZ: 1, MA: 1, TN: 1, LY: 1, SD: 1,                                    // North Africa (networks)
+  NG: 2, GH: 2, CD: 2, CG: 2, CM: 2, CI: 2, KE: 2, ET: 2, SN: 2, ML: 2, UG: 2, TZ: 2, // Central/W Africa (militias)
+  ZA: 3, ZW: 3, NA: 3, BW: 3, MZ: 3, ZM: 3, AO: 3,                             // Southern Africa (syndicates)
+  SA: 14, IR: 14, IQ: 14, TR: 14, IL: 14, AE: 14, SY: 14, JO: 14, LB: 14, YE: 14, OM: 14, QA: 14, KW: 14, BH: 14, // Middle East (networks)
+  AU: 11, NZ: 11, FJ: 11, PG: 11,                                             // Oceania (outfits)
+};
+
+/** Authoritative crime region for a country: the curated map (by ISO code) over the buggy cultureCode. */
+export function getCrimeRegion(country: { code?: string; cultureCode?: number } | null | undefined): number {
+  if (!country) return 13;
+  const byCode = country.code ? CRIME_REGION_BY_COUNTRY[country.code.toUpperCase()] : undefined;
+  return byCode ?? country.cultureCode ?? 13;
 }
 
 // ============ GOVERNMENT CONSTRAINTS ============

@@ -332,7 +332,7 @@ function selectBestGadget(
 
 // ============ TEST ============
 
-if (require.main === module) {
+if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
   console.log('='.repeat(60));
   console.log('       GADGET BATTLE RUNNER TEST');
   console.log('='.repeat(60));

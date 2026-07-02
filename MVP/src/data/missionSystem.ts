@@ -434,6 +434,30 @@ export const MISSION_TEMPLATES: MissionTemplate[] = [
 // MISSION GENERATION
 // =============================================================================
 
+/**
+ * Underworld raid — auto-emitted by the criminal underworld sim when an org enters
+ * conflict, commits an extreme-risk crime, or reaches Hunted heat (>=61). Raid the HQ.
+ */
+export const UNDERWORLD_RAID_TEMPLATE: MissionTemplate = {
+  id: 'underworld_raid',
+  type: 'capture_hold',
+  name: 'Underworld Raid',
+  description: "Raid a criminal organization's headquarters and break their operation.",
+  source: 'underworld',
+  minSquadSize: 2,
+  maxSquadSize: 6,
+  recommendedThreatLevel: 2,
+  baseDifficulty: 3,
+  dangerLevel: 7,
+  estimatedDurationMinutes: 60,
+  baseReward: 10000,
+  fameReward: 120,
+  reputationChange: 10,
+  expectedEnemies: { min: 8, max: 18 },
+  combatRequired: true,
+  stealthOption: true,
+};
+
 export interface GeneratedMission {
   id: string;
   template: MissionTemplate;
@@ -448,6 +472,7 @@ export interface GeneratedMission {
   timeLimit?: number;
   expiresAt?: number;  // Game timestamp
   completedAt?: number;  // Game day when mission was completed
+  linkedOrgId?: string;  // Criminal org targeted by an underworld raid mission
   status: 'available' | 'accepted' | 'in_progress' | 'completed' | 'failed' | 'expired';
 }
 

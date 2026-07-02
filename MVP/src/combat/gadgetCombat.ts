@@ -420,7 +420,7 @@ export function getGadgetSummary(): Record<string, number> {
 
 // ============ TEST OUTPUT ============
 
-if (require.main === module) {
+if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
   console.log('='.repeat(60));
   console.log('       GADGET COMBAT MAPPING REPORT');
   console.log('='.repeat(60));

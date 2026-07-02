@@ -30,6 +30,10 @@ import {
   SELFISH_CALLINGS,
   SELFLESS_CALLINGS,
   getMotivationFromHarmAvoidance,
+  getRegionalOrgType,
+  generateRegionalOrgName,
+  blendRegionalSpecialties,
+  getCrimeRegion,
 } from './criminalOrganization';
 import {
   ActivityResult,
@@ -53,6 +57,13 @@ export interface SimulationEvent {
   headline?: string;
 }
 
+/** Per-activity context surfaced for downstream wiring (investigations + raid missions). */
+export interface ActivityContext {
+  org: CriminalOrganization;
+  city: City;
+  result: ActivityResult;
+}
+
 export interface SimulationResult {
   week: number;
   orgsProcessed: number;
@@ -63,6 +74,7 @@ export interface SimulationResult {
   orgsEliminated: number;
   orgsSpawned: number;
   events: SimulationEvent[];
+  activityResults: ActivityContext[];
 }
 
 // ============ WEEKLY SIMULATION ============
@@ -83,6 +95,7 @@ export function simulateWeek(
     orgsEliminated: 0,
     orgsSpawned: 0,
     events: [],
+    activityResults: [],
   };
 
   // Process each organization
@@ -118,6 +131,9 @@ export function simulateWeek(
 
         // Apply results to org
         applyActivityResult(org, activityResult);
+
+        // Surface for downstream wiring (investigations + raid missions)
+        result.activityResults.push({ org, city, result: activityResult });
 
         // Generate event
         if (activityResult.newsworthy || !activityResult.success) {
@@ -564,14 +580,15 @@ function generateNewOrganization(
   country: Country,
   currentWeek: number
 ): CriminalOrganization {
-  // Determine type based on city size
-  const type = city.populationRating > 5 ? 'syndicate' : 'street_gang';
+  // Authoritative crime region (curated by ISO code); city crime tunes its scale.
+  const cc = getCrimeRegion(country);
+  const type = getRegionalOrgType(cc, (city as any).crimeIndex ?? 40);
 
-  // Generate name
-  const name = generateOrgName(city, country);
+  // Region-flavored name
+  const name = generateRegionalOrgName(cc, city.name);
 
-  // Determine specialties from city types
-  const specialties = getSpecialtiesForCity(city);
+  // Specialties: city-type driven (city stats) blended with regional bias (country)
+  const specialties = blendRegionalSpecialties(cc, getSpecialtiesForCity(city));
 
   // Generate leader
   const leader = generateLeader();

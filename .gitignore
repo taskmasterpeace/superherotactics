@@ -70,3 +70,6 @@ hive-mind-prompt-*.txt
 
 # Auto Claude data directory
 .auto-claude/
+
+# Playwright MCP session artifacts
+.playwright-mcp/

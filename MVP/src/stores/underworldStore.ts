@@ -12,6 +12,12 @@ import {
   CriminalOrganization,
   OrgState,
   CrimeSpecialty,
+  createOrganization,
+  CITY_CRIME_MAP,
+  getMotivationFromHarmAvoidance,
+  NEUTRAL_CALLINGS,
+  SELFISH_CALLINGS,
+  SELFLESS_CALLINGS,
 } from '../data/criminalOrganization';
 import {
   SimulationEvent,
@@ -335,15 +341,7 @@ function generateInitialOrganizations(
   for (let i = 0; i < Math.min(numOrgs, sortedCities.length); i++) {
     const city = sortedCities[i];
 
-    // Import needed functions
-    const {
-      createOrganization,
-      CITY_CRIME_MAP,
-      getMotivationFromHarmAvoidance,
-      NEUTRAL_CALLINGS,
-      SELFISH_CALLINGS,
-      SELFLESS_CALLINGS,
-    } = require('../data/criminalOrganization');
+    // (functions imported at top of file)
 
     // Determine type
     const type = city.populationRating > 5 ? 'syndicate' : 'street_gang';

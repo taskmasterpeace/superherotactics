@@ -8,7 +8,8 @@ import {
   IMPATIENCE_STATE_MESSAGES,
 } from '../data/personalitySystem'
 // News templates (old API removed - using new news system)
-import { getCountryByCode } from '../data/countries'
+import { getCountryByCode, ALL_COUNTRIES } from '../data/countries'
+import { getCountryByName as resolveCountryByName, getCountryByCode as resolveCountryByCode } from '../data/allCountries'
 import { calculateMedicalSystem } from '../data/combinedEffects'
 import {
   getOriginHealing,
@@ -26,7 +27,7 @@ import {
   advanceInvestigation,
   INVESTIGATION_TEMPLATES
 } from '../data/investigationSystem'
-import { GeneratedMission, MISSION_TEMPLATES, generateMission } from '../data/missionSystem'
+import { GeneratedMission, MISSION_TEMPLATES, generateMission, UNDERWORLD_RAID_TEMPLATE } from '../data/missionSystem'
 import {
   createMissionActions,
   shouldRefreshMissions,
@@ -41,9 +42,15 @@ import {
   CITY_CRIME_MAP,
   NEUTRAL_CALLINGS,
   getMotivationFromHarmAvoidance,
+  getRegionalOrgType,
+  generateRegionalOrgName,
+  blendRegionalSpecialties,
+  getCrimeRegion,
 } from '../data/criminalOrganization'
 import { simulateWeek, SimulationEvent, SimulationResult } from '../data/criminalSimulation'
 import { generateWeeklyNews } from '../data/criminalNewsBridge'
+import { generateInvestigationFromCrime } from '../data/criminalInvestigationBridge'
+import { ACTIVITY_CONFIG } from '../data/crimeActivities'
 import { getCitiesByCountry } from '../data/cities'
 import { Email } from '../data/emailSystem'
 
@@ -144,6 +151,7 @@ import {
   generateFillerNews,
 } from '../data/newsTemplates'
 import { getCityByName } from '../data/cities'
+import { getCityByName as getCityFull } from '../data/allCities'
 import { getArmorById } from '../data/armor'
 import { generateNewspaperName } from '../data/newspaperExpansion'
 import {
@@ -167,6 +175,12 @@ import {
   progressConstruction,
   startConstruction,
   calculateMonthlyUpkeep,
+  BASE_TYPES,
+  FACILITIES,
+  createFacility,
+  hasRequiredFacilities,
+  isPositionAvailable,
+  cancelConstruction,
 } from '../data/baseSystem'
 
 // Faction Relations System
@@ -589,7 +603,13 @@ interface EnhancedGameStore {
 
 export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   // Initial State
-  gamePhase: 'playing',  // Start directly in playing mode for testing
+  // Boot into the New Game flow (country -> city -> recruit).
+  // The old 4-faction picker is deprecated; selection starts at the full
+  // country list. Append ?dev=true to jump straight to the world map.
+  gamePhase: (typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('dev') === 'true')
+    ? 'playing'
+    : 'country-selection',
   selectedFaction: '',
   selectedCountry: 'United States',
   selectedCity: 'Washington DC',
@@ -891,8 +911,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   },
 
   selectCity: (city) => {
-    // Generate newspaper name based on city's culture code
-    const cityData = getCityByName(city);
+    // Generate newspaper name based on city's culture code (full city DB)
+    const cityData = getCityFull(city);
     const newspaperName = cityData
       ? generateNewspaperName(city, cityData.cultureCode)
       : `The ${city} Times`;  // Fallback if city not found
@@ -900,10 +920,13 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     set({
       selectedCity: city,
       localNewspaperName: newspaperName,
+      // Place the squad's starting sector at the chosen city so the world map
+      // opens on the right location (was previously a fixed default).
+      currentSector: cityData?.sector || get().currentSector,
       gamePhase: 'recruiting'
     })
-    // Initialize squads with starting characters
-    get().initializeSquads()
+    // Squad is formed from the recruited team in RecruitingPage (handleConfirmTeam),
+    // not here -- no operatives have been chosen yet at this point.
     toast.success(`Headquarters established in ${city} - Now recruit your team!`)
   },
 
@@ -2875,8 +2898,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       )
     })
 
-    // Emit event for investigation generation
-    const { EventBus } = require('../data/eventBus')
+    // Emit event for investigation generation (EventBus imported at top)
     EventBus.emit({
       id: `news-read-${Date.now()}`,
       type: 'news:article-read',
@@ -3392,12 +3414,12 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   initializeUnderworld: () => {
     const state = get()
-    const countryCode = state.selectedCountry
+    const sel = state.selectedCountry
 
-    // Get country data
-    const country = getCountryByCode(countryCode)
+    // Resolve by name (onboarding stores a country NAME) or code, against the full 168-country set
+    const country = resolveCountryByName(sel) || resolveCountryByCode(sel)
     if (!country) {
-      console.warn(`[Underworld] Country not found: ${countryCode}`)
+      console.warn(`[Underworld] Country not found: ${sel}`)
       return
     }
 
@@ -3417,31 +3439,32 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       const orgCount = 1 + Math.floor(Math.random() * 2) // 1-2 orgs per city
 
       for (let j = 0; j < orgCount; j++) {
-        const orgTypes = ['street_gang', 'syndicate', 'cartel'] as const
-        const orgType = orgTypes[Math.min(Math.floor(city.crimeIndex / 30), 2)]
+        // Authoritative crime region (curated by ISO code); city crime tunes scale + specialties.
+        const cc = getCrimeRegion(country)
+        const orgType = getRegionalOrgType(cc, city.crimeIndex)
 
-        // Get available crime specialties based on city type
+        // City-type specialties (city stats) — supports both cityType1-4 and cityTypes[] formats
         const cityTypes = [
           (city as any).cityType1,
           (city as any).cityType2,
           (city as any).cityType3,
           (city as any).cityType4,
+          ...(Array.isArray((city as any).cityTypes) ? (city as any).cityTypes : []),
         ].filter(t => t && t.length > 0)
 
-        const specialties: string[] = []
+        const citySpecialties: any[] = []
         for (const cityType of cityTypes) {
           const typeSpecialties = CITY_CRIME_MAP[cityType]
-          if (typeSpecialties) {
-            specialties.push(...typeSpecialties)
-          }
+          if (typeSpecialties) citySpecialties.push(...typeSpecialties)
         }
-        const uniqueSpecialties = [...new Set(specialties)].slice(0, 3) as any[]
+        // Blend city specialties (city stats) with regional bias (country)
+        const uniqueSpecialties = blendRegionalSpecialties(cc, [...new Set(citySpecialties)] as any[]) as any[]
         if (uniqueSpecialties.length === 0) {
           uniqueSpecialties.push('theft', 'extortion')
         }
 
         const org = createOrganization(
-          `The ${city.name} ${['Syndicate', 'Cartel', 'Crew', 'Gang', 'Family'][j % 5]}`,
+          generateRegionalOrgName(cc, city.name),
           orgType,
           city.name,
           country.code,
@@ -3492,8 +3515,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       return null
     }
 
-    // Get country data
-    const country = getCountryByCode(state.selectedCountry)
+    // Get country data — resolve by name (onboarding stores a NAME) or code
+    const country = resolveCountryByName(state.selectedCountry) || resolveCountryByCode(state.selectedCountry)
     if (!country) {
       return null
     }
@@ -3519,11 +3542,66 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       get().addNewsArticle(article)
     }
 
+    // === GAP 1 — crimes -> investigations (RULING-INV-WIRE §8.2: <=2 new/week) ===
+    const newInvestigations: Investigation[] = []
+    for (const ctx of result.activityResults) {
+      if (newInvestigations.length >= 2) break
+      const generated = generateInvestigationFromCrime(
+        ctx.org, ctx.result, country, ctx.city, state.gameTime.day
+      )
+      if (generated) newInvestigations.push(generated.investigation)
+    }
+
+    // === GAP 2 — crimes -> underworld raid missions (RULING-MISSION-WIRE §8.4: <=1 per org/4wks) ===
+    const extremeOrgIds = new Set(
+      result.activityResults
+        .filter(ctx => ACTIVITY_CONFIG[ctx.result.activityType]?.riskLevel === 'extreme')
+        .map(ctx => ctx.org.id)
+    )
+    const updatedMissions = new Map(state.availableMissions)
+    let autoMissionsEmitted = 0
+    for (const org of state.criminalOrganizations) {
+      if (org.state === 'eliminated') continue
+      // Trigger: in conflict, OR committed an extreme-risk crime this week, OR heat >= 61 (Hunted)
+      const triggered = org.state === 'conflict' || org.heat >= 61 || extremeOrgIds.has(org.id)
+      if (!triggered) continue
+      if (currentWeek - (org.lastAutoMissionWeek ?? -999) < 4) continue // throttle: 1 per org / 4 weeks
+      const hqCity = cities.find(c => c.name === org.headquarters)
+      if (!hqCity) continue
+
+      const mission = generateMission(UNDERWORLD_RAID_TEMPLATE, hqCity.sector, hqCity.name, 0)
+      mission.targetName = org.name
+      mission.linkedOrgId = org.id
+      // Meaningful reward scaled by org strength (capital + reputation), in real dollars
+      mission.reward = 20000 + Math.floor(org.capital * 600) + Math.floor(org.reputation * 250)
+      mission.fameReward = Math.floor(15 + org.reputation / 4)
+      // Tougher, hotter orgs make for a harder raid
+      mission.difficulty = Math.max(2, Math.min(5, 2 + Math.floor(org.reputation / 30))) as any
+      mission.dangerLevel = Math.min(10, 6 + Math.floor(org.heat / 40))
+      mission.briefing = `Raid the headquarters of ${org.name} in ${hqCity.name}. Their boss, ${org.leader.name}, is wanted — capturing the leader will shatter the organization.`
+
+      // Dedup: keep at most ONE live raid mission per org (replace any stale one)
+      const sectorMissions = (updatedMissions.get(hqCity.sector) || []).filter(
+        (m: any) => !(m.template && m.template.source === 'underworld' && m.linkedOrgId === org.id)
+      )
+      updatedMissions.set(hqCity.sector, [...sectorMissions, mission])
+      org.lastAutoMissionWeek = currentWeek // in-place; picked up by the spread below
+      autoMissionsEmitted++
+    }
+
+    if (newInvestigations.length > 0 || autoMissionsEmitted > 0) {
+      console.log(`[Underworld] Wired ${newInvestigations.length} investigation(s), ${autoMissionsEmitted} raid mission(s)`)
+    }
+
     // Update state
     set((prev) => ({
       criminalOrganizations: [...prev.criminalOrganizations], // Updated in place by simulation
       underworldEvents: [...prev.underworldEvents, ...result.events].slice(-200),
       lastUnderworldWeek: currentWeek,
+      investigations: newInvestigations.length > 0
+        ? [...newInvestigations, ...prev.investigations]
+        : prev.investigations,
+      availableMissions: autoMissionsEmitted > 0 ? updatedMissions : prev.availableMissions,
       underworldStats: {
         totalArrests: prev.underworldStats.totalArrests + result.arrestsMade,
         totalProfit: prev.underworldStats.totalProfit + result.profitGenerated,
@@ -3735,7 +3813,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   // Base Building Actions
   purchaseBase: (type, name, sectorCode, countryCode) => {
     const state = get()
-    const { BASE_TYPES } = require('../data/baseSystem')
+    // BASE_TYPES imported at top
     const config = BASE_TYPES[type]
 
     if (!canAfford(state.economy, config.purchaseCost)) {
@@ -3784,7 +3862,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       return
     }
 
-    const { FACILITIES, createFacility, hasRequiredFacilities, isPositionAvailable } = require('../data/baseSystem')
+    // FACILITIES, createFacility, hasRequiredFacilities, isPositionAvailable imported at top
     const config = FACILITIES[facilityType]
 
     if (!isPositionAvailable(activeBase, gridX, gridY)) {
@@ -3883,7 +3961,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   cancelConstruction: (projectId) => {
     const state = get()
-    const { cancelConstruction } = require('../data/baseSystem')
+    // cancelConstruction imported at top
     const result = cancelConstruction(state.baseState, projectId)
 
     set({
@@ -3919,7 +3997,6 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   initFactionStandings: () => {
     const state = get()
-    const { ALL_COUNTRIES } = require('../data/countries')
     const homeCountry = state.selectedCountry || 'US'
 
     const standings = initializeFactionStandings(ALL_COUNTRIES, homeCountry)
@@ -3977,7 +4054,6 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   getCountryReputation: (countryCode) => {
     const state = get()
-    const { getCountryByCode } = require('../data/countries')
     const country = getCountryByCode(countryCode)
     if (!country) return null
 

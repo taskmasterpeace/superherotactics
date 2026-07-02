@@ -2,24 +2,25 @@ import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '../stores/enhancedGameStore'
 import { ArrowLeft, MapPin, Users, Shield, AlertTriangle, Building, ChevronRight, Search } from 'lucide-react'
-import { CITIES, getCountryByName, type City } from '../data/worldData'
+import { getCitiesByCountry, type City } from '../data/allCities'
+import { getCountryByName, codeToFlag } from '../data/allCountries'
 
 export default function FixedCitySelection() {
   const { selectedCountry, setGamePhase, selectCity } = useGameStore()
   const [selectedCityData, setSelectedCityData] = useState<City | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
 
-  // Get cities for the selected country, filtered by search
+  const country = getCountryByName(selectedCountry)
+
+  // Get cities for the selected country (linked by ISO code), filtered by search
   const availableCities = useMemo(() => {
-    const cities = CITIES.filter(city => city.country === selectedCountry)
+    const cities = country ? getCitiesByCountry(country.code) : []
     if (!searchTerm) return cities
     return cities.filter(city =>
       city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       city.cityTypes.some(t => t?.toLowerCase().includes(searchTerm.toLowerCase()))
     )
-  }, [selectedCountry, searchTerm])
-
-  const country = getCountryByName(selectedCountry)
+  }, [country, searchTerm])
 
   const handleConfirmCity = () => {
     if (selectedCityData) {
@@ -90,7 +91,7 @@ export default function FixedCitySelection() {
           </button>
 
           <div className="text-center">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
               Select Your City
             </h1>
             <p className="text-gray-400 mt-2">
@@ -101,7 +102,7 @@ export default function FixedCitySelection() {
           <div className="text-right">
             <div className="text-sm text-gray-400">Step 2 of 3</div>
             <div className="text-xs text-gray-500 flex items-center gap-1">
-              {country?.flag} {selectedCountry}
+              {country ? codeToFlag(country.code) : ''} {selectedCountry}
             </div>
           </div>
         </div>
@@ -116,7 +117,7 @@ export default function FixedCitySelection() {
           >
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <Building className="text-purple-400" size={24} />
+                <Building className="text-cyan-400" size={24} />
                 Cities ({availableCities.length})
               </h2>
               <div className="relative">
@@ -124,7 +125,7 @@ export default function FixedCitySelection() {
                 <input
                   type="text"
                   placeholder="Search cities..."
-                  className="pl-8 pr-3 py-1.5 text-sm bg-gray-900 border border-gray-700 rounded-lg focus:border-purple-400 focus:ring-1 focus:ring-purple-400/20 w-40"
+                  className="pl-8 pr-3 py-1.5 text-sm bg-gray-900 border border-gray-700 rounded-lg focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20 w-40"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -138,7 +139,7 @@ export default function FixedCitySelection() {
                     key={city.name}
                     className={`w-full p-4 rounded-lg border transition-all text-left ${
                       selectedCityData?.name === city.name
-                        ? 'bg-purple-600/30 border-purple-400'
+                        ? 'bg-cyan-600/30 border-cyan-400'
                         : 'bg-gray-900/50 border-gray-700 hover:border-gray-500'
                     }`}
                     onClick={() => setSelectedCityData(city)}
@@ -183,21 +184,24 @@ export default function FixedCitySelection() {
                   onClick={() => {
                     // Create a placeholder city
                     const placeholder: City = {
+                      id: -1,
                       sector: '',
-                      countryCode: 0,
-                      cultureCode: 0,
+                      countryId: country?.id ?? 0,
+                      countryCode: country?.code ?? '',
+                      countryName: selectedCountry,
+                      cultureCode: country?.cultureCode ?? 0,
                       name: `${selectedCountry} Capital`,
-                      country: selectedCountry,
                       population: 1000000,
                       populationRating: 5,
                       populationType: 'City',
                       cityTypes: ['Political'],
+                      hvt: '',
                       crimeIndex: 50,
                       safetyIndex: 50
                     }
                     setSelectedCityData(placeholder)
                   }}
-                  className="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm"
+                  className="mt-4 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-sm"
                 >
                   Use Placeholder City
                 </button>
@@ -265,7 +269,7 @@ export default function FixedCitySelection() {
                   <h3 className="text-sm text-gray-400 mb-2">City Types</h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedCityData.cityTypes.filter(t => t).map(type => (
-                      <span key={type} className="px-3 py-1 bg-purple-600/20 border border-purple-500 rounded-full text-sm text-purple-300 flex items-center gap-1">
+                      <span key={type} className="px-3 py-1 bg-cyan-600/20 border border-cyan-500 rounded-full text-sm text-cyan-300 flex items-center gap-1">
                         {getCityTypeIcon(type)} {type}
                       </span>
                     ))}
@@ -278,7 +282,7 @@ export default function FixedCitySelection() {
                   <div className="space-y-1 text-xs">
                     {selectedCityData.cityTypes.filter(t => t).map(type => (
                       <div key={type} className="text-gray-300">
-                        <span className="text-purple-400">{type}:</span>
+                        <span className="text-cyan-400">{type}:</span>
                         {type === 'Political' && ' +2CS Political/Diplomatic investigations'}
                         {type === 'Military' && ' +2CS Military/Security investigations, +3CS military recruitment'}
                         {type === 'Company' && ' +2CS Corporate/Financial investigations'}
@@ -302,7 +306,7 @@ export default function FixedCitySelection() {
 
                 {/* Confirm Button */}
                 <motion.button
-                  className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-lg font-bold text-lg text-white shadow-lg transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-lg font-bold text-lg text-white shadow-lg transition-all flex items-center justify-center gap-2"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleConfirmCity}

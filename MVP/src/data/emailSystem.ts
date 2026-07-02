@@ -151,13 +151,11 @@ const state: EmailSystemState = {
   lastEmailId: 0
 }
 
-// Lazy import to avoid circular dependency
-let _store: any = null
+// Static ESM import (replaces a CommonJS require). getStore() is only ever
+// called at runtime, so the circular dependency with the store resolves fine.
+import { useGameStore } from '../stores/enhancedGameStore'
 function getStore() {
-  if (!_store) {
-    _store = require('../stores/enhancedGameStore').useGameStore
-  }
-  return _store.getState()
+  return useGameStore.getState()
 }
 
 // ============================================================================

@@ -2,7 +2,9 @@ import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore } from '../stores/enhancedGameStore'
 import { Search, MapPin, Users, Shield, GraduationCap, Heart, Zap, ChevronDown } from 'lucide-react'
-import { COUNTRIES, getCitiesByCountry, getEducationLevel, type Country } from '../data/worldData'
+import { ALL_COUNTRIES as COUNTRIES, codeToFlag, type Country } from '../data/allCountries'
+import { getCitiesByCountry } from '../data/allCities'
+import { getEducationLevel } from '../data/worldData'
 
 export default function CountrySelection() {
   const { setGamePhase, selectCountry } = useGameStore()
@@ -45,7 +47,7 @@ export default function CountrySelection() {
     }
   }
 
-  const cities = selectedCountryData ? getCitiesByCountry(selectedCountryData.name) : []
+  const cities = selectedCountryData ? getCitiesByCountry(selectedCountryData.code) : []
 
   return (
     <div className="h-screen flex items-center justify-center p-6 overflow-auto">
@@ -132,7 +134,7 @@ export default function CountrySelection() {
                           }`}
                           onClick={() => handleSelectCountry(country)}
                         >
-                          <span className="text-2xl">{country.flag}</span>
+                          <span className="text-2xl">{codeToFlag(country.code)}</span>
                           <div className="flex-1">
                             <div className="font-medium text-white">{country.name}</div>
                             <div className="text-xs text-gray-400">{country.nationality} • {country.governmentPerception}</div>
@@ -168,7 +170,7 @@ export default function CountrySelection() {
                           : 'bg-gray-700/50 hover:bg-gray-600 text-gray-300'
                       }`}
                     >
-                      <span className="text-lg">{country.flag}</span>
+                      <span className="text-lg">{codeToFlag(country.code)}</span>
                       <span className="truncate">{name.split(' ')[0]}</span>
                     </button>
                   )
@@ -185,10 +187,15 @@ export default function CountrySelection() {
               <>
                 {/* Country Header */}
                 <div className="flex items-center gap-4 mb-6">
-                  <span className="text-6xl">{selectedCountryData.flag}</span>
+                  <span className="text-6xl">{codeToFlag(selectedCountryData.code)}</span>
                   <div className="flex-1">
                     <h2 className="text-3xl font-bold text-white">{selectedCountryData.name}</h2>
                     <p className="text-gray-400">{selectedCountryData.motto || 'No official motto'}</p>
+                    {selectedCountryData.president && (
+                      <p className="text-sm text-gray-300 mt-1">
+                        {selectedCountryData.leaderTitle || 'Leader'}: <span className="text-white font-medium">{selectedCountryData.president}</span>
+                      </p>
+                    )}
                     <div className="flex items-center gap-3 mt-2">
                       <span className={`px-2 py-1 text-xs rounded ${
                         selectedCountryData.governmentPerception === 'Full Democracy' ? 'bg-green-600' :
@@ -226,7 +233,7 @@ export default function CountrySelection() {
                     icon={<Heart size={20} />}
                     label="Healthcare"
                     value={`${selectedCountryData.healthcare}/100`}
-                    sublabel={selectedCountryData.cloning > 0 ? `Cloning: ${selectedCountryData.cloning}%` : 'No cloning'}
+                    sublabel={`Cloning: ${selectedCountryData.cloning}`}
                   />
                 </div>
 
@@ -290,7 +297,7 @@ export default function CountrySelection() {
                 {/* Confirm Button */}
                 <button
                   type="button"
-                  className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-lg font-bold text-lg text-white shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 rounded-lg font-bold text-lg text-white shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
                   onClick={handleConfirmCountry}
                 >
                   ESTABLISH OPERATIONS IN {selectedCountryData.name.toUpperCase()}

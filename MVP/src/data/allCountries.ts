@@ -45,6 +45,14 @@ export interface Country {
   cultureGroup: string;
 }
 
+/** Derive a flag emoji from a 2-letter ISO country code (regional indicator symbols). */
+export function codeToFlag(code: string): string {
+  if (!code || code.length !== 2) return '🏳️';
+  const base = 0x1F1E6;
+  const cc = code.toUpperCase();
+  return String.fromCodePoint(base + cc.charCodeAt(0) - 65, base + cc.charCodeAt(1) - 65);
+}
+
 export const ALL_COUNTRIES: Country[] = [
   {
     id: 2,

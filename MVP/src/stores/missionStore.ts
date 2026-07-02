@@ -212,6 +212,25 @@ export function createMissionActions(set: any, get: any): MissionStoreActions {
           mission.completedAt = gameStore.gameTime?.day || 0;
         }
 
+        // RULING-MISSION-WIRE: a successful underworld raid cripples the targeted org
+        // (-> declining, or -> eliminated if the leader is captured -> feeds prisoners).
+        let orgsChanged = false;
+        if (success && mission.template?.source === 'underworld' && mission.linkedOrgId
+            && Array.isArray(state.criminalOrganizations)) {
+          const org = state.criminalOrganizations.find((o: any) => o.id === mission.linkedOrgId);
+          if (org && org.state !== 'eliminated') {
+            const leaderCaptured = Math.random() < 0.35;
+            if (leaderCaptured) {
+              org.state = 'eliminated';
+              if (org.leader) org.leader.imprisoned = true;
+            } else {
+              org.state = 'declining';
+            }
+            org.stateEnteredAt = Math.floor((state.gameTime?.day ?? 0) / 7);
+            orgsChanged = true;
+          }
+        }
+
         // Remove from active missions
         const newActiveMissions = [...state.activeMissions];
         newActiveMissions.splice(missionIndex, 1);
@@ -219,6 +238,7 @@ export function createMissionActions(set: any, get: any): MissionStoreActions {
         return {
           activeMissions: newActiveMissions,
           completedMissions: [...state.completedMissions, mission],
+          ...(orgsChanged ? { criminalOrganizations: [...state.criminalOrganizations] } : {}),
         };
       });
     },

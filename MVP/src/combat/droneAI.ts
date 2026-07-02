@@ -376,7 +376,7 @@ function getRandomPatrolPosition(from: Position, speed: number): Position {
 
 // ============ TEST ============
 
-if (require.main === module) {
+if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
   console.log('='.repeat(60));
   console.log('       DRONE AI TEST');
   console.log('='.repeat(60));

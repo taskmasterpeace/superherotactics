@@ -34,10 +34,10 @@ import { CallingId, generateCallingForBackground } from './callingSystem';
 import {
   getCountryProfile,
   determineRole,
-  CharacterRole,
-  EducationField,
+  type CharacterRole,
+  type EducationField,
   EDUCATION_FIELDS,
-  CountryProfile,
+  type CountryProfile,
 } from './countryProfiles';
 
 // =============================================================================
@@ -1102,11 +1102,15 @@ export function debugCultureDistribution(sampleSize: number = 100): void {
 // EXPORTS
 // =============================================================================
 
-// Re-export types and functions from countryProfiles for convenience
-export {
+// Re-export types and functions from countryProfiles for convenience.
+// Types MUST use `export type` so esbuild does not emit a runtime binding
+// (these are erased at build time and would otherwise crash the module graph).
+export type {
   CharacterRole,
   RoleDefinition,
   EducationField,
+} from './countryProfiles';
+export {
   EDUCATION_FIELDS,
   CHARACTER_ROLES,
   determineRole
