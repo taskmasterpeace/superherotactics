@@ -1953,12 +1953,69 @@ export function getCharacterHitChance(
 // COMPLETE CHARACTER SHEET
 // =============================================================================
 
+/**
+ * Portrait slot. Art comes later (and voices after that) — this reserves the
+ * face so characters can show up on the phone/roster NOW via a deterministic
+ * placeholder, and real portrait art (or an LLM-described face) drops in without
+ * a data migration. `resolvePortrait()` always returns a renderable result.
+ */
+export interface PortraitInfo {
+  assetKey?: string;              // resolved art asset id, when art exists
+  url?: string;                   // explicit image URL / data URI, when available
+  emoji?: string;                 // quick glyph fallback
+  seed: string;                   // stable per-character (usually the id) for placeholders
+  // appearance hints for future portrait generation / LLM face description
+  skinTone?: string;
+  hairColor?: string;
+  build?: 'slim' | 'average' | 'athletic' | 'heavy';
+  descriptor?: string;            // short prose appearance for art/LLM prompts
+}
+
+// Origin glyphs for placeholder faces (1-9). No purple anywhere (brand rule).
+const ORIGIN_PORTRAIT_EMOJI: Record<number, string> = {
+  1: '🧑', 2: '🧬', 3: '🤖', 4: '🦎', 5: '✨', 6: '⚙️', 7: '👾', 8: '👽', 9: '❓',
+};
+// Curated non-purple hue palette (skips 260-340) for deterministic placeholder tints.
+const PORTRAIT_HUES = [12, 28, 45, 90, 140, 165, 195, 220, 245, 350];
+
+export interface ResolvedPortrait {
+  url?: string;      // real art when present
+  emoji: string;     // origin glyph fallback
+  initials: string;  // from the character's name
+  hue: number;       // deterministic, non-purple
+}
+
+/**
+ * Always returns something renderable: real art if the portrait slot has a
+ * url/assetKey, otherwise a deterministic placeholder (initials + origin glyph +
+ * stable tint) so a face shows on the phone/roster today and real portraits drop
+ * in later without touching call sites.
+ */
+export function resolvePortrait(char: {
+  id?: string; realName?: string; originType?: number; origin?: number; portrait?: PortraitInfo;
+}): ResolvedPortrait {
+  const p = char.portrait;
+  const seed = p?.seed || char.id || char.realName || 'x';
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  const initials = (char.realName || '?')
+    .split(/\s+/).map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || '?';
+  const origin = (typeof char.originType === 'number' ? char.originType : char.origin) ?? 1;
+  return {
+    url: p?.url,
+    emoji: p?.emoji || ORIGIN_PORTRAIT_EMOJI[origin] || '🧑',
+    initials,
+    hue: PORTRAIT_HUES[h % PORTRAIT_HUES.length],
+  };
+}
+
 export interface CharacterSheet {
   // === IDENTITY ===
   id: string;
   realName: string;
   codeName?: string;              // Hero/villain name
   hasSecretIdentity: boolean;
+  portrait?: PortraitInfo;        // reserved face slot (see PortraitInfo / resolvePortrait)
 
   // === CLASSIFICATION ===
   characterType: CharacterType;
