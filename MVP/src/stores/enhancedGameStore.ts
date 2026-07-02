@@ -168,6 +168,7 @@ import {
   addBaseToState,
   removeBaseFromState,
   getActiveBase,
+  getFacilityAt,
   updateBase,
   getEducationBonus,
   getHealingBonus,
@@ -325,7 +326,7 @@ interface EnhancedGameStore {
   selectedCity: string
 
   // Game State
-  currentView: 'world-map' | 'tactical-combat' | 'investigation' | 'investigation-board' | 'characters' | 'combat-lab' | 'news' | 'encyclopedia' | 'balance' | 'world-map-grid' | 'database' | 'data-viewer' | 'sound-config' | 'loadout-editor' | 'sector-editor' | 'world-data' | 'almanac' | 'hospital' | 'equipment-shop' | 'training' | 'base'
+  currentView: 'world-map' | 'tactical-combat' | 'investigation' | 'investigation-board' | 'characters' | 'combat-lab' | 'news' | 'encyclopedia' | 'balance' | 'world-map-grid' | 'database' | 'data-viewer' | 'sound-config' | 'loadout-editor' | 'sector-editor' | 'world-data' | 'almanac' | 'hospital' | 'equipment-shop' | 'training' | 'base' | 'chronos' | 'reputation'
   budget: number
   day: number  // Legacy - use gameTime.day instead
 
@@ -466,7 +467,7 @@ interface EnhancedGameStore {
   // Medical system
   addInjury: (characterId: string, injury: any) => void
   scheduleHospitalStay: (characterId: string, injury: any) => void
-  processRecovery: () => void
+  processRecovery: (hours?: number) => void
   updateCharacterInjuries: (characterId: string, injury: any) => void
   hospitalizeCharacter: (characterId: string, injuries: any[], countryCode?: string) => void
   calculateRecoveryTime: (injury: any, hospitalQuality: number) => number
@@ -545,6 +546,8 @@ interface EnhancedGameStore {
   // New World Systems Actions
   // Economy
   recordTransaction: (type: 'income' | 'expense' | 'purchase' | 'sale', category: TransactionCategory, amount: number, description: string) => void
+  addMoney: (amount: number, description?: string) => void
+  addFame: (amount: number) => void
   processWeeklyPayday: () => void
   getEconomyStats: () => { netWorth: number; weeklyIncome: number; weeklyExpenses: number }
 
@@ -573,12 +576,13 @@ interface EnhancedGameStore {
   initializeSquads: () => void  // Create initial squad from characters
   createNewSquad: (name: string, characterIds: string[]) => Squad | null
   disbandSquad: (squadId: string) => boolean
+  renameSquad: (squadId: string, name: string) => boolean
   assignToSquad: (characterId: string, squadId: string) => boolean
   removeFromSquad: (characterId: string, squadId: string) => boolean
   setActiveSquad: (squadId: string) => void
   getSquadById: (squadId: string) => Squad | undefined
   getSquadForCharacter: (characterId: string) => Squad | undefined
-  assignVehicle: (squadId: string, vehicleId: string) => { success: boolean; reason?: string }
+  assignVehicle: (squadId: string, vehicleId: string) => { success: boolean; reason?: string; warnings?: string[] }
   deploySquad: (squadId: string, sector: string) => void
 
   // Character Life Cycle Actions
@@ -1069,9 +1073,10 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     }
   },
 
-  processRecovery: () => {
+  processRecovery: (hours = 1) => {
     const state = get()
     const recovered = []
+    let anyRecovering = false
     // Calculate current game hour for idle tracking
     const currentGameHour = (state.gameTime.day * 24) + Math.floor(state.gameTime.minutes / 60)
 
@@ -1083,8 +1088,9 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     const updatedCharacters = state.characters.map(char => {
       // Process both 'hospitalized' (legacy) and 'hospital' (new) status
       if ((char.status === 'hospitalized' || char.status === 'hospital') && char.recoveryTime > 0) {
-        // Reduce recovery time by 1 hour per tick, multiplied by healing bonus
-        const recoveryRate = healingMultiplier
+        anyRecovering = true
+        // Reduce recovery time by hours passed, multiplied by healing bonus
+        const recoveryRate = healingMultiplier * hours
         const newRecoveryTime = Math.max(0, char.recoveryTime - recoveryRate)
 
         if (newRecoveryTime <= 0) {
@@ -1105,8 +1111,11 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       return char
     })
 
-    if (recovered.length > 0) {
+    if (anyRecovering) {
       set({ characters: updatedCharacters })
+    }
+
+    if (recovered.length > 0) {
       recovered.forEach(name => {
         toast.success(`${name} has recovered and returned to duty`)
 
@@ -2714,10 +2723,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     )
 
     if (currentRecoveryProcessing.length > 0) {
-      // Process recovery for each hour passed
-      for (let i = 0; i < Math.floor(hoursToProcess); i++) {
-        get().processRecovery()
-      }
+      get().processRecovery(hoursToProcess)
     }
 
     set({ lastTimeTick: Date.now() })
@@ -3148,6 +3154,10 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
         result.progressGained = Math.round(result.progressGained * (1 + investigationBonus / 100))
       }
     }
+
+    // Apply investigator INT modifier (INT 50 = neutral, +/-25% at INT 100/0)
+    const investigatorINT = character.stats?.INT ?? 50
+    result.progressGained = Math.round(result.progressGained * (1 + (investigatorINT - 50) / 200))
 
     // Create decision log entry
     const decision: any = {
@@ -3737,6 +3747,22 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     })
   },
 
+  // Signed convenience wrappers used by event handlers (wages, encounters, loot)
+  addMoney: (amount: number, description = 'Miscellaneous') => {
+    if (!amount) return
+    get().recordTransaction(
+      amount > 0 ? 'income' : 'expense',
+      'other',
+      Math.abs(amount),
+      description,
+    )
+  },
+
+  addFame: (amount: number) => {
+    if (!amount) return
+    set(state => ({ playerFame: Math.max(0, Math.min(1000, state.playerFame + amount)) }))
+  },
+
   processWeeklyPayday: () => {
     const state = get()
     // Get team jobs (placeholder - would come from character data)
@@ -3816,8 +3842,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     // BASE_TYPES imported at top
     const config = BASE_TYPES[type]
 
-    if (!canAfford(state.economy, config.purchaseCost)) {
-      toast.error(`Cannot afford base! Need $${config.purchaseCost.toLocaleString()}`)
+    if (state.budget < config.purchaseCost) {
+      toast.error(`Insufficient funds! Need $${config.purchaseCost.toLocaleString()} but have $${state.budget.toLocaleString()}`)
       return
     }
 
@@ -3835,8 +3861,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
         id: `tx_${Date.now()}`,
         timestamp: state.gameTime.day,
         type: 'purchase',
-        category: 'other',
-        amount: config.purchaseCost,
+        category: 'property_purchase',
+        amount: -config.purchaseCost,
         description: `Purchased ${name} (${config.name})`,
       }),
     })
@@ -3876,8 +3902,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     }
 
     const cost = config.buildCost[0] // Level 1 cost
-    if (!canAfford(state.economy, cost)) {
-      toast.error(`Cannot afford! Need $${cost.toLocaleString()}`)
+    if (state.budget < cost) {
+      toast.error(`Insufficient funds! Need $${cost.toLocaleString()} but have $${state.budget.toLocaleString()}`)
       return
     }
 
@@ -3895,9 +3921,17 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     set({
       baseState: newBaseState,
       budget: state.budget - cost,
+      economy: processTransaction(state.economy, {
+        id: `tx_${Date.now()}`,
+        timestamp: state.gameTime.day,
+        type: 'purchase',
+        category: 'property_purchase',
+        amount: -cost,
+        description: `Construction started: ${config.name}`,
+      }),
     })
 
-    toast.success(`Construction started: ${config.name}`)
+    toast.success(`Construction started: ${config.name} (-$${cost.toLocaleString()})`)
   },
 
   upgradeFacilityAt: (gridX, gridY) => {
@@ -3909,6 +3943,19 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       return
     }
 
+    const facility = getFacilityAt(activeBase, gridX, gridY)
+    if (!facility || facility.level >= 3) {
+      toast.error('Cannot upgrade facility')
+      return
+    }
+
+    const config = FACILITIES[facility.type]
+    const cost = config.buildCost[facility.level] // Next level cost
+    if (state.budget < cost) {
+      toast.error(`Insufficient funds! Need $${cost.toLocaleString()} but have $${state.budget.toLocaleString()}`)
+      return
+    }
+
     const updatedBase = upgradeFacility(activeBase, gridX, gridY)
     if (updatedBase === activeBase) {
       toast.error('Cannot upgrade facility')
@@ -3917,9 +3964,18 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
     set({
       baseState: updateBase(state.baseState, updatedBase),
+      budget: state.budget - cost,
+      economy: processTransaction(state.economy, {
+        id: `tx_${Date.now()}`,
+        timestamp: state.gameTime.day,
+        type: 'purchase',
+        category: 'property_purchase',
+        amount: -cost,
+        description: `Upgraded ${config.name} to level ${facility.level + 1}`,
+      }),
     })
 
-    toast.success('Facility upgraded!')
+    toast.success(`${config.name} upgraded to level ${facility.level + 1}! (-$${cost.toLocaleString()})`)
   },
 
   removeFacilityAt: (gridX, gridY) => {
@@ -4171,6 +4227,19 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
     set({ squads: state.squads.filter(s => s.id !== squadId) })
     toast(`${squad.name} disbanded`)
+    return true
+  },
+
+  renameSquad: (squadId, name) => {
+    const state = get()
+    const squad = state.squads.find(s => s.id === squadId)
+    if (!squad) return false
+
+    const trimmed = name.trim()
+    if (!trimmed || trimmed === squad.name) return false
+
+    set({ squads: state.squads.map(s => s.id === squadId ? { ...s, name: trimmed } : s) })
+    toast.success(`${squad.name} renamed to ${trimmed}`)
     return true
   },
 

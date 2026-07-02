@@ -20,9 +20,19 @@ import {
   createTransaction,
   processTransaction,
   processPayday,
-  formatCurrency
+  formatCurrency,
+  calculateCountryFunding,
+  processCountryFunding,
+  checkBankruptcy,
+  CountryFundingConfig,
+  TransactionCategory
 } from './economySystem'
+import { GameTime } from './timeSystem'
+import { getPlayerTerritorySummary } from './territorySystem'
+import { getCountryByName, getCountryByCode } from './allCountries'
+import { createEmail, EMAIL_SENDERS } from './emailSystem'
 import { useGameStore } from '../stores/enhancedGameStore'
+import { getActiveBase, getCraftingBonus } from './baseSystem'
 
 // ============================================================================
 // ECONOMY EVENT HANDLER STATE
@@ -95,6 +105,34 @@ export function applyPriceModifier(basePrice: number, modifier: number): number 
 // ============================================================================
 
 /**
+ * Calculate weekly equipment maintenance
+ * Workshop facilities (engineering lab, pharmacy, armory) maintain gear
+ * in-house - crafting bonus discounts the cost, floored at 25% of full price
+ */
+export function calculateEquipmentMaintenance(): {
+  itemCount: number
+  baseCost: number
+  cost: number
+  savings: number
+} {
+  const store = useGameStore.getState()
+
+  const itemCount = store.characters.reduce((sum, c) =>
+    sum + (c.equipment?.length || 0), 0
+  )
+  const baseCost = Math.floor(itemCount * 15) // $15/item/week
+
+  const activeBase = getActiveBase(store.baseState)
+  const craftingBonus = activeBase ? getCraftingBonus(activeBase) : 0
+  const cost = Math.max(
+    Math.floor(baseCost * 0.25),
+    Math.floor(baseCost * (1 - craftingBonus / 100))
+  )
+
+  return { itemCount, baseCost, cost, savings: baseCost - cost }
+}
+
+/**
  * Calculate weekly recurring expenses for the team
  */
 export function calculateRecurringExpenses(): {
@@ -135,16 +173,15 @@ export function calculateRecurringExpenses(): {
     })
   }
 
-  // Equipment maintenance
-  const totalEquipment = store.characters.reduce((sum, c) =>
-    sum + (c.equipment?.length || 0), 0
-  )
-  if (totalEquipment > 0) {
-    const maintenanceCost = Math.floor(totalEquipment * 15) // $15/item/week
+  // Equipment maintenance (discounted by workshop crafting bonus)
+  const maintenance = calculateEquipmentMaintenance()
+  if (maintenance.itemCount > 0) {
     expenses.push({
       category: 'equipment_maintenance',
-      amount: maintenanceCost,
-      description: `Equipment maintenance (${totalEquipment} items)`
+      amount: maintenance.cost,
+      description: maintenance.savings > 0
+        ? `Equipment maintenance (${maintenance.itemCount} items, workshop saved ${formatCurrency(maintenance.savings)})`
+        : `Equipment maintenance (${maintenance.itemCount} items)`
     })
   }
 
@@ -159,7 +196,10 @@ export function calculateWeeklyIncome(): number {
   let income = 0
 
   // Base operations income (from fame)
-  income += 500 + Math.floor((store.fame || 0) * 5)
+  income += 500 + Math.floor((store.playerFame || 0) * 5)
+
+  // Territory income from controlled sectors
+  income += getPlayerTerritorySummary().totalIncome
 
   // Characters with jobs would contribute here
   // TODO: Implement job system
@@ -183,14 +223,31 @@ function handlePayday(event: GameEvent): void {
     return
   }
 
+  const econTime = {
+    day: gameTime.day,
+    hour: Math.floor((gameTime.minutes || 0) / 60)
+  } as GameTime
+
   const income = calculateWeeklyIncome()
   const expenses = calculateRecurringExpenses()
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0)
   const netChange = income - totalExpenses
 
-  // Add income
+  // Apply income and expenses to both ledgers (economy.cash + budget)
+  let economy = store.economy
   if (income > 0) {
-    store.addMoney(income)
+    economy = processTransaction(economy, createTransaction(
+      'income', 'job_pay', income, 'Weekly operations income', economy.cash, econTime
+    ))
+  }
+  for (const expense of expenses) {
+    economy = processTransaction(economy, createTransaction(
+      'expense', expense.category as TransactionCategory, expense.amount, expense.description, economy.cash, econTime
+    ))
+  }
+  useGameStore.setState({ economy, budget: store.budget + netChange })
+
+  if (income > 0) {
     store.addNotification({
       type: 'economy',
       priority: 'low',
@@ -200,19 +257,121 @@ function handlePayday(event: GameEvent): void {
     })
   }
 
-  // Deduct expenses
-  for (const expense of expenses) {
-    store.addMoney(-expense.amount)
-  }
-
   if (totalExpenses > 0) {
+    const maintenance = calculateEquipmentMaintenance()
     store.addNotification({
       type: 'economy',
       priority: 'medium',
       title: 'Weekly Expenses',
-      message: `Paid ${formatCurrency(totalExpenses)} in expenses. Net: ${formatCurrency(netChange)}`,
-      data: { expenses: totalExpenses, net: netChange }
+      message: maintenance.savings > 0
+        ? `Paid ${formatCurrency(totalExpenses)} in expenses. Net: ${formatCurrency(netChange)}. Workshop crews saved ${formatCurrency(maintenance.savings)} on equipment maintenance.`
+        : `Paid ${formatCurrency(totalExpenses)} in expenses. Net: ${formatCurrency(netChange)}`,
+      data: { expenses: totalExpenses, net: netChange, maintenanceSavings: maintenance.savings }
     })
+  }
+
+  // Territory bonuses (income already counted in calculateWeeklyIncome)
+  const territory = getPlayerTerritorySummary()
+  if (territory.totalIncome > 0) {
+    store.addNotification({
+      type: 'economy',
+      priority: 'low',
+      title: 'Territory Income',
+      message: `Territory income: +${formatCurrency(territory.totalIncome)} from ${territory.totalSectors} sectors`,
+      data: { amount: territory.totalIncome, sectors: territory.totalSectors }
+    })
+  }
+  if (territory.totalFame > 0) {
+    const currentFame = useGameStore.getState().playerFame
+    useGameStore.setState({
+      playerFame: Math.max(0, Math.min(1000, currentFame + territory.totalFame))
+    })
+    store.addNotification({
+      type: 'economy',
+      priority: 'low',
+      title: 'Territory Influence',
+      message: `Territory influence: +${territory.totalFame} fame from controlled sectors`,
+      data: { fame: territory.totalFame, sectors: territory.totalSectors }
+    })
+  }
+
+  // Weekly country funding (JA2 style)
+  const country = getCountryByName(store.selectedCountry) || getCountryByCode(store.selectedCountry)
+  let fundingConfig: CountryFundingConfig | null = null
+  let fundingReceived = 0
+
+  if (country) {
+    fundingConfig = {
+      ...calculateCountryFunding(country),
+      countryCode: country.code,
+      countryName: country.name
+    }
+    const governmentRep = store.reputation?.government ?? 0
+    const preFunding = useGameStore.getState()
+    const fundingResult = processCountryFunding(preFunding.economy, fundingConfig, governmentRep, econTime)
+    fundingReceived = fundingResult.fundingReceived
+
+    if (fundingReceived > 0) {
+      useGameStore.setState({
+        economy: fundingResult.newState,
+        budget: preFunding.budget + fundingReceived
+      })
+    }
+
+    store.addNotification({
+      type: 'economy',
+      priority: fundingReceived > 0 ? 'low' : 'high',
+      title: fundingReceived > 0 ? 'Country Funding' : 'Funding Suspended',
+      message: fundingResult.message,
+      data: { amount: fundingReceived, country: fundingConfig.countryName }
+    })
+  }
+
+  // Bankruptcy check after all payday flows resolve
+  if (fundingConfig) {
+    const finalState = useGameStore.getState()
+    const governmentRep = finalState.reputation?.government ?? 0
+    const bankruptcy = checkBankruptcy(finalState.economy, governmentRep, fundingConfig)
+
+    if (bankruptcy.isBankrupt) {
+      store.addNotification({
+        type: 'economy',
+        priority: 'urgent',
+        title: 'BANKRUPTCY',
+        message: bankruptcy.warning || 'Operations are out of funds and country support has been withdrawn',
+        data: { cash: finalState.economy.cash }
+      })
+
+      createEmail(
+        'admin',
+        EMAIL_SENDERS.admin,
+        '🚨 FINANCIAL COLLAPSE - Operations at Risk',
+        `
+FINANCIAL EMERGENCY
+==================
+
+Our accounts are empty and ${fundingConfig.countryName} has withdrawn all financial support.
+
+Current balance: ${formatCurrency(finalState.economy.cash)}
+Government standing: ${governmentRep}
+
+Without funds we cannot pay salaries, maintain the base, or field operations.
+
+Recover funding immediately: complete missions, improve government standing, or liquidate assets.
+
+- Admin Office
+`.trim(),
+        { priority: 'urgent' }
+      )
+    } else if (bankruptcy.warning) {
+      store.addNotification({
+        type: 'economy',
+        priority: 'high',
+        title: 'Low Funds Warning',
+        message: bankruptcy.warning,
+        data: { cash: finalState.economy.cash }
+      })
+    }
   }
 
   // Emit economy update event
@@ -224,14 +383,19 @@ function handlePayday(event: GameEvent): void {
       income,
       expenses: totalExpenses,
       netChange,
-      newBalance: store.money
+      territoryIncome: territory.totalIncome,
+      territoryFame: territory.totalFame,
+      countryFunding: fundingReceived,
+      newBalance: useGameStore.getState().economy.cash
     }
   })
 
   console.log('[EconomyEventHandler] Payday processed:', {
     income,
     expenses: totalExpenses,
-    net: netChange
+    net: netChange,
+    territoryIncome: territory.totalIncome,
+    countryFunding: fundingReceived
   })
 }
 
@@ -244,9 +408,19 @@ function handleMissionCompleted(event: MissionCompletedEvent): void {
 
   if (!success || !rewards) return
 
-  // Add cash reward
-  if (rewards.cash > 0) {
-    store.addMoney(rewards.cash)
+  // Add cash reward (event payload uses rewards.money per MissionCompletedEvent)
+  const cashReward = rewards.money || 0
+  if (cashReward > 0) {
+    const gameTime = store.gameTime
+    const econTime = {
+      day: gameTime.day,
+      hour: Math.floor((gameTime.minutes || 0) / 60)
+    } as GameTime
+    const economy = processTransaction(store.economy, createTransaction(
+      'income', 'mission_reward', cashReward,
+      `Mission reward: ${event.data.missionName}`, store.economy.cash, econTime
+    ))
+    useGameStore.setState({ economy, budget: store.budget + cashReward })
 
     EventBus.emit<GameEvent>({
       id: `economy-mission-reward-${Date.now()}`,
@@ -254,7 +428,7 @@ function handleMissionCompleted(event: MissionCompletedEvent): void {
       timestamp: Date.now(),
       data: {
         category: 'mission_reward',
-        amount: rewards.cash,
+        amount: cashReward,
         source: 'mission',
         missionName: event.data.missionName
       }
@@ -264,12 +438,12 @@ function handleMissionCompleted(event: MissionCompletedEvent): void {
       type: 'economy',
       priority: 'medium',
       title: 'Mission Reward',
-      message: `Received ${formatCurrency(rewards.cash)} for completing mission`,
-      data: { amount: rewards.cash }
+      message: `Received ${formatCurrency(cashReward)} for completing mission`,
+      data: { amount: cashReward }
     })
   }
 
-  console.log('[EconomyEventHandler] Mission reward processed:', rewards.cash)
+  console.log('[EconomyEventHandler] Mission reward processed:', cashReward)
 }
 
 /**

@@ -7,8 +7,9 @@
 
 import { EventBus, MissionCompletedEvent, GameEvent } from './eventBus';
 import { useGameStore } from '../stores/enhancedGameStore';
-import { FactionType, getRelatedFactionEffects, checkBountyStatus } from './factionSystem';
+import { FactionType, FACTION_NAMES, getRelatedFactionEffects, checkBountyStatus } from './factionSystem';
 import { getMissionFactionEffects, calculateMissionFactionChanges } from './missionFactionEffects';
+import { createNewsArticle, pickRandomSource } from './newsSystem';
 import {
   EscalationCombatOutcome,
   calculateEscalationConsequences,
@@ -78,6 +79,44 @@ function handleMissionCompleted(event: MissionCompletedEvent): void {
         duration: 4000,
       }
     );
+
+    // Generate faction reaction news (mirrors escalation news flow)
+    if (store.addNewsArticle) {
+      const biggest = significantChanges.reduce((a, b) =>
+        Math.abs(b.change) > Math.abs(a.change) ? b : a
+      );
+      const factionName = FACTION_NAMES[biggest.faction];
+      const city = event.location?.city || 'the operational area';
+      const positive = biggest.change > 0;
+
+      const headline = positive
+        ? `${factionName} Signals Support After ${missionName}`
+        : `${factionName} Condemns Fallout From ${missionName}`;
+
+      const body = positive
+        ? `Following the ${missionType} operation in ${city}, ${factionName.toLowerCase()} representatives have signaled warming relations with the operatives involved. Insiders cite "${biggest.reason}" as the driving factor. Observers expect closer cooperation in the region.`
+        : `The ${missionType} operation in ${city} has drawn sharp criticism from ${factionName.toLowerCase()} circles. Sources point to "${biggest.reason}" as the cause of deteriorating relations. Analysts warn of consequences for future operations in the region.`;
+
+      const article = createNewsArticle(
+        headline,
+        body,
+        'superhuman',
+        Math.abs(biggest.change) >= 10 ? 'major' : 'standard',
+        store.gameTime,
+        {
+          source: pickRandomSource(positive ? 'superhuman' : 'politics'),
+          region: event.location?.country,
+          city: event.location?.city,
+          sectorCode: event.location?.sector,
+          relatedFactions: significantChanges.map(c => c.faction),
+          eventType: 'mission_complete',
+          eventId: event.id,
+        }
+      );
+
+      store.addNewsArticle(article);
+      console.log('[FACTIONS] Faction reaction news generated:', article.headline);
+    }
   }
 }
 

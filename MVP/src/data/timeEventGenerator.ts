@@ -332,9 +332,7 @@ function emitTimeOfDayChanged(oldTimeOfDay: TimeOfDay, newTimeOfDay: TimeOfDay):
  * Emit payday event
  */
 function emitPayday(time: GameTime): void {
-  const store = useGameStore.getState()
-
-  // Calculate weekly income/expenses
+  // Calculate weekly income/expenses (money is applied by the economy:payday handler)
   const income = calculateWeeklyIncome()
   const expenses = calculateWeeklyExpenses()
   const netChange = income - expenses
@@ -350,11 +348,6 @@ function emitPayday(time: GameTime): void {
       netChange
     }
   })
-
-  // Apply money change
-  if (netChange !== 0) {
-    store.addMoney(netChange)
-  }
 
   console.log('[TimeEventGenerator] Payday! Income:', income, 'Expenses:', expenses)
 }

@@ -539,25 +539,39 @@ export function handleCombatComplete(result: EnhancedCombatResult): void {
   // ============== MISSION COMPLETION ==============
   // Emit mission:completed when combat ends as part of a mission
   if (result.missionLocation) {
-    const missionRewards = {
-      money: result.victory ? 5000 + Math.floor(Math.random() * 5000) : 0,
-      xp: experienceGained.reduce((sum, xp) => sum + xp.xp, 0),
-      items: lootGained.map(item => item.itemId),
-      fameChange
-    }
+    const loc = result.missionLocation
 
-    EventBus.emitMissionCompleted(
-      {
-        missionId: `mission_${combatEvent.id}`,
-        missionName: `Combat in ${result.missionLocation.city}`,
-        missionType: 'combat',
-        success: result.victory,
-        rewards: missionRewards,
-        casualties: result.casualties.map(c => c.characterId)
-      },
-      result.missionLocation
+    // If combat resolves an accepted mission at this location, complete it
+    // through the mission store - completeMissionById emits mission:completed
+    // itself, so skip the synthetic emission to avoid double-counting
+    const linkedMission = store.activeMissions?.find(m =>
+      m.sector === loc.sector || (m.city && m.city === loc.city)
     )
-    console.log('[EVENTBUS] Mission completed event emitted for:', result.missionLocation.city)
+
+    if (linkedMission) {
+      store.completeMissionById(linkedMission.id, result.victory)
+      console.log('[EVENTBUS] Accepted mission resolved by combat:', linkedMission.id)
+    } else {
+      const missionRewards = {
+        money: result.victory ? 5000 + Math.floor(Math.random() * 5000) : 0,
+        xp: experienceGained.reduce((sum, xp) => sum + xp.xp, 0),
+        items: lootGained.map(item => item.itemId),
+        fameChange
+      }
+
+      EventBus.emitMissionCompleted(
+        {
+          missionId: `mission_${combatEvent.id}`,
+          missionName: `Combat in ${loc.city}`,
+          missionType: 'combat',
+          success: result.victory,
+          rewards: missionRewards,
+          casualties: result.casualties.map(c => c.characterId)
+        },
+        loc
+      )
+      console.log('[EVENTBUS] Mission completed event emitted for:', loc.city)
+    }
   }
 }
 

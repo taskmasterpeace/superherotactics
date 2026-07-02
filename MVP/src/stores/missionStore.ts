@@ -13,6 +13,7 @@ import {
 } from '../data/missionGeneration';
 import { getCountryByName } from '../data/countries';
 import { generateMissionBriefing } from '../data/emailSystem';
+import { EventBus } from '../data/eventBus';
 
 // =============================================================================
 // MISSION STORE STATE
@@ -195,6 +196,8 @@ export function createMissionActions(set: any, get: any): MissionStoreActions {
      * Complete a mission
      */
     completeMissionById: (missionId: string, success: boolean) => {
+      let completedMission: GeneratedMission | null = null;
+
       set((state: any) => {
         const missionIndex = state.activeMissions.findIndex((m: GeneratedMission) => m.id === missionId);
 
@@ -231,6 +234,8 @@ export function createMissionActions(set: any, get: any): MissionStoreActions {
           }
         }
 
+        completedMission = mission;
+
         // Remove from active missions
         const newActiveMissions = [...state.activeMissions];
         newActiveMissions.splice(missionIndex, 1);
@@ -241,6 +246,33 @@ export function createMissionActions(set: any, get: any): MissionStoreActions {
           ...(orgsChanged ? { criminalOrganizations: [...state.criminalOrganizations] } : {}),
         };
       });
+
+      // Notify faction/news/economy systems - same payload shape as the combat
+      // path in combatResultsHandler. The mission is removed from activeMissions
+      // above, so a repeat call for the same id is a no-op (no double emission).
+      if (completedMission) {
+        const mission: any = completedMission;
+        EventBus.emitMissionCompleted(
+          {
+            missionId: mission.id,
+            missionName: mission.template?.name || mission.targetName || 'Operation',
+            missionType: mission.template?.type || 'combat',
+            success,
+            rewards: {
+              money: success ? (mission.reward || 0) : 0,
+              xp: 0,
+              items: [],
+              fameChange: success ? (mission.fameReward || 0) : 0,
+            },
+            casualties: [],
+          },
+          {
+            city: mission.targetCity || mission.city,
+            country: mission.targetCountry || get().selectedCountry,
+            sector: mission.sector,
+          }
+        );
+      }
     },
 
     /**
