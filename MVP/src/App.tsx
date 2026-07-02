@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { useGameStore } from './stores/enhancedGameStore'
 import { Toaster } from 'react-hot-toast'
+import { Laptop } from 'lucide-react'
 
 // Underworld Test - registers testUnderworldSystem() on window for console testing
 import './data/underworldTest'
@@ -78,6 +79,7 @@ import { initFactionEventHandler, cleanupFactionEventHandler } from './data/fact
 import { initChronoSystem, cleanupChronoSystem } from './data/chronoSystem'
 import ChronosDevice from './components/ChronosDevice'
 import ReputationScreen from './components/ReputationScreen'
+import LaptopShell from './components/LaptopShell'
 
 // World Systems - central initialization for all simulation systems
 import { initWorldSystems, cleanupWorldSystems } from './data/worldSystemsInit'
@@ -500,6 +502,18 @@ function App() {
       {/* Squad Roster - Shows characters (only in playing phase on world map) */}
       {gamePhase === 'playing' && currentView === 'world-map' && <SquadRoster />}
 
+      {/* Laptop launcher - opens the meta-game hub from the field (world map) */}
+      {gamePhase === 'playing' && currentView === 'world-map' && (
+        <button
+          onClick={() => setCurrentView('laptop')}
+          title="Open laptop (pauses the world clock)"
+          className="fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-xl border-2 border-black bg-neutral-900 px-3 py-2 text-sm font-bold text-primary shadow-retro hover:-translate-y-0.5 hover:bg-neutral-800 transition-all"
+        >
+          <Laptop className="w-5 h-5" />
+          <span className="hidden sm:inline">LAPTOP</span>
+        </button>
+      )}
+
       {/* Game Setup Phase - wrapped in error boundary */}
       <ErrorBoundary>
       {gamePhase === 'faction-selection' && <FactionSelection />}
@@ -508,37 +522,53 @@ function App() {
       {gamePhase === 'recruiting' && <RecruitingPage />}
 
       {/* Main Game Phase */}
-      {gamePhase === 'playing' && (
-        <>
-          {/* Only show HUD for non-fullscreen views (world-map and combat-lab have their own UI) */}
-          {currentView !== 'combat-lab' && currentView !== 'world-map' && <GameHUD />}
-          <div className={currentView !== 'combat-lab' && currentView !== 'world-map' ? 'pt-16' : ''}> {/* Account for HUD */}
-            {currentView === 'world-map' && <WorldMapGrid />}
-            {currentView === 'investigation' && <InvestigationCenter />}
-            {currentView === 'investigation-board' && <InvestigationBoard />}
-            {currentView === 'tactical-combat' && <TacticalCombat />}
-            {currentView === 'characters' && <CharacterScreen />}
-            {currentView === 'hospital' && <HospitalScreen />}
-            {currentView === 'equipment-shop' && <EquipmentShop />}
-            {currentView === 'combat-lab' && <CombatLab />}
-            {currentView === 'news' && <NewsBrowser />}
-            {currentView === 'encyclopedia' && <Encyclopedia />}
-            {currentView === 'almanac' && <WorldAlmanac onClose={() => setCurrentView('world-map')} />}
-            {currentView === 'balance' && <BalanceAnalyzer />}
-            {/* world-map-grid is now aliased to world-map - WorldMapGrid is the main map */}
-            {currentView === 'database' && <DatabaseAdmin />}
-            {currentView === 'data-viewer' && <DataViewer onClose={() => setCurrentView('world-map')} />}
-            {currentView === 'sound-config' && <SoundConfigUI />}
-            {currentView === 'loadout-editor' && <LoadoutEditor />}
-            {currentView === 'sector-editor' && <SectorEditor onClose={() => setCurrentView('world-map')} />}
-            {currentView === 'world-data' && <WorldDataEditor onClose={() => setCurrentView('world-map')} />}
-            {currentView === 'training' && <TrainingCenter />}
-            {currentView === 'base' && <BaseManager />}
-            {currentView === 'chronos' && <ChronosDevice />}
-            {currentView === 'reputation' && <ReputationScreen />}
-          </div>
-        </>
-      )}
+      {gamePhase === 'playing' && (() => {
+        // Desk apps live INSIDE the laptop shell (frame + home dock). The world
+        // map + combat are "the field" and render bare. Dev tools stay bare too.
+        const LAPTOP_VIEWS = new Set([
+          'laptop', 'news', 'characters', 'investigation', 'base', 'hospital',
+          'training', 'equipment-shop', 'reputation', 'chronos', 'encyclopedia', 'almanac',
+        ])
+        const appForView: Record<string, React.ReactNode> = {
+          investigation: <InvestigationCenter />,
+          characters: <CharacterScreen />,
+          hospital: <HospitalScreen />,
+          'equipment-shop': <EquipmentShop />,
+          news: <NewsBrowser />,
+          encyclopedia: <Encyclopedia />,
+          almanac: <WorldAlmanac onClose={() => setCurrentView('laptop')} />,
+          training: <TrainingCenter />,
+          base: <BaseManager />,
+          chronos: <ChronosDevice />,
+          reputation: <ReputationScreen />,
+        }
+        if (LAPTOP_VIEWS.has(currentView)) {
+          return (
+            <LaptopShell currentView={currentView} setCurrentView={setCurrentView}>
+              {appForView[currentView] ?? null}
+            </LaptopShell>
+          )
+        }
+        // Field + dev views (bare, no laptop chrome)
+        return (
+          <>
+            {currentView !== 'combat-lab' && currentView !== 'world-map' && <GameHUD />}
+            <div className={currentView !== 'combat-lab' && currentView !== 'world-map' ? 'pt-16' : ''}>
+              {currentView === 'world-map' && <WorldMapGrid />}
+              {currentView === 'investigation-board' && <InvestigationBoard />}
+              {currentView === 'tactical-combat' && <TacticalCombat />}
+              {currentView === 'combat-lab' && <CombatLab />}
+              {currentView === 'balance' && <BalanceAnalyzer />}
+              {currentView === 'database' && <DatabaseAdmin />}
+              {currentView === 'data-viewer' && <DataViewer onClose={() => setCurrentView('world-map')} />}
+              {currentView === 'sound-config' && <SoundConfigUI />}
+              {currentView === 'loadout-editor' && <LoadoutEditor />}
+              {currentView === 'sector-editor' && <SectorEditor onClose={() => setCurrentView('world-map')} />}
+              {currentView === 'world-data' && <WorldDataEditor onClose={() => setCurrentView('world-map')} />}
+            </div>
+          </>
+        )
+      })()}
       </ErrorBoundary>
       </div> {/* End game-content wrapper */}
 
