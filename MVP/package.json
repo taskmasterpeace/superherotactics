@@ -9,7 +9,12 @@
     "preview": "vite preview",
     "start": "vite dev --host",
     "migrate": "node scripts/migrate-to-supabase.js",
-    "generate-data": "node scripts/generate-data.js"
+    "generate-data": "node scripts/generate-data.js",
+    "test:mechanics": "tsx src/combat/mechanicsTest.ts",
+    "test:integration": "tsx src/combat/integrationTest.ts",
+    "test:belt": "tsx src/combat/beltBonusTest.ts",
+    "test:grenade": "tsx src/combat/grenadeTest.ts",
+    "test:battery": "tsx src/combat/mechanicsTest.ts && tsx src/combat/integrationTest.ts && tsx src/combat/beltBonusTest.ts && tsx src/combat/grenadeTest.ts"
   },
   "dependencies": {
     "@react-three/drei": "^9.56.0",
@@ -42,6 +47,7 @@
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.21",
     "tailwindcss": "^3.2.7",
+    "tsx": "^4.22.5",
     "typescript": "^4.9.3",
     "vite": "^4.1.0"
   },
