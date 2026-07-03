@@ -1,13 +1,14 @@
 import React from 'react';
-import { Stethoscope, Brain, AlertTriangle, EyeOff } from 'lucide-react';
+import { Stethoscope, AlertTriangle, EyeOff } from 'lucide-react';
 import { useGameStore } from '../stores/enhancedGameStore';
 import { CharacterPortrait } from './CharacterPortrait';
 import { RetroPanel, RetroBadge } from './ui';
 import {
-  getPhysicalState, getMentalState, AppliedInjury, SEVERITY_COLOR,
+  getPhysicalState, AppliedInjury, SEVERITY_COLOR,
 } from '../data/injuryEngine';
 import { getStrengths } from '../data/characterRoles';
 import { getCharacterDayJob } from '../data/educationSystem';
+import { getMood } from '../data/moodSystem';
 
 /**
  * PERSONNEL — the color-coded condition board. One row per character: portrait,
@@ -48,7 +49,7 @@ const PersonnelReport: React.FC = () => {
             health: char.health?.current ?? char.health,
             maxHealth: char.health?.maximum ?? char.maxHealth,
           });
-          const mental = getMentalState({ activeInjuries: char.activeInjuries, morale: char.morale });
+          const mood = getMood(char); // emotional read — feeds this chip + speech bubbles
           const injuries: AppliedInjury[] = char.activeInjuries ?? [];
           const visible = injuries.filter(i => !i.hidden);
           const hiddenCount = injuries.length - visible.length;
@@ -96,10 +97,11 @@ const PersonnelReport: React.FC = () => {
                       <Stethoscope size={10} /> {phys.state}
                     </span>
                     <span
+                      title="Current mood — drives how they speak on calls"
                       className="flex items-center gap-1 rounded-md border border-black px-1.5 py-0.5 text-[10px] font-bold uppercase"
-                      style={{ background: `${mental.color}26`, color: mental.color }}
+                      style={{ background: `${mood.color}26`, color: mood.color }}
                     >
-                      <Brain size={10} /> {mental.state}
+                      <span className="text-[11px] leading-none">{mood.emoji}</span> {mood.label}
                     </span>
                     {/* Injury tags, severity-colored */}
                     {visible.map(inj => (
