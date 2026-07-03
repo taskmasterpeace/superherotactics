@@ -318,6 +318,13 @@ function processDayChange(newTime: GameTime): void {
   // Assigned activities pay off daily (patrol → fame+familiarity, day job → morale)
   processDailyActivities(newTime)
 
+  // The morning paper hits the stands
+  try {
+    (useGameStore.getState() as any).generateTodaysEdition()
+  } catch (e) {
+    console.warn('[TimeEventGenerator] Edition print failed:', e)
+  }
+
   console.log('[TimeEventGenerator] Day changed to', newTime.day, newTime.date)
 }
 

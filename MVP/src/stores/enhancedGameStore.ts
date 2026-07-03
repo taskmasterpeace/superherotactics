@@ -97,6 +97,7 @@ import { diagnoseInjuries } from '../data/injuryEngine'
 import { getMoraleLevel } from '../data/characterSheet'
 import { generateCheckInCall, nextNode, PhoneCall, CallChoice, CallEffect } from '../data/phoneCallSystem'
 import { generateStatusText, TextEvent } from '../data/characterTexts'
+import { generateDailyEdition, NewspaperEdition } from '../data/newspaperEngine'
 import {
   ReputationState,
   ReputationAxis,
@@ -531,6 +532,9 @@ interface EnhancedGameStore {
 
   // News System
   addNewsArticle: (article: NewsArticle) => void
+  // Daily newspaper editions (back-issue shelf, newest first)
+  editions: NewspaperEdition[]
+  generateTodaysEdition: () => NewspaperEdition | null
   markArticleRead: (articleId: string) => void
   generateMissionNews: (missionResult: {
     success: boolean
@@ -642,6 +646,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   currentView: 'world-map',
   sheetCharacterId: null as string | null,
+  editions: [] as NewspaperEdition[],
   activePhoneCall: null as PhoneCall | null,
   phoneCallNodeId: null as string | null,
   incomingCall: null as PhoneCall | null,
@@ -3097,6 +3102,24 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     set({
       newsArticles: [article, ...state.newsArticles].slice(0, 100)  // Keep last 100 articles
     })
+  },
+
+  // Print (or reprint) today's paper for the player's home country. Idempotent
+  // per day — reprinting replaces that day's edition. Shelf keeps 14 issues.
+  generateTodaysEdition: () => {
+    const state = get()
+    const country = resolveCountryByName(state.selectedCountry) || resolveCountryByCode(state.selectedCountry)
+    if (!country) return null
+    const edition = generateDailyEdition({
+      country: country as any,
+      city: state.selectedCity || undefined,
+      day: state.gameTime.day,
+      articles: state.newsArticles,
+    })
+    set({
+      editions: [edition, ...state.editions.filter(e => e.day !== state.gameTime.day)].slice(0, 14),
+    })
+    return edition
   },
 
   markArticleRead: (articleId) => {

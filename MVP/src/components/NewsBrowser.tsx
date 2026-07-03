@@ -24,6 +24,7 @@ import {
   generatePoliticalNews,
 } from '../data/newspaperExpansion';
 import { createNewsArticle } from '../data/newsSystem';
+import NewspaperFrontPage from './NewspaperFrontPage';
 import { getCountryByName, getCountryByCode } from '../data/allCountries';
 import { calculateMediaSystem } from '../data/combinedEffects';
 import type { GeneratedMission } from '../data/missionSystem';
@@ -33,7 +34,7 @@ import type { GeneratedMission } from '../data/missionSystem';
 // =============================================================================
 
 type SortOption = 'newest' | 'oldest' | 'most-impactful';
-type MainSection = 'news' | 'classifieds' | 'wanted' | 'letters' | 'media';
+type MainSection = 'paper' | 'news' | 'classifieds' | 'wanted' | 'letters' | 'media';
 
 // =============================================================================
 // MISSION-TO-CLASSIFIED CONVERSION
@@ -554,7 +555,7 @@ export default function NewsBrowser() {
     setSelectedArticle(article);
   };
 
-  const [mainSection, setMainSection] = useState<MainSection>('news');
+  const [mainSection, setMainSection] = useState<MainSection>('paper');
   // Front-page scope: YOUR COUNTRY vs the WORLD (the living-newspaper split)
   const [scope, setScope] = useState<'home' | 'world'>('home');
   const [selectedCategory, setSelectedCategory] = useState<NewsCategory | 'all'>('all');
@@ -937,6 +938,7 @@ export default function NewsBrowser() {
   // =============================================================================
 
   const mainSections: { id: MainSection; label: string; icon: string; count?: number }[] = [
+    { id: 'paper', label: "Today's Paper", icon: '🗞️' },
     { id: 'news', label: 'Headlines', icon: '📰', count: filteredArticles.length },
     { id: 'classifieds', label: 'Classifieds', icon: '📋', count: classifieds.length },
     { id: 'wanted', label: 'Wanted', icon: '🎯', count: wantedPosters.length },
@@ -1365,6 +1367,18 @@ export default function NewsBrowser() {
       {mainSection === 'media' && renderMediaOps()}
 
       {/* HEADLINES LIST - Only show for news section */}
+      {/* TODAY'S PAPER — the daily edition, printed like real newsprint */}
+      {mainSection === 'paper' && (
+        <div className="flex-1 overflow-y-auto bg-neutral-900/60 px-2">
+          <NewspaperFrontPage
+            onOpenArticle={(articleId) => {
+              const a = newsArticles.find(x => x.id === articleId);
+              if (a) handleArticleClick(a as any);
+            }}
+          />
+        </div>
+      )}
+
       {mainSection === 'news' && <div className="flex-1 overflow-y-auto">
         {filteredArticles.length === 0 ? (
           <div className="flex items-center justify-center h-full">
