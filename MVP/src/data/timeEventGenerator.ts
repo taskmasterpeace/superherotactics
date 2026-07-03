@@ -315,7 +315,65 @@ function processDayChange(newTime: GameTime): void {
   // A rattled operative reaches out — mood collapse rings the player's phone
   checkMoraleCrisisCalls(newTime)
 
+  // Assigned activities pay off daily (patrol → fame+familiarity, day job → morale)
+  processDailyActivities(newTime)
+
   console.log('[TimeEventGenerator] Day changed to', newTime.day, newTime.date)
+}
+
+/**
+ * Daily payoff for assigned activities (activity-scheduler lite, plan C4):
+ *  - patrol: +fame, +2 city familiarity, -1 morale (it's tiring work)
+ *  - personal_life (day job): +2 morale (cover-job income already flows weekly)
+ */
+function processDailyActivities(newTime: GameTime): void {
+  const store = useGameStore.getState() as any
+  let fameGain = 0
+  let changed = false
+
+  const nudgeMorale = (char: any, delta: number, reason: string) => {
+    const cur = typeof char.morale === 'number' ? char.morale : char.morale?.current ?? 60
+    const next = Math.max(0, Math.min(100, cur + delta))
+    if (char.morale && typeof char.morale === 'object') {
+      return { ...char.morale, current: next, lastChangeReason: reason }
+    }
+    return next
+  }
+
+  const updated = (store.characters || []).map((char: any) => {
+    if (char.status === 'patrol') {
+      changed = true
+      fameGain += 1
+      // Grow familiarity with the city they're patrolling
+      const cityKey = char.currentLocation || char.location?.city
+      let cityFamiliarity = char.cityFamiliarity || []
+      if (cityKey) {
+        const idx = cityFamiliarity.findIndex((f: any) =>
+          (f.cityId || '').toLowerCase() === String(cityKey).toLowerCase() ||
+          (f.cityName || '').toLowerCase() === String(cityKey).toLowerCase())
+        if (idx >= 0) {
+          cityFamiliarity = cityFamiliarity.map((f: any, i: number) =>
+            i === idx ? { ...f, level: Math.min(100, (f.level ?? 0) + 2), lastVisit: newTime.day, totalDaysSpent: (f.totalDaysSpent ?? 0) + 1 } : f)
+        } else {
+          cityFamiliarity = [...cityFamiliarity, {
+            cityId: String(cityKey), cityName: String(cityKey), level: 2,
+            lastVisit: newTime.day, totalDaysSpent: 1, missionsCompleted: 0, contactsMade: 0, isHometown: false,
+          }]
+        }
+      }
+      return { ...char, cityFamiliarity, fame: (char.fame || 0) + 1, morale: nudgeMorale(char, -1, 'Long patrol shifts') }
+    }
+    if (char.status === 'personal_life') {
+      changed = true
+      return { ...char, morale: nudgeMorale(char, 2, 'Time living their cover life') }
+    }
+    return char
+  })
+
+  if (changed) {
+    useGameStore.setState({ characters: updated })
+    if (fameGain > 0 && typeof store.addFame === 'function') store.addFame(fameGain)
+  }
 }
 
 // One crisis call per character per cooldown window — nobody rings twice a day.

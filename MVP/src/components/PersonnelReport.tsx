@@ -2,7 +2,7 @@ import React from 'react';
 import { Stethoscope, AlertTriangle, EyeOff, Phone } from 'lucide-react';
 import { useGameStore } from '../stores/enhancedGameStore';
 import { CharacterPortrait } from './CharacterPortrait';
-import { RetroPanel, RetroBadge } from './ui';
+import { RetroPanel } from './ui';
 import {
   getPhysicalState, AppliedInjury, SEVERITY_COLOR,
 } from '../data/injuryEngine';
@@ -10,6 +10,7 @@ import { getStrengths } from '../data/characterRoles';
 import { getCharacterDayJob } from '../data/educationSystem';
 import { getMood } from '../data/moodSystem';
 import { getCharacterCityFamiliarity, getFamiliarityTierInfo, getFamiliarityOpModifier } from '../data/characterLifeCycle';
+import { getStatusMeta, ASSIGNABLE_ACTIVITIES } from '../data/statusMeta';
 
 /**
  * PERSONNEL — the color-coded condition board. One row per character: portrait,
@@ -21,6 +22,8 @@ const PersonnelReport: React.FC = () => {
   const characters = useGameStore(s => s.characters);
   const setCurrentView = useGameStore(s => s.setCurrentView);
   const startCharacterCall = useGameStore(s => s.startCharacterCall);
+  const setCharacterStatus = useGameStore(s => s.setCharacterStatus);
+  const [assigningId, setAssigningId] = React.useState<string | null>(null);
 
   const roster = characters.filter((c: any) => c.status !== 'dead');
   const fallen = characters.filter((c: any) => c.status === 'dead');
@@ -71,7 +74,19 @@ const PersonnelReport: React.FC = () => {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold text-foreground truncate">{char.name || char.realName}</span>
-                    <RetroBadge size="sm" variant="default">{char.status}</RetroBadge>
+                    {/* Full status palette (spec 06) — icon + color per state */}
+                    {(() => {
+                      const sm = getStatusMeta(char.status);
+                      return (
+                        <span
+                          title={sm.blurb}
+                          className="flex items-center gap-1 rounded-md border border-black px-1.5 py-0.5 text-[10px] font-bold uppercase"
+                          style={{ background: `${sm.color}26`, color: sm.color }}
+                        >
+                          {sm.icon} {sm.label}
+                        </span>
+                      );
+                    })()}
                     {char.recoveryTime > 0 && (
                       <span className="text-[10px] text-muted-foreground">
                         recovery ~{Math.ceil(char.recoveryTime)}h
@@ -149,13 +164,60 @@ const PersonnelReport: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <button
-                  onClick={() => startCharacterCall(char.id)}
-                  title={`Call ${char.name || char.realName}`}
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-black bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
-                >
-                  <Phone size={15} />
-                </button>
+                <div className="relative flex shrink-0 items-center gap-2">
+                  {/* Assign activity (activity-scheduler lite) */}
+                  {['ready', 'patrol', 'personal_life'].includes(char.status) && (
+                    <button
+                      onClick={() => setAssigningId(assigningId === char.id ? null : char.id)}
+                      title="Assign activity"
+                      className="rounded-lg border-2 border-black bg-surface px-2 py-1.5 text-[10px] font-bold uppercase text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+                    >
+                      Assign ▾
+                    </button>
+                  )}
+                  <button
+                    onClick={() => startCharacterCall(char.id)}
+                    title={`Call ${char.name || char.realName}`}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-black bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                  >
+                    <Phone size={15} />
+                  </button>
+                  {assigningId === char.id && (
+                    <div className="absolute right-0 top-full z-20 mt-1 w-64 rounded-lg border-2 border-black bg-card p-1 shadow-xl">
+                      {ASSIGNABLE_ACTIVITIES.filter(a => a.status !== char.status).map(a => {
+                        const sm = getStatusMeta(a.status);
+                        return (
+                          <button
+                            key={a.status}
+                            onClick={() => { setCharacterStatus(char.id, a.status); setAssigningId(null); }}
+                            className="flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left hover:bg-surface transition-colors"
+                          >
+                            <span>{sm.icon}</span>
+                            <span>
+                              <span className="block text-xs font-bold" style={{ color: sm.color }}>{sm.label}</span>
+                              <span className="block text-[10px] text-muted-foreground">{a.payoff}</span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                      <div className="my-1 border-t border-black/20" />
+                      <button
+                        onClick={() => { setAssigningId(null); setCurrentView('training'); }}
+                        className="flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left hover:bg-surface transition-colors"
+                      >
+                        <span>🎓</span>
+                        <span className="block text-xs font-bold text-emerald-400">Training Center →</span>
+                      </button>
+                      <button
+                        onClick={() => { setAssigningId(null); setCurrentView('investigation'); }}
+                        className="flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left hover:bg-surface transition-colors"
+                      >
+                        <span>🔍</span>
+                        <span className="block text-xs font-bold text-sky-400">Investigations →</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </RetroPanel>
           );

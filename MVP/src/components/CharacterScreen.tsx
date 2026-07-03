@@ -10,6 +10,7 @@ import {
   RefreshCw, Dice6
 } from 'lucide-react'
 import { generateCharacter } from '../data/characterGeneration'
+import PsycheTab from './PsycheTab'
 
 // Full Character Interface based on Character_Schema_Complete.md
 interface FullCharacter {
@@ -190,10 +191,11 @@ const CAREER_CATEGORIES: Record<number, string> = {
 const RESOURCE_LEVELS = ['Poverty', 'Low', 'Medium', 'High', 'Wealthy', 'Elite']
 
 // Tab configuration
-type TabId = 'identity' | 'stats' | 'powers' | 'skills' | 'equipment' | 'background' | 'world' | 'faction'
+type TabId = 'identity' | 'psyche' | 'stats' | 'powers' | 'skills' | 'equipment' | 'background' | 'world' | 'faction'
 
 const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: 'identity', label: 'Identity', icon: <User size={18} /> },
+  { id: 'psyche', label: 'Psyche', icon: <Brain size={18} /> },
   { id: 'stats', label: 'Stats', icon: <Activity size={18} /> },
   { id: 'powers', label: 'Powers', icon: <Zap size={18} /> },
   { id: 'skills', label: 'Skills', icon: <Award size={18} /> },
@@ -455,7 +457,9 @@ export default function CharacterScreen() {
 
             {/* Tab Content */}
             <div className="flex-1 overflow-y-auto p-6">
-              <AnimatePresence mode="wait">
+              {/* sync mode: incoming tab mounts immediately (snappy, and robust
+                  when the browser throttles rAF in background tabs) */}
+              <AnimatePresence initial={false}>
                 <motion.div
                   key={activeTab}
                   initial={{ opacity: 0, y: 10 }}
@@ -465,6 +469,9 @@ export default function CharacterScreen() {
                 >
                   {activeTab === 'identity' && (
                     <IdentityTab character={selectedCharacter} displayMode={displayMode} />
+                  )}
+                  {activeTab === 'psyche' && (
+                    <PsycheTab character={selectedCharacter} />
                   )}
                   {activeTab === 'stats' && (
                     <StatsTab character={selectedCharacter} displayMode={displayMode} />
