@@ -16,6 +16,7 @@ import {
   EDUCATION_FIELDS,
 } from '../data/characterGeneration'
 import { getCountryProfile, ROLE_DESCRIPTIONS } from '../data/countryProfiles'
+import { isLSW } from '../data/lswSystem'
 import { ORIGIN_NAMES } from '../types'
 import { RetroPanel, RetroBadge, RetroButton, RetroInput } from './ui'
 
@@ -491,6 +492,18 @@ export default function RecruitingPage() {
                           <p className="text-xs text-gray-400 truncate">{char.realName}</p>
                           <p className="text-[10px] text-gray-500">
                             {char.age}yo • {ORIGIN_NAMES[char.origin] || 'Human'}
+                            {isLSW(char) ? (
+                              <span
+                                className="ml-1 rounded bg-amber-500/20 border border-amber-500/60 px-1 py-px text-[9px] font-bold text-amber-300"
+                                title={`LSW — powered being: ${(char.powers || []).map((p: any) => p.name).join(', ') || 'powers undisclosed'}`}
+                              >
+                                ⚡ LSW
+                              </span>
+                            ) : (
+                              <span className="ml-1 rounded bg-gray-600/30 border border-gray-600 px-1 py-px text-[9px] font-semibold text-gray-400" title="Baseline human — no powers, not subject to LSW law">
+                                HUMAN
+                              </span>
+                            )}
                           </p>
                         </div>
                         <div className="text-right shrink-0">

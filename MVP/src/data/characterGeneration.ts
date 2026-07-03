@@ -29,6 +29,7 @@ import {
   PersonalityTraits,
 } from './personalitySystem';
 import { CallingId, generateCallingForBackground } from './callingSystem';
+import { generatePowersForOrigin } from './lswSystem';
 
 // Country-specific generation profiles
 import {
@@ -335,16 +336,19 @@ function generateCareer(): CareerType {
  */
 function generateOriginFromProfile(profile: CountryProfile): OriginType {
   const weights = profile.originWeights;
+  // Profiles often define only a subset of origins — missing keys MUST read
+  // as 0, not undefined (undefined poisoned the sum to NaN and silently made
+  // every recruit origin 1, so no LSWs ever spawned).
   const weightList = [
-    { value: 1, weight: weights.skilled_human },      // Skilled Human
-    { value: 2, weight: weights.altered_human },      // Altered Human
-    { value: 3, weight: weights.tech_enhanced },      // Tech Enhancement
-    { value: 4, weight: weights.mutated },            // Mutated Human
-    { value: 5, weight: weights.spiritual },          // Spiritual Enhancement
-    { value: 6, weight: weights.synthetic },          // Robotic/Synthetic
-    { value: 7, weight: weights.symbiotic },          // Symbiotic
-    { value: 8, weight: weights.alien },              // Alien
-    { value: 9, weight: weights.trained_soldier },    // Trained Soldier (maps to origin 9)
+    { value: 1, weight: weights.skilled_human ?? 0 },   // Skilled Human
+    { value: 2, weight: weights.altered_human ?? 0 },   // Altered Human
+    { value: 3, weight: weights.tech_enhanced ?? 0 },   // Tech Enhancement
+    { value: 4, weight: weights.mutated ?? 0 },         // Mutated Human
+    { value: 5, weight: weights.spiritual ?? 0 },       // Spiritual Enhancement
+    { value: 6, weight: weights.synthetic ?? 0 },       // Robotic/Synthetic
+    { value: 7, weight: weights.symbiotic ?? 0 },       // Symbiotic
+    { value: 8, weight: weights.alien ?? 0 },           // Alien
+    { value: 9, weight: weights.trained_soldier ?? 0 }, // Trained Soldier (origin 9)
   ];
 
   // Normalize weights (they should sum to 100, but handle any discrepancy)
@@ -645,8 +649,9 @@ export function generateCharacter(options: CharacterGenerationOptions = {}): Gam
     equippedShield: undefined,
     equipment: [],
 
-    // Abilities
-    powers: [],
+    // Abilities — LSW origins (2-8) roll origin-flavored powers; baseline
+    // humans (1 Skilled, 9 Trained Soldier) get none. LSW = has powers.
+    powers: generatePowersForOrigin(origin, threatLevel),
     skills: [],
     talents: [],
 
@@ -921,8 +926,9 @@ export function generateCharacterWithProfile(
     equippedShield: undefined,
     equipment: [],
 
-    // Abilities
-    powers: [],
+    // Abilities — LSW origins (2-8) roll origin-flavored powers; baseline
+    // humans (1 Skilled, 9 Trained Soldier) get none. LSW = has powers.
+    powers: generatePowersForOrigin(origin, threatLevel),
     skills: [],
     talents: [],
 

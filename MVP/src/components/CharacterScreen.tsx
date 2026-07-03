@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { generateCharacter } from '../data/characterGeneration'
 import PsycheTab from './PsycheTab'
+import { isLSW } from '../data/lswSystem'
 
 // Full Character Interface based on Character_Schema_Complete.md
 interface FullCharacter {
@@ -577,13 +578,20 @@ function IdentityTab({ character, displayMode }: { character: FullCharacter; dis
         </div>
       </div>
 
-      {/* Classification */}
+      {/* Classification — only powered beings (origins 2-8) are LSWs;
+          skilled humans / trained soldiers are baseline humans. */}
       <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700">
-        <h3 className="text-lg font-bold text-purple-400 mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-bold text-cyan-400 mb-4 flex items-center gap-2">
           <Shield size={20} />
-          LSW Classification
+          {isLSW(character as any) ? 'LSW Classification' : 'Classification'}
         </h3>
         <div className="space-y-3">
+          <InfoRow
+            label="Registry"
+            value={isLSW(character as any) ? 'LSW — Licensed Super Worker' : 'Baseline Human (Non-LSW)'}
+            highlight
+            color={isLSW(character as any) ? 'red' : undefined}
+          />
           <InfoRow label="Origin Type" value={ORIGIN_TYPES[character.origin_type] || character.origin_type} highlight />
           <InfoRow
             label="Threat Level"
@@ -758,12 +766,13 @@ function DerivedStatCard({ label, value, formula, icon, unit = '' }: {
 
 // POWERS TAB
 function PowersTab({ character }: { character: FullCharacter }) {
+  const lsw = isLSW(character as any)
   return (
     <div className="space-y-6">
       <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700">
-        <h3 className="text-lg font-bold text-purple-400 mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-bold text-cyan-400 mb-4 flex items-center gap-2">
           <Zap size={20} />
-          LSW Powers ({character.powers.length}/6)
+          {lsw ? `LSW Powers (${character.powers.length}/6)` : 'Powers — Baseline Human'}
         </h3>
 
         {character.powers.length > 0 ? (
@@ -773,10 +782,10 @@ function PowersTab({ character }: { character: FullCharacter }) {
               return (
                 <div
                   key={idx}
-                  className="bg-gradient-to-br from-purple-900/50 to-blue-900/50 rounded-lg p-4 border border-purple-500/30"
+                  className="bg-gradient-to-br from-cyan-900/50 to-blue-900/50 rounded-lg p-4 border border-cyan-500/30"
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-bold text-purple-300 flex items-center gap-2">
+                    <h4 className="font-bold text-cyan-300 flex items-center gap-2">
                       <Zap size={16} className="text-yellow-400" />
                       {powerData.name}
                     </h4>
@@ -801,12 +810,12 @@ function PowersTab({ character }: { character: FullCharacter }) {
         ) : (
           <div className="text-center text-gray-500 py-8">
             <Zap size={48} className="mx-auto mb-3 opacity-30" />
-            <p>No powers - Skilled Human origin</p>
+            <p>{lsw ? 'No powers manifested yet' : 'Baseline human — no LSW powers. Their edge is training, gear, and skill.'}</p>
           </div>
         )}
 
-        {/* Empty Slots */}
-        {character.powers.length < 6 && (
+        {/* Empty Slots — only LSWs can manifest more powers */}
+        {lsw && character.powers.length < 6 && (
           <div className="mt-4 grid grid-cols-3 gap-2">
             {Array.from({ length: 6 - character.powers.length }).map((_, idx) => (
               <div
