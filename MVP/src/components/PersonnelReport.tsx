@@ -10,6 +10,7 @@ import { getStrengths } from '../data/characterRoles';
 import { getCharacterDayJob } from '../data/educationSystem';
 import { getMood } from '../data/moodSystem';
 import { getCharacterCityFamiliarity, getFamiliarityTierInfo, getFamiliarityOpModifier } from '../data/characterLifeCycle';
+import { CONDITION_META } from '../data/mentalHealthSystem';
 import { getStatusMeta, ASSIGNABLE_ACTIVITIES } from '../data/statusMeta';
 
 /**
@@ -146,6 +147,21 @@ const PersonnelReport: React.FC = () => {
                     >
                       <span className="text-[11px] leading-none">{mood.emoji}</span> {mood.label}
                     </span>
+                    {/* Mental-health conditions (grief/depression/anxiety) */}
+                    {((char as any).mentalConditions || []).map((mc: any) => {
+                      const meta = CONDITION_META[mc.type as keyof typeof CONDITION_META];
+                      if (!meta) return null;
+                      return (
+                        <span
+                          key={mc.id}
+                          title={`${meta.label} (severity ${mc.severity}) — ${mc.cause}. ${mc.type === 'depression' ? 'Hospital care treats it; may refuse deployment.' : 'Fades with time — or worsens.'}`}
+                          className="flex items-center gap-1 rounded-md border border-black px-1.5 py-0.5 text-[10px] font-bold uppercase"
+                          style={{ background: `${meta.color}26`, color: meta.color }}
+                        >
+                          {meta.icon} {meta.label}{mc.severity >= 2 ? ` ${'!'.repeat(mc.severity - 1)}` : ''}
+                        </span>
+                      );
+                    })}
                     {/* Contagion flag — quarantine or hospitalize */}
                     {(char as any).infected && (
                       <span

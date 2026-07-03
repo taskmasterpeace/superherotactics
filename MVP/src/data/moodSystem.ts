@@ -83,10 +83,20 @@ export function getMood(char: any, ctx: MoodContext = {}): MoodRead {
   const aggressive = aggression >= 6;
   const fearful = aggression <= 4 || volatility >= 7;
 
+  // Mental-health conditions dominate the read: a depressed or grieving
+  // character can't present as content, whatever their morale number says.
+  const conditions: any[] = (char?.mentalConditions || []);
+  const severeDepression = conditions.some(c => c.type === 'depression' && c.severity >= 2);
+  const grieving = conditions.some(c => c.type === 'grief');
+
   let mood: Mood = 'calm';
 
   if (ctx.intoxicated) {
     mood = 'drunk';
+  } else if (severeDepression) {
+    mood = 'broken';
+  } else if (grieving && morale < 60) {
+    mood = 'shaken';
   } else if (traumas >= 2 || morale < 15) {
     mood = 'broken';
   } else if (traumas >= 1) {

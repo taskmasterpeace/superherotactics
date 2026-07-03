@@ -17,6 +17,7 @@ import { ALL_ARMOR } from './armor'
 import { getCharacterDayJob } from './educationSystem'
 import { getMood } from './moodSystem'
 import { generateCheckInCall } from './phoneCallSystem'
+import { tickConditions, treatDepression, dailyMoraleDrain } from './mentalHealthSystem'
 import {
   GameTime,
   TimeOfDay,
@@ -335,7 +336,71 @@ function processDayChange(newTime: GameTime): void {
   // Contagion: infections spread through the roster day by day
   processContagion(newTime)
 
+  // Mental health: grief decays (or curdles into depression), depression
+  // drains, hospital stays treat it
+  processMentalHealth(newTime)
+
   console.log('[TimeEventGenerator] Day changed to', newTime.day, newTime.date)
+}
+
+/**
+ * MENTAL HEALTH daily tick (owner directive P5): grief decays or converts to
+ * depression (susceptibility-scaled); active conditions drain morale; a
+ * hospital stay treats depression (35%/day step-down).
+ */
+function processMentalHealth(newTime: GameTime): void {
+  const store = useGameStore.getState() as any
+  const chars = store.characters || []
+  if (!chars.some((c: any) => (c.mentalConditions || []).length > 0)) return
+
+  const texts: { id: string; event: string; detail: string }[] = []
+
+  const updated = chars.map((c: any) => {
+    const list = c.mentalConditions || []
+    if (list.length === 0 || c.status === 'dead') return c
+
+    // Hospital treats depression
+    let conditions = list
+    if (c.status === 'hospital') {
+      const t = treatDepression(conditions)
+      conditions = t.conditions
+      if (t.improved && !conditions.some((x: any) => x.type === 'depression')) {
+        texts.push({ id: c.id, event: 'recovered', detail: '' })
+      }
+    }
+
+    const tick = tickConditions({ ...c, mentalConditions: conditions }, newTime.day)
+    if (tick.converted) {
+      texts.push({ id: c.id, event: 'depressed', detail: tick.converted.cause })
+    }
+
+    // Morale drain from what remains
+    let cur = typeof c.morale === 'number' ? c.morale : c.morale?.current ?? 60
+    const drain = tick.conditions.reduce((s: number, x: any) => s + dailyMoraleDrain(x), 0)
+    if (drain > 0) cur = Math.max(0, cur - drain)
+    const morale = c.morale && typeof c.morale === 'object'
+      ? { ...c.morale, current: cur, lastChangeReason: drain > 0 ? 'Struggling mentally' : c.morale.lastChangeReason }
+      : cur
+
+    return { ...c, mentalConditions: tick.conditions, morale }
+  })
+
+  useGameStore.setState({ characters: updated })
+
+  for (const t of texts) {
+    if (t.event === 'depressed') {
+      const c = updated.find((x: any) => x.id === t.id)
+      store.addNotification?.({
+        type: 'injury', priority: 'urgent', title: `${c?.name} is sinking into depression`,
+        message: `${t.detail} broke something. They need hospital care, or time — and they may refuse to deploy.`,
+        characterId: t.id, characterName: c?.name,
+        timestamp: newTime.day * 1440,
+      })
+      store.sendCharacterText?.(t.id, 'injured', { detail: "not the body this time. I can't shake it. I don't know if I can keep doing this" })
+    } else if (t.event === 'recovered') {
+      store.sendCharacterText?.(t.id, 'recovered')
+    }
+  }
 }
 
 /**

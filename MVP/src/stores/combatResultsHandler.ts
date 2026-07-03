@@ -17,6 +17,7 @@ import { Weapon, Armor } from '../data/equipmentTypes'
 import { EventBus, createCombatEndedEvent } from '../data/eventBus'
 import { getDeathConsequencesManager } from '../data/deathConsequences'
 import { rollInjury, AppliedInjury } from '../data/injuryEngine'
+import { griefFromDeath } from '../data/mentalHealthSystem'
 import { getCountryByName, getCountryByCode } from '../data/allCountries'
 
 // Unsubscribe function for cleanup
@@ -431,6 +432,28 @@ export function handleCombatComplete(result: EnhancedCombatResult): void {
     return char
   })
 
+  // GRIEF (mental-health system): a teammate's death marks the survivors.
+  // Personality sets susceptibility — fragile people take it harder, and
+  // grief can later curdle into depression.
+  const deadNames = result.casualties.filter(c => c.status === 'dead').map(c => c.characterName)
+  const charactersWithGrief = deadNames.length === 0 ? updatedCharacters : updatedCharacters.map(char => {
+    if ((char as any).status === 'dead') return char
+    const grief = griefFromDeath(char, deadNames.join(', '), gameDay)
+    if (!grief) return char
+    return {
+      ...char,
+      mentalConditions: [...((char as any).mentalConditions || []), grief],
+    }
+  })
+  if (deadNames.length > 0) {
+    store.addNotification({
+      type: 'status_change',
+      priority: 'urgent',
+      title: 'The team is grieving',
+      message: `${deadNames.join(', ')} ${deadNames.length === 1 ? 'is' : 'are'} gone. The survivors carry it — watch their mental state on the Personnel board.`,
+    })
+  }
+
   // Surface new injuries: visible ones by name; hidden ones as "needs diagnosis"
   newInjuryReports.forEach(({ name, injury }) => {
     if (injury.hidden) {
@@ -465,7 +488,7 @@ export function handleCombatComplete(result: EnhancedCombatResult): void {
 
   // Update store state
   useGameStore.setState({
-    characters: updatedCharacters,
+    characters: charactersWithGrief,
     playerFame: Math.max(0, Math.min(1000, store.playerFame + fameChange)),
     squadStatus: 'idle',
     currentView: 'world-map',
