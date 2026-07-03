@@ -23,6 +23,15 @@ import { GameCharacter } from '../types';
 
 export type EducationTrack = 'academic' | 'vocational' | 'military';
 
+/**
+ * A character's education attainment IS a DegreeLevel — the single canonical
+ * ladder the jobs/degree/training systems all key off (DEGREE_LEVEL_DATA tiers).
+ * `EducationLevel` is the name the rest of the codebase imports; keep it aliased
+ * so there is ONE type. (The db-layer and country-population education types are
+ * deliberately separate concepts and live in their own modules.)
+ */
+export type EducationLevel = DegreeLevel;
+
 export type DegreeLevel =
   | 'none'
   // Vocational
@@ -2328,6 +2337,61 @@ export function getAvailableJobs(educationLevel: DegreeLevel, degrees: string[])
 
     return true;
   });
+}
+
+// Job requiredEducation codes look like `bachelor_medicine`, `assoc_hacking`,
+// `doctorate_generic`. Map a canonical DegreeLevel to that code prefix.
+const DEGREE_CODE_PREFIX: Record<DegreeLevel, string> = {
+  none: '', certificate: 'cert', diploma: 'diploma', trade_license: 'trade', master_craftsman: 'master',
+  associate: 'assoc', bachelor: 'bachelor', master: 'master', doctorate: 'doctorate', postdoc: 'doctorate',
+  basic: 'cert', advanced: 'assoc', specialist: 'bachelor', elite: 'master', command: 'doctorate',
+};
+
+/**
+ * Best-effort translation of a character's education into the degree-code strings
+ * that day jobs check for. Combines their canonical level with each field they
+ * studied (`bachelor_medicine`) plus a `<level>_generic` fallback so higher-tier
+ * generalists still qualify for generic professional roles.
+ */
+export function deriveDegreeCodes(
+  educationLevel: DegreeLevel,
+  fields: string[] = [],
+  completedDegrees: { fieldId?: string; degreeLevel?: string }[] = []
+): string[] {
+  const codes = new Set<string>();
+  const prefix = DEGREE_CODE_PREFIX[educationLevel] || '';
+  if (prefix) {
+    codes.add(`${prefix}_generic`);
+    fields.forEach(f => f && codes.add(`${prefix}_${f}`));
+  }
+  completedDegrees.forEach(d => {
+    const p = DEGREE_CODE_PREFIX[(d.degreeLevel as DegreeLevel)] || prefix;
+    if (p && d.fieldId) { codes.add(`${p}_${d.fieldId}`); codes.add(`${p}_generic`); }
+  });
+  return [...codes];
+}
+
+/**
+ * The single best-paying day job a character qualifies for given their canonical
+ * education level + earned degrees/fields. This is the "cover job" — where a
+ * character works (and earns) when they aren't deployed. Turns education into
+ * income and a plausible civilian identity. Returns null if they qualify for none.
+ */
+export function getBestDayJob(educationLevel: DegreeLevel, degrees: string[] = []): DayJob | null {
+  const jobs = getAvailableJobs(educationLevel || 'none', degrees);
+  if (jobs.length === 0) return null;
+  return jobs.reduce((best, j) => (j.weeklyPay > best.weeklyPay ? j : best), jobs[0]);
+}
+
+/** Convenience: resolve a character's cover job directly from its fields. */
+export function getCharacterDayJob(char: {
+  educationLevel?: DegreeLevel;
+  education?: string[];
+  completedDegrees?: { fieldId?: string; degreeLevel?: string }[];
+}): DayJob | null {
+  const level = (char.educationLevel as DegreeLevel) || 'none';
+  const codes = deriveDegreeCodes(level, char.education || [], char.completedDegrees || []);
+  return getBestDayJob(level, codes);
 }
 
 export function calculateLearningSpeed(

@@ -14,6 +14,7 @@ import {
 } from './eventBus'
 import { ALL_WEAPONS } from './weapons'
 import { ALL_ARMOR } from './armor'
+import { getCharacterDayJob } from './educationSystem'
 import {
   GameTime,
   TimeOfDay,
@@ -495,6 +496,15 @@ function calculateWeeklyIncome(): number {
     (m: any) => m.completedAt && m.completedAt >= sevenDaysAgo && m.status === 'completed'
   ).length
   income += weeklyMissions * 500  // $500 bonus per mission completed this week
+
+  // Cover-job income — education pays. A character earns their best-qualifying
+  // day job's weekly pay when they're home (not deployed / on a mission / dead).
+  for (const char of (store.characters || [])) {
+    const st = (char as any).status
+    if (st === 'dead' || st === 'on_mission' || st === 'deployed' || st === 'traveling' || (char as any).deployed) continue
+    const job = getCharacterDayJob(char as any)
+    if (job) income += job.weeklyPay
+  }
 
   return income
 }

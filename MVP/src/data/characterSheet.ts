@@ -2180,7 +2180,7 @@ export function createBlankCharacter(id: string): CharacterSheet {
     skills: [],
     talents: [],
 
-    educationLevel: 'high_school',
+    educationLevel: 'none',
     careerRank: 1,
     careerHistory: [],
 
@@ -2428,17 +2428,18 @@ export function getCharacterTypeFromOrigin(origin: OriginType): CharacterType {
 /**
  * Generate education level based on age and INT
  */
+// Returns a canonical DegreeLevel. Pre-degree schooling (child/teen or low-INT
+// adults) maps to 'none' — a degree is something you EARN via training; a
+// character with 'none' can still study up.
 export function generateEducationLevel(age: number, int: number): EducationLevel {
-  if (age < 13) return 'elementary';
-  if (age < 15) return 'middle_school';
-  if (age < 18) return 'high_school';
+  if (age < 18) return 'none';
 
-  // Adults - higher INT = more education
-  if (int < 10) return 'high_school';
-  if (int < 15) return Math.random() < 0.7 ? 'high_school' : 'associates';
-  if (int < 20) return Math.random() < 0.5 ? 'associates' : 'bachelors';
-  if (int < 30) return Math.random() < 0.5 ? 'bachelors' : 'masters';
-  return Math.random() < 0.7 ? 'masters' : 'doctorate';
+  // Adults - higher INT = more likely to hold a degree
+  if (int < 10) return 'none';
+  if (int < 15) return Math.random() < 0.7 ? 'none' : 'associate';
+  if (int < 20) return Math.random() < 0.5 ? 'associate' : 'bachelor';
+  if (int < 30) return Math.random() < 0.5 ? 'bachelor' : 'master';
+  return Math.random() < 0.7 ? 'master' : 'doctorate';
 }
 
 // =============================================================================
@@ -2815,7 +2816,7 @@ export const MILITARY_RANKS: Record<MilitaryRank, MilitaryRankInfo> = {
     payGrade: 'E-2',
     minAge: 18,
     minServiceYears: 0,
-    requiredEducation: 'military_basic',
+    requiredEducation: 'basic',
     weeklyPay: 500,
     commandSize: 0,
   },
@@ -2825,7 +2826,7 @@ export const MILITARY_RANKS: Record<MilitaryRank, MilitaryRankInfo> = {
     payGrade: 'E-4',
     minAge: 20,
     minServiceYears: 2,
-    requiredEducation: 'military_basic',
+    requiredEducation: 'basic',
     weeklyPay: 700,
     commandSize: 4,
   },
@@ -2835,7 +2836,7 @@ export const MILITARY_RANKS: Record<MilitaryRank, MilitaryRankInfo> = {
     payGrade: 'E-5',
     minAge: 22,
     minServiceYears: 4,
-    requiredEducation: 'military_advanced',
+    requiredEducation: 'advanced',
     weeklyPay: 900,
     commandSize: 8,
   },
@@ -2845,7 +2846,7 @@ export const MILITARY_RANKS: Record<MilitaryRank, MilitaryRankInfo> = {
     payGrade: 'E-7',
     minAge: 26,
     minServiceYears: 8,
-    requiredEducation: 'military_advanced',
+    requiredEducation: 'advanced',
     weeklyPay: 1200,
     commandSize: 16,
   },
@@ -2855,7 +2856,7 @@ export const MILITARY_RANKS: Record<MilitaryRank, MilitaryRankInfo> = {
     payGrade: 'E-9',
     minAge: 32,
     minServiceYears: 14,
-    requiredEducation: 'military_special',
+    requiredEducation: 'specialist',
     weeklyPay: 1500,
     commandSize: 50,
   },
@@ -2865,7 +2866,7 @@ export const MILITARY_RANKS: Record<MilitaryRank, MilitaryRankInfo> = {
     payGrade: 'O-2',
     minAge: 22,
     minServiceYears: 0,  // Can commission directly from academy
-    requiredEducation: 'bachelors',  // Officers need degree
+    requiredEducation: 'bachelor',  // Officers need degree
     weeklyPay: 1100,
     commandSize: 30,
   },
@@ -2875,7 +2876,7 @@ export const MILITARY_RANKS: Record<MilitaryRank, MilitaryRankInfo> = {
     payGrade: 'O-3',
     minAge: 26,
     minServiceYears: 4,
-    requiredEducation: 'bachelors',
+    requiredEducation: 'bachelor',
     weeklyPay: 1400,
     commandSize: 100,
   },
@@ -2885,7 +2886,7 @@ export const MILITARY_RANKS: Record<MilitaryRank, MilitaryRankInfo> = {
     payGrade: 'O-4',
     minAge: 30,
     minServiceYears: 10,
-    requiredEducation: 'masters',
+    requiredEducation: 'master',
     weeklyPay: 1800,
     commandSize: 300,
   },
@@ -2895,7 +2896,7 @@ export const MILITARY_RANKS: Record<MilitaryRank, MilitaryRankInfo> = {
     payGrade: 'O-6',
     minAge: 38,
     minServiceYears: 18,
-    requiredEducation: 'masters',
+    requiredEducation: 'master',
     weeklyPay: 2500,
     commandSize: 1000,
   },
@@ -2905,7 +2906,7 @@ export const MILITARY_RANKS: Record<MilitaryRank, MilitaryRankInfo> = {
     payGrade: 'O-8',
     minAge: 45,
     minServiceYears: 25,
-    requiredEducation: 'masters',
+    requiredEducation: 'master',
     weeklyPay: 4000,
     commandSize: 10000,
   },
@@ -2942,7 +2943,7 @@ export const MILITARY_SPECIALIZATIONS: Record<MilitarySpecialization, MilitarySp
     description: 'Standard ground combat soldier',
     statPriorities: ['STR', 'STA', 'MEL', 'AGL'],
     skills: ['Shooting', 'Tactics', 'First_Aid', 'Driving'],
-    requiredEducation: 'military_basic',
+    requiredEducation: 'basic',
   },
   marksman: {
     id: 'marksman',
@@ -2950,7 +2951,7 @@ export const MILITARY_SPECIALIZATIONS: Record<MilitarySpecialization, MilitarySp
     description: 'Precision shooter and sniper',
     statPriorities: ['AGL', 'INS', 'CON', 'STA'],
     skills: ['Sniper', 'Stealth', 'Camouflage', 'Spotting'],
-    requiredEducation: 'military_advanced',
+    requiredEducation: 'advanced',
   },
   heavy_weapons: {
     id: 'heavy_weapons',
@@ -2958,7 +2959,7 @@ export const MILITARY_SPECIALIZATIONS: Record<MilitarySpecialization, MilitarySp
     description: 'Machine guns, mortars, and rockets',
     statPriorities: ['STR', 'STA', 'MEL', 'AGL'],
     skills: ['Heavy_Weapons', 'Explosives', 'Tactics', 'Shooting'],
-    requiredEducation: 'military_advanced',
+    requiredEducation: 'advanced',
   },
   medic: {
     id: 'medic',
@@ -2966,7 +2967,7 @@ export const MILITARY_SPECIALIZATIONS: Record<MilitarySpecialization, MilitarySp
     description: 'Battlefield medical support',
     statPriorities: ['INT', 'INS', 'AGL', 'CON'],
     skills: ['Medicine', 'First_Aid', 'Surgery', 'Shooting'],
-    requiredEducation: 'military_advanced',
+    requiredEducation: 'advanced',
   },
   engineer: {
     id: 'engineer',
@@ -2974,7 +2975,7 @@ export const MILITARY_SPECIALIZATIONS: Record<MilitarySpecialization, MilitarySp
     description: 'Explosives and construction',
     statPriorities: ['INT', 'AGL', 'STR', 'INS'],
     skills: ['Explosives', 'Lockpicking', 'Mechanical', 'Construction'],
-    requiredEducation: 'military_advanced',
+    requiredEducation: 'advanced',
   },
   communications: {
     id: 'communications',
@@ -2982,7 +2983,7 @@ export const MILITARY_SPECIALIZATIONS: Record<MilitarySpecialization, MilitarySp
     description: 'Radio and signals specialist',
     statPriorities: ['INT', 'INS', 'CON', 'AGL'],
     skills: ['Electronics', 'Radio', 'Cryptography', 'Languages'],
-    requiredEducation: 'military_advanced',
+    requiredEducation: 'advanced',
   },
   reconnaissance: {
     id: 'reconnaissance',
@@ -2990,7 +2991,7 @@ export const MILITARY_SPECIALIZATIONS: Record<MilitarySpecialization, MilitarySp
     description: 'Scout and forward observer',
     statPriorities: ['AGL', 'INS', 'STA', 'INT'],
     skills: ['Stealth', 'Tracking', 'Navigation', 'Spotting'],
-    requiredEducation: 'military_advanced',
+    requiredEducation: 'advanced',
   },
   armor: {
     id: 'armor',
@@ -2998,7 +2999,7 @@ export const MILITARY_SPECIALIZATIONS: Record<MilitarySpecialization, MilitarySp
     description: 'Tank and vehicle crew',
     statPriorities: ['INT', 'AGL', 'INS', 'STR'],
     skills: ['Driving', 'Heavy_Weapons', 'Mechanical', 'Tactics'],
-    requiredEducation: 'military_advanced',
+    requiredEducation: 'advanced',
   },
   pilot: {
     id: 'pilot',
@@ -3006,7 +3007,7 @@ export const MILITARY_SPECIALIZATIONS: Record<MilitarySpecialization, MilitarySp
     description: 'Aircraft or helicopter pilot',
     statPriorities: ['AGL', 'INT', 'INS', 'CON'],
     skills: ['Pilot', 'Navigation', 'Electronics', 'Radio'],
-    requiredEducation: 'military_advanced',
+    requiredEducation: 'advanced',
   },
   special_forces: {
     id: 'special_forces',
@@ -3014,7 +3015,7 @@ export const MILITARY_SPECIALIZATIONS: Record<MilitarySpecialization, MilitarySp
     description: 'Elite multi-role operator',
     statPriorities: ['AGL', 'STR', 'INS', 'INT', 'MEL', 'STA', 'CON'],
     skills: ['Shooting', 'Stealth', 'Explosives', 'Martial_Arts', 'Survival', 'Languages'],
-    requiredEducation: 'military_special',
+    requiredEducation: 'specialist',
   },
 };
 
@@ -3120,18 +3121,16 @@ export function generateSoldier(
   // Education based on rank and specialization
   let educationLevel: EducationLevel;
   if (isOfficer) {
-    // Officers have at least bachelor's
-    if (rank === 'major' || rank === 'colonel' || rank === 'general') {
-      educationLevel = 'masters';
-    } else {
-      educationLevel = 'bachelors';
-    }
+    // Officers hold Command-track military education
+    educationLevel = (rank === 'major' || rank === 'colonel' || rank === 'general')
+      ? 'command'
+      : 'elite';
   } else if (specialization === 'special_forces') {
-    educationLevel = 'military_special';
+    educationLevel = 'specialist';
   } else if (serviceYears >= 4) {
-    educationLevel = 'military_advanced';
+    educationLevel = 'advanced';
   } else {
-    educationLevel = 'military_basic';
+    educationLevel = 'basic';
   }
 
   // Culture/nationality
@@ -3365,7 +3364,7 @@ export const CIVILIAN_CAREERS: Record<CivilianCareer, CivilianCareerInfo> = {
     id: 'retail',
     name: 'Retail Worker',
     description: 'Sales and customer service',
-    requiredEducation: 'high_school',
+    requiredEducation: 'none',
     minINT: 8,
     statPriorities: ['INT', 'INS', 'CON'],
     skills: ['Persuasion', 'Streetwise'],
@@ -3387,7 +3386,7 @@ export const CIVILIAN_CAREERS: Record<CivilianCareer, CivilianCareerInfo> = {
     id: 'office_worker',
     name: 'Office Worker',
     description: 'Administrative and clerical work',
-    requiredEducation: 'high_school',
+    requiredEducation: 'none',
     minINT: 10,
     statPriorities: ['INT', 'CON', 'INS'],
     skills: ['Computer', 'Administration'],
@@ -3398,7 +3397,7 @@ export const CIVILIAN_CAREERS: Record<CivilianCareer, CivilianCareerInfo> = {
     id: 'teacher',
     name: 'Teacher',
     description: 'K-12 education',
-    requiredEducation: 'bachelors',
+    requiredEducation: 'bachelor',
     minINT: 15,
     statPriorities: ['INT', 'CON', 'INS'],
     skills: ['Teaching', 'Psychology', 'Leadership'],
@@ -3409,7 +3408,7 @@ export const CIVILIAN_CAREERS: Record<CivilianCareer, CivilianCareerInfo> = {
     id: 'nurse',
     name: 'Nurse',
     description: 'Healthcare nursing',
-    requiredEducation: 'associates',
+    requiredEducation: 'associate',
     minINT: 12,
     statPriorities: ['INT', 'INS', 'CON', 'AGL'],
     skills: ['Medicine', 'First_Aid', 'Psychology'],
@@ -3420,7 +3419,7 @@ export const CIVILIAN_CAREERS: Record<CivilianCareer, CivilianCareerInfo> = {
     id: 'police',
     name: 'Police Officer',
     description: 'Law enforcement',
-    requiredEducation: 'high_school',
+    requiredEducation: 'none',
     minINT: 10,
     statPriorities: ['STR', 'AGL', 'INS', 'CON'],
     skills: ['Shooting', 'Investigation', 'Driving', 'Law'],
@@ -3431,7 +3430,7 @@ export const CIVILIAN_CAREERS: Record<CivilianCareer, CivilianCareerInfo> = {
     id: 'firefighter',
     name: 'Firefighter',
     description: 'Fire and rescue services',
-    requiredEducation: 'high_school',
+    requiredEducation: 'none',
     minINT: 10,
     statPriorities: ['STR', 'STA', 'AGL', 'INS'],
     skills: ['First_Aid', 'Driving', 'Rescue'],
@@ -3442,7 +3441,7 @@ export const CIVILIAN_CAREERS: Record<CivilianCareer, CivilianCareerInfo> = {
     id: 'accountant',
     name: 'Accountant',
     description: 'Financial accounting',
-    requiredEducation: 'bachelors',
+    requiredEducation: 'bachelor',
     minINT: 15,
     statPriorities: ['INT', 'CON', 'INS'],
     skills: ['Accounting', 'Computer', 'Law'],
@@ -3453,7 +3452,7 @@ export const CIVILIAN_CAREERS: Record<CivilianCareer, CivilianCareerInfo> = {
     id: 'engineer',
     name: 'Engineer',
     description: 'Technical engineering',
-    requiredEducation: 'bachelors',
+    requiredEducation: 'bachelor',
     minINT: 18,
     statPriorities: ['INT', 'INS', 'CON'],
     skills: ['Engineering', 'Computer', 'Mathematics'],
@@ -3464,7 +3463,7 @@ export const CIVILIAN_CAREERS: Record<CivilianCareer, CivilianCareerInfo> = {
     id: 'programmer',
     name: 'Software Developer',
     description: 'Software programming',
-    requiredEducation: 'bachelors',
+    requiredEducation: 'bachelor',
     minINT: 18,
     statPriorities: ['INT', 'CON', 'INS'],
     skills: ['Computer', 'Hacking', 'Engineering'],
@@ -3508,7 +3507,7 @@ export const CIVILIAN_CAREERS: Record<CivilianCareer, CivilianCareerInfo> = {
     id: 'executive',
     name: 'Executive',
     description: 'Business executive',
-    requiredEducation: 'masters',
+    requiredEducation: 'master',
     minINT: 20,
     statPriorities: ['INT', 'CON', 'INS'],
     skills: ['Leadership', 'Persuasion', 'Administration', 'Finance'],
@@ -3530,7 +3529,7 @@ export const CIVILIAN_CAREERS: Record<CivilianCareer, CivilianCareerInfo> = {
     id: 'journalist',
     name: 'Journalist',
     description: 'News and media',
-    requiredEducation: 'bachelors',
+    requiredEducation: 'bachelor',
     minINT: 15,
     statPriorities: ['INT', 'INS', 'CON'],
     skills: ['Writing', 'Investigation', 'Persuasion', 'Photography'],

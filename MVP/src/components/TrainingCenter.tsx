@@ -106,12 +106,23 @@ export const TrainingCenter: React.FC = () => {
     const currentDay = gameTime?.day || 0
     const durationDays = estimatedWeeks * 7
 
-    // Get stat bonuses from the field
+    // Stat bonus scales with the DEGREE LEVEL (associate +1 ... postdoc +5) and
+    // lands on the field's PRIMARY stat, so a doctorate in Combat Sciences is
+    // meaningfully different from an associate in Languages.
+    const levelBonus = DEGREE_LEVEL_DATA[selectedLevel]?.statBonus ?? 1
     const statBonuses: Record<string, number> = {}
-    if (selectedField.optimalStat) {
-      statBonuses[selectedField.optimalStat.toLowerCase()] = 5 // +5 to optimal stat
+    const primary = (selectedField.primaryStat || 'INT').toLowerCase()
+    statBonuses[primary] = levelBonus
+    if (primary !== 'int') statBonuses.int = Math.max(1, Math.round(levelBonus / 2)) // study broadens INT
+    if (selectedField.secondaryStat) {
+      const sec = selectedField.secondaryStat.toLowerCase()
+      statBonuses[sec] = (statBonuses[sec] || 0) + Math.max(1, Math.round(levelBonus / 2))
     }
-    statBonuses.int = 3 // Education always increases INT
+
+    // Skills come from the field's specializations (real unlocks), not a stub.
+    const skillsUnlocked = (selectedField.specializations || [])
+      .flatMap((sp: any) => sp.skillUnlocks || [])
+      .slice(0, 3)
 
     // Call store action
     enrollCharacter({
@@ -125,7 +136,7 @@ export const TrainingCenter: React.FC = () => {
       progress: 0,
       cost: estimatedCost,
       statBonuses,
-      skillsUnlocked: selectedField.skillsProvided?.slice(0, 2) || []
+      skillsUnlocked
     })
 
     setSelectedCharacter(null)

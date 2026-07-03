@@ -6,6 +6,8 @@ import { RetroPanel, RetroBadge } from './ui';
 import {
   getPhysicalState, getMentalState, AppliedInjury, SEVERITY_COLOR,
 } from '../data/injuryEngine';
+import { getStrengths } from '../data/characterRoles';
+import { getCharacterDayJob } from '../data/educationSystem';
 
 /**
  * PERSONNEL — the color-coded condition board. One row per character: portrait,
@@ -50,6 +52,8 @@ const PersonnelReport: React.FC = () => {
           const injuries: AppliedInjury[] = char.activeInjuries ?? [];
           const visible = injuries.filter(i => !i.hidden);
           const hiddenCount = injuries.length - visible.length;
+          const strengths = getStrengths(char, 2); // what this person is good at
+          const coverJob = getCharacterDayJob(char); // education → cover + income
 
           return (
             <RetroPanel key={char.id} padding="sm">
@@ -62,6 +66,24 @@ const PersonnelReport: React.FC = () => {
                     {char.recoveryTime > 0 && (
                       <span className="text-[10px] text-muted-foreground">
                         recovery ~{Math.ceil(char.recoveryTime)}h
+                      </span>
+                    )}
+                    {/* Role strengths — "everyone is effective at something" */}
+                    {strengths.map(s => (
+                      <span
+                        key={s.domain}
+                        title={`${s.label}: ${s.score}/100`}
+                        className="flex items-center gap-1 rounded-md border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
+                      >
+                        {s.icon} {s.label} {s.score}
+                      </span>
+                    ))}
+                    {coverJob && (
+                      <span
+                        title={`Cover: ${coverJob.coverBenefit} · pays $${coverJob.weeklyPay}/wk when home`}
+                        className="flex items-center gap-1 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400"
+                      >
+                        💼 {coverJob.name} ${coverJob.weeklyPay}/wk
                       </span>
                     )}
                   </div>

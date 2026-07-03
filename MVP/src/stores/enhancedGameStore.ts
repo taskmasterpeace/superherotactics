@@ -4836,6 +4836,19 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
         updates.skills = [...(c.skills || []), ...enrollment.skillsUnlocked]
       }
 
+      // Record the earned degree + raise the canonical education level so jobs
+      // and role effectiveness can read it (single source of truth).
+      const earned = { fieldId: enrollment.fieldId, degreeLevel: enrollment.degreeLevel, earnedDay: get().gameTime.day }
+      updates.completedDegrees = [...((c as any).completedDegrees || []), earned]
+      const TIER: Record<string, number> = {
+        none: 0, certificate: 1, associate: 1, basic: 1, diploma: 2, bachelor: 2, advanced: 2,
+        trade_license: 3, master: 3, specialist: 3, master_craftsman: 4, doctorate: 4, elite: 4,
+        postdoc: 5, command: 5,
+      }
+      if ((TIER[enrollment.degreeLevel] ?? 0) > (TIER[(c as any).educationLevel] ?? 0)) {
+        updates.educationLevel = enrollment.degreeLevel
+      }
+
       return updates
     })
 
