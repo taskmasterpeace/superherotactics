@@ -5,6 +5,10 @@ import { calculateBorderControl } from '../../data/combinedEffects';
 import { useGameStore, TravelingUnit, FleetVehicle, TIME_SPEEDS, TimeSpeed } from '../../stores/enhancedGameStore';
 import CityActionsPanel from './CityActionsPanel';
 import { CityAction } from '../../data/cityActions';
+import { CharacterPortrait } from '../CharacterPortrait';
+import { getMood } from '../../data/moodSystem';
+import { getPhysicalState } from '../../data/injuryEngine';
+import { ALL_WEAPONS } from '../../data/weapons';
 // TC-004: Territory display imports
 import {
   getSectorControl,
@@ -446,6 +450,15 @@ const MessagesPanel: React.FC<{
                 {characters.map((char) => {
                   const isSelected = selectedCharacterIds.includes(char.id);
                   const canTravel = char.status === 'ready';
+                  // JA2 merc card: portrait + condition + mood + equipped weapon.
+                  const mood = getMood(char as any);
+                  const phys = getPhysicalState({
+                    activeInjuries: (char as any).activeInjuries,
+                    health: (char as any).health?.current ?? (char as any).health,
+                    maxHealth: (char as any).health?.maximum ?? (char as any).maxHealth,
+                  });
+                  const wpnId = (char as any).equippedWeapon;
+                  const weapon = wpnId ? ALL_WEAPONS.find(w => w.id === wpnId || w.name === wpnId) : null;
                   return (
                     <div
                       key={char.id}
@@ -455,20 +468,21 @@ const MessagesPanel: React.FC<{
                         }
                       }}
                       className={cn(
-                        "flex items-center gap-3 px-4 py-2 transition-colors",
-                        canTravel ? 'cursor-pointer hover:bg-primary/10' : 'opacity-50 cursor-not-allowed',
-                        isSelected && 'bg-accent/30 border-l-4 border-accent pl-3'
+                        "flex items-center gap-2.5 px-3 py-2 transition-colors",
+                        canTravel ? 'cursor-pointer hover:bg-primary/10' : 'opacity-60 cursor-not-allowed',
+                        isSelected && 'bg-accent/30 border-l-4 border-accent pl-2'
                       )}
                     >
-                      <div className="relative">
-                        <div className={cn(
-                          "w-10 h-10 rounded-lg bg-surface border-2 flex items-center justify-center shadow-retro-sm",
-                          isSelected ? 'border-accent' : 'border-black'
-                        )}>
-                          {getStatusIcon(char.status)}
-                        </div>
+                      <div className="relative flex-shrink-0">
+                        <CharacterPortrait character={char as any} size={40} />
+                        {/* physical-condition dot */}
+                        <span
+                          className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-black"
+                          style={{ background: phys.color }}
+                          title={`Condition: ${phys.state}`}
+                        />
                         {isSelected && (
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-accent rounded-full flex items-center justify-center border border-black">
+                          <div className="absolute -top-1 -left-1 w-4 h-4 bg-accent rounded-full flex items-center justify-center border border-black">
                             <span className="text-[10px] text-black font-bold">✓</span>
                           </div>
                         )}
@@ -477,19 +491,25 @@ const MessagesPanel: React.FC<{
                         <p className={cn("font-bold text-sm truncate", isSelected ? 'text-accent' : 'text-foreground')}>
                           {char.name}
                         </p>
-                        <p className="text-muted-foreground text-xs truncate">{char.status?.toUpperCase()}</p>
+                        <div className="flex items-center gap-1.5 text-[10px]">
+                          <span style={{ color: mood.color }} title="Mood">{mood.emoji} {mood.label}</span>
+                          <span className="text-muted-foreground">·</span>
+                          <span className="text-muted-foreground uppercase">{char.status}</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground truncate" title="Equipped weapon">
+                          {weapon ? `${weapon.emoji || '🔫'} ${weapon.name}` : '— unarmed —'}
+                        </p>
                       </div>
-                      <div className="text-right flex-shrink-0">
+                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
                         <p className="text-primary font-mono font-bold text-sm">{char.sector || 'HQ'}</p>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onCharacterClick?.(char); }}
+                          title={`Open ${char.name}'s sheet`}
+                          className="flex h-6 w-6 items-center justify-center rounded-md border border-black bg-surface text-primary hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer"
+                        >
+                          <User className="w-3 h-3" />
+                        </button>
                       </div>
-                      {/* Open full character sheet (distinct from select-for-travel) */}
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onCharacterClick?.(char); }}
-                        title={`Open ${char.name}'s sheet`}
-                        className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-md border border-black bg-surface text-primary hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer"
-                      >
-                        <User className="w-3.5 h-3.5" />
-                      </button>
                     </div>
                   );
                 })}
