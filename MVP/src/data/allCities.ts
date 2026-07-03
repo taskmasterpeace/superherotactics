@@ -19460,6 +19460,13 @@ export const ALL_CITIES: City[] = [
   }
 ];
 
+// Append supplemental cities for the 29 countries that shipped with zero cities.
+// Type-only import of City means supplementalCities.ts has no runtime dependency
+// back on this module, so this is not a circular import. Every consumer that
+// reads ALL_CITIES (getCitiesByCountry, city selection, world map) now sees them.
+import { SUPPLEMENTAL_CITIES } from './supplementalCities';
+ALL_CITIES.push(...SUPPLEMENTAL_CITIES);
+
 // Utility functions
 export function getCity(id: number): City | undefined {
   return ALL_CITIES.find(c => c.id === id);
