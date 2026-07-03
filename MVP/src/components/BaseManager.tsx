@@ -135,14 +135,22 @@ const SafeHousePanel: React.FC<{ safeHouses: SafeHouseSystem; countryName: strin
   ].filter(Boolean) as string[]
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4">
-      <div className="flex justify-between items-center mb-3">
-        <h3 className="font-semibold text-gray-300">Safe Houses</h3>
+    <div className="bg-gray-800/60 rounded-lg p-4 border-l-4 border-amber-500/70">
+      <div className="flex justify-between items-center mb-1">
+        <h3 className="font-semibold text-amber-300 flex items-center gap-1.5">
+          <span>🏚️</span> Safe Houses
+        </h3>
         <span className={`text-xs uppercase ${getSafeHouseAvailabilityColor(safeHouses.availability)}`}>
           {safeHouses.availability}
         </span>
       </div>
-      <p className="text-xs text-gray-500 mb-3">Weekly rentals in {countryName}</p>
+      {/* Make it unmistakable this is a SEPARATE system from your owned base */}
+      <p className="text-[11px] text-amber-200/70 mb-1">
+        Temporary weekly rentals in {countryName} — <span className="italic">not</span> part of your base.
+      </p>
+      <p className="text-[10px] text-gray-500 mb-3 leading-tight">
+        Rent a hideout in this country for a quick, deniable place to lie low. Separate from the base you build and own below.
+      </p>
       {safeHouses.safeHousesAvailable ? (
         <div className="space-y-2 text-sm">
           {tiers.map((tier) => (
@@ -161,12 +169,15 @@ const SafeHousePanel: React.FC<{ safeHouses: SafeHouseSystem; countryName: strin
             </div>
           ))}
           {features.length > 0 && (
-            <div className="flex flex-wrap gap-1 pt-2 border-t border-gray-700">
-              {features.map((feature) => (
-                <span key={feature} className="px-2 py-0.5 bg-gray-700 rounded text-xs text-green-400">
-                  {feature}
-                </span>
-              ))}
+            <div className="pt-2 border-t border-gray-700">
+              <p className="text-[10px] uppercase tracking-wide text-gray-500 mb-1">Hideout perks (this country)</p>
+              <div className="flex flex-wrap gap-1">
+                {features.map((feature) => (
+                  <span key={feature} className="px-2 py-0.5 bg-gray-700 rounded text-xs text-green-400">
+                    {feature}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -192,12 +203,26 @@ export const BaseManager: React.FC = () => {
   const upgradeFacilityAt = useGameStore((state) => state.upgradeFacilityAt)
   const removeFacilityAt = useGameStore((state) => state.removeFacilityAt)
   const cancelConstruction = useGameStore((state) => state.cancelConstruction)
+  const gameTime = useGameStore((state) => state.gameTime)
 
   // Get construction queue for active base
   const constructionQueue = useMemo(() => {
     if (!baseState.activeBaseId) return []
     return baseState.constructionQueue.filter(p => p.baseId === baseState.activeBaseId)
   }, [baseState.constructionQueue, baseState.activeBaseId])
+
+  // Completion clock: "Done Day X, HH:00" from hours remaining + the live game time.
+  const etaLabel = (hoursRemaining: number): string => {
+    const absHourNow = (gameTime?.day ?? 1) * 24 + Math.floor((gameTime?.minutes ?? 0) / 60)
+    const done = absHourNow + Math.ceil(hoursRemaining)
+    const day = Math.floor(done / 24)
+    const hour = done % 24
+    return `Done Day ${day}, ${String(hour).padStart(2, '0')}:00`
+  }
+
+  // Which grid cell (if any) is being built right now → for the "under construction" state
+  const projectAt = (x: number, y: number) =>
+    constructionQueue.find(p => p.gridX === x && p.gridY === y)
 
   // Local state
   const [showPurchaseModal, setShowPurchaseModal] = useState(false)
@@ -366,8 +391,9 @@ export const BaseManager: React.FC = () => {
                           <span className="text-sm font-medium">
                             {facilityName} L{project.targetLevel}
                           </span>
-                          <span className="text-xs text-gray-400">
-                            {formatHours(project.hoursRemaining)} remaining
+                          <span className="text-xs text-gray-400 text-right">
+                            {formatHours(project.hoursRemaining)} left
+                            <span className="block text-[10px] text-amber-300/80">{etaLabel(project.hoursRemaining)}</span>
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -404,23 +430,47 @@ export const BaseManager: React.FC = () => {
                   const facility = activeBase.grid[y]?.[x]
                   const isSelected = selectedCell?.x === x && selectedCell?.y === y
                   const config = facility ? FACILITIES[facility.type] : null
+                  const building = projectAt(x, y)
+                  const buildPct = building
+                    ? Math.round(((building.totalHours - building.hoursRemaining) / building.totalHours) * 100)
+                    : 0
+                  const buildConfig = building ? FACILITIES[building.facilityType] : null
 
                   return (
                     <button
                       key={`${x}-${y}`}
                       onClick={() => handleCellClick(x, y)}
-                      title={facility ? getFacilityBonusText(facility.type, facility.level) : 'Build new facility'}
+                      title={
+                        building
+                          ? `Building ${buildConfig?.name} L${building.targetLevel} — ${buildPct}% · ${etaLabel(building.hoursRemaining)}`
+                          : facility ? getFacilityBonusText(facility.type, facility.level) : 'Build new facility'
+                      }
                       className={`
                         aspect-square rounded-lg border-2 flex flex-col items-center justify-center
-                        transition-all hover:scale-105 relative group
-                        ${isSelected ? 'border-cyan-400 ring-2 ring-cyan-400/50' : 'border-gray-600'}
-                        ${facility
-                          ? 'bg-gray-700'
-                          : 'bg-gray-800 hover:bg-gray-700 border-dashed'
+                        transition-all hover:scale-105 relative group overflow-hidden
+                        ${isSelected ? 'border-cyan-400 ring-2 ring-cyan-400/50' : building ? 'border-amber-500/80' : 'border-gray-600'}
+                        ${building
+                          ? 'bg-amber-950/40'
+                          : facility
+                            ? 'bg-gray-700'
+                            : 'bg-gray-800 hover:bg-gray-700 border-dashed'
                         }
                       `}
                     >
-                      {facility ? (
+                      {building ? (
+                        <>
+                          {/* Under-construction state: hardhat + % + fill bar from the bottom */}
+                          <div
+                            className="absolute bottom-0 left-0 right-0 bg-amber-500/25 transition-all"
+                            style={{ height: `${buildPct}%` }}
+                          />
+                          <span className="text-2xl relative z-10 animate-pulse">🔨</span>
+                          <span className="text-[10px] text-amber-200 mt-1 relative z-10 leading-tight text-center">
+                            {buildConfig?.name}
+                          </span>
+                          <span className="text-[10px] font-bold text-amber-300 relative z-10">{buildPct}%</span>
+                        </>
+                      ) : facility ? (
                         <>
                           <span className="text-2xl">{config?.icon || '?'}</span>
                           <span className="text-xs text-gray-300 mt-1">{config?.name || 'Unknown'}</span>
