@@ -325,6 +325,13 @@ function processDayChange(newTime: GameTime): void {
     console.warn('[TimeEventGenerator] Edition print failed:', e)
   }
 
+  // Engineering benches advance (design/research/fabrication)
+  try {
+    (useGameStore.getState() as any).progressEngineering(24)
+  } catch (e) {
+    console.warn('[TimeEventGenerator] Engineering progress failed:', e)
+  }
+
   console.log('[TimeEventGenerator] Day changed to', newTime.day, newTime.date)
 }
 

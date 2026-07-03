@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Newspaper, Users, Search, Building2, Heart, HeartPulse, GraduationCap, ShoppingBag,
-  Award, History, BookOpen, Globe2, Map, Power, Wifi, BatteryFull,
+  Award, History, BookOpen, Globe2, Map, Power, Wifi, BatteryFull, Wrench,
 } from 'lucide-react';
 import { useGameStore } from '../stores/enhancedGameStore';
 
@@ -38,6 +38,7 @@ const APPS: AppDef[] = [
   { view: 'base', label: 'Base', icon: <Building2 className="w-full h-full" />, blurb: 'Facilities & upgrades', accent: 'text-orange-400' },
   { view: 'hospital', label: 'Hospital', icon: <Heart className="w-full h-full" />, blurb: 'Recovery & cloning', accent: 'text-rose-400' },
   { view: 'training', label: 'Training', icon: <GraduationCap className="w-full h-full" />, blurb: 'Skills & martial arts', accent: 'text-sky-400' },
+  { view: 'engineering', label: 'Engineering', icon: <Wrench className="w-full h-full" />, blurb: 'Design · research · fabricate', accent: 'text-cyan-400' },
   { view: 'equipment-shop', label: 'Market', icon: <ShoppingBag className="w-full h-full" />, blurb: 'Buy & sell gear', accent: 'text-yellow-400' },
   { view: 'reputation', label: 'Standings', icon: <Award className="w-full h-full" />, blurb: 'Factions & bounties', accent: 'text-lime-400' },
   { view: 'chronos', label: 'Chronos', icon: <History className="w-full h-full" />, blurb: 'Timeline & rewind', accent: 'text-teal-400' },

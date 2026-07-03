@@ -31,6 +31,7 @@ import WorldMapGrid from './components/WorldMap/WorldMapGrid'
 import LoadoutEditor from './components/LoadoutEditor'
 import MobilePhone from './components/MobilePhone'
 import PhoneCallScreen from './components/PhoneCallScreen'
+import EngineeringBay from './components/EngineeringBay'
 import SquadRoster from './components/SquadRoster'
 import QuickCombatSimulator from './components/QuickCombatSimulator'
 import InstantCombat from './components/InstantCombat'
@@ -537,11 +538,13 @@ function App() {
         const LAPTOP_VIEWS = new Set([
           'laptop', 'news', 'characters', 'personnel', 'investigation', 'base', 'hospital',
           'training', 'equipment-shop', 'reputation', 'chronos', 'encyclopedia', 'almanac',
+          'engineering',
         ])
         const appForView: Record<string, React.ReactNode> = {
           investigation: <InvestigationCenter />,
           characters: <CharacterScreen />,
           personnel: <PersonnelReport />,
+          engineering: <EngineeringBay />,
           hospital: <HospitalScreen />,
           'equipment-shop': <EquipmentShop />,
           news: <NewsBrowser />,

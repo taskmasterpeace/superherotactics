@@ -158,7 +158,11 @@ import {
 } from '../data/newsTemplates'
 import { getCityByName } from '../data/cities'
 import { getCityByName as getCityFull } from '../data/allCities'
-import { getArmorById } from '../data/armor'
+import { getArmorById, ALL_ARMOR } from '../data/armor'
+import {
+  Blueprint, EngineeringProject, SUIT_ARCHETYPES, RESEARCH_PROJECTS,
+  getResearchProject, designQuality, brainSpeed, engineerSpeed, fabricateArmor,
+} from '../data/engineeringSystem'
 import { generateNewspaperName } from '../data/newspaperExpansion'
 import {
   BaseState,
@@ -189,6 +193,7 @@ import {
   isPositionAvailable,
   cancelConstruction,
   getVehicleSlots,
+  getCraftingBonus,
 } from '../data/baseSystem'
 
 // Faction Relations System
@@ -333,7 +338,7 @@ interface EnhancedGameStore {
   selectedCity: string
 
   // Game State
-  currentView: 'world-map' | 'tactical-combat' | 'investigation' | 'investigation-board' | 'characters' | 'combat-lab' | 'news' | 'encyclopedia' | 'balance' | 'world-map-grid' | 'database' | 'data-viewer' | 'sound-config' | 'loadout-editor' | 'sector-editor' | 'world-data' | 'almanac' | 'hospital' | 'equipment-shop' | 'training' | 'base' | 'chronos' | 'reputation' | 'laptop' | 'bubble-lab' | 'personnel'
+  currentView: 'world-map' | 'tactical-combat' | 'investigation' | 'investigation-board' | 'characters' | 'combat-lab' | 'news' | 'encyclopedia' | 'balance' | 'world-map-grid' | 'database' | 'data-viewer' | 'sound-config' | 'loadout-editor' | 'sector-editor' | 'world-data' | 'almanac' | 'hospital' | 'equipment-shop' | 'training' | 'base' | 'chronos' | 'reputation' | 'laptop' | 'bubble-lab' | 'personnel' | 'engineering'
   budget: number
   day: number  // Legacy - use gameTime.day instead
 
@@ -543,6 +548,16 @@ interface EnhancedGameStore {
   // Quick auto-resolve battle simulator (overlay)
   quickCombatOpen: boolean
   setQuickCombatOpen: (open: boolean) => void
+
+  // Engineering: Design → Research → Fabricate (the spine)
+  blueprints: Blueprint[]
+  engineeringProjects: EngineeringProject[]
+  unlockedResearch: string[]
+  customArmors: any[]
+  startDesignProject: (characterId: string, archetypeId: string, suitName: string) => boolean
+  startResearchProject: (characterId: string, researchId: string) => boolean
+  startFabrication: (characterId: string, blueprintId: string) => boolean
+  progressEngineering: (hours: number) => void
   markArticleRead: (articleId: string) => void
   generateMissionNews: (missionResult: {
     success: boolean
@@ -656,6 +671,10 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   sheetCharacterId: null as string | null,
   editions: [] as NewspaperEdition[],
   quickCombatOpen: false,
+  blueprints: [] as Blueprint[],
+  engineeringProjects: [] as EngineeringProject[],
+  unlockedResearch: [] as string[],
+  customArmors: [] as any[],
   activePhoneCall: null as PhoneCall | null,
   phoneCallNodeId: null as string | null,
   incomingCall: null as PhoneCall | null,
@@ -991,6 +1010,165 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   },
 
   setQuickCombatOpen: (open) => set({ quickCombatOpen: open }),
+
+  // ==========================================================================
+  // ENGINEERING — Design → Research → Fabricate
+  // ==========================================================================
+
+  startDesignProject: (characterId, archetypeId, suitName) => {
+    const state = get()
+    const char = state.characters.find(c => c.id === characterId) as any
+    const arch = SUIT_ARCHETYPES.find(a => a.id === archetypeId)
+    if (!char || !arch) { toast.error('Designer or archetype not found'); return false }
+    if (char.status !== 'ready') { toast.error(`${char.name} is busy (${char.status})`); return false }
+    if (arch.requiredResearch && !state.unlockedResearch.includes(arch.requiredResearch)) {
+      toast.error(`${arch.name} requires ${getResearchProject(arch.requiredResearch)?.name || arch.requiredResearch} research first`)
+      return false
+    }
+    const quality = designQuality(char)
+    const hours = Math.max(8, Math.round(arch.designHours / brainSpeed(char)))
+    const blueprint: Blueprint = {
+      id: `bp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      name: suitName || `${char.name}'s ${arch.name}`,
+      archetypeId, designerId: characterId, designerName: char.name,
+      quality, status: 'drafting', createdDay: state.gameTime.day,
+    }
+    set({
+      blueprints: [...state.blueprints, blueprint],
+      engineeringProjects: [...state.engineeringProjects, {
+        id: `ep_${Date.now()}_d`, kind: 'design' as const,
+        label: `Designing ${blueprint.name}`,
+        characterId, characterName: char.name,
+        blueprintId: blueprint.id, hoursRemaining: hours, totalHours: hours,
+      }],
+    })
+    get().setCharacterStatus(characterId, 'research')
+    toast.success(`${char.name} started designing ${blueprint.name} (quality ${quality}, ~${Math.ceil(hours / 24)}d)`)
+    return true
+  },
+
+  startResearchProject: (characterId, researchId) => {
+    const state = get()
+    const char = state.characters.find(c => c.id === characterId) as any
+    const project = getResearchProject(researchId)
+    if (!char || !project) { toast.error('Researcher or project not found'); return false }
+    if (char.status !== 'ready') { toast.error(`${char.name} is busy (${char.status})`); return false }
+    if (state.unlockedResearch.includes(researchId)) { toast.error('Already researched'); return false }
+    if (project.prerequisite && !state.unlockedResearch.includes(project.prerequisite)) {
+      toast.error(`Requires ${getResearchProject(project.prerequisite)?.name} first`)
+      return false
+    }
+    if (state.budget < project.cost) { toast.error(`Lab materials cost $${project.cost.toLocaleString()}`); return false }
+    const hours = Math.max(8, Math.round(project.hours / brainSpeed(char)))
+    // (recordTransaction below both books the ledger AND deducts the budget)
+    set({
+      engineeringProjects: [...state.engineeringProjects, {
+        id: `ep_${Date.now()}_r`, kind: 'research' as const,
+        label: `Researching ${project.name}`,
+        characterId, characterName: char.name,
+        researchId, hoursRemaining: hours, totalHours: hours,
+      }],
+    })
+    get().recordTransaction?.('expense', 'equipment', project.cost, `Research: ${project.name}`)
+    get().setCharacterStatus(characterId, 'research')
+    toast.success(`${char.name} started ${project.name} (~${Math.ceil(hours / 24)}d)`)
+    return true
+  },
+
+  startFabrication: (characterId, blueprintId) => {
+    const state = get()
+    const char = state.characters.find(c => c.id === characterId) as any
+    const blueprint = state.blueprints.find(b => b.id === blueprintId)
+    const arch = blueprint && SUIT_ARCHETYPES.find(a => a.id === blueprint.archetypeId)
+    if (!char || !blueprint || !arch) { toast.error('Engineer or blueprint not found'); return false }
+    if (char.status !== 'ready') { toast.error(`${char.name} is busy (${char.status})`); return false }
+    if (blueprint.status !== 'designed') { toast.error('Blueprint is not ready to build'); return false }
+    if (state.budget < arch.materialCost) { toast.error(`Materials cost $${arch.materialCost.toLocaleString()}`); return false }
+    const activeBase = getActiveBase(state.baseState)
+    const craftBonus = activeBase ? getCraftingBonus(activeBase) : 0
+    const hours = Math.max(8, Math.round(arch.fabricateHours / engineerSpeed(char, craftBonus)))
+    // (recordTransaction below both books the ledger AND deducts the budget)
+    set({
+      engineeringProjects: [...state.engineeringProjects, {
+        id: `ep_${Date.now()}_f`, kind: 'fabricate' as const,
+        label: `Fabricating ${blueprint.name}`,
+        characterId, characterName: char.name,
+        blueprintId, hoursRemaining: hours, totalHours: hours,
+      }],
+    })
+    get().recordTransaction?.('expense', 'equipment', arch.materialCost, `Fabrication materials: ${blueprint.name}`)
+    get().setCharacterStatus(characterId, 'engineering')
+    toast.success(`${char.name} began fabricating ${blueprint.name} (~${Math.ceil(hours / 24)}d)`)
+    return true
+  },
+
+  // Advance all engineering work (called from the day tick with 24h)
+  progressEngineering: (hours) => {
+    const state = get()
+    if (state.engineeringProjects.length === 0) return
+    const finished: EngineeringProject[] = []
+    const remaining: EngineeringProject[] = []
+    for (const p of state.engineeringProjects) {
+      const left = p.hoursRemaining - hours
+      if (left <= 0) finished.push(p)
+      else remaining.push({ ...p, hoursRemaining: left })
+    }
+    if (finished.length === 0) {
+      set({ engineeringProjects: remaining })
+      return
+    }
+
+    let blueprints = [...state.blueprints]
+    let unlockedResearch = [...state.unlockedResearch]
+    let customArmors = [...state.customArmors]
+
+    for (const p of finished) {
+      if (p.kind === 'design' && p.blueprintId) {
+        blueprints = blueprints.map(b => b.id === p.blueprintId ? { ...b, status: 'designed' as const } : b)
+        get().addNotification({
+          type: 'status_change', priority: 'high', title: 'Blueprint complete',
+          message: `${p.characterName} finished the design — it's ready for fabrication at the Engineering Bay.`,
+          characterId: p.characterId, characterName: p.characterName,
+          timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
+        })
+        get().sendCharacterText(p.characterId, 'investigation_lead', { detail: 'the suit design is DONE — send it to fabrication' })
+      } else if (p.kind === 'research' && p.researchId) {
+        unlockedResearch.push(p.researchId)
+        const proj = getResearchProject(p.researchId)
+        const unlockedGear = ALL_ARMOR.filter((a: any) => a.researchRequired === p.researchId).map((a: any) => a.name)
+        get().addNotification({
+          type: 'status_change', priority: 'high', title: `Research complete: ${proj?.name || p.researchId}`,
+          message: unlockedGear.length
+            ? `Unlocked for fabrication/purchase: ${unlockedGear.join(', ')}`
+            : 'New engineering options unlocked.',
+          characterId: p.characterId, characterName: p.characterName,
+          timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
+        })
+        toast.success(`Research complete: ${proj?.name}${unlockedGear.length ? ` → ${unlockedGear.length} items unlocked` : ''}`)
+      } else if (p.kind === 'fabricate' && p.blueprintId) {
+        const bp = blueprints.find(b => b.id === p.blueprintId)
+        if (bp) {
+          const armor = fabricateArmor(bp)
+          customArmors.push(armor)
+          // Register in the live armor DB so equipping/tooltips resolve it
+          if (!ALL_ARMOR.some((a: any) => a.id === (armor as any).id)) ALL_ARMOR.push(armor as any)
+          blueprints = blueprints.map(b => b.id === p.blueprintId ? { ...b, status: 'fabricated' as const } : b)
+          set({ inventory: { ...get().inventory, armor: [...get().inventory.armor, (armor as any).id] } })
+          get().addNotification({
+            type: 'status_change', priority: 'urgent', title: `Fabrication complete: ${bp.name}`,
+            message: `${p.characterName} built the suit — it's in your armory, ready to equip.`,
+            characterId: p.characterId, characterName: p.characterName,
+            timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
+          })
+          get().sendCharacterText(p.characterId, 'training_complete', { detail: `the build — ${bp.name} is ready to wear` })
+        }
+      }
+      // free the worker
+      get().setCharacterStatus(p.characterId, 'ready')
+    }
+
+    set({ engineeringProjects: remaining, blueprints, unlockedResearch, customArmors })
+  },
 
   deployTeam: () => {
     const state = get()
@@ -2336,10 +2514,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       maintenanceNeeded: false,
     }
 
-    set({
-      fleetVehicles: [...state.fleetVehicles, fleet],
-      budget: state.budget - cost,
-    })
+    // recordTransaction books the ledger AND deducts the budget (single source)
+    set({ fleetVehicles: [...state.fleetVehicles, fleet] })
     get().recordTransaction?.('expense', 'equipment', cost, `Purchased vehicle: ${template.name}`)
     toast.success(`${template.name} delivered to ${homeSector} — garage ${state.fleetVehicles.length + 1}/${capacity}`)
     return true
