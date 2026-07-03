@@ -47,7 +47,7 @@ import { CharacterPortrait } from './CharacterPortrait';
 import { getMood } from '../data/moodSystem';
 
 // Message types that appear on the phone
-const PHONE_MESSAGE_TYPES = ['idle_warning', 'call_incoming', 'arrival', 'handler'];
+const PHONE_MESSAGE_TYPES = ['idle_warning', 'call_incoming', 'arrival', 'handler', 'text_message'];
 
 // Contact enriched with live unlock/cooldown status (shape of contactsWithStatus entries)
 type ContactStatus = Contact & {
@@ -703,7 +703,13 @@ export const MobilePhone: React.FC = () => {
                               }}
                             >
                               <div className="flex items-start gap-3">
-                                {/* Icon */}
+                                {/* Icon — texts from a character show their portrait */}
+                                {msg.type === 'text_message' && msg.characterId ? (
+                                  <CharacterPortrait
+                                    character={characters.find((c: any) => c.id === msg.characterId) || { realName: msg.characterName }}
+                                    size={40}
+                                  />
+                                ) : (
                                 <div className={`
                                   w-10 h-10 rounded-xl border-2 border-black flex items-center justify-center shadow-retro-sm
                                   ${msg.type === 'call_incoming' ? 'bg-success' :
@@ -712,6 +718,7 @@ export const MobilePhone: React.FC = () => {
                                 `}>
                                   {getMessageIcon(msg.type)}
                                 </div>
+                                )}
 
                                 {/* Content */}
                                 <div className="flex-1 min-w-0">
@@ -725,9 +732,18 @@ export const MobilePhone: React.FC = () => {
                                     </span>
                                   </div>
 
+                                  {msg.type === 'text_message' ? (
+                                    /* Chat-bubble look for first-person texts */
+                                    <div className={`mt-1 rounded-2xl rounded-tl-sm border-2 border-black px-3 py-2 text-sm ${
+                                      msg.read ? 'bg-surface text-muted-foreground' : 'bg-primary/10 text-foreground'
+                                    }`}>
+                                      {msg.message}
+                                    </div>
+                                  ) : (
                                   <p className={`text-sm mt-1 ${msg.read ? 'text-muted-foreground' : 'text-foreground/80'}`}>
                                     {msg.message}
                                   </p>
+                                  )}
 
                                   {msg.location && (
                                     <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
@@ -758,6 +774,24 @@ export const MobilePhone: React.FC = () => {
                                         }}
                                       >
                                         Decline
+                                      </RetroButton>
+                                    </div>
+                                  )}
+
+                                  {/* Reply to a text with a call */}
+                                  {msg.type === 'text_message' && msg.characterId && (
+                                    <div className="mt-2">
+                                      <RetroButton
+                                        variant="secondary"
+                                        size="sm"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          markNotificationRead(msg.id);
+                                          startCharacterCall(msg.characterId!);
+                                          setIsOpen(false);
+                                        }}
+                                      >
+                                        <Phone className="w-3 h-3" /> Call back
                                       </RetroButton>
                                     </div>
                                   )}

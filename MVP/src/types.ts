@@ -156,6 +156,7 @@ export type NotificationType =
     | 'death'           // Character died
     | 'idle_warning'    // Character has been idle too long
     | 'call_incoming'   // Character calling you
+    | 'text_message'    // First-person text FROM a character (status texts)
     | 'email'           // Email received
     | 'world_event'     // Something happened in the world
     | 'handler'         // Handler message

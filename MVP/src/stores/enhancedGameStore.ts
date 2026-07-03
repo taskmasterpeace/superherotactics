@@ -96,6 +96,7 @@ import {
 import { diagnoseInjuries } from '../data/injuryEngine'
 import { getMoraleLevel } from '../data/characterSheet'
 import { generateCheckInCall, nextNode, PhoneCall, CallChoice, CallEffect } from '../data/phoneCallSystem'
+import { generateStatusText, TextEvent } from '../data/characterTexts'
 import {
   ReputationState,
   ReputationAxis,
@@ -482,6 +483,7 @@ interface EnhancedGameStore {
   incomingCall: PhoneCall | null
   callLog: { id: string; callerId: string; callerName: string; day: number; minutes: number; direction: 'outgoing' | 'incoming'; kind: string }[]
   startCharacterCall: (characterId: string) => void
+  sendCharacterText: (characterId: string, event: TextEvent, slots?: { place?: string; detail?: string }) => void
   receiveIncomingCall: (call: PhoneCall) => void
   answerIncomingCall: () => void
   declineIncomingCall: () => void
@@ -1115,7 +1117,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
         const newRecoveryTime = Math.max(0, char.recoveryTime - recoveryRate)
 
         if (newRecoveryTime <= 0) {
-          recovered.push(char.name)
+          recovered.push({ id: char.id, name: char.name })
           return {
             ...char,
             status: 'ready',
@@ -1137,7 +1139,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     }
 
     if (recovered.length > 0) {
-      recovered.forEach(name => {
+      recovered.forEach(({ id, name }) => {
         toast.success(`${name} has recovered and returned to duty`)
 
         // Create notification
@@ -1148,6 +1150,9 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
           message: `${name} has fully recovered and is ready for duty.`,
           timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
         })
+
+        // The discharged operative texts in
+        get().sendCharacterText(id, 'recovered')
       })
     }
   },
@@ -1260,6 +1265,24 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
         day: state.gameTime.day, minutes: state.gameTime.minutes,
         direction: 'outgoing' as const, kind: call.kind,
       }, ...state.callLog].slice(0, 30),
+    })
+  },
+
+  // A character texts the player about a life event — first person, flavored
+  // by their current mood. Lands in the phone's Messages tab.
+  sendCharacterText: (characterId: string, event: TextEvent, slots?: { place?: string; detail?: string }) => {
+    const state = get()
+    const char = state.characters.find(c => c.id === characterId) as any
+    if (!char || char.status === 'dead') return
+    const { message } = generateStatusText(char, event, slots)
+    get().addNotification({
+      type: 'text_message',
+      priority: event === 'injured' || event === 'hospitalized' ? 'high' : 'medium',
+      title: char.name || char.realName || 'Operative',
+      message,
+      characterId,
+      characterName: char.name || char.realName,
+      timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
     })
   },
 
@@ -1507,6 +1530,11 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       characterName: character.name,
       location: hospitalCountry,
       timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
+    })
+
+    // The patient texts you from their hospital bed
+    get().sendCharacterText(character.id, 'hospitalized', {
+      detail: `${Math.ceil(totalRecoveryHours / 24)} day${Math.ceil(totalRecoveryHours / 24) === 1 ? '' : 's'} of treatment`,
     })
 
     const toastMsg = maxHealingPercent < 100
@@ -2176,6 +2204,11 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       location: `Sector ${unit.destinationSector}`,
       timestamp: Date.now(),
     })
+
+    // The lead character texts in — first person, mood-flavored (living world)
+    if (firstCharacter?.id) {
+      get().sendCharacterText(firstCharacter.id, 'arrival', { place: `Sector ${unit.destinationSector}` })
+    }
 
     if (incidentDamage > 0) {
       toast.error(`Travel incident: ${incidentDescription} (${incidentDamage} damage)`)
@@ -3426,6 +3459,13 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       location: `${investigation.city}, ${investigation.country}`,
       timestamp: Date.now()
     })
+
+    // The lead investigator texts in about closing the case
+    if (investigation.assignedCharacters[0]) {
+      get().sendCharacterText(investigation.assignedCharacters[0], 'investigation_complete', {
+        detail: investigation.title,
+      })
+    }
 
     toast.success(`Investigation complete! +$${reward.cash.toLocaleString()}, +${reward.fame} fame`)
 
@@ -5002,6 +5042,11 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       category: 'character',
       priority: 'medium' as NotificationPriority,
       gameTime: state.gameTime
+    })
+
+    // The graduate texts in about it
+    get().sendCharacterText(enrollment.characterId, 'training_complete', {
+      detail: `${enrollment.degreeLevel} in ${String(enrollment.fieldId).replace(/_/g, ' ')}`,
     })
 
     // Apply reputation changes based on degree level
