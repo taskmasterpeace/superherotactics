@@ -19,6 +19,7 @@ import { getMood } from './moodSystem'
 import { generateCheckInCall } from './phoneCallSystem'
 import { tickConditions, treatDepression, dailyMoraleDrain } from './mentalHealthSystem'
 import { ACTIVITIES, calculateActivityDesires, getHighestDesire, shouldAutoExecute } from './characterLifeCycle'
+import { getInvasionPhase, PHASE_META, ARMADA_ARRIVAL_DAY, computeReadiness, arrivalFork } from './invasionEndgame'
 import {
   GameTime,
   TimeOfDay,
@@ -347,7 +348,37 @@ function processDayChange(newTime: GameTime): void {
   // Forks expire (inaction is a choice) and court cases come due
   processForksAndLaw(newTime)
 
+  // The armada clock (Day 2472) ticks whether you look at it or not
+  processInvasionClock(newTime)
+
   console.log('[TimeEventGenerator] Day changed to', newTime.day, newTime.date)
+}
+
+/**
+ * INVASION CLOCK (spec 111): fixed Day-2472 armada. Phase transitions hit the
+ * news and your phone; on arrival day the final fork fires — fight or
+ * future-jump (L1). No third door.
+ */
+let lastInvasionPhase: string | null = null
+function processInvasionClock(newTime: GameTime): void {
+  const store = useGameStore.getState() as any
+  const phase = getInvasionPhase(newTime.day)
+  if (lastInvasionPhase === null) { lastInvasionPhase = phase; return } // don't announce on boot
+  if (phase !== lastInvasionPhase) {
+    lastInvasionPhase = phase
+    const meta = PHASE_META[phase]
+    store.addNotification?.({
+      type: 'world_event', priority: phase === 'invasion' ? 'urgent' : 'high',
+      title: `${meta.icon} ${meta.label}`,
+      message: `${meta.note} (Armada ETA: Day ${ARMADA_ARRIVAL_DAY} — ${Math.max(0, ARMADA_ARRIVAL_DAY - newTime.day)} days out.)`,
+      timestamp: newTime.day * 1440,
+    })
+  }
+  if (newTime.day >= ARMADA_ARRIVAL_DAY && !store.activeFork?.id?.startsWith('fork_invasion')) {
+    const readiness = computeReadiness(store)
+    const sanity = store.chronoSanity ?? store.sanity ?? 100
+    store.presentFork?.(arrivalFork(readiness, sanity, newTime.day))
+  }
 }
 
 /**

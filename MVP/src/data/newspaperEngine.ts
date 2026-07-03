@@ -26,6 +26,7 @@ import {
 } from './newspaperExpansion';
 import { calculateMediaSystem, MediaSystem } from './combinedEffects';
 import { getCountryOrganization } from './countryOrganizations';
+import { getInvasionPhase, INVASION_WIRE } from './invasionEndgame';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -300,6 +301,12 @@ export function generateDailyEdition(inputs: EditionInputs): NewspaperEdition {
   // --- WORLD: real foreign stories, wire filler when quiet ------------------
   const world: EditionStory[] = realWorld.slice(0, 4).map((a: any) => storyFromArticle(a, 'world'));
   while (world.length < 2) world.push(ambient(pick(WORLD_WIRE), 'world', vars));
+  // The armada casts a longer shadow every phase (spec 111 foreshadowing)
+  const invasionPhase = getInvasionPhase(day);
+  if (invasionPhase !== 'distant_signals' || Math.random() < 0.3) {
+    world.unshift(ambient(pick(INVASION_WIRE[invasionPhase]), 'world', vars,
+      invasionPhase === 'arrival_imminent' || invasionPhase === 'invasion'));
+  }
 
   // --- Censor pass BEFORE choosing the front page ---------------------------
   const censoredNational = applyCensorship(national, quality);
