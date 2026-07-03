@@ -23,6 +23,7 @@ import {
   InvestigationType
 } from './investigationSystem'
 import { useGameStore } from '../stores/enhancedGameStore'
+import { cities as ALL_CITIES } from './cities'
 
 // ============================================================================
 // INVESTIGATION GENERATOR STATE
@@ -188,10 +189,11 @@ function handleDayPassed(event: TimePassedEvent): void {
   // Check max leads
   if (store.investigationLeads.length >= state.maxLeads) return
 
-  // Pick a random city where we have presence
+  // Pick a random city where we have presence (city data lives in data/cities,
+  // not on the store — reading store.cities crashed every day tick)
   const currentSector = store.currentSector
-  const cities = store.cities.filter(c =>
-    c.sectorCode === currentSector ||
+  const cities = ALL_CITIES.filter(c =>
+    (c as any).sectorCode === currentSector ||
     Math.random() < 0.3 // 30% chance for any city
   )
 

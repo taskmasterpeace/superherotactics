@@ -3217,6 +3217,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   discoverInvestigation: (template, city, country, sector) => {
     const state = get()
     const investigation = generateInvestigation(template, city, country, sector)
+    // Cold-case clock starts now (game days, not wall time)
+    investigation.discoveredDay = state.gameTime.day
 
     set({
       investigationLeads: [...state.investigationLeads, investigation]
@@ -3348,9 +3350,22 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       }
     }
 
-    // Apply investigator INT modifier (INT 50 = neutral, +/-25% at INT 100/0)
-    const investigatorINT = character.stats?.INT ?? 50
-    result.progressGained = Math.round(result.progressGained * (1 + (investigatorINT - 50) / 200))
+    // Detective rank = Instinct + Intellect (spec 09). The BEST-rated assigned
+    // investigator sets the pace — rank 100 (50/50) is neutral, 200 gives +25%,
+    // 0 gives -25%.
+    const rankOf = (c: any) => (c?.stats?.INT ?? 50) + (c?.stats?.INS ?? 50)
+    const assignedRanks = investigation.assignedCharacters
+      .map(id => rankOf(state.characters.find(c => c.id === id)))
+    const detectiveRank = Math.max(rankOf(character), ...assignedRanks, 0)
+    result.progressGained = Math.round(result.progressGained * (1 + (detectiveRank - 100) / 400))
+
+    // Cold case: evidence goes stale. After 3 game days a lead loses 3% progress
+    // efficiency per day, capped at -40%.
+    const ageDays = state.gameTime.day - (investigation.discoveredDay ?? state.gameTime.day)
+    if (ageDays > 3) {
+      const stalePenalty = Math.min(0.4, (ageDays - 3) * 0.03)
+      result.progressGained = Math.round(result.progressGained * (1 - stalePenalty))
+    }
 
     // Create decision log entry
     const decision: any = {
@@ -3371,15 +3386,43 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     }
 
     // Update investigation
+    const newProgress = Math.min(100, investigation.progress + result.progressGained)
     const updatedInvestigation: Investigation = {
       ...investigation,
-      progress: Math.min(100, investigation.progress + result.progressGained),
+      progress: newProgress,
       cluesGathered: [...investigation.cluesGathered, ...result.cluesFound],
       decisionsLog: [...investigation.decisionsLog, decision],
       suspicionLevel: Math.min(100, investigation.suspicionLevel + result.suspicionChange),
       publicExposure: Math.min(100, investigation.publicExposure + result.exposureChange),
       currentPhase: result.nextPhase || investigation.currentPhase,
       lastActionResult: result
+    }
+
+    // The WHY breaks open at 60% — the motive becomes a clue and the 4 Ws are 5
+    if (newProgress >= 60 && investigation.why && !investigation.why.revealed) {
+      updatedInvestigation.why = { ...investigation.why, revealed: true }
+      updatedInvestigation.cluesGathered = [
+        ...updatedInvestigation.cluesGathered,
+        {
+          id: `clue-why-${investigation.id}`,
+          description: `MOTIVE UNCOVERED: ${investigation.why.motive}`,
+          foundBy: characterId,
+          foundAt: Date.now(),
+          quality: 'strong' as const,
+          relatesTo: ['motive'],
+        },
+      ]
+      get().addNotification({
+        type: 'investigation_discovered',
+        priority: 'high',
+        title: `Motive uncovered: ${investigation.title}`,
+        message: investigation.why.motive,
+        characterId,
+        characterName: character.name,
+        timestamp: Date.now(),
+      })
+      // The investigator texts in about the break in the case
+      get().sendCharacterText(characterId, 'investigation_lead', { detail: investigation.why.motive })
     }
 
     // Check if investigation complete

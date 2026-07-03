@@ -91,6 +91,12 @@ export interface Investigation {
   suspicionLevel: number  // 0-100, how much enemies are alerted
   publicExposure: number  // 0-100, how public investigation is
 
+  // The 5th W — WHY. Hidden at discovery; revealed as the case cracks open.
+  why?: { motive: string; revealed: boolean }
+
+  // Cold-case clock: game day the lead surfaced (evidence goes stale)
+  discoveredDay?: number
+
   // Current state
   availableApproaches: ApproachType[]
   lastActionResult?: ActionResult
@@ -800,6 +806,56 @@ function getNextPhase(currentPhase: InvestigationPhase): InvestigationPhase | un
 // INVESTIGATION GENERATION
 // =============================================================================
 
+// WHY banks — a motive per investigation type, uncovered mid-case (the 4 Ws
+// become 5). Kept short and reusable; the reveal is the payoff moment.
+export const MOTIVE_BANK: Record<InvestigationType, string[]> = {
+  crime: [
+    'Debt to a loan shark spiraled out of control',
+    'An inside man was covering an earlier theft',
+    'Retaliation for a deal that went bad last month',
+  ],
+  underworld: [
+    'A succession war inside the syndicate — this was a message',
+    'They are buying protection ahead of a bigger shipment',
+    'An informant in their ranks needed silencing',
+  ],
+  terrorism: [
+    'A splinter cell trying to out-radicalize its parent group',
+    'The target was symbolic — the real goal was recruitment footage',
+    'Extortion dressed as ideology: they were paid to do it',
+  ],
+  conspiracy: [
+    'Someone in city hall is erasing a paper trail',
+    'A shell company needed a scapegoat before the audit',
+    'Blackmail material was about to change hands',
+  ],
+  corporate: [
+    'A rival funded the sabotage to tank the merger',
+    'An executive is hiding trial data that would sink the stock',
+    'Industrial espionage — the prototype was already sold',
+  ],
+  espionage: [
+    'A foreign service is burning its own asset to protect a mole',
+    'Stolen credentials were the real target; the rest was cover',
+    'A defector changed their mind — and someone noticed',
+  ],
+  missing_person: [
+    'They saw something they were never meant to see',
+    'A staged disappearance — new identity, old debts',
+    'Taken as leverage against a relative in power',
+  ],
+  supernatural: [
+    'An experiment escaped containment and someone is covering it up',
+    'A cult believes the victim was "chosen" — they may act again',
+    'The phenomenon is bait: someone is studying who investigates',
+  ],
+} as any;
+
+export function pickMotive(type: InvestigationType): string {
+  const bank = (MOTIVE_BANK as any)[type] || (MOTIVE_BANK as any).crime;
+  return bank[Math.floor(Math.random() * bank.length)];
+}
+
 export function generateInvestigation(
   template: InvestigationTemplate,
   city: string,
@@ -828,6 +884,7 @@ export function generateInvestigation(
     potentialReward: template.successReward,
     suspicionLevel: 0,
     publicExposure: 0,
+    why: { motive: pickMotive(template.type), revealed: false },
     availableApproaches: ['stealth', 'direct', 'social', 'technical', 'intimidation']
   }
 }

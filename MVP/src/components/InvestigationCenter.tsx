@@ -307,6 +307,16 @@ function InvestigationDetails({ investigation }: { investigation: Investigation 
             <div className="font-bold text-green-400">${(investigation.potentialReward.cash / 1000).toFixed(0)}k</div>
           </div>
         </div>
+
+        {/* The 5th W — motive stays hidden until the case cracks (60%) */}
+        <div className="mt-4 rounded-lg border border-gray-700 bg-gray-800/60 px-4 py-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-gray-400">Why · Motive</span>
+          {investigation.why?.revealed ? (
+            <p className="mt-1 text-sm font-semibold text-amber-300">{investigation.why.motive}</p>
+          ) : (
+            <p className="mt-1 text-sm italic text-gray-500">Unknown — crack the case past 60% to uncover the motive.</p>
+          )}
+        </div>
       </div>
 
       {/* Investigation Status - Only for Active */}
