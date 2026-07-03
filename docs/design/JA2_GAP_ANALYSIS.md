@@ -5,6 +5,22 @@
 > fix it in. Written 2026-07-03 off five parallel code audits.
 >
 > **Verdict legend:** ✅ EXISTS (works today) · 🟡 PARTIAL (scaffolded/stubbed) · ❌ MISSING (design only)
+>
+> ## ✅ STATUS: FULFILLED (2026-07-03, commits `5bca4c4`…`a5bf954`)
+> Every item in the §12 task list shipped and was runtime-verified:
+> **P0** phone gating · map→character sheet · build ETA + on-grid state · safe-house
+> separation · 120 cities for the 29 empty countries. **P1** ⚡SIMULATE from the
+> sector panel (+ dead DEPLOY/ENTER COMBAT buttons wired) · New Pool standing cost ·
+> merc-card roster (portrait/condition/mood/weapon) · vehicle purchase + garage
+> capacity. **P2** the Design→Research→Fabricate spine (Engineering Bay laptop app;
+> the 14 dangling `researchRequired` ids are now a real tech tree; Engineering skill
+> speeds fabrication; custom suits land in the armory) · per-item flammability wired
+> to combat fire. **P3** sector intel block · right-click merc orders · strategic
+> contagion (spread/quarantine/hospital-cure) · the Handler persona texting on
+> standing shifts · encyclopedia acquisition tags (BUY/RESEARCH-LOCKED/CRAFTED + 🔥).
+> Also shipped alongside: the daily-edition newspaper engine and the LSW rule
+> (origins 2-8 = powered LSWs; skilled humans/trained soldiers are baseline humans —
+> including the origin-weight NaN fix that had silently prevented ALL LSW spawns).
 
 ---
 

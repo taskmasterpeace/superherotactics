@@ -64,11 +64,11 @@ Grid-based global operations.
 | Deploy to Sector | WORKING | Click sector -> Deploy button |
 | Travel Time Calc | WORKING | 6 hours per sector distance |
 | Enter Combat | WORKING | Button appears when on_mission |
-| 1050 Cities | WORKING | Displays in sector panels |
-| 168 Countries | DATA ONLY | Not affecting gameplay yet |
+| 1170 Cities | WORKING | Displays in sector panels (all 168 countries covered) |
+| 168 Countries | WORKING | Stats drive recruiting, newspaper tone, LSW desk, standings |
 | Time Progression | **WORKING** | `TimeDisplay.tsx`, `timeEventGenerator.ts` |
-| Vehicles | DATA ONLY | 24 vehicles defined, not used |
-| Militia/Territory | NOT DONE | Faction control |
+| Vehicles | **WORKING** | Purchase + Vehicle Garage capacity, crew assignment, travel (VEHICLES tab) |
+| Militia/Territory | **WORKING** | Territory control + militia in store; sector-intel block on map panel |
 
 **Files**:
 - `WorldMap/WorldMapGrid.tsx` - Main world map component
