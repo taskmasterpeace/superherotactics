@@ -40,10 +40,19 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 export const BudgetDisplay: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const budget = useGameStore(state => state.budget);
   const economy = useGameStore(state => state.economy);
+  const gameTime = useGameStore(state => state.gameTime);
   const [showDetails, setShowDetails] = useState(false);
 
   const weeklyNet = (economy?.weeklyIncome || 0) - (economy?.weeklyExpenses || 0);
   const isPositive = weeklyNet >= 0;
+
+  // Payday fires on days where day % 7 === 1 (day 1, 8, 15…). Show the countdown
+  // so the player knows when wages land.
+  const currentDay = gameTime?.day ?? 1;
+  const daysUntilPayday = (1 - (currentDay % 7) + 7) % 7;
+  const paydayLabel = daysUntilPayday === 0
+    ? 'Payday today!'
+    : `Next payday: ${daysUntilPayday} day${daysUntilPayday === 1 ? '' : 's'} (Day ${currentDay + daysUntilPayday})`;
 
   if (compact) {
     return (
@@ -57,6 +66,10 @@ export const BudgetDisplay: React.FC<{ compact?: boolean }> = ({ compact = false
           <span className="text-xs">
             {isPositive ? '+' : ''}${weeklyNet.toLocaleString()}/wk
           </span>
+        </div>
+        <div className="flex items-center gap-1 text-xs text-yellow-400" title={paydayLabel}>
+          <Calendar size={12} />
+          <span>{daysUntilPayday === 0 ? 'Payday!' : `${daysUntilPayday}d`}</span>
         </div>
       </div>
     );
@@ -122,6 +135,14 @@ export const BudgetDisplay: React.FC<{ compact?: boolean }> = ({ compact = false
         )}
         <span className={`font-bold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
           Weekly Net: {isPositive ? '+' : ''}${weeklyNet.toLocaleString()}
+        </span>
+      </div>
+
+      {/* Payday countdown */}
+      <div className="mt-2 flex items-center justify-center gap-2 rounded-lg bg-gray-800 px-3 py-2 text-sm">
+        <Calendar size={14} className={daysUntilPayday === 0 ? 'text-green-400' : 'text-yellow-400'} />
+        <span className={`font-semibold ${daysUntilPayday === 0 ? 'text-green-400' : 'text-gray-200'}`}>
+          {paydayLabel}
         </span>
       </div>
 

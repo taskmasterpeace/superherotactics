@@ -46,6 +46,11 @@ export const FAMILIARITY_TIERS: Record<FamiliarityTier, {
   minLevel: number;
   maxLevel: number;
   priceDiscount: number;  // % off purchases
+  // Operating in a city you don't know HURTS: a % modifier to field-op
+  // effectiveness (missions, investigation, evasion) and a 4CS column shift.
+  // Strangers fumble; natives own the streets.
+  opModifier: number;     // -15 (stranger) .. +10 (native), as a percentage
+  columnShift: number;    // +CS = penalty against you; -CS = edge in your favor
   label: string;
   description: string;
 }> = {
@@ -53,13 +58,17 @@ export const FAMILIARITY_TIERS: Record<FamiliarityTier, {
     minLevel: 0,
     maxLevel: 20,
     priceDiscount: 0,
+    opModifier: -15,
+    columnShift: 2,
     label: 'Stranger',
-    description: 'No bonuses, full prices, no contacts',
+    description: 'Lost in a strange city — full prices, no contacts, ops suffer',
   },
   visitor: {
     minLevel: 21,
     maxLevel: 40,
     priceDiscount: 5,
+    opModifier: -5,
+    columnShift: 1,
     label: 'Visitor',
     description: 'Basic navigation, cheap lodging available',
   },
@@ -67,6 +76,8 @@ export const FAMILIARITY_TIERS: Record<FamiliarityTier, {
     minLevel: 41,
     maxLevel: 60,
     priceDiscount: 10,
+    opModifier: 0,
+    columnShift: 0,
     label: 'Familiar',
     description: 'Know shortcuts, some contacts',
   },
@@ -74,6 +85,8 @@ export const FAMILIARITY_TIERS: Record<FamiliarityTier, {
     minLevel: 61,
     maxLevel: 80,
     priceDiscount: 15,
+    opModifier: 5,
+    columnShift: -1,
     label: 'Local',
     description: 'Underground access, trusted contacts',
   },
@@ -81,6 +94,8 @@ export const FAMILIARITY_TIERS: Record<FamiliarityTier, {
     minLevel: 81,
     maxLevel: 100,
     priceDiscount: 20,
+    opModifier: 10,
+    columnShift: -1,
     label: 'Native',
     description: 'Safe houses, insider networks, home base bonus',
   },
@@ -109,6 +124,36 @@ export function getFamiliarityTierInfo(level: number) {
  */
 export function getFamiliarityDiscount(level: number): number {
   return getFamiliarityTierInfo(level).priceDiscount;
+}
+
+/**
+ * Field-op effectiveness modifier for a familiarity level: negative when the
+ * character is out of their depth in an unknown city, positive when they own it.
+ */
+export function getFamiliarityOpModifier(level: number): number {
+  return getFamiliarityTierInfo(level).opModifier;
+}
+
+/** 4CS column shift from familiarity (+ = penalty against the character). */
+export function getFamiliarityColumnShift(level: number): number {
+  return getFamiliarityTierInfo(level).columnShift;
+}
+
+/**
+ * A character's familiarity level (0-100) with a given city. Defaults to 0
+ * (stranger) when they've never been. Reads the character's cityFamiliarity list
+ * (works with both `cityId` and `cityName` lookups).
+ */
+export function getCharacterCityFamiliarity(
+  char: { cityFamiliarity?: Array<{ cityId?: string; cityName?: string; level: number }> },
+  cityKey: string | undefined
+): number {
+  if (!cityKey || !char?.cityFamiliarity?.length) return 0;
+  const key = cityKey.toLowerCase();
+  const entry = char.cityFamiliarity.find(
+    e => e.cityId?.toLowerCase() === key || e.cityName?.toLowerCase() === key
+  );
+  return entry?.level ?? 0;
 }
 
 // Familiarity change amounts

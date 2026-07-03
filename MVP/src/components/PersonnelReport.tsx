@@ -9,6 +9,7 @@ import {
 import { getStrengths } from '../data/characterRoles';
 import { getCharacterDayJob } from '../data/educationSystem';
 import { getMood } from '../data/moodSystem';
+import { getCharacterCityFamiliarity, getFamiliarityTierInfo, getFamiliarityOpModifier } from '../data/characterLifeCycle';
 
 /**
  * PERSONNEL — the color-coded condition board. One row per character: portrait,
@@ -56,6 +57,12 @@ const PersonnelReport: React.FC = () => {
           const hiddenCount = injuries.length - visible.length;
           const strengths = getStrengths(char, 2); // what this person is good at
           const coverJob = getCharacterDayJob(char); // education → cover + income
+          // City familiarity: unknown ground carries an op penalty; home turf a bonus.
+          const cityKey = char.currentLocation || char.location?.city;
+          const hasFamRecord = !!(cityKey && char.cityFamiliarity?.length);
+          const famLevel = hasFamRecord ? getCharacterCityFamiliarity(char, cityKey) : null;
+          const famTier = famLevel != null ? getFamiliarityTierInfo(famLevel) : null;
+          const famMod = famLevel != null ? getFamiliarityOpModifier(famLevel) : 0;
 
           return (
             <RetroPanel key={char.id} padding="sm">
@@ -86,6 +93,19 @@ const PersonnelReport: React.FC = () => {
                         className="flex items-center gap-1 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400"
                       >
                         💼 {coverJob.name} ${coverJob.weeklyPay}/wk
+                      </span>
+                    )}
+                    {famTier && (
+                      <span
+                        title={`${famTier.label} in ${cityKey} — ${famTier.description}. Field-op modifier ${famMod > 0 ? '+' : ''}${famMod}%`}
+                        className="flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-semibold"
+                        style={{
+                          borderColor: famMod < 0 ? '#f9731688' : famMod > 0 ? '#22c55e88' : '#88888888',
+                          background: famMod < 0 ? '#f9731614' : famMod > 0 ? '#22c55e14' : 'transparent',
+                          color: famMod < 0 ? '#f97316' : famMod > 0 ? '#22c55e' : '#a1a1aa',
+                        }}
+                      >
+                        🗺️ {famTier.label} {famMod > 0 ? '+' : ''}{famMod}%
                       </span>
                     )}
                   </div>
