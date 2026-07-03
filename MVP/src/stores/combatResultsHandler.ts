@@ -16,6 +16,8 @@ import { ALL_ARMOR } from '../data/armor'
 import { Weapon, Armor } from '../data/equipmentTypes'
 import { EventBus, createCombatEndedEvent } from '../data/eventBus'
 import { getDeathConsequencesManager } from '../data/deathConsequences'
+import { rollInjury, AppliedInjury } from '../data/injuryEngine'
+import { getCountryByName, getCountryByCode } from '../data/allCountries'
 
 // Unsubscribe function for cleanup
 let unsubscribeCombatEnded: (() => void) | null = null
@@ -353,15 +355,37 @@ export function handleCombatComplete(result: EnhancedCombatResult): void {
     store.playerFame
   )
 
+  // Persistent injury rolls (SHT d100 table): downed characters roll with a
+  // hard negative bias; badly-hurt survivors roll with a bias scaled to how
+  // hurt they are. Country healthcare/crime feeds the spine modifier.
+  const homeCountry = getCountryByName(store.selectedCountry) || getCountryByCode(store.selectedCountry)
+  const gameDay = store.gameTime?.day ?? 0
+  const newInjuryReports: { name: string; injury: AppliedInjury }[] = []
+  const rollFor = (charName: string, origin: number | undefined, rollBias: number): AppliedInjury | null => {
+    const injury = rollInjury({
+      origin,
+      countryHealthcare: homeCountry?.healthcare,
+      crimeIndex: 100 - (homeCountry?.lawEnforcement ?? 50),
+      rollBias,
+      gameDay,
+    })
+    if (injury) newInjuryReports.push({ name: charName, injury })
+    return injury
+  }
+
   // Update character states
   const updatedCharacters = store.characters.map(char => {
     // Handle casualties
     const casualty = result.casualties.find(c => c.characterId === char.id)
     if (casualty) {
+      const injury = casualty.status === 'dead'
+        ? null
+        : rollFor(char.name, (char as any).origin ?? (char as any).originType, -25)
       return {
         ...char,
         status: casualty.status === 'dead' ? 'dead' : 'unconscious',
-        health: { current: 0, maximum: char.health.maximum }
+        health: { current: 0, maximum: char.health.maximum },
+        ...(injury ? { activeInjuries: [...((char as any).activeInjuries || []), injury] } : {}),
       }
     }
 
@@ -371,10 +395,12 @@ export function handleCombatComplete(result: EnhancedCombatResult): void {
       const severeInjury = characterInjuries.find(
         inj => inj.severity === 'SEVERE' || inj.severity === 'PERMANENT' || inj.severity === 'FATAL'
       )
+      const injury = rollFor(char.name, (char as any).origin ?? (char as any).originType, severeInjury ? -15 : 0)
 
       return {
         ...char,
         injuries: [...(char.injuries || []), ...characterInjuries],
+        ...(injury ? { activeInjuries: [...((char as any).activeInjuries || []), injury] } : {}),
         status: severeInjury ? 'hospitalized' : 'injured',
         recoveryTime: severeInjury?.healingTime || 0
       }
@@ -384,6 +410,11 @@ export function handleCombatComplete(result: EnhancedCombatResult): void {
     const survivor = result.survivors.find(s => s.characterId === char.id)
     if (survivor) {
       const xpGain = experienceGained.find(xp => xp.characterId === char.id)
+      const hpFrac = survivor.maxHp > 0 ? survivor.currentHp / survivor.maxHp : 1
+      // Only meaningfully-hurt survivors risk a lasting injury
+      const injury = hpFrac < 0.65
+        ? rollFor(char.name, (char as any).origin ?? (char as any).originType, Math.round((hpFrac - 0.65) * 40))
+        : null
 
       return {
         ...char,
@@ -392,11 +423,33 @@ export function handleCombatComplete(result: EnhancedCombatResult): void {
           maximum: survivor.maxHp
         },
         experience: (char.experience || 0) + (xpGain?.xp || 0),
+        ...(injury ? { activeInjuries: [...((char as any).activeInjuries || []), injury] } : {}),
         status: survivor.currentHp < survivor.maxHp * 0.5 ? 'injured' : 'ready'
       }
     }
 
     return char
+  })
+
+  // Surface new injuries: visible ones by name; hidden ones as "needs diagnosis"
+  newInjuryReports.forEach(({ name, injury }) => {
+    if (injury.hidden) {
+      store.addNotification({
+        type: 'status_change',
+        priority: 'high',
+        title: 'Medical Attention Needed',
+        message: `${name} took internal damage — a hospital diagnosis is needed to learn the extent.`,
+        data: { injuryId: injury.id },
+      })
+    } else {
+      store.addNotification({
+        type: 'status_change',
+        priority: injury.permanent ? 'urgent' : 'high',
+        title: injury.permanent ? 'PERMANENT INJURY' : 'Injury Sustained',
+        message: `${name}: ${injury.name} (${injury.severity}) — ${injury.effect.slice(0, 90)}`,
+        data: { injuryId: injury.id },
+      })
+    }
   })
 
   // Update equipment inventory (add loot to inventory)

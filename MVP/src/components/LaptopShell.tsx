@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Newspaper, Users, Search, Building2, Heart, GraduationCap, ShoppingBag,
+  Newspaper, Users, Search, Building2, Heart, HeartPulse, GraduationCap, ShoppingBag,
   Award, History, BookOpen, Globe2, Map, Power, Wifi, BatteryFull,
 } from 'lucide-react';
 import { useGameStore } from '../stores/enhancedGameStore';
@@ -18,7 +18,7 @@ import { useGameStore } from '../stores/enhancedGameStore';
  */
 
 export type LaptopView =
-  | 'laptop' | 'news' | 'characters' | 'investigation' | 'base' | 'hospital'
+  | 'laptop' | 'news' | 'characters' | 'personnel' | 'investigation' | 'base' | 'hospital'
   | 'training' | 'equipment-shop' | 'reputation' | 'chronos' | 'encyclopedia' | 'almanac';
 
 interface AppDef {
@@ -33,6 +33,7 @@ interface AppDef {
 const APPS: AppDef[] = [
   { view: 'news', label: 'Newspaper', icon: <Newspaper className="w-full h-full" />, blurb: 'Your country & the world', accent: 'text-amber-400' },
   { view: 'characters', label: 'Operatives', icon: <Users className="w-full h-full" />, blurb: 'Roster, stats, loadouts', accent: 'text-cyan-400' },
+  { view: 'personnel', label: 'Personnel', icon: <HeartPulse className="w-full h-full" />, blurb: 'Injuries & mental state', accent: 'text-red-400' },
   { view: 'investigation', label: 'Investigations', icon: <Search className="w-full h-full" />, blurb: 'Cases & leads', accent: 'text-emerald-400' },
   { view: 'base', label: 'Base', icon: <Building2 className="w-full h-full" />, blurb: 'Facilities & upgrades', accent: 'text-orange-400' },
   { view: 'hospital', label: 'Hospital', icon: <Heart className="w-full h-full" />, blurb: 'Recovery & cloning', accent: 'text-rose-400' },
@@ -45,7 +46,7 @@ const APPS: AppDef[] = [
 ];
 
 // Dock = the most-used apps for quick switching (subset of APPS + Home + Map).
-const DOCK_VIEWS: LaptopView[] = ['news', 'characters', 'investigation', 'base', 'hospital', 'reputation', 'chronos'];
+const DOCK_VIEWS: LaptopView[] = ['news', 'characters', 'personnel', 'investigation', 'base', 'hospital', 'reputation', 'chronos'];
 
 const TITLES: Record<string, string> = {
   laptop: 'Home',

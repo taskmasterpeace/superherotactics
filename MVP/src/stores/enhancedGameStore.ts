@@ -93,6 +93,7 @@ import {
   calculateNetWorth,
   canAfford,
 } from '../data/economySystem'
+import { diagnoseInjuries } from '../data/injuryEngine'
 import {
   ReputationState,
   ReputationAxis,
@@ -326,7 +327,7 @@ interface EnhancedGameStore {
   selectedCity: string
 
   // Game State
-  currentView: 'world-map' | 'tactical-combat' | 'investigation' | 'investigation-board' | 'characters' | 'combat-lab' | 'news' | 'encyclopedia' | 'balance' | 'world-map-grid' | 'database' | 'data-viewer' | 'sound-config' | 'loadout-editor' | 'sector-editor' | 'world-data' | 'almanac' | 'hospital' | 'equipment-shop' | 'training' | 'base' | 'chronos' | 'reputation' | 'laptop' | 'bubble-lab'
+  currentView: 'world-map' | 'tactical-combat' | 'investigation' | 'investigation-board' | 'characters' | 'combat-lab' | 'news' | 'encyclopedia' | 'balance' | 'world-map-grid' | 'database' | 'data-viewer' | 'sound-config' | 'loadout-editor' | 'sector-editor' | 'world-data' | 'almanac' | 'hospital' | 'equipment-shop' | 'training' | 'base' | 'chronos' | 'reputation' | 'laptop' | 'bubble-lab' | 'personnel'
   budget: number
   day: number  // Legacy - use gameTime.day instead
 
@@ -470,6 +471,7 @@ interface EnhancedGameStore {
   processRecovery: (hours?: number) => void
   updateCharacterInjuries: (characterId: string, injury: any) => void
   hospitalizeCharacter: (characterId: string, injuries: any[], countryCode?: string) => void
+  diagnoseCharacter: (characterId: string) => void
   calculateRecoveryTime: (injury: any, hospitalQuality: number) => number
   getHospitalQuality: (countryCode: string) => number
   transferToHospital: (characterId: string, targetCountryCode: string) => void
@@ -1201,6 +1203,29 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     return recoveryHours
   },
 
+  // Hospital diagnosis: reveal hidden internal/mental injuries on a character
+  // (the "some shown now, some later" reveal). Auto-runs on hospitalization.
+  diagnoseCharacter: (characterId: string) => {
+    const state = get()
+    const char = state.characters.find(c => c.id === characterId) as any
+    if (!char || !char.activeInjuries?.length) return
+    const { injuries, revealed } = diagnoseInjuries(char.activeInjuries, state.gameTime.day)
+    if (revealed.length === 0) return
+    set({
+      characters: state.characters.map(c =>
+        c.id === characterId ? { ...c, activeInjuries: injuries } as any : c),
+    })
+    revealed.forEach(inj => {
+      get().addNotification({
+        type: 'status_change',
+        priority: inj.permanent ? 'urgent' : 'high',
+        title: 'Diagnosis',
+        message: `${char.name}: doctors found ${inj.name} (${inj.severity}). Treatment: ${inj.treatment}.`,
+        data: { injuryId: inj.id },
+      })
+    })
+  },
+
   hospitalizeCharacter: (characterId: string, injuries: any[], countryCode?: string) => {
     const state = get()
     const character = state.characters.find(c => c.id === characterId)
@@ -1209,6 +1234,9 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       toast.error('Character not found')
       return
     }
+
+    // Admission includes a diagnosis — hidden injuries surface here.
+    setTimeout(() => get().diagnoseCharacter(characterId), 0)
 
     // Check origin-based hospital restrictions
     const originHealing = getOriginHealing(character.origin || 1)

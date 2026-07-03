@@ -80,6 +80,7 @@ import { initChronoSystem, cleanupChronoSystem } from './data/chronoSystem'
 import ChronosDevice from './components/ChronosDevice'
 import ReputationScreen from './components/ReputationScreen'
 import LaptopShell from './components/LaptopShell'
+import PersonnelReport from './components/PersonnelReport'
 import { BubbleLab } from './speech-bubbles'
 
 // World Systems - central initialization for all simulation systems
@@ -527,12 +528,13 @@ function App() {
         // Desk apps live INSIDE the laptop shell (frame + home dock). The world
         // map + combat are "the field" and render bare. Dev tools stay bare too.
         const LAPTOP_VIEWS = new Set([
-          'laptop', 'news', 'characters', 'investigation', 'base', 'hospital',
+          'laptop', 'news', 'characters', 'personnel', 'investigation', 'base', 'hospital',
           'training', 'equipment-shop', 'reputation', 'chronos', 'encyclopedia', 'almanac',
         ])
         const appForView: Record<string, React.ReactNode> = {
           investigation: <InvestigationCenter />,
           characters: <CharacterScreen />,
+          personnel: <PersonnelReport />,
           hospital: <HospitalScreen />,
           'equipment-shop': <EquipmentShop />,
           news: <NewsBrowser />,
