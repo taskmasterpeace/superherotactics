@@ -94,6 +94,8 @@ import {
   canAfford,
 } from '../data/economySystem'
 import { diagnoseInjuries } from '../data/injuryEngine'
+import { getMoraleLevel } from '../data/characterSheet'
+import { generateCheckInCall, nextNode, PhoneCall, CallChoice, CallEffect } from '../data/phoneCallSystem'
 import {
   ReputationState,
   ReputationAxis,
@@ -472,6 +474,13 @@ interface EnhancedGameStore {
   updateCharacterInjuries: (characterId: string, injury: any) => void
   hospitalizeCharacter: (characterId: string, injuries: any[], countryCode?: string) => void
   diagnoseCharacter: (characterId: string) => void
+  // Phone-call dialogue: a character rings the player; they talk via portrait +
+  // mood-styled bubble + choices. Effects (morale/reassure/mission) apply on pick.
+  activePhoneCall: PhoneCall | null
+  phoneCallNodeId: string | null
+  startCharacterCall: (characterId: string) => void
+  answerCall: (choice: CallChoice) => void
+  endCall: () => void
   calculateRecoveryTime: (injury: any, hospitalQuality: number) => number
   getHospitalQuality: (countryCode: string) => number
   transferToHospital: (characterId: string, targetCountryCode: string) => void
@@ -621,6 +630,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   selectedCity: 'Washington DC',
 
   currentView: 'world-map',
+  activePhoneCall: null as PhoneCall | null,
+  phoneCallNodeId: null as string | null,
   budget: 75000,
   day: 2472,  // Legacy
 
@@ -1225,6 +1236,57 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       })
     })
   },
+
+  // --- Phone-call dialogue ------------------------------------------------
+  startCharacterCall: (characterId: string) => {
+    const char = get().characters.find(c => c.id === characterId) as any
+    if (!char) return
+    const call = generateCheckInCall(char)
+    set({ activePhoneCall: call, phoneCallNodeId: call.startNode })
+  },
+
+  answerCall: (choice: CallChoice) => {
+    const state = get()
+    const call = state.activePhoneCall
+    if (!call) return
+
+    // Apply the choice's declarative effect.
+    const eff: CallEffect | undefined = choice.effect
+    if (eff) {
+      if ((eff.type === 'morale' || eff.type === 'reassure') && eff.amount) {
+        set({
+          characters: state.characters.map(c => {
+            if (c.id !== call.callerId) return c
+            const cur = typeof (c as any).morale === 'number'
+              ? (c as any).morale
+              : (c as any).morale?.current ?? 75
+            const next = Math.max(0, Math.min(100, cur + eff.amount!))
+            if ((c as any).morale && typeof (c as any).morale === 'object') {
+              return { ...c, morale: {
+                ...(c as any).morale, current: next, level: getMoraleLevel(next),
+                lastChange: state.gameTime.day, lastChangeReason: 'Phone call with command',
+              } } as any
+            }
+            return { ...c, morale: next } as any
+          }),
+        })
+      } else if (eff.type === 'acceptMission' && eff.missionId && (get() as any).acceptMission) {
+        try { (get() as any).acceptMission(eff.missionId) } catch { /* mission store not ready */ }
+      } else if (eff.type === 'declineMission') {
+        get().addNotification({
+          type: 'status_change', priority: 'low',
+          title: 'Job declined', message: `You passed on the offer from ${call.callerName}.`,
+        })
+      }
+    }
+
+    // Advance to the next node, or hang up.
+    const node = nextNode(call, choice)
+    if (node) set({ phoneCallNodeId: node.id })
+    else set({ activePhoneCall: null, phoneCallNodeId: null })
+  },
+
+  endCall: () => set({ activePhoneCall: null, phoneCallNodeId: null }),
 
   hospitalizeCharacter: (characterId: string, injuries: any[], countryCode?: string) => {
     const state = get()

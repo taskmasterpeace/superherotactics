@@ -1,5 +1,5 @@
 import React from 'react';
-import { Stethoscope, AlertTriangle, EyeOff } from 'lucide-react';
+import { Stethoscope, AlertTriangle, EyeOff, Phone } from 'lucide-react';
 import { useGameStore } from '../stores/enhancedGameStore';
 import { CharacterPortrait } from './CharacterPortrait';
 import { RetroPanel, RetroBadge } from './ui';
@@ -19,6 +19,7 @@ import { getMood } from '../data/moodSystem';
 const PersonnelReport: React.FC = () => {
   const characters = useGameStore(s => s.characters);
   const setCurrentView = useGameStore(s => s.setCurrentView);
+  const startCharacterCall = useGameStore(s => s.startCharacterCall);
 
   const roster = characters.filter((c: any) => c.status !== 'dead');
   const fallen = characters.filter((c: any) => c.status === 'dead');
@@ -128,6 +129,13 @@ const PersonnelReport: React.FC = () => {
                     )}
                   </div>
                 </div>
+                <button
+                  onClick={() => startCharacterCall(char.id)}
+                  title={`Call ${char.name || char.realName}`}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-black bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                >
+                  <Phone size={15} />
+                </button>
               </div>
             </RetroPanel>
           );

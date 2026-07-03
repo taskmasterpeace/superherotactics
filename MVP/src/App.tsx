@@ -30,6 +30,7 @@ import BalanceAnalyzer from './components/BalanceAnalyzer'
 import WorldMapGrid from './components/WorldMap/WorldMapGrid'
 import LoadoutEditor from './components/LoadoutEditor'
 import MobilePhone from './components/MobilePhone'
+import PhoneCallScreen from './components/PhoneCallScreen'
 import SquadRoster from './components/SquadRoster'
 import QuickCombatSimulator from './components/QuickCombatSimulator'
 import InstantCombat from './components/InstantCombat'
@@ -500,6 +501,9 @@ function App() {
 
       {/* Mobile Phone - Shows texts and calls */}
       <MobilePhone />
+
+      {/* Incoming phone-call dialogue — portrait + mood bubble + choices */}
+      <PhoneCallScreen />
 
       {/* Squad Roster - Shows characters (only in playing phase on world map) */}
       {gamePhase === 'playing' && currentView === 'world-map' && <SquadRoster />}
