@@ -20,7 +20,8 @@ export type TextEvent =
   | 'recovered'
   | 'investigation_lead'
   | 'investigation_complete'
-  | 'mission_complete';
+  | 'mission_complete'
+  | 'downtime';
 
 // Buckets keep the matrix small: most moods read "steady", strained moods get
 // their own voice, wrecked moods theirs.
@@ -93,6 +94,13 @@ const TEXT_BANK: Record<TextEvent, Record<MoodBucket, string>> = {
     strained: "It's done. Got messy out there. We need to talk about support.",
     wrecked: "Mission's over. We made it out. That's all I can say right now.",
     drunk: "MISSION ACCOMPLISHED!! Team's at the bar. You're paying!!",
+  },
+  downtime: {
+    up: "Took the afternoon for {detail}. Recharged and ready. 😎",
+    steady: "FYI — spent some downtime on {detail}. Back on call now.",
+    strained: "Needed a break. Did {detail}. Don't read into it.",
+    wrecked: "Tried {detail} to clear my head. Didn't really work.",
+    drunk: "Sooo {detail} turned into a WHOLE thing. Details later. Or never.",
   },
 };
 

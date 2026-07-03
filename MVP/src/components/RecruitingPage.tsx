@@ -57,7 +57,6 @@ export default function RecruitingPage() {
   const { selectedCountry, selectedCity, setGamePhase, budget } = useGameStore()
   const [selectedRecruits, setSelectedRecruits] = useState<Set<string>>(new Set())
   const [poolRefreshes, setPoolRefreshes] = useState(0)
-  const [viewMode, setViewMode] = useState<'numbers' | 'stars'>('numbers')
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState<CharacterRole | 'all'>('all')
   const [recruitingPool, setRecruitingPool] = useState<ProfiledCharacter[]>([])
@@ -391,20 +390,12 @@ export default function RecruitingPage() {
           ))}
         </div>
 
-        {/* View Toggle */}
-        <div className="flex items-center gap-1 bg-gray-800 rounded-lg p-1 border-2 border-black">
-          <button
-            className={`px-2 py-1 rounded text-xs transition-colors duration-200 ${viewMode === 'numbers' ? 'bg-primary text-black font-bold' : 'hover:bg-gray-700 text-gray-400'}`}
-            onClick={() => setViewMode('numbers')}
-          >
-            123
-          </button>
-          <button
-            className={`px-2 py-1 rounded text-xs transition-colors duration-200 ${viewMode === 'stars' ? 'bg-primary text-black font-bold' : 'hover:bg-gray-700 text-gray-400'}`}
-            onClick={() => setViewMode('stars')}
-          >
-            ★★★
-          </button>
+        {/* P2: dossiers are scout ESTIMATES — exact ratings hidden until they've served */}
+        <div
+          className="flex items-center gap-1.5 bg-gray-800 rounded-lg px-2 py-1 border-2 border-black text-[10px] text-gray-400"
+          title="JA2 rule: you learn a merc by fielding them. Dossiers show bands, not numbers."
+        >
+          🕵️ Scout estimates only
         </div>
 
         {/* Regenerate Button — costs escalating government standing */}
@@ -553,7 +544,6 @@ export default function RecruitingPage() {
                         <div className="grid grid-cols-7 gap-0.5 text-center">
                           {Object.entries(char.stats as Record<string, number>).map(([stat, value]) => {
                             const isTop = topStats.includes(stat)
-                            const delta = value - (poolAverages[stat] ?? value)
                             const bias = boostedStats[stat]
                             return (
                               <div key={stat} className={`rounded transition-colors duration-200 ${isTop ? 'bg-primary/20' : ''}`}>
@@ -562,26 +552,21 @@ export default function RecruitingPage() {
                                   {bias !== undefined && (
                                     <span
                                       className={bias > 0 ? 'text-green-400' : 'text-red-400'}
-                                      title={`${selectedCountry} national bias: ${bias > 0 ? '+' : ''}${bias} ${stat}`}
+                                      title={`${selectedCountry} national tendency in ${stat}`}
                                     >
                                       {bias > 0 ? '▲' : '▼'}
                                     </span>
                                   )}
                                 </div>
+                                {/* P2 (owner-locked): exact stats HIDDEN at recruit — dossiers
+                                    give scout bands only; you learn the merc in the field. */}
                                 <div className={`text-[10px] ${
                                   isTop ? 'text-primary font-extrabold' :
                                   value >= 60 ? 'text-green-400 font-bold' :
                                   value >= 40 ? 'text-yellow-400 font-bold' : 'text-gray-400 font-bold'
-                                }`}>
-                                  {viewMode === 'stars' ? (value >= 60 ? '★★' : value >= 40 ? '★' : '☆') : value}
+                                }`} title="Scout's estimate — true ratings reveal once they've served">
+                                  {value >= 75 ? '★★★' : value >= 55 ? '★★' : value >= 38 ? '★' : '☆'}
                                 </div>
-                                {viewMode === 'numbers' && (
-                                  <div className={`text-[8px] leading-none pb-0.5 ${
-                                    delta > 0 ? 'text-green-400' : delta < 0 ? 'text-red-400' : 'text-gray-600'
-                                  }`}>
-                                    {delta > 0 ? `+${delta}` : delta < 0 ? delta : '='}
-                                  </div>
-                                )}
                               </div>
                             )
                           })}

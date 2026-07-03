@@ -18,6 +18,7 @@ import { getCharacterDayJob } from './educationSystem'
 import { getMood } from './moodSystem'
 import { generateCheckInCall } from './phoneCallSystem'
 import { tickConditions, treatDepression, dailyMoraleDrain } from './mentalHealthSystem'
+import { ACTIVITIES, calculateActivityDesires, getHighestDesire, shouldAutoExecute } from './characterLifeCycle'
 import {
   GameTime,
   TimeOfDay,
@@ -340,7 +341,74 @@ function processDayChange(newTime: GameTime): void {
   // drains, hospital stays treat it
   processMentalHealth(newTime)
 
+  // P6: idle characters live their lives — personality-gated auto-activities
+  processIdleAutonomy(newTime)
+
   console.log('[TimeEventGenerator] Day changed to', newTime.day, newTime.date)
+}
+
+/**
+ * IDLE AUTONOMY (owner directive P6): idle characters AUTO-take activities,
+ * personality-gated. A driven extrovert hits the town; a disciplined loner
+ * trains. They can surprise you — and they text you about it after.
+ */
+function processIdleAutonomy(newTime: GameTime): void {
+  const store = useGameStore.getState() as any
+  const chars = store.characters || []
+  const idle = chars.filter((c: any) => c.status === 'ready')
+  if (idle.length === 0) return
+
+  let budget = store.budget
+  const updates = new Map<string, any>()
+  const stories: { id: string; name: string; act: any }[] = []
+
+  for (const char of idle) {
+    const p = char.personality || {}
+    // Autonomy chance: driven/impulsive personalities act more (15-45%/day)
+    const drive = (p.motivation ?? p.initiative ?? 5) / 10
+    if (Math.random() > 0.15 + drive * 0.3) continue
+
+    // Build a traits object from whatever the character carries
+    const traits = {
+      discipline: p.discipline ?? 5,
+      initiative: p.initiative ?? p.motivation ?? 5,
+      impatience: p.impatience ?? p.volatility ?? 5,
+      sociability: p.sociability ?? 5,
+      volatility: p.volatility ?? 5,
+      harmAvoidance: p.harmAvoidance ?? (p.harmPotential != null ? 10 - p.harmPotential : 5),
+      riskTolerance: p.riskTolerance ?? p.harmPotential ?? 5,
+    } as any
+    const hp = char.health?.maximum ? (char.health.current / char.health.maximum) * 100 : 100
+    const morale = typeof char.morale === 'number' ? char.morale : char.morale?.current ?? 60
+    const desires = calculateActivityDesires(traits, hp, morale)
+    const want = getHighestDesire(desires)
+
+    // Only auto-execute safe, affordable activities (adventure never auto — P6 spec)
+    const options = ACTIVITIES.filter(a => a.category === want && shouldAutoExecute(a) && a.cost <= budget)
+    if (options.length === 0) continue
+    const act = options[Math.floor(Math.random() * options.length)]
+
+    budget -= act.cost
+    const nextMorale = Math.max(0, Math.min(100, morale + act.moraleChange))
+    updates.set(char.id, {
+      ...char,
+      morale: char.morale && typeof char.morale === 'object'
+        ? { ...char.morale, current: nextMorale, lastChangeReason: act.name }
+        : nextMorale,
+    })
+    stories.push({ id: char.id, name: char.name, act })
+  }
+
+  if (stories.length === 0) return
+  useGameStore.setState({ characters: chars.map((c: any) => updates.get(c.id) || c) })
+  for (const s of stories) {
+    // recordTransaction books the ledger AND deducts the budget (single source)
+    if (s.act.cost > 0) {
+      store.recordTransaction?.('expense', 'other', s.act.cost, `${s.name}: ${s.act.name}`)
+    }
+    store.sendCharacterText?.(s.id, 'downtime', { detail: s.act.name.toLowerCase() })
+  }
+  console.log('[IdleAutonomy]', stories.map(s => `${s.name}→${s.act.name}`).join(', '))
 }
 
 /**
