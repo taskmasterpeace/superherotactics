@@ -55,6 +55,7 @@ const STAT_KEYS = ['MEL', 'AGL', 'STR', 'STA', 'INT', 'INS', 'CON'] as const
 export default function RecruitingPage() {
   const { selectedCountry, selectedCity, setGamePhase, budget } = useGameStore()
   const [selectedRecruits, setSelectedRecruits] = useState<Set<string>>(new Set())
+  const [poolRefreshes, setPoolRefreshes] = useState(0)
   const [viewMode, setViewMode] = useState<'numbers' | 'stars'>('numbers')
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState<CharacterRole | 'all'>('all')
@@ -138,10 +139,23 @@ export default function RecruitingPage() {
     return counts
   }, [recruitingPool])
 
-  // Regenerate pool
+  // Each manual pool refresh costs standing with your employing government —
+  // burning through candidates makes your handler impatient. Escalates.
+  const nextRefreshPenalty = 2 + poolRefreshes  // -2, -3, -4, …
   const handleRegeneratePool = () => {
     setIsLoading(true)
     setSelectedRecruits(new Set())
+
+    // Ding the home-country government faction (resolve NAME → ISO code).
+    const code = countryData?.code || getCountryByName(selectedCountry)?.code
+    if (code) {
+      useGameStore.getState().modifyFactionStanding(
+        'government', code, -nextRefreshPenalty,
+        'Churned through the recruiting pool',
+      )
+    }
+    setPoolRefreshes(n => n + 1)
+
     setTimeout(() => {
       const pool = generateRecruitingPool(selectedCountry, 10)
       setRecruitingPool(pool)
@@ -392,11 +406,19 @@ export default function RecruitingPage() {
           </button>
         </div>
 
-        {/* Regenerate Button */}
-        <RetroButton variant="success" size="sm" onClick={handleRegeneratePool} disabled={isLoading}>
-          <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-          New Pool
-        </RetroButton>
+        {/* Regenerate Button — costs escalating government standing */}
+        <div className="flex flex-col items-start gap-0.5">
+          <RetroButton variant="success" size="sm" onClick={handleRegeneratePool} disabled={isLoading}>
+            <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
+            New Pool
+            <span className="ml-1 text-red-300 font-bold">−{nextRefreshPenalty} standing</span>
+          </RetroButton>
+          {poolRefreshes > 0 && (
+            <span className="text-[10px] text-amber-400/80">
+              Your handler is getting impatient ({poolRefreshes} refresh{poolRefreshes === 1 ? '' : 'es'})
+            </span>
+          )}
+        </div>
 
         {/* Stat legend */}
         <div className="ml-auto text-[10px] text-gray-500 hidden lg:block">
