@@ -12,7 +12,7 @@
  * - Responsive design styled like a news website
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useGameStore } from '../stores/enhancedGameStore';
 import { NewsArticle, NewsCategory, NewsBias } from '../data/newsTemplates';
@@ -21,7 +21,9 @@ import {
   WantedPoster,
   LetterToEditor,
   generateNewspaperName,
+  generatePoliticalNews,
 } from '../data/newspaperExpansion';
+import { createNewsArticle } from '../data/newsSystem';
 import { getCountryByName, getCountryByCode } from '../data/allCountries';
 import { calculateMediaSystem } from '../data/combinedEffects';
 import type { GeneratedMission } from '../data/missionSystem';
@@ -553,6 +555,8 @@ export default function NewsBrowser() {
   };
 
   const [mainSection, setMainSection] = useState<MainSection>('news');
+  // Front-page scope: YOUR COUNTRY vs the WORLD (the living-newspaper split)
+  const [scope, setScope] = useState<'home' | 'world'>('home');
   const [selectedCategory, setSelectedCategory] = useState<NewsCategory | 'all'>('all');
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
   const [selectedClassified, setSelectedClassified] = useState<ClassifiedAd | null>(null);
@@ -611,6 +615,55 @@ export default function NewsBrowser() {
     [playerCountry]
   );
 
+  // Is an article about the player's home country? Match by region/city/related
+  // fields against both the country NAME and CODE (the name-vs-code bug class).
+  const isHomeArticle = useMemo(() => {
+    const keys = new Set<string>();
+    if (playerCountry) {
+      keys.add(playerCountry.name.toLowerCase());
+      if ((playerCountry as any).code) keys.add(String((playerCountry as any).code).toLowerCase());
+    }
+    if (selectedCountry) keys.add(String(selectedCountry).toLowerCase());
+    if (selectedCity) keys.add(String(selectedCity).toLowerCase());
+    return (a: any): boolean => {
+      const fields = [
+        a.region, a.city, a.country, a.location,
+        ...(a.relatedCountries || []), ...(a.relatedLocations || []),
+      ].filter(Boolean).map((s: any) => String(s).toLowerCase());
+      return fields.some(f => keys.has(f) || [...keys].some(k => f.includes(k)));
+    };
+  }, [playerCountry, selectedCountry, selectedCity]);
+
+  // Ambient home-country coverage: once per game day, if the home front page is
+  // thin, run the political-news generator off the country's REAL stats so YOUR
+  // COUNTRY always has a living front page (not random filler).
+  const seededDayRef = useRef<number>(-1);
+  useEffect(() => {
+    const gameDay = gameTime?.day || 1;
+    if (!playerCountry || seededDayRef.current === gameDay) return;
+    const homeToday = newsArticles.filter(
+      (a: any) => isHomeArticle(a) && (a.publishedDay === gameDay || Math.floor((a.timestamp || 0) / 1440) === gameDay)
+    );
+    if (homeToday.length >= 3) { seededDayRef.current = gameDay; return; }
+
+    const headlines = generatePoliticalNews(playerCountry as any, {
+      day: gameDay,
+      hour: Math.floor((gameTime?.minutes || 480) / 60),
+    } as any) || [];
+    headlines.slice(0, 3 - homeToday.length).forEach(h => {
+      const article = createNewsArticle(
+        h.headline,
+        h.summary,
+        (h.category === 'politics' ? 'politics' : h.category === 'crime' ? 'crime' : 'local') as any,
+        h.isBreaking ? 'major' : 'minor',
+        { day: gameDay, hour: h.publishedHour || 8, minutes: 0 } as any,
+        { region: playerCountry.name, city: selectedCity || undefined }
+      );
+      addNewsArticle(article as any);
+    });
+    seededDayRef.current = gameDay;
+  }, [gameTime?.day, playerCountry, newsArticles, isHomeArticle, addNewsArticle, selectedCity, gameTime?.minutes]);
+
   // Limit story planting to once per game day (planted articles persist in the store)
   const plantedToday = useMemo(() => {
     const gameDay = gameTime?.day || 1;
@@ -666,6 +719,11 @@ export default function NewsBrowser() {
   const filteredArticles = useMemo(() => {
     let filtered = newsArticles;
 
+    // Scope: YOUR COUNTRY front page vs the rest of the WORLD
+    filtered = filtered.filter(article =>
+      scope === 'home' ? isHomeArticle(article) : !isHomeArticle(article)
+    );
+
     // Filter by category
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(article => article.category === selectedCategory);
@@ -682,7 +740,7 @@ export default function NewsBrowser() {
     }
 
     return sorted;
-  }, [newsArticles, selectedCategory, sortOption]);
+  }, [newsArticles, selectedCategory, sortOption, scope, isHomeArticle]);
 
   // =============================================================================
   // CATEGORY TABS
@@ -1227,6 +1285,32 @@ export default function NewsBrowser() {
             </button>
           ))}
         </div>
+
+        {/* Scope toggle: YOUR COUNTRY vs WORLD (only for news) */}
+        {mainSection === 'news' && (
+          <div className="flex items-center gap-2 pb-2">
+            <button
+              onClick={() => setScope('home')}
+              className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors flex items-center gap-2 border-2 ${
+                scope === 'home'
+                  ? 'bg-amber-500 text-black border-black'
+                  : 'bg-blue-800/50 text-blue-200 border-transparent hover:bg-blue-700'
+              }`}
+            >
+              🏠 {playerCountry?.name?.toUpperCase() || 'YOUR COUNTRY'}
+            </button>
+            <button
+              onClick={() => setScope('world')}
+              className={`px-4 py-2 rounded-lg font-bold text-sm transition-colors flex items-center gap-2 border-2 ${
+                scope === 'world'
+                  ? 'bg-amber-500 text-black border-black'
+                  : 'bg-blue-800/50 text-blue-200 border-transparent hover:bg-blue-700'
+              }`}
+            >
+              🌍 WORLD
+            </button>
+          </div>
+        )}
 
         {/* Category Tabs (only for news) */}
         {mainSection === 'news' && (
