@@ -120,6 +120,7 @@ import {
   generateTravelIncident,
   TravelDamageEvent,
   KM_PER_SECTOR,
+  getVehicleCost,
 } from '../data/vehicleSystem'
 
 // EventBus for game-wide event emission
@@ -187,6 +188,7 @@ import {
   hasRequiredFacilities,
   isPositionAvailable,
   cancelConstruction,
+  getVehicleSlots,
 } from '../data/baseSystem'
 
 // Faction Relations System
@@ -514,6 +516,9 @@ interface EnhancedGameStore {
   completeTravelUnit: (unitId: string) => void
   cancelTravel: (unitId: string) => void
   assignCharacterToVehicle: (characterId: string, vehicleId: string) => void
+  // Buy a vehicle from the catalog into your garage (capacity from Vehicle Garage facilities)
+  purchaseVehicle: (vehicleTemplateId: string) => boolean
+  getGarageCapacity: () => number
   unassignCharacterFromVehicle: (characterId: string, vehicleId: string) => void
 
   // Notification System
@@ -2279,6 +2284,65 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     })
 
     toast(`Travel cancelled. ${unit.name} stopped at ${currentSector}`)
+  },
+
+  // Fleet capacity: every base's Vehicle Garage grants slots, plus one free
+  // "street parking" spot so a garage isn't required for your first ride.
+  getGarageCapacity: () => {
+    const state = get()
+    const slots = (state.baseState?.bases || []).reduce(
+      (sum: number, base: any) => sum + (getVehicleSlots(base) || 0), 0)
+    return slots + 1
+  },
+
+  purchaseVehicle: (vehicleTemplateId) => {
+    const state = get()
+    const template = getVehicleById(vehicleTemplateId)
+    if (!template) {
+      toast.error('Unknown vehicle')
+      return false
+    }
+    const cost = getVehicleCost(template)
+    if (state.budget < cost) {
+      toast.error(`Not enough funds — ${template.name} costs $${cost.toLocaleString()}`)
+      return false
+    }
+    const capacity = get().getGarageCapacity()
+    if (state.fleetVehicles.length >= capacity) {
+      toast.error(`No garage space (${state.fleetVehicles.length}/${capacity}). Build or upgrade a Vehicle Garage.`)
+      return false
+    }
+
+    // The vehicle is delivered to your base's sector (or wherever you are)
+    const activeBase = getActiveBase(state.baseState)
+    const homeSector = (activeBase as any)?.location || state.currentSector || 'K3'
+    const travelMode = (template as any).travelMode
+    const fleet: FleetVehicle = {
+      id: `fv_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      vehicleTemplateId: template.id,
+      name: template.name,
+      type: travelMode === 'air' ? 'aircraft' : travelMode === 'water' ? 'sea' : 'ground',
+      status: 'available',
+      currentSector: homeSector,
+      capacity: template.passengers,
+      speed: template.topSpeedMph,
+      assignedCharacters: [],
+      currentHP: template.hp,
+      maxHP: template.hp,
+      currentFuel: 100,
+      maxRange: template.rangeKm,
+      fuelType: template.fuelType,
+      dr: template.dr,
+      maintenanceNeeded: false,
+    }
+
+    set({
+      fleetVehicles: [...state.fleetVehicles, fleet],
+      budget: state.budget - cost,
+    })
+    get().recordTransaction?.('expense', 'equipment', cost, `Purchased vehicle: ${template.name}`)
+    toast.success(`${template.name} delivered to ${homeSector} — garage ${state.fleetVehicles.length + 1}/${capacity}`)
+    return true
   },
 
   assignCharacterToVehicle: (characterId, vehicleId) => {

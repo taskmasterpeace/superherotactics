@@ -842,6 +842,22 @@ export function calculateFuelConsumption(vehicle: Vehicle, distanceKm: number): 
  */
 export const KM_PER_SECTOR = 500;
 
+// ---------------------------------------------------------------------------
+// Acquisition — price a vehicle from its cost tier (garage/purchase flow)
+// ---------------------------------------------------------------------------
+
+export const VEHICLE_COST_BY_LEVEL: Record<Vehicle['costLevel'], number> = {
+  low: 8_000,
+  medium: 35_000,
+  high: 120_000,
+  very_high: 500_000,
+  ultra_high: 2_000_000,
+};
+
+export function getVehicleCost(vehicle: Vehicle): number {
+  return VEHICLE_COST_BY_LEVEL[vehicle.costLevel] ?? 35_000;
+}
+
 /**
  * Calculate fuel consumption for sector travel.
  * @param vehicle - The vehicle being used

@@ -9,6 +9,7 @@ import { CharacterPortrait } from '../CharacterPortrait';
 import { getMood } from '../../data/moodSystem';
 import { getPhysicalState } from '../../data/injuryEngine';
 import { ALL_WEAPONS } from '../../data/weapons';
+import { VEHICLES as ALL_VEHICLE_TEMPLATES, getVehicleCost } from '../../data/vehicleSystem';
 // TC-004: Territory display imports
 import {
   getSectorControl,
@@ -303,6 +304,8 @@ const MessagesPanel: React.FC<{
   const [editSquadName, setEditSquadName] = useState('');
   const [squadMemberSelection, setSquadMemberSelection] = useState<string[]>([]);
   const [expandedVehicleId, setExpandedVehicleId] = useState<string | null>(null);
+  const [showVehicleShop, setShowVehicleShop] = useState(false);
+  const budget = useGameStore(s => s.budget);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
 
   // Get country for selected city (for city actions)
@@ -785,10 +788,55 @@ const MessagesPanel: React.FC<{
 
               <div className="px-3 py-2 bg-primary/80 border-b-2 border-black flex-shrink-0">
                 <div className="flex items-center justify-between">
-                  <span className="text-primary-foreground font-bold text-sm tracking-wider">FLEET MANAGEMENT</span>
-                  <span className="text-primary-foreground/70 text-[10px]">Click vehicle to manage crew</span>
+                  <span className="text-primary-foreground font-bold text-sm tracking-wider">
+                    GARAGE ({vehicles.length}/{useGameStore.getState().getGarageCapacity()})
+                  </span>
+                  <button
+                    onClick={() => setShowVehicleShop(v => !v)}
+                    className="rounded border border-black bg-card px-2 py-0.5 text-[10px] font-bold text-foreground hover:bg-surface transition-colors"
+                  >
+                    {showVehicleShop ? 'CLOSE SHOP' : '🛒 BUY VEHICLE'}
+                  </button>
                 </div>
+                <span className="text-primary-foreground/70 text-[10px]">
+                  Vehicle Garage facilities add slots · click a vehicle to manage crew
+                </span>
               </div>
+
+              {/* Vehicle shop — buy from the catalog into your garage */}
+              {showVehicleShop && (
+                <div className="max-h-64 overflow-y-auto border-b-2 border-black bg-background/95">
+                  {ALL_VEHICLE_TEMPLATES.map(v => {
+                    const cost = getVehicleCost(v);
+                    const canAfford = budget >= cost;
+                    return (
+                      <div key={v.id} className="flex items-center gap-2 px-3 py-1.5 border-b border-black/10">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-foreground truncate">
+                            {v.name} <span className="text-muted-foreground font-normal">({v.category.replace(/_/g, ' ')})</span>
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {v.topSpeedMph}mph · {v.passengers} seats · DR {v.dr} · {v.fuelType}
+                          </p>
+                        </div>
+                        <span className={cn('text-[11px] font-mono font-bold', canAfford ? 'text-primary' : 'text-destructive')}>
+                          ${cost.toLocaleString()}
+                        </span>
+                        <button
+                          disabled={!canAfford}
+                          onClick={() => useGameStore.getState().purchaseVehicle(v.id)}
+                          className={cn(
+                            'rounded border border-black px-2 py-0.5 text-[10px] font-bold transition-colors',
+                            canAfford ? 'bg-success text-white hover:opacity-80' : 'bg-muted text-muted-foreground cursor-not-allowed'
+                          )}
+                        >
+                          BUY
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Vehicle List */}
               <div className="flex-1 overflow-y-auto">
