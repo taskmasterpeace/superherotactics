@@ -657,7 +657,12 @@ export default function NewsBrowser() {
         (h.category === 'politics' ? 'politics' : h.category === 'crime' ? 'crime' : 'local') as any,
         h.isBreaking ? 'major' : 'minor',
         { day: gameDay, hour: h.publishedHour || 8, minutes: 0 } as any,
-        { region: playerCountry.name, city: selectedCity || undefined }
+        {
+          region: playerCountry.name,
+          city: selectedCity || undefined,
+          relatedCountries: [playerCountry.name],
+          relatedLocations: selectedCity ? [selectedCity] : [],
+        } as any
       );
       addNewsArticle(article as any);
     });
@@ -875,7 +880,7 @@ export default function NewsBrowser() {
                 )}
 
                 {/* Related Countries */}
-                {selectedArticle.relatedCountries.length > 0 && (
+                {(selectedArticle.relatedCountries?.length ?? 0) > 0 && (
                   <div>
                     <span className="text-gray-400 block mb-2">Related Countries:</span>
                     <div className="flex flex-wrap gap-2">
@@ -892,11 +897,11 @@ export default function NewsBrowser() {
                 )}
 
                 {/* Related Factions */}
-                {selectedArticle.relatedFactions.length > 0 && (
+                {(selectedArticle.relatedFactions?.length ?? 0) > 0 && (
                   <div>
                     <span className="text-gray-400 block mb-2">Related Factions:</span>
                     <div className="flex flex-wrap gap-2">
-                      {selectedArticle.relatedFactions.map(faction => (
+                      {selectedArticle.relatedFactions!.map(faction => (
                         <span
                           key={faction}
                           className="px-3 py-1 bg-red-900 text-red-200 rounded-full text-sm"
@@ -1365,8 +1370,36 @@ export default function NewsBrowser() {
           <div className="flex items-center justify-center h-full">
             <div className="text-center text-gray-500">
               <div className="text-6xl mb-4">📰</div>
-              <div className="text-xl font-semibold mb-2">No News Yet</div>
-              <p className="text-gray-600">Complete missions to generate news coverage.</p>
+              {/* Scope-aware: if the OTHER tab has stories, point there instead of "no news" */}
+              {(() => {
+                const otherCount = newsArticles.filter(a =>
+                  scope === 'home' ? !isHomeArticle(a) : isHomeArticle(a)
+                ).length;
+                if (otherCount > 0) {
+                  return (
+                    <>
+                      <div className="text-xl font-semibold mb-2">
+                        Nothing on the {scope === 'home' ? (playerCountry?.name || 'home') : 'world'} desk yet
+                      </div>
+                      <p className="text-gray-600 mb-4">
+                        {otherCount} stor{otherCount === 1 ? 'y is' : 'ies are'} filed under {scope === 'home' ? 'WORLD' : 'YOUR COUNTRY'}.
+                      </p>
+                      <button
+                        onClick={() => setScope(scope === 'home' ? 'world' : 'home')}
+                        className="px-4 py-2 rounded-lg bg-amber-500 text-black font-bold hover:bg-amber-400 transition-colors"
+                      >
+                        {scope === 'home' ? '🌍 Switch to WORLD' : `🏠 Switch to ${playerCountry?.name || 'YOUR COUNTRY'}`}
+                      </button>
+                    </>
+                  );
+                }
+                return (
+                  <>
+                    <div className="text-xl font-semibold mb-2">No News Yet</div>
+                    <p className="text-gray-600">Complete missions and let a day or two pass to generate coverage.</p>
+                  </>
+                );
+              })()}
             </div>
           </div>
         ) : (
