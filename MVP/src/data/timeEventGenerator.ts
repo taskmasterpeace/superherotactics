@@ -15,6 +15,8 @@ import {
 import { ALL_WEAPONS } from './weapons'
 import { ALL_ARMOR } from './armor'
 import { getCharacterDayJob } from './educationSystem'
+import { getMood } from './moodSystem'
+import { generateCheckInCall } from './phoneCallSystem'
 import {
   GameTime,
   TimeOfDay,
@@ -310,7 +312,39 @@ function processDayChange(newTime: GameTime): void {
   // Update investigation deadlines
   processInvestigationDeadlines()
 
+  // A rattled operative reaches out — mood collapse rings the player's phone
+  checkMoraleCrisisCalls(newTime)
+
   console.log('[TimeEventGenerator] Day changed to', newTime.day, newTime.date)
+}
+
+// One crisis call per character per cooldown window — nobody rings twice a day.
+const lastCrisisCallDay = new Map<string, number>()
+const CRISIS_CALL_COOLDOWN_DAYS = 3
+
+/**
+ * Characters in mental trouble (shaken/broken mood) ring the player instead of
+ * waiting to be asked. The call is the same mood-driven check-in the player
+ * could initiate — answered, it lets them reassure (or lose) the operative;
+ * declined, the store dings the caller's morale and logs a missed call.
+ */
+function checkMoraleCrisisCalls(newTime: GameTime): void {
+  const store = useGameStore.getState() as any
+  if (store.incomingCall || store.activePhoneCall) return // line is busy
+
+  for (const char of store.characters || []) {
+    if (char.status === 'dead') continue
+    const last = lastCrisisCallDay.get(char.id)
+    if (last !== undefined && newTime.day - last < CRISIS_CALL_COOLDOWN_DAYS) continue
+
+    const mood = getMood(char).mood
+    if (mood !== 'broken' && mood !== 'shaken') continue
+
+    lastCrisisCallDay.set(char.id, newTime.day)
+    store.receiveIncomingCall(generateCheckInCall(char))
+    console.log('[TimeEventGenerator] Morale crisis call from', char.name, `(${mood})`)
+    break // one ringing call at a time
+  }
 }
 
 /**
