@@ -344,7 +344,57 @@ function processDayChange(newTime: GameTime): void {
   // P6: idle characters live their lives — personality-gated auto-activities
   processIdleAutonomy(newTime)
 
+  // Forks expire (inaction is a choice) and court cases come due
+  processForksAndLaw(newTime)
+
   console.log('[TimeEventGenerator] Day changed to', newTime.day, newTime.date)
+}
+
+/**
+ * FORKS & LAW daily tick: pending decisions expire to their DEFAULT option
+ * (inaction is a choice), and filed court cases reach verdicts — the fine
+ * scales with severity, softened by government standing.
+ */
+function processForksAndLaw(newTime: GameTime): void {
+  const store = useGameStore.getState() as any
+
+  // 1. Expire queued/pending forks → resolve with the default option
+  const expiredActive = store.activeFork && store.activeFork.expiresDay != null && newTime.day >= store.activeFork.expiresDay
+  if (expiredActive) {
+    store.addNotification?.({
+      type: 'world_event', priority: 'high',
+      title: `Decision defaulted: ${store.activeFork.title}`,
+      message: 'You sat on it — events chose for you.',
+      timestamp: newTime.day * 1440,
+    })
+    store.resolveFork(store.activeFork.defaultOptionId)
+  }
+  const expiredQueued = (store.forkQueue || []).filter((f: any) => f.expiresDay != null && newTime.day >= f.expiresDay)
+  for (const f of expiredQueued) {
+    // promote to active then default-resolve so effects apply
+    useGameStore.setState({ activeFork: f, forkQueue: store.forkQueue.filter((x: any) => x !== f) })
+    ;(useGameStore.getState() as any).resolveFork(f.defaultOptionId)
+  }
+
+  // 2. Court verdicts
+  const due = (store.legalCases || []).filter((lc: any) => newTime.day >= lc.resolvesDay)
+  if (due.length > 0) {
+    for (const lc of due) {
+      const code = store.selectedCountry
+      const standing = (store.factionStandings || []).find((s: any) => s.factionType === 'government' && (s.countryName === code || s.countryCode === code))?.standing ?? 0
+      // Good standing halves the damage; bad standing doubles it
+      const mult = standing >= 25 ? 0.5 : standing <= -25 ? 2 : 1
+      const fine = Math.round(lc.settleCost * mult)
+      store.recordTransaction?.('expense', 'other', fine, `Court verdict: ${lc.title}`)
+      store.addNotification?.({
+        type: 'world_event', priority: 'high',
+        title: 'Court verdict',
+        message: `${lc.title} — fined $${fine.toLocaleString()}${mult !== 1 ? (mult < 1 ? ' (connections helped)' : ' (they made an example of you)') : ''}.`,
+        timestamp: newTime.day * 1440,
+      })
+    }
+    useGameStore.setState({ legalCases: (useGameStore.getState() as any).legalCases.filter((lc: any) => newTime.day < lc.resolvesDay) })
+  }
 }
 
 /**

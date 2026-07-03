@@ -18,6 +18,7 @@ import { EventBus, createCombatEndedEvent } from '../data/eventBus'
 import { getDeathConsequencesManager } from '../data/deathConsequences'
 import { rollInjury, AppliedInjury } from '../data/injuryEngine'
 import { griefFromDeath } from '../data/mentalHealthSystem'
+import { prisonersFork, legalFalloutFork } from '../data/forkSystem'
 import { getCountryByName, getCountryByCode } from '../data/allCountries'
 
 // Unsubscribe function for cleanup
@@ -497,6 +498,27 @@ export function handleCombatComplete(result: EnhancedCombatResult): void {
 
   // Advance time
   store.advanceTime(combatDuration)
+
+  // FORKS: combat aftermath forces decisions (spec 110)
+  // Prisoners taken (109): on victory, some enemies surrender rather than die.
+  if (result.victory && Math.random() < 0.4) {
+    const captured = 1 + Math.floor(Math.random() * 3)
+    ;(store as any).presentFork?.(prisonersFork(captured, result.missionLocation ? undefined : undefined, gameDay))
+  }
+  // Legal fallout (17): civilian harm or heavy collateral gets lawyers moving.
+  if ((result.civilianCasualties ?? 0) > 0) {
+    ;(store as any).presentFork?.(legalFalloutFork(
+      `${result.civilianCasualties} civilian${result.civilianCasualties === 1 ? '' : 's'} caught in the crossfire during your operation.`,
+      Math.min(3, result.civilianCasualties) as 1 | 2 | 3,
+      gameDay,
+    ))
+  } else if ((result.collateralDamage ?? 0) >= 3) {
+    ;(store as any).presentFork?.(legalFalloutFork(
+      'Extensive property destruction during your operation — the block looks like a war zone.',
+      1,
+      gameDay,
+    ))
+  }
 
   // Generate news article if mission context available
   if (result.missionLocation) {

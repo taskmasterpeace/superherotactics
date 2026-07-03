@@ -99,6 +99,7 @@ import { generateCheckInCall, nextNode, PhoneCall, CallChoice, CallEffect } from
 import { generateStatusText, TextEvent } from '../data/characterTexts'
 import { generateDailyEdition, NewspaperEdition } from '../data/newspaperEngine'
 import { getHandler, handlerLineForChange } from '../data/handlerSystem'
+import { ForkEvent, ForkOption } from '../data/forkSystem'
 import {
   ReputationState,
   ReputationAxis,
@@ -498,6 +499,14 @@ interface EnhancedGameStore {
   sendCharacterText: (characterId: string, event: TextEvent, slots?: { place?: string; detail?: string }) => void
   // Contagion entry point (combat results / events / scenarios flip this)
   infectCharacter: (characterId: string) => void
+
+  // Fork-in-the-road decision events (spec 110) + prisoners (109) + legal (17)
+  activeFork: ForkEvent | null
+  forkQueue: ForkEvent[]
+  prisoners: { id: string; name: string; threat: number; orgId?: string; status: 'held' | 'probation'; capturedDay: number }[]
+  legalCases: { id: string; title: string; severity: number; settleCost: number; filedDay: number; resolvesDay: number }[]
+  presentFork: (fork: ForkEvent) => void
+  resolveFork: (optionId: string) => void
   receiveIncomingCall: (call: PhoneCall) => void
   answerIncomingCall: () => void
   declineIncomingCall: () => void
@@ -678,6 +687,10 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   engineeringProjects: [] as EngineeringProject[],
   unlockedResearch: [] as string[],
   customArmors: [] as any[],
+  activeFork: null as ForkEvent | null,
+  forkQueue: [] as ForkEvent[],
+  prisoners: [] as { id: string; name: string; threat: number; orgId?: string; status: 'held' | 'probation'; capturedDay: number }[],
+  legalCases: [] as { id: string; title: string; severity: number; settleCost: number; filedDay: number; resolvesDay: number }[],
   activePhoneCall: null as PhoneCall | null,
   phoneCallNodeId: null as string | null,
   incomingCall: null as PhoneCall | null,
@@ -1495,6 +1508,83 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       characterName: char.name || char.realName,
       timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
     })
+  },
+
+  // --- Fork-in-the-road ----------------------------------------------------
+  presentFork: (fork) => {
+    const state = get()
+    if (fork.context === 'interrupt' && !state.activeFork) {
+      // Critical decisions stop the world
+      set({ activeFork: fork, isTimePaused: true })
+    } else {
+      set({ forkQueue: [...state.forkQueue, fork] })
+      get().addNotification({
+        type: 'world_event', priority: 'high',
+        title: `Decision needed: ${fork.title}`,
+        message: `${fork.situation.slice(0, 100)}… (open pending decisions)`,
+        timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
+      })
+    }
+  },
+
+  resolveFork: (optionId) => {
+    const state = get()
+    const fork = state.activeFork
+    if (!fork) return
+    const option = fork.options.find(o => o.id === optionId) || fork.options.find(o => o.id === fork.defaultOptionId)!
+    const eff = option.effect
+
+    // Apply declarative effects
+    if (eff.budget) {
+      get().recordTransaction?.(eff.budget > 0 ? 'income' : 'expense', 'other', Math.abs(eff.budget), `Decision: ${fork.title} — ${option.label}`)
+    }
+    if (eff.fame) get().addFame(eff.fame)
+    if (eff.standing) {
+      const code = resolveCountryByName(state.selectedCountry)?.code || state.selectedCountry
+      get().modifyFactionStanding(eff.standing.factionType as any, code, eff.standing.delta, `Decision: ${fork.title}`)
+    }
+    if (eff.moraleTeam) {
+      set({
+        characters: get().characters.map(c => {
+          const cur = typeof (c as any).morale === 'number' ? (c as any).morale : (c as any).morale?.current ?? 60
+          const next = Math.max(0, Math.min(100, cur + eff.moraleTeam!))
+          return (c as any).morale && typeof (c as any).morale === 'object'
+            ? { ...c, morale: { ...(c as any).morale, current: next } } as any
+            : { ...c, morale: next } as any
+        }),
+      })
+    }
+    if (eff.addPrisoners?.length) {
+      const now = get()
+      set({
+        prisoners: [...now.prisoners, ...eff.addPrisoners.map(p => ({
+          id: `pr_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          name: p.name, threat: p.threat, orgId: p.orgId,
+          status: (eff.flipPrisoners ? 'probation' : 'held') as 'held' | 'probation',
+          capturedDay: now.gameTime.day,
+        }))],
+      })
+    }
+    if (eff.legalCase) {
+      const now = get()
+      set({
+        legalCases: [...now.legalCases, {
+          id: `lc_${Date.now()}`,
+          title: eff.legalCase.title, severity: eff.legalCase.severity,
+          settleCost: eff.legalCase.settleCost,
+          filedDay: now.gameTime.day,
+          resolvesDay: now.gameTime.day + 30 * eff.legalCase.severity,
+        }],
+      })
+    }
+
+    // Record + advance the queue
+    const nextQueued = get().forkQueue.find(f => f.status === 'pending' && f.context === 'interrupt') || null
+    set({
+      activeFork: nextQueued,
+      forkQueue: get().forkQueue.filter(f => f !== nextQueued),
+    })
+    toast(`${fork.icon} ${option.label}`)
   },
 
   infectCharacter: (characterId: string) => {

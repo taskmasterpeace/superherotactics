@@ -32,6 +32,7 @@ import LoadoutEditor from './components/LoadoutEditor'
 import MobilePhone from './components/MobilePhone'
 import PhoneCallScreen from './components/PhoneCallScreen'
 import EngineeringBay from './components/EngineeringBay'
+import ForkModal from './components/ForkModal'
 import SquadRoster from './components/SquadRoster'
 import QuickCombatSimulator from './components/QuickCombatSimulator'
 import InstantCombat from './components/InstantCombat'
@@ -508,6 +509,9 @@ function App() {
 
       {/* Incoming phone-call dialogue — portrait + mood bubble + choices */}
       {gamePhase === 'playing' && <PhoneCallScreen />}
+
+      {/* Fork-in-the-road decisions — the clock stops, you choose */}
+      {gamePhase === 'playing' && <ForkModal />}
 
       {/* Squad Roster - Shows characters (only in playing phase on world map) */}
       {gamePhase === 'playing' && currentView === 'world-map' && <SquadRoster />}
