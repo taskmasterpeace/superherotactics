@@ -478,7 +478,13 @@ interface EnhancedGameStore {
   // mood-styled bubble + choices. Effects (morale/reassure/mission) apply on pick.
   activePhoneCall: PhoneCall | null
   phoneCallNodeId: string | null
+  // Incoming call waiting to be answered (rings until answered/declined)
+  incomingCall: PhoneCall | null
+  callLog: { id: string; callerId: string; callerName: string; day: number; minutes: number; direction: 'outgoing' | 'incoming'; kind: string }[]
   startCharacterCall: (characterId: string) => void
+  receiveIncomingCall: (call: PhoneCall) => void
+  answerIncomingCall: () => void
+  declineIncomingCall: () => void
   answerCall: (choice: CallChoice) => void
   endCall: () => void
   calculateRecoveryTime: (injury: any, hospitalQuality: number) => number
@@ -632,6 +638,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   currentView: 'world-map',
   activePhoneCall: null as PhoneCall | null,
   phoneCallNodeId: null as string | null,
+  incomingCall: null as PhoneCall | null,
+  callLog: [] as { id: string; callerId: string; callerName: string; day: number; minutes: number; direction: 'outgoing' | 'incoming'; kind: string }[],
   budget: 75000,
   day: 2472,  // Legacy
 
@@ -1239,10 +1247,72 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
 
   // --- Phone-call dialogue ------------------------------------------------
   startCharacterCall: (characterId: string) => {
-    const char = get().characters.find(c => c.id === characterId) as any
+    const state = get()
+    const char = state.characters.find(c => c.id === characterId) as any
     if (!char) return
     const call = generateCheckInCall(char)
-    set({ activePhoneCall: call, phoneCallNodeId: call.startNode })
+    set({
+      activePhoneCall: call,
+      phoneCallNodeId: call.startNode,
+      callLog: [{
+        id: `log-${state.gameTime.day}-${state.gameTime.minutes}-${call.callerId}`,
+        callerId: call.callerId, callerName: call.callerName,
+        day: state.gameTime.day, minutes: state.gameTime.minutes,
+        direction: 'outgoing' as const, kind: call.kind,
+      }, ...state.callLog].slice(0, 30),
+    })
+  },
+
+  // A game event rings the player. The call waits (phone buzzes) until the
+  // player answers or declines — it does NOT interrupt with a full overlay.
+  receiveIncomingCall: (call: PhoneCall) => {
+    if (get().incomingCall || get().activePhoneCall) return // one call at a time
+    set({ incomingCall: call })
+  },
+
+  answerIncomingCall: () => {
+    const state = get()
+    const call = state.incomingCall
+    if (!call) return
+    set({
+      incomingCall: null,
+      activePhoneCall: call,
+      phoneCallNodeId: call.startNode,
+      callLog: [{
+        id: `log-${state.gameTime.day}-${state.gameTime.minutes}-${call.callerId}`,
+        callerId: call.callerId, callerName: call.callerName,
+        day: state.gameTime.day, minutes: state.gameTime.minutes,
+        direction: 'incoming' as const, kind: call.kind,
+      }, ...state.callLog].slice(0, 30),
+    })
+  },
+
+  declineIncomingCall: () => {
+    const state = get()
+    const call = state.incomingCall
+    if (!call) return
+    // Declining a crisis call stings the caller a little.
+    if (call.kind === 'morale_crisis') {
+      set({
+        characters: state.characters.map(c => {
+          if (c.id !== call.callerId) return c
+          const cur = typeof (c as any).morale === 'number' ? (c as any).morale : (c as any).morale?.current ?? 75
+          const next = Math.max(0, cur - 3)
+          if ((c as any).morale && typeof (c as any).morale === 'object') {
+            return { ...c, morale: { ...(c as any).morale, current: next, level: getMoraleLevel(next), lastChangeReason: 'Call went unanswered' } } as any
+          }
+          return { ...c, morale: next } as any
+        }),
+      })
+    }
+    set({ incomingCall: null })
+    get().addNotification({
+      type: 'call_incoming', priority: 'medium',
+      title: `Missed call: ${call.callerName}`,
+      message: call.topic,
+      characterId: call.callerId, characterName: call.callerName,
+      timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
+    })
   },
 
   answerCall: (choice: CallChoice) => {

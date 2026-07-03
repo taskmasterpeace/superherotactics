@@ -43,6 +43,8 @@ import {
   isContactUnlocked,
 } from '../data/contactsSystem';
 import { FactionType, FACTION_NAMES, FACTION_ICONS, getStandingLabel } from '../data/factionSystem';
+import { CharacterPortrait } from './CharacterPortrait';
+import { getMood } from '../data/moodSystem';
 
 // Message types that appear on the phone
 const PHONE_MESSAGE_TYPES = ['idle_warning', 'call_incoming', 'arrival', 'handler'];
@@ -122,6 +124,9 @@ export const MobilePhone: React.FC = () => {
     gameTime,
     setCurrentView,
     addNotification,
+    characters,
+    startCharacterCall,
+    callLog,
   } = useGameStore();
   const [isOpen, setIsOpen] = useState(false);
   const [isVibrating, setIsVibrating] = useState(false);
@@ -186,6 +191,24 @@ export const MobilePhone: React.FC = () => {
   }, [factionStandings, contactLastUsed, gameTime, budget]);
 
   const unlockedContactsCount = contactsWithStatus.filter(c => c.unlocked).length;
+
+  // Calls tab shows BOTH service-contact calls (local session) and character
+  // calls (store log, includes incoming), newest first.
+  const mergedCallHistory = useMemo(() => {
+    const contactCalls = callHistory.map(c => ({ ...c, direction: 'outgoing' as const, isCharacter: false }));
+    const charCalls = (callLog || []).map(l => ({
+      id: l.id,
+      contactId: l.callerId,
+      alias: l.callerName,
+      icon: l.direction === 'incoming' ? '📲' : '📞',
+      day: l.day,
+      minutes: l.minutes,
+      direction: l.direction,
+      isCharacter: true,
+    }));
+    return [...contactCalls, ...charCalls]
+      .sort((a, b) => (b.day * 1440 + b.minutes) - (a.day * 1440 + a.minutes));
+  }, [callHistory, callLog]);
 
   // Consume a contact's service: pay, start cooldown, log the call, fire effects
   const executeContactEffects = (contact: ContactStatus) => {
@@ -977,9 +1000,53 @@ export const MobilePhone: React.FC = () => {
                         })()}
                       </div>
                     ) : (
-                      /* Contacts List */
-                      contactsWithStatus.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center p-8 text-center">
+                      /* Contacts List — your team first, then service contacts */
+                      <div>
+                        {/* YOUR TEAM — ring an operative for a mood-driven check-in */}
+                        {characters.filter((c: any) => c.status !== 'dead').length > 0 && (
+                          <div>
+                            <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                              Your Team
+                            </div>
+                            <div className="divide-y-2 divide-black/10">
+                              {characters.filter((c: any) => c.status !== 'dead').map((char: any) => {
+                                const mood = getMood(char);
+                                return (
+                                  <div
+                                    key={char.id}
+                                    className="p-3 px-4 cursor-pointer bg-background hover:bg-surface transition-colors"
+                                    onClick={() => { startCharacterCall(char.id); setIsOpen(false); }}
+                                    title={`Call ${char.name || char.realName}`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <CharacterPortrait character={char} size={36} />
+                                      <div className="flex-1 min-w-0">
+                                        <p className="font-bold text-sm text-foreground truncate">
+                                          {char.name || char.realName}
+                                        </p>
+                                        <div className="flex items-center gap-2">
+                                          <span
+                                            className="text-[10px] font-bold uppercase"
+                                            style={{ color: mood.color }}
+                                          >
+                                            {mood.emoji} {mood.label}
+                                          </span>
+                                          <span className="text-[10px] text-muted-foreground">{char.status}</span>
+                                        </div>
+                                      </div>
+                                      <PhoneCall className="w-4 h-4 text-success flex-shrink-0" />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <div className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-t-2 border-black/20">
+                              Services
+                            </div>
+                          </div>
+                        )}
+                      {contactsWithStatus.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center p-8 text-center">
                           <div className="w-16 h-16 mx-auto mb-3 rounded-xl bg-surface border-2 border-black flex items-center justify-center shadow-retro-sm">
                             <User className="w-8 h-8 text-muted-foreground" />
                           </div>
@@ -1043,27 +1110,34 @@ export const MobilePhone: React.FC = () => {
                             </motion.div>
                           ))}
                         </div>
-                      )
+                      )}
+                      </div>
                     )
                     ) : activeTab === 'calls' ? (
-                      /* Calls Tab - session call history */
-                      callHistory.length === 0 ? (
+                      /* Calls Tab - contact + character call history */
+                      mergedCallHistory.length === 0 ? (
                         <div className="h-full flex flex-col items-center justify-center p-8 text-center">
                           <div className="w-16 h-16 mb-3 rounded-xl bg-surface border-2 border-black flex items-center justify-center shadow-retro-sm">
                             <Phone className="w-8 h-8 text-muted-foreground" />
                           </div>
                           <p className="text-muted-foreground font-semibold">No calls yet</p>
-                          <p className="text-sm text-muted-foreground/60 mt-1">Call a contact from the Contacts tab</p>
+                          <p className="text-sm text-muted-foreground/60 mt-1">Call a contact or an operative from the Contacts tab</p>
                         </div>
                       ) : (
                         <div className="divide-y-2 divide-black/20">
-                          {callHistory.map((call) => (
+                          {mergedCallHistory.map((call: any) => (
                             <motion.div
                               key={call.id}
                               initial={{ opacity: 0, x: 20 }}
                               animate={{ opacity: 1, x: 0 }}
                               className="p-4 flex items-center gap-3 cursor-pointer hover:bg-surface transition-colors"
                               onClick={() => {
+                                if (call.isCharacter) {
+                                  // Tap a character entry to ring them again
+                                  startCharacterCall(call.contactId);
+                                  setIsOpen(false);
+                                  return;
+                                }
                                 const contact = contactsWithStatus.find(c => c.id === call.contactId);
                                 if (contact) {
                                   setActiveTab('contacts');
@@ -1071,15 +1145,25 @@ export const MobilePhone: React.FC = () => {
                                 }
                               }}
                             >
-                              <div className="w-10 h-10 rounded-xl border-2 border-black flex items-center justify-center shadow-retro-sm text-lg bg-surface">
-                                {call.icon}
-                              </div>
+                              {call.isCharacter ? (
+                                <CharacterPortrait
+                                  character={characters.find((c: any) => c.id === call.contactId) || { realName: call.alias }}
+                                  size={40}
+                                />
+                              ) : (
+                                <div className="w-10 h-10 rounded-xl border-2 border-black flex items-center justify-center shadow-retro-sm text-lg bg-surface">
+                                  {call.icon}
+                                </div>
+                              )}
                               <div className="flex-1 min-w-0">
                                 <div className="flex justify-between items-center gap-2">
                                   <p className="font-bold text-sm text-foreground truncate">{call.alias}</p>
                                   <span className="text-xs text-muted-foreground flex items-center gap-1 flex-shrink-0">
-                                    <PhoneOutgoing className="w-3 h-3 text-success" />
-                                    Outgoing
+                                    {call.direction === 'incoming' ? (
+                                      <><PhoneCall className="w-3 h-3 text-secondary" /> Incoming</>
+                                    ) : (
+                                      <><PhoneOutgoing className="w-3 h-3 text-success" /> Outgoing</>
+                                    )}
                                   </span>
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { PhoneOff } from 'lucide-react';
+import { PhoneOff, Phone } from 'lucide-react';
 import { useGameStore } from '../stores/enhancedGameStore';
 import { CharacterPortrait } from './CharacterPortrait';
 import { MOOD_META } from '../data/moodSystem';
@@ -25,6 +25,46 @@ const PhoneCallScreen: React.FC = () => {
   const answerCall = useGameStore(s => s.answerCall);
   const endCall = useGameStore(s => s.endCall);
   const characters = useGameStore(s => s.characters);
+  const incoming = useGameStore(s => s.incomingCall);
+  const answerIncoming = useGameStore(s => s.answerIncomingCall);
+  const declineIncoming = useGameStore(s => s.declineIncomingCall);
+
+  // RINGING: an incoming call buzzes as a banner until answered or declined.
+  if (incoming && !call) {
+    const ringer = characters.find((c: any) => c.id === incoming.callerId)
+      || { id: incoming.callerId, realName: incoming.callerName };
+    const rMood = MOOD_META[incoming.callerMood];
+    return (
+      <div className="fixed bottom-6 left-1/2 z-[80] -translate-x-1/2">
+        <div className="flex items-center gap-3 rounded-2xl border-4 border-black bg-background px-4 py-3 shadow-2xl animate-[wiggle_0.4s_ease-in-out_infinite]"
+          style={{ boxShadow: `0 0 24px ${rMood.color}66, 6px 6px 0 0 #000` }}
+        >
+          <div className="animate-pulse">
+            <CharacterPortrait character={ringer as any} size={48} rounded />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">📳 Incoming call</div>
+            <div className="font-bold text-foreground truncate">{incoming.callerName}</div>
+            <div className="text-[11px] truncate" style={{ color: rMood.color }}>{incoming.topic}</div>
+          </div>
+          <button
+            onClick={answerIncoming}
+            title="Answer"
+            className="ml-2 flex h-11 w-11 items-center justify-center rounded-full border-2 border-black bg-emerald-600 text-white hover:bg-emerald-700 animate-bounce"
+          >
+            <Phone size={18} />
+          </button>
+          <button
+            onClick={declineIncoming}
+            title="Decline"
+            className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-black bg-red-600 text-white hover:bg-red-700"
+          >
+            <PhoneOff size={18} />
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!call || !nodeId) return null;
   const node = call.nodes[nodeId];
