@@ -120,7 +120,9 @@ function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768)
   const [isBelowMinWidth, setIsBelowMinWidth] = useState(window.innerWidth < 1024)
   const [assetManagerOpen, setAssetManagerOpen] = useState(false)
-  const [quickCombatOpen, setQuickCombatOpen] = useState(false)
+  // Store-driven so the world map (and anything else) can open the simulator
+  const quickCombatOpen = useGameStore(s => s.quickCombatOpen)
+  const setQuickCombatOpen = useGameStore(s => s.setQuickCombatOpen)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
 
   // Check if dev mode is enabled via URL parameter (?dev=true)

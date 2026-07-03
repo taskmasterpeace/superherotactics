@@ -703,11 +703,32 @@ const MessagesPanel: React.FC<{
 
                   {/* Action Buttons */}
                   <div className="flex gap-2 mt-3">
-                    <RetroButton variant="secondary" size="sm" className="flex-1">
+                    <RetroButton
+                      variant="secondary"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => setActiveTab('character')}
+                      title="Pick operatives on the TEAM tab, then send them to this sector"
+                    >
                       DEPLOY SQUAD
                     </RetroButton>
-                    <RetroButton variant="destructive" size="sm" className="flex-1">
+                    <RetroButton
+                      variant="destructive"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => useGameStore.getState().setCurrentView('tactical-combat')}
+                      title="Fight it out on the tactical map"
+                    >
                       ENTER COMBAT
+                    </RetroButton>
+                    <RetroButton
+                      variant="primary"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => useGameStore.getState().setQuickCombatOpen(true)}
+                      title="Auto-resolve: simulate the battle and see the aftermath (casualties, damage, loot)"
+                    >
+                      ⚡ SIMULATE
                     </RetroButton>
                   </div>
 

@@ -535,6 +535,9 @@ interface EnhancedGameStore {
   // Daily newspaper editions (back-issue shelf, newest first)
   editions: NewspaperEdition[]
   generateTodaysEdition: () => NewspaperEdition | null
+  // Quick auto-resolve battle simulator (overlay)
+  quickCombatOpen: boolean
+  setQuickCombatOpen: (open: boolean) => void
   markArticleRead: (articleId: string) => void
   generateMissionNews: (missionResult: {
     success: boolean
@@ -647,6 +650,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   currentView: 'world-map',
   sheetCharacterId: null as string | null,
   editions: [] as NewspaperEdition[],
+  quickCombatOpen: false,
   activePhoneCall: null as PhoneCall | null,
   phoneCallNodeId: null as string | null,
   incomingCall: null as PhoneCall | null,
@@ -980,6 +984,8 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   openCharacterSheet: (characterId) => {
     set({ sheetCharacterId: characterId, currentView: 'characters' })
   },
+
+  setQuickCombatOpen: (open) => set({ quickCombatOpen: open }),
 
   deployTeam: () => {
     const state = get()
