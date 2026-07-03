@@ -98,6 +98,7 @@ import { getMoraleLevel } from '../data/characterSheet'
 import { generateCheckInCall, nextNode, PhoneCall, CallChoice, CallEffect } from '../data/phoneCallSystem'
 import { generateStatusText, TextEvent } from '../data/characterTexts'
 import { generateDailyEdition, NewspaperEdition } from '../data/newspaperEngine'
+import { getHandler, handlerLineForChange } from '../data/handlerSystem'
 import {
   ReputationState,
   ReputationAxis,
@@ -495,6 +496,8 @@ interface EnhancedGameStore {
   callLog: { id: string; callerId: string; callerName: string; day: number; minutes: number; direction: 'outgoing' | 'incoming'; kind: string }[]
   startCharacterCall: (characterId: string) => void
   sendCharacterText: (characterId: string, event: TextEvent, slots?: { place?: string; detail?: string }) => void
+  // Contagion entry point (combat results / events / scenarios flip this)
+  infectCharacter: (characterId: string) => void
   receiveIncomingCall: (call: PhoneCall) => void
   answerIncomingCall: () => void
   declineIncomingCall: () => void
@@ -1492,6 +1495,15 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       characterName: char.name || char.realName,
       timestamp: state.gameTime.day * 1440 + state.gameTime.minutes,
     })
+  },
+
+  infectCharacter: (characterId: string) => {
+    const state = get()
+    const char = state.characters.find(c => c.id === characterId) as any
+    if (!char || char.infected) return
+    set({ characters: state.characters.map(c => c.id === characterId ? { ...c, infected: true } as any : c) })
+    get().sendCharacterText(characterId, 'injured', { detail: 'something bit me and it is NOT healing right. Feeling feverish' })
+    toast.error(`🦠 ${char.name} is infected — quarantine or hospitalize them`)
   },
 
   // A game event rings the player. The call waits (phone buzzes) until the
@@ -4630,6 +4642,30 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
     if (Math.abs(change) >= 10) {
       const icon = change > 0 ? '📈' : '📉'
       toast.success(`${icon} ${FACTION_NAMES[factionType]} (${countryCode}): ${change > 0 ? '+' : ''}${change}`)
+    }
+
+    // Your HANDLER — the home government's face — texts you when standing
+    // with your employer meaningfully shifts (crisis tone under -20).
+    if (factionType === 'government') {
+      const home = state.selectedCountry
+      const homeMatches = home && (
+        countryCode.toLowerCase() === String(home).toLowerCase() ||
+        (resolveCountryByName(home)?.code || '').toLowerCase() === countryCode.toLowerCase()
+      )
+      if (homeMatches) {
+        const line = handlerLineForChange(change, updatedStanding.standing)
+        if (line) {
+          const handler = getHandler(String(home))
+          get().addNotification({
+            type: 'text_message',
+            priority: updatedStanding.standing <= -20 ? 'urgent' : 'medium',
+            title: `${handler.name} (${handler.title})`,
+            message: line,
+            characterName: handler.name,
+            timestamp,
+          })
+        }
+      }
     }
 
     console.log(`[FACTIONS] ${factionType} in ${countryCode}: ${change > 0 ? '+' : ''}${change} (${reason})`)

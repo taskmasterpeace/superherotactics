@@ -146,6 +146,15 @@ const PersonnelReport: React.FC = () => {
                     >
                       <span className="text-[11px] leading-none">{mood.emoji}</span> {mood.label}
                     </span>
+                    {/* Contagion flag — quarantine or hospitalize */}
+                    {(char as any).infected && (
+                      <span
+                        title="Infected — spreads to teammates in the same sector; hospital treatment cures"
+                        className="flex items-center gap-1 rounded-md border border-red-500 bg-red-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-400 animate-pulse"
+                      >
+                        🦠 Infected
+                      </span>
+                    )}
                     {/* Injury tags, severity-colored */}
                     {visible.map(inj => (
                       <span

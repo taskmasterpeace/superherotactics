@@ -10,6 +10,8 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { useGameStore } from '../stores/enhancedGameStore';
+import { getItemFlammability, flammabilityLabel } from '../data/materialSystem';
 import {
   getAllEquipmentEntries,
   EquipmentEntry,
@@ -772,6 +774,36 @@ const DetailPanel: React.FC<DetailPanelProps> = ({ entry }) => {
           <div>{entry.availability.replace(/_/g, ' ')}</div>
         </div>
       </div>
+
+      {/* Acquisition + material read */}
+      {(() => {
+        const d: any = entry.data;
+        const research = d?.researchRequired as string | undefined;
+        const unlocked = useGameStore.getState().unlockedResearch || [];
+        const flam = getItemFlammability(d || entry.name);
+        return (
+          <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
+            {research ? (
+              unlocked.includes(research) ? (
+                <span className="rounded bg-emerald-900/50 border border-emerald-600 px-2 py-0.5 text-emerald-300 font-bold">
+                  🔓 RESEARCHED — available via Engineering Bay
+                </span>
+              ) : (
+                <span className="rounded bg-red-900/40 border border-red-700 px-2 py-0.5 text-red-300 font-bold">
+                  🔒 RESEARCH-LOCKED: {research.replace(/_/g, ' ')} (Engineering Bay → Research)
+                </span>
+              )
+            ) : String(d?.id || '').startsWith('custom_') ? (
+              <span className="rounded bg-cyan-900/40 border border-cyan-700 px-2 py-0.5 text-cyan-300 font-bold">🔧 CRAFTED — one of a kind</span>
+            ) : (
+              <span className="rounded bg-gray-600/40 border border-gray-500 px-2 py-0.5 text-gray-300 font-bold">🛒 BUY — open market</span>
+            )}
+            <span className="rounded bg-gray-700 border border-gray-600 px-2 py-0.5 text-gray-300" title="How well fire sticks to this item">
+              🔥 Flammability: {flammabilityLabel(flam)}
+            </span>
+          </div>
+        );
+      })()}
 
       {/* Type-specific details */}
       {entry.type === 'weapon' && renderWeaponDetails(entry.data as Weapon)}

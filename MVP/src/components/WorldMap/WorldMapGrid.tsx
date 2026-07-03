@@ -306,6 +306,8 @@ const MessagesPanel: React.FC<{
   const [expandedVehicleId, setExpandedVehicleId] = useState<string | null>(null);
   const [showVehicleShop, setShowVehicleShop] = useState(false);
   const budget = useGameStore(s => s.budget);
+  // JA2-style right-click orders on a merc row
+  const [ctxMenu, setCtxMenu] = useState<{ charId: string; x: number; y: number } | null>(null);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
 
   // Get country for selected city (for city actions)
@@ -470,6 +472,10 @@ const MessagesPanel: React.FC<{
                           onCharacterSelect(char.id, e.shiftKey);
                         }
                       }}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        setCtxMenu({ charId: char.id, x: e.clientX, y: e.clientY });
+                      }}
                       className={cn(
                         "flex items-center gap-2.5 px-3 py-2 transition-colors",
                         canTravel ? 'cursor-pointer hover:bg-primary/10' : 'opacity-60 cursor-not-allowed',
@@ -517,6 +523,33 @@ const MessagesPanel: React.FC<{
                   );
                 })}
               </div>
+
+              {/* Right-click orders (JA2 style) */}
+              {ctxMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setCtxMenu(null)} onContextMenu={(e) => { e.preventDefault(); setCtxMenu(null); }} />
+                  <div
+                    className="fixed z-50 w-44 rounded-lg border-2 border-black bg-card p-1 shadow-xl"
+                    style={{ left: Math.min(ctxMenu.x, window.innerWidth - 190), top: Math.min(ctxMenu.y, window.innerHeight - 200) }}
+                  >
+                    {[
+                      { label: '🚨 Patrol this city', act: () => useGameStore.getState().setCharacterStatus(ctxMenu.charId, 'patrol') },
+                      { label: '💼 Work day job', act: () => useGameStore.getState().setCharacterStatus(ctxMenu.charId, 'personal_life') },
+                      { label: '🟢 Recall to ready', act: () => useGameStore.getState().setCharacterStatus(ctxMenu.charId, 'ready') },
+                      { label: '📞 Call them', act: () => useGameStore.getState().startCharacterCall(ctxMenu.charId) },
+                      { label: '👤 Open sheet', act: () => useGameStore.getState().openCharacterSheet(ctxMenu.charId) },
+                    ].map(item => (
+                      <button
+                        key={item.label}
+                        onClick={() => { item.act(); setCtxMenu(null); }}
+                        className="block w-full rounded-md px-2 py-1.5 text-left text-xs font-semibold text-foreground hover:bg-surface transition-colors"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
 
               {/* Traveling Units */}
               {travelingUnits.length > 0 && (
@@ -669,6 +702,55 @@ const MessagesPanel: React.FC<{
                       <p className="text-foreground text-xs">{selectedCell.climate || 'Varied'}</p>
                     </div>
                   </div>
+
+                  {/* SECTOR INTEL — who holds it, militia, liberation (JA2 theater read) */}
+                  {(() => {
+                    const gs = useGameStore.getState();
+                    const control = gs.getSectorControlStatus?.(selectedCell.id);
+                    const militia = gs.getSectorMilitiaList?.(selectedCell.id) || [];
+                    if (!control && militia.length === 0) return null;
+                    const FACTION_COLORS: Record<string, string> = {
+                      player: '#22c55e', criminal: '#ef4444', government: '#3b82f6',
+                      corporate: '#eab308', rebel: '#f97316',
+                    };
+                    const fc = control ? (FACTION_COLORS[control.controllingFaction] || '#9ca3af') : '#9ca3af';
+                    return (
+                      <div className="mt-2 bg-surface rounded-lg px-3 py-2 border-2 border-black">
+                        <p className="text-[10px] text-muted-foreground uppercase mb-1">Sector Intel</p>
+                        {control && (
+                          <>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="flex items-center gap-1.5">
+                                <span className="h-2 w-2 rounded-full border border-black" style={{ background: fc }} />
+                                <span className="text-foreground capitalize">{control.controllingFaction} control</span>
+                              </span>
+                              <span className="font-mono font-bold" style={{ color: fc }}>{Math.round(control.controlPercent)}%</span>
+                            </div>
+                            {control.contestedBy && (
+                              <div className="mt-1">
+                                <div className="flex justify-between text-[10px] text-muted-foreground">
+                                  <span>⚔️ Contested by {control.contestedBy}</span>
+                                  <span>liberation {Math.round(control.liberationProgress)}%</span>
+                                </div>
+                                <div className="mt-0.5 h-1.5 rounded-full bg-black/40 overflow-hidden">
+                                  <div className="h-full bg-amber-400" style={{ width: `${control.liberationProgress}%` }} />
+                                </div>
+                              </div>
+                            )}
+                            <div className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
+                              <span>🛡️ Militia strength</span>
+                              <span className="font-mono">{Math.round(control.militiaStrength)}/100</span>
+                            </div>
+                          </>
+                        )}
+                        {militia.length > 0 && (
+                          <p className="mt-1 text-[10px] text-emerald-400">
+                            Your militia here: {militia.length} unit{militia.length === 1 ? '' : 's'} ({militia.reduce((s: number, m: any) => s + (m.size || 0), 0)} fighters)
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* Available Missions */}
                   {sectorMissions.length > 0 && (

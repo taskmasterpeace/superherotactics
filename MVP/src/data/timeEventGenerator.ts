@@ -332,7 +332,79 @@ function processDayChange(newTime: GameTime): void {
     console.warn('[TimeEventGenerator] Engineering progress failed:', e)
   }
 
+  // Contagion: infections spread through the roster day by day
+  processContagion(newTime)
+
   console.log('[TimeEventGenerator] Day changed to', newTime.day, newTime.date)
+}
+
+/**
+ * CONTAGIOUS DISEASE — the strategic layer over the combat 'diseased'/
+ * 'infected' statuses. An infected character (char.infected, set by combat
+ * results, events, or infectCharacter()):
+ *  - loses 2 morale/day (feels awful),
+ *  - has a 15%/day chance to infect EACH teammate sharing their sector
+ *    (quarantine by moving people apart!),
+ *  - is cured in hospital (40%/day chance while status === 'hospital').
+ */
+function processContagion(newTime: GameTime): void {
+  const store = useGameStore.getState() as any
+  const chars = store.characters || []
+  const infected = chars.filter((c: any) => c.infected && c.status !== 'dead')
+  if (infected.length === 0) return
+
+  const newlyInfected = new Set<string>()
+  const cured = new Set<string>()
+
+  for (const sick of infected) {
+    // Hospital treatment can clear it
+    if (sick.status === 'hospital' && Math.random() < 0.4) {
+      cured.add(sick.id)
+      continue
+    }
+    // Spread to same-sector teammates
+    const sector = sick.sector || sick.currentLocation || 'HQ'
+    for (const other of chars) {
+      if (other.id === sick.id || other.infected || other.status === 'dead' || newlyInfected.has(other.id)) continue
+      const otherSector = other.sector || other.currentLocation || 'HQ'
+      if (otherSector === sector && Math.random() < 0.15) newlyInfected.add(other.id)
+    }
+  }
+
+  if (newlyInfected.size === 0 && cured.size === 0 && infected.length === 0) return
+
+  useGameStore.setState({
+    characters: chars.map((c: any) => {
+      if (cured.has(c.id)) return { ...c, infected: false }
+      const nowSick = c.infected || newlyInfected.has(c.id)
+      if (!nowSick) return c
+      // daily misery for the sick
+      const cur = typeof c.morale === 'number' ? c.morale : c.morale?.current ?? 60
+      const next = Math.max(0, cur - 2)
+      const morale = c.morale && typeof c.morale === 'object'
+        ? { ...c.morale, current: next, lastChangeReason: 'Fighting off an infection' }
+        : next
+      return { ...c, infected: true, morale }
+    }),
+  })
+
+  cured.forEach(id => {
+    const c = chars.find((x: any) => x.id === id)
+    if (c) store.sendCharacterText?.(id, 'recovered')
+  })
+  newlyInfected.forEach(id => {
+    const c = chars.find((x: any) => x.id === id)
+    if (c) {
+      store.sendCharacterText?.(id, 'injured', { detail: 'running a fever — I think I caught what they have. Keep people away from me' })
+      store.addNotification?.({
+        type: 'injury', priority: 'high', title: `${c.name} is infected`,
+        message: 'The disease is spreading through the team. Separate the sick or get them to a hospital.',
+        characterId: id, characterName: c.name,
+        timestamp: newTime.day * 1440,
+      })
+    }
+  })
+  if (newlyInfected.size > 0) console.log('[Contagion] spread to', newlyInfected.size, 'character(s)')
 }
 
 /**
