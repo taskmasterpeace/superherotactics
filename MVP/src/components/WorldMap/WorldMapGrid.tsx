@@ -55,6 +55,7 @@ import {
   Pencil,
   Home,
   X,
+  User,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { RetroButton, RetroBadge, RetroTabs, RetroTabPanel, cn } from '../ui';
@@ -481,6 +482,14 @@ const MessagesPanel: React.FC<{
                       <div className="text-right flex-shrink-0">
                         <p className="text-primary font-mono font-bold text-sm">{char.sector || 'HQ'}</p>
                       </div>
+                      {/* Open full character sheet (distinct from select-for-travel) */}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onCharacterClick?.(char); }}
+                        title={`Open ${char.name}'s sheet`}
+                        className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-md border border-black bg-surface text-primary hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer"
+                      >
+                        <User className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   );
                 })}
@@ -1340,6 +1349,7 @@ export const WorldMapGrid: React.FC = () => {
     selectedFaction,
     selectedCountry,
     setCurrentView,
+    openCharacterSheet,
     travelingUnits,
     fleetVehicles,
     startTravel,
@@ -2461,7 +2471,7 @@ export const WorldMapGrid: React.FC = () => {
             selectedCell={selectedCell}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            onCharacterClick={(char) => console.log('Character clicked:', char)}
+            onCharacterClick={(char) => openCharacterSheet(char.id)}
             vehicles={fleetVehicles}
             travelingUnits={travelingUnits}
             gameTime={currentTime}

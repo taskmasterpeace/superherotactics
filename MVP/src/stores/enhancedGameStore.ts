@@ -443,6 +443,9 @@ interface EnhancedGameStore {
   selectCountry: (country: string) => void
   selectCity: (city: string) => void
   setCurrentView: (view: any) => void
+  // Open a specific character's sheet (from map roster / personnel / phone)
+  sheetCharacterId: string | null
+  openCharacterSheet: (characterId: string) => void
 
   // Enhanced functions
   deployTeam: () => void
@@ -638,6 +641,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   selectedCity: 'Washington DC',
 
   currentView: 'world-map',
+  sheetCharacterId: null as string | null,
   activePhoneCall: null as PhoneCall | null,
   phoneCallNodeId: null as string | null,
   incomingCall: null as PhoneCall | null,
@@ -960,6 +964,11 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
   setCurrentView: (view) => {
     set({ currentView: view })
     toast(`Switched to ${view.replace('-', ' ')}`)
+  },
+
+  // Jump straight to a character's full sheet from anywhere (map, personnel, phone)
+  openCharacterSheet: (characterId) => {
+    set({ sheetCharacterId: characterId, currentView: 'characters' })
   },
 
   deployTeam: () => {

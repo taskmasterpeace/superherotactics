@@ -23,6 +23,7 @@ const PersonnelReport: React.FC = () => {
   const setCurrentView = useGameStore(s => s.setCurrentView);
   const startCharacterCall = useGameStore(s => s.startCharacterCall);
   const setCharacterStatus = useGameStore(s => s.setCharacterStatus);
+  const openCharacterSheet = useGameStore(s => s.openCharacterSheet);
   const [assigningId, setAssigningId] = React.useState<string | null>(null);
 
   const roster = characters.filter((c: any) => c.status !== 'dead');
@@ -73,7 +74,13 @@ const PersonnelReport: React.FC = () => {
                 <CharacterPortrait character={char} size={52} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold text-foreground truncate">{char.name || char.realName}</span>
+                    <button
+                      onClick={() => openCharacterSheet(char.id)}
+                      title="Open full character sheet"
+                      className="font-bold text-foreground truncate hover:text-primary hover:underline transition-colors"
+                    >
+                      {char.name || char.realName}
+                    </button>
                     {/* Full status palette (spec 06) — icon + color per state */}
                     {(() => {
                       const sm = getStatusMeta(char.status);

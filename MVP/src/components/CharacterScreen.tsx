@@ -207,9 +207,15 @@ const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
 
 export default function CharacterScreen() {
   const { characters, setCurrentView, addCharacter, updateCharacter } = useGameStore()
+  // If we were opened targeting a specific character (from map/personnel/phone), start there.
+  const sheetCharacterId = useGameStore(s => s.sheetCharacterId)
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(
-    characters.length > 0 ? characters[0].id : null
+    sheetCharacterId || (characters.length > 0 ? characters[0].id : null)
   )
+  // Honor a later openCharacterSheet() call while the screen is already mounted.
+  React.useEffect(() => {
+    if (sheetCharacterId) setSelectedCharacterId(sheetCharacterId)
+  }, [sheetCharacterId])
   const [activeTab, setActiveTab] = useState<TabId>('identity')
   const [displayMode, setDisplayMode] = useState<'numbers' | 'stars'>('numbers')
   const [equipmentTab, setEquipmentTab] = useState<'ready' | 'personal' | 'container'>('ready')
