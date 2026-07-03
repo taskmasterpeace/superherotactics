@@ -25,6 +25,7 @@ import {
   substituteVars,
 } from './newspaperExpansion';
 import { calculateMediaSystem, MediaSystem } from './combinedEffects';
+import { getCountryOrganization } from './countryOrganizations';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -246,10 +247,12 @@ export function generateDailyEdition(inputs: EditionInputs): NewspaperEdition {
   // real home stories join the national desk
   for (const a of realHome.slice(0, 4)) national.push(storyFromArticle(a, a.category === 'crime' ? 'crime' : 'local'));
 
-  // --- LSW DESK: tone set by the country's LSW law --------------------------
+  // --- LSW DESK: tone set by the country's LSW law; the NATIONAL ORG (T1)
+  // is the desk's recurring character — its raids, statements and scandals.
   const law = (country as any).lswRegulations || 'Regulated';
   const desk = LSW_DESK_BY_LAW[law] || LSW_DESK_BY_LAW.Regulated;
   const lswActivity = (country as any).lswActivity ?? 30;
+  const org = getCountryOrganization((country as any).code || country.name);
   const lswDesk: EditionStory[] = [];
   const lswCount = lswActivity > 60 ? 3 : lswActivity > 25 ? 2 : 1;
   for (let i = 0; i < lswCount; i++) {
@@ -257,6 +260,33 @@ export function generateDailyEdition(inputs: EditionInputs): NewspaperEdition {
     lswDesk.push({ id: sid('st'), headline: h.headline, summary: h.summary, category: 'superhuman', isBreaking: h.isBreaking });
   }
   lswDesk.push(ambient(pick(desk.extra), 'superhuman', vars));
+  if (org) {
+    const ORG_LINES: Record<string, string[]> = {
+      sponsors: [
+        `${org.acronym} ${org.leaderTitle} ${org.leaderName} Announces Expanded LSW Benefits`,
+        `${org.orgName} Parades New Powered Recruits Through the Capital`,
+      ],
+      regulates: [
+        `${org.acronym} Publishes Updated Registration Compliance Figures`,
+        `${org.leaderTitle} ${org.leaderName}: "${org.acronym} Will Audit Every License"`,
+      ],
+      hunts: [
+        `${org.acronym} Claims Another Successful Anti-LSW Operation`,
+        `${org.orgName} Expands Informant Network — Rewards Doubled`,
+      ],
+      denies: [
+        `Officials Repeat: No Superhuman Activity In This Country`,
+        `Foreign Reports of Powered Individuals "Fabrications," Says Ministry`,
+      ],
+    };
+    const line = pick(ORG_LINES[org.stance] || ORG_LINES.regulates);
+    lswDesk.unshift({
+      id: sid('st'), headline: line,
+      summary: org.agenda,
+      category: 'superhuman', isBreaking: false,
+      sourceNote: org.acronym,
+    });
+  }
 
   // --- BUSINESS: GDP + corruption pick the register -------------------------
   const gdp = (country as any).gdpPerCapita ?? (country as any).gdp ?? 50;

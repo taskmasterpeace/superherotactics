@@ -17,6 +17,7 @@ import {
 } from '../data/characterGeneration'
 import { getCountryProfile, ROLE_DESCRIPTIONS } from '../data/countryProfiles'
 import { isLSW } from '../data/lswSystem'
+import { getCountryOrganization } from '../data/countryOrganizations'
 import { ORIGIN_NAMES } from '../types'
 import { RetroPanel, RetroBadge, RetroButton, RetroInput } from './ui'
 
@@ -294,6 +295,20 @@ export default function RecruitingPage() {
                 <span className="text-sm font-normal text-blue-300">({selectedCity})</span>
               </h2>
               <p className="text-xs text-gray-400 mt-0.5">{countryProfile.tagline}</p>
+              {/* T1: every country has its OWN organization + politics */}
+              {(() => {
+                const org = getCountryOrganization(countryData?.code || selectedCountry);
+                if (!org) return null;
+                const stanceColor = org.stance === 'sponsors' ? 'text-emerald-400' : org.stance === 'regulates' ? 'text-sky-400' : org.stance === 'hunts' ? 'text-red-400' : 'text-gray-400';
+                return (
+                  <p className="text-[11px] mt-1" title={org.agenda}>
+                    <span className="text-gray-500 uppercase tracking-wide text-[9px]">National authority: </span>
+                    <span className="font-bold text-gray-200">{org.orgName} ({org.acronym})</span>
+                    <span className={`ml-1 font-semibold uppercase text-[9px] ${stanceColor}`}>· {org.stance} LSWs</span>
+                    <span className="ml-1 text-gray-500">— {org.leaderTitle} {org.leaderName}</span>
+                  </p>
+                );
+              })()}
               {/* Origin Focus - show top 3 origin types */}
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-[10px] text-gray-500 uppercase tracking-wide">Origin Focus:</span>
