@@ -133,6 +133,7 @@ import {
   spawnRandomZombie,
   randomZombieName,
 } from '../../combat/zombieSystem';
+import { getItemFlammability, burnDurationMultiplier, UNARMORED_FLAMMABILITY } from '../../data/materialSystem';
 
 // Combat statistics tracking interface
 interface UnitStats {
@@ -923,6 +924,7 @@ interface Unit {
   evasion: number; // Base evasion (derived from AGL)
   dr: number; // Damage reduction (armor) - reduces penetrating damage
   stoppingPower: number; // Armor stopping power - blocks damage completely if damage <= SP
+  armorFlammability: number; // 0 (fireproof plate) .. 1 (tinder) - how well fire sticks to this unit
   shieldHp: number; // Shield HP - absorbs damage before health
   shieldMaxHp: number;
   shieldRegenRate: number; // HP per turn
@@ -2590,6 +2592,7 @@ export class CombatScene extends Phaser.Scene {
         mel: char.stats.MEL,
         dr: armorData.dr,           // Damage reduction from armor database
         stoppingPower: armorData.stoppingPower, // Armor stopping power from database
+        armorFlammability: getItemFlammability(armorData.armorName ?? undefined) ?? UNARMORED_FLAMMABILITY,
         moraleAccuracyMod: moraleEffects.accuracyMod,
         moraleDamageMod: moraleEffects.damageMod,
         acted: false,
@@ -2652,6 +2655,7 @@ export class CombatScene extends Phaser.Scene {
         mel: char.stats.MEL,
         dr: armorData.dr,           // Damage reduction from armor database
         stoppingPower: armorData.stoppingPower, // Armor stopping power from database
+        armorFlammability: getItemFlammability(armorData.armorName ?? undefined) ?? UNARMORED_FLAMMABILITY,
         moraleAccuracyMod: moraleEffects.accuracyMod,
         moraleDamageMod: moraleEffects.damageMod,
         acted: false,
@@ -2707,6 +2711,7 @@ export class CombatScene extends Phaser.Scene {
       evasion: unitData.evasion ?? 30,
       dr: unitData.dr ?? 0,
       stoppingPower: unitData.stoppingPower ?? 0, // Default no armor
+      armorFlammability: (unitData as any).armorFlammability ?? UNARMORED_FLAMMABILITY,
       shieldHp: unitData.shieldHp ?? 0, // Default no shield
       shieldMaxHp: unitData.shieldMaxHp ?? 0,
       shieldRegenRate: unitData.shieldRegenRate ?? 0,
@@ -3132,15 +3137,23 @@ export class CombatScene extends Phaser.Scene {
       }
     }
 
-    // Apply burning effect
+    // Apply burning effect — the target's armor MATERIAL decides how well
+    // fire sticks: steel plate shrugs ignition off, leather turns to torch.
     if (damageTypeDef.burning?.enabled) {
       const burnEffect = damageTypeDef.burning;
       const existingBurn = target.statusEffects.find(e => e.type === 'burning');
+      const burnMult = burnDurationMultiplier(target.armorFlammability ?? UNARMORED_FLAMMABILITY);
 
-      if (!existingBurn) {
-        this.applyStatusEffect(target, 'burning', burnEffect.duration);
+      if (!existingBurn && burnMult <= 0) {
         this.emitToUI('combat-log', {
-          message: `🔥 ${target.name} is burning!`,
+          message: `🔥 Flames wash over ${target.name}'s fireproof armor — no ignition!`,
+          type: 'status'
+        });
+      } else if (!existingBurn) {
+        const scaledDuration = Math.max(1, Math.round(burnEffect.duration * burnMult));
+        this.applyStatusEffect(target, 'burning', scaledDuration);
+        this.emitToUI('combat-log', {
+          message: `🔥 ${target.name} is burning!${burnMult > 1.2 ? ' Their gear is going up like tinder!' : ''}`,
           type: 'status'
         });
 

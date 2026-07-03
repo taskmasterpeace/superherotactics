@@ -190,6 +190,10 @@ export interface Weapon {
    * Hit chance modifiers apply based on these brackets
    */
   rangeBrackets?: WeaponRangeBrackets;
+
+  // Material properties (materialSystem resolves a default from the name when absent)
+  material?: string;
+  flammability?: number;  // 0 (fireproof) .. 1 (tinder)
 }
 
 /**
@@ -525,6 +529,10 @@ export interface Armor {
   availability: Availability;
   researchRequired?: string;
   notes?: string;
+
+  // Material properties (materialSystem resolves a default from the name when absent)
+  material?: string;
+  flammability?: number;  // 0 (fireproof) .. 1 (tinder) — how well fire sticks to the wearer
 
   // UI
   emoji: string;
