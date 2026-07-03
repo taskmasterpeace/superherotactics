@@ -499,11 +499,12 @@ function App() {
       {/* Keyboard Shortcuts Guide - Press ? to toggle */}
       <KeyboardShortcuts isOpen={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
 
-      {/* Mobile Phone - Shows texts and calls */}
-      <MobilePhone />
+      {/* Mobile Phone - Shows texts and calls. Only once the game is live —
+          before you've hired a team there's no one to call (fixes seed-squad leak). */}
+      {gamePhase === 'playing' && <MobilePhone />}
 
       {/* Incoming phone-call dialogue — portrait + mood bubble + choices */}
-      <PhoneCallScreen />
+      {gamePhase === 'playing' && <PhoneCallScreen />}
 
       {/* Squad Roster - Shows characters (only in playing phase on world map) */}
       {gamePhase === 'playing' && currentView === 'world-map' && <SquadRoster />}
