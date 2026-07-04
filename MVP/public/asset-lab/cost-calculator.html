@@ -50,16 +50,24 @@
     <div class="row">
       <label class="q">Animation depth per character</label>
       <div class="seg" id="tier">
-        <button data-t="mvp">MVP (~16)</button>
-        <button data-t="full" class="on">Full P0 (~65)</button>
-        <button data-t="rich">Rich +flight (~145)</button>
+        <button data-t="mvp">MVP</button>
+        <button data-t="full" class="on">Full P0</button>
+        <button data-t="rich">Rich +flight</button>
       </div>
     </div>
     <div class="row">
-      <label class="q">Custom-anim frames <span class="sub">guns/beams/flight cost 1 gen PER FRAME; fewer frames = cheaper</span></label>
+      <label class="q">Facing model <span class="sub">how many directions we generate</span></label>
+      <div class="seg" id="facing">
+        <button data-f="8">8-way</button>
+        <button data-f="4" class="on">4-way</button>
+        <button data-f="2">2-way E/W + mirror ⭐</button>
+      </div>
+    </div>
+    <div class="row">
+      <label class="q">Custom-anim frames <span class="sub">guns/beams/flight = 1 gen PER FRAME</span></label>
       <div class="seg" id="atk">
-        <button data-a="4">4 frames (cheap)</button>
-        <button data-a="8" class="on">8 frames (smooth)</button>
+        <button data-a="4">4 frames</button>
+        <button data-a="8" class="on">8 frames</button>
       </div>
     </div>
   </div>
@@ -96,21 +104,26 @@
   <p class="foot">Playback speed locked to <b>6 fps</b> (your call). Money is not the constraint — your monthly plan covers a launch roster many times over. The real costs are <b>generation time</b> (batchable) and <b>engine wiring</b> (grid refactor + animation anchoring). Numbers are gens; $ assumes a flat ~$15/mo Tier-1/2 sub with ~2,000 gens included (marginal cost ≈ $0 until you exhaust the month, then ~$1/gen in credits).</p>
 </div>
 <script>
-  // KEY: template animations (walk/punch/throw/fireball/death…) = 1 gen/direction.
-  // CUSTOM animations (gun-fire, energy beam, flight — no preset) = ~CF gens/direction
-  // (one per frame). tmpl = template direction-count; cust = custom direction-count.
+  // Each action: type (template=1 gen/dir, custom=CF gens/dir) + directions used
+  // under each facing model. 2way = East only, mirror West → 1 gen/action (customs 1×CF).
+  const A = (type, d8, d4, d2) => ({ type, d8, d4, d2 });
   const TIERS = {
-    mvp:  { base:3, tmpl:(4+4+4+1),          cust:0 },          // template-attack unit (idle,walk,melee/throw,death)
-    full: { base:3, tmpl:(8+8+4+4+4+1+1),    cust:4 },          // + ranged gun-fire (custom, 4-dir)
-    rich: { base:3, tmpl:(8+8+4+4+4+1+1+8),  cust:(4+4+4+1) },  // + overwatch(t) + ranged/flyhover/flymove/teleport(custom)
+    mvp:  [ A('t',8,4,1), A('t',8,4,1), A('t',4,4,1), A('t',1,1,1) ],                                   // idle, walk, melee/throw, death
+    full: [ A('t',8,4,1), A('t',8,4,1), A('t',4,4,1), A('t',4,4,1), A('t',4,4,1), A('t',1,1,1), A('t',1,1,1), A('c',4,4,1) ], // +throw,melee,cast,hit,death, ranged(custom)
+    rich: [ A('t',8,4,1), A('t',8,4,1), A('t',4,4,1), A('t',4,4,1), A('t',4,4,1), A('t',1,1,1), A('t',1,1,1), A('t',8,4,1), A('c',4,4,1), A('c',8,4,1), A('c',8,4,1), A('c',1,1,1) ], // +overwatch(t), ranged/flyhover/flymove/teleport(custom)
   };
-  const PLAN=2000, MIN_PER_GEN=5, CONCURRENCY=8, SUB=15;
-  let roster=30, tier='full', atk=4, CF=8;
+  const PLAN=2000, MIN_PER_GEN=5, CONCURRENCY=8, SUB=15, ART=3;
+  let roster=30, tier='full', facing='4', CF=8;
   const $=id=>document.getElementById(id);
   function perChar(){
-    const T=TIERS[tier];
-    // template dirs cost 1 gen each; custom dirs cost CF gens each (per frame)
-    return T.base + T.tmpl + T.cust * CF;
+    const dirKey='d'+facing; let g=ART;
+    for(const a of TIERS[tier]){ const dirs=a[dirKey]; g += (a.type==='t') ? dirs : dirs*CF; }
+    return g;
+  }
+  function breakdown(){
+    const dirKey='d'+facing; let tmpl=0, cust=0;
+    for(const a of TIERS[tier]){ const dirs=a[dirKey]; if(a.type==='t') tmpl+=dirs; else cust+=dirs*CF; }
+    return {tmpl, cust};
   }
   function fmt(n){ return n.toLocaleString('en-US'); }
   function calc(){
@@ -120,7 +133,8 @@
     const dollars = inPlan ? SUB : Math.ceil(months)*SUB;
     $('rlabel').textContent = `— ${roster} character${roster>1?'s':''}`;
     $('perchar').textContent = pc;
-    $('percharBreak').textContent = `${TIERS[tier].base} art + ${TIERS[tier].tmpl} template gens + ${TIERS[tier].cust}×${CF} custom gens = ${pc} total`;
+    const bd=breakdown();
+    $('percharBreak').textContent = `${ART} art + ${bd.tmpl} template + ${bd.cust} custom = ${pc} gens/char · ${facing==='2'?'2-way E/W (mirror)':facing+'-way'} · ${CF}-frame customs`;
     $('totGen').textContent = fmt(tot);
     $('totGenN').textContent = `${pc} gens × ${roster}`;
     const mEl=$('months'); mEl.textContent = months<1? months.toFixed(2) : months.toFixed(1);
@@ -135,5 +149,6 @@
   $('roster').oninput=e=>{ roster=+e.target.value; calc(); };
   for(const b of document.querySelectorAll('#tier button')) b.onclick=()=>{ tier=b.dataset.t; document.querySelectorAll('#tier button').forEach(x=>x.classList.toggle('on',x===b)); calc(); };
   for(const b of document.querySelectorAll('#atk button')) b.onclick=()=>{ CF=+b.dataset.a; document.querySelectorAll('#atk button').forEach(x=>x.classList.toggle('on',x===b)); calc(); };
+  for(const b of document.querySelectorAll('#facing button')) b.onclick=()=>{ facing=b.dataset.f; document.querySelectorAll('#facing button').forEach(x=>x.classList.toggle('on',x===b)); calc(); };
   calc();
 </script>

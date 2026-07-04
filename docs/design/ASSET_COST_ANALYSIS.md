@@ -28,6 +28,25 @@ PixelLab bills in **generations**. Your plan = **~2,000/month** (Tier 1, ~$9–2
 
 The single custom action (gun-fire) is ~half a Full-P0 character's cost. A **melee/thrown-only** unit (no gun, no powers) skips it → **~33 gens**. Flight is the expensive tier (two more customs).
 
+## ⭐ The facing model is the biggest lever (owner idea)
+Sprites only need to face **East/West** — West is a **free horizontal mirror** of East. True 8-way facing is shown by a **ground vision cone** (Project-Zomboid style), not the sprite; projectiles fly the true angle regardless of body facing. Prototype: `asset-lab/facing-cone.html`. This collapses direction count to **1 generated direction per animation**:
+
+| Facing model | Full-P0 gens/char | 30-hero roster |
+|--------------|-------------------|----------------|
+| 8-way (unique renders) | ~65 | 1,950 (~1 mo) |
+| 4-way | ~57 | 1,710 |
+| **2-way E/W + mirror ⭐** | **~18** (14 with 4-frame customs) | **~420–540** |
+
+**~72% cheaper**, and it *improves* tactical readability (the cone shows an enemy facing away — you couldn't tell that from a sprite anyway). This is the recommended system. Tradeoff: no unique front/back/¾ art — acceptable, the cone + pip carry facing.
+
+## "Can we duplicate the work cheaper?" (slicing)
+- **Mirror (E/W)** — the #1 free win, now the plan.
+- **Templates are skeleton-based** — the same preset applied to any character is cheap (1 gen/dir) and consistent; we already lean on them.
+- **Pose + procedural FX** — for some customs (muzzle flash, recoil), generate ONE firing pose + add flash/shake in code instead of a full 8-frame custom. Cuts a custom to ~1 gen.
+- **Full cutout rigging** (slice a character into limbs + re-rig, Spine-style) — powerful but PixelLab returns flat frames, not rigged parts, so this needs a whole rig pipeline. **Overkill vs mirror + templates + the cone. Not recommended now.**
+
+Verdict: **the way we're doing it is good** — generate to the style contract, lean on templates, mirror E/W, cone for facing, procedural for the cheap FX. Reserve real generation budget for the few customs that matter (signature powers, flight).
+
 ## Roster math (against 2,000 gens/month)
 | Roster | MVP (~16) | Full P0 (~65) | Rich (~145) |
 |--------|-----------|---------------|-------------|
