@@ -1,0 +1,346 @@
+<title>SHT — Character Direction Sheet</title>
+<style>
+  :root{
+    --bg:#12100d; --panel:#1c1813; --panel2:#221d16; --line:#2e2820;
+    --gold:#f5b21a; --cyan:#38bdf8; --red:#e0603a;
+    --bone:#e8e0d2; --muted:#8a8172; --dim:#5f5849;
+    --mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(1200px 500px at 50% -10%, #1e1a13 0%, var(--bg) 60%),
+      var(--bg);
+    color:var(--bone);font-family:var(--mono);line-height:1.5;
+    -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 72px}
+  .eyebrow{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin:0 0 8px}
+  h1{font-size:clamp(26px,4.4vw,40px);margin:0;letter-spacing:-.01em;text-wrap:balance;font-family:system-ui,sans-serif;font-weight:800}
+  .lede{color:var(--muted);max-width:60ch;margin:12px 0 0;font-family:system-ui,sans-serif}
+  .lede b{color:var(--bone);font-weight:600}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:26px 0 20px}
+  .tab{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--muted);
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 13px;cursor:pointer;
+    display:flex;align-items:center;gap:8px;transition:.15s}
+  .tab:hover{color:var(--bone);border-color:#443c30}
+  .tab.on{color:#151109;background:var(--gold);border-color:var(--gold);font-weight:700}
+  .tab .dot{width:9px;height:9px;border-radius:50%;background:var(--d);box-shadow:0 0 8px var(--d)}
+  .tab.on .dot{box-shadow:none}
+  .char-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
+    border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:22px}
+  h2{margin:0;font-family:system-ui,sans-serif;font-weight:800;font-size:24px}
+  .role{margin:4px 0 0;color:var(--gold);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+  .src{margin:0;color:var(--dim);font-size:11px;letter-spacing:.05em;text-align:right}
+
+  .compass{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:720px;margin:0 auto}
+  .cell{position:relative;background:
+      linear-gradient(180deg,var(--panel2),var(--panel));
+    border:1px solid var(--line);border-radius:12px;padding:12px 10px 10px;
+    display:flex;flex-direction:column;align-items:center;gap:8px;min-height:190px;justify-content:space-between}
+  .tile{position:relative;width:100%;aspect-ratio:1/1;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+  .tile .shadow{position:absolute;bottom:12px;width:56%;height:15px;border-radius:50%;
+    background:radial-gradient(ellipse at center, rgba(0,0,0,.55), transparent 70%)}
+  .sprite{image-rendering:pixelated;image-rendering:crisp-edges;height:96%;width:auto;
+    filter:drop-shadow(0 2px 0 rgba(0,0,0,.3));position:relative;z-index:1}
+  .dir-label{font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .arrow{color:var(--gold);font-size:15px;line-height:1}
+  .missing{color:var(--dim);font-size:26px;align-self:center}
+
+  .cell.side{border-color:#245b6b;box-shadow:0 0 0 1px rgba(56,189,248,.25) inset, 0 0 22px rgba(56,189,248,.08)}
+  .cell.side .arrow{color:var(--cyan)}
+  .cell.side .dir-label{color:var(--cyan)}
+  .side-tag{position:absolute;top:-9px;font-size:10px;font-weight:700;letter-spacing:.18em;
+    background:var(--cyan);color:#04222c;padding:3px 9px;border-radius:5px;z-index:3}
+
+  .cell.mid{background:transparent;border:1px dashed var(--line);justify-content:center;gap:14px}
+  .rose{position:relative;width:74px;height:74px;border:1px solid var(--line);border-radius:50%}
+  .rose span[class^=rose-]{position:absolute;font-size:11px;color:var(--muted);letter-spacing:.1em}
+  .rose-n{top:5px;left:50%;transform:translateX(-50%)}
+  .rose-s{bottom:5px;left:50%;transform:translateX(-50%)}
+  .rose-e{right:6px;top:50%;transform:translateY(-50%);color:var(--cyan)}
+  .rose-w{left:6px;top:50%;transform:translateY(-50%);color:var(--cyan)}
+  .rose-dot{position:absolute;top:50%;left:50%;width:7px;height:7px;margin:-3.5px;border-radius:50%;background:var(--gold)}
+  .mid-cap{margin:0;text-align:center;font-size:11px;letter-spacing:.24em;color:var(--dim);line-height:1.4}
+
+  .strip-wrap{margin-top:30px}
+  .strip-title{font-size:12px;letter-spacing:.04em;color:var(--muted);text-align:center;margin:0 0 12px}
+  .hi{color:var(--cyan)} .hi2{color:var(--cyan)}
+  .strip{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;overflow-x:auto;padding-bottom:4px}
+  .frame{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 4px 6px;text-align:center}
+  .frame.lr{border-color:#245b6b}
+  .ftile{aspect-ratio:1/1;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+  .frame .sprite{height:92%}
+  figcaption{font-size:10px;letter-spacing:.08em;color:var(--muted);margin-top:5px;text-transform:uppercase}
+  .frame.lr figcaption{color:var(--cyan)}
+  .foot{margin-top:40px;border-top:1px solid var(--line);padding-top:18px;color:var(--dim);font-size:12px;
+    display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:system-ui,sans-serif}
+  .foot b{color:var(--muted)}
+  @media(max-width:560px){.compass{max-width:100%}.strip{grid-template-columns:repeat(4,1fr)}}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">SuperHero Tactics · Art Pipeline Test</p>
+  <h1>Character Direction Sheet</h1>
+  <p class="lede">Every operative renders as <b>8 true facings</b> from PixelLab v3 — not mirrored. The compass places each sprite where it actually looks: <b style="color:var(--cyan)">West faces LEFT, East faces RIGHT</b>. This is the tactical facing the combat grid will use.</p>
+
+  <div class="tabs"><button class="tab on" data-tab="merc"><span class="dot" style="--d:#a8a06a"></span>Grizzled Merc</button><button class="tab" data-tab="hero"><span class="dot" style="--d:#e0603a"></span>Red Sentinel</button><button class="tab" data-tab="surge"><span class="dot" style="--d:#3ac0c8"></span>Surge</button></div>
+  <section class="char" data-char="merc" >
+    <div class="char-head">
+      <div><h2>Grizzled Merc</h2><p class="role">Human · Rifleman</p></div>
+      <p class="src">PixelLab v3 · 8 true rotations · low top-down · 128px native</p>
+    </div>
+    <div class="compass"><div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3merc_north-west.png" alt="Grizzled Merc facing NW"></div>
+    <span class="dir-label"><b class="arrow">↖</b> NW</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3merc_north.png" alt="Grizzled Merc facing N (away)"></div>
+    <span class="dir-label"><b class="arrow">↑</b> N (away)</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3merc_north-east.png" alt="Grizzled Merc facing NE"></div>
+    <span class="dir-label"><b class="arrow">↗</b> NE</span>
+  </div>
+<div class="cell side left">
+    <span class="side-tag">LEFT</span>
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3merc_west.png" alt="Grizzled Merc facing W"></div>
+    <span class="dir-label"><b class="arrow">←</b> W</span>
+  </div>
+<div class="cell mid">
+      <div class="rose">
+        <span class="rose-n">N</span><span class="rose-e">E</span><span class="rose-s">S</span><span class="rose-w">W</span>
+        <span class="rose-dot"></span>
+      </div>
+      <p class="mid-cap">8-WAY<br>FACING</p>
+    </div>
+<div class="cell side right">
+    <span class="side-tag">RIGHT</span>
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3merc_east.png" alt="Grizzled Merc facing E"></div>
+    <span class="dir-label"><b class="arrow">→</b> E</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3merc_south-west.png" alt="Grizzled Merc facing SW"></div>
+    <span class="dir-label"><b class="arrow">↙</b> SW</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3merc_south.png" alt="Grizzled Merc facing S (toward you)"></div>
+    <span class="dir-label"><b class="arrow">↓</b> S (toward you)</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3merc_south-east.png" alt="Grizzled Merc facing SE"></div>
+    <span class="dir-label"><b class="arrow">↘</b> SE</span>
+  </div></div>
+    <div class="strip-wrap">
+      <p class="strip-title">All eight, in order — <span class="hi">West = faces LEFT</span>, <span class="hi2">East = faces RIGHT</span></p>
+      <div class="strip"><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3merc_south.png" alt="south"></div>
+      <figcaption>S</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3merc_south-west.png" alt="south-west"></div>
+      <figcaption>SW</figcaption>
+    </figure><figure class="frame lr">
+      <div class="ftile"><img class="sprite" src="sprites/v3merc_west.png" alt="west"></div>
+      <figcaption>W · LEFT</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3merc_north-west.png" alt="north-west"></div>
+      <figcaption>NW</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3merc_north.png" alt="north"></div>
+      <figcaption>N</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3merc_north-east.png" alt="north-east"></div>
+      <figcaption>NE</figcaption>
+    </figure><figure class="frame lr">
+      <div class="ftile"><img class="sprite" src="sprites/v3merc_east.png" alt="east"></div>
+      <figcaption>E · RIGHT</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3merc_south-east.png" alt="south-east"></div>
+      <figcaption>SE</figcaption>
+    </figure></div>
+    </div>
+  </section>
+<section class="char" data-char="hero" hidden>
+    <div class="char-head">
+      <div><h2>Red Sentinel</h2><p class="role">LSW · Flying Brick</p></div>
+      <p class="src">PixelLab v3 · 8 true rotations · low top-down · 128px native</p>
+    </div>
+    <div class="compass"><div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3hero_north-west.png" alt="Red Sentinel facing NW"></div>
+    <span class="dir-label"><b class="arrow">↖</b> NW</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3hero_north.png" alt="Red Sentinel facing N (away)"></div>
+    <span class="dir-label"><b class="arrow">↑</b> N (away)</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3hero_north-east.png" alt="Red Sentinel facing NE"></div>
+    <span class="dir-label"><b class="arrow">↗</b> NE</span>
+  </div>
+<div class="cell side left">
+    <span class="side-tag">LEFT</span>
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3hero_west.png" alt="Red Sentinel facing W"></div>
+    <span class="dir-label"><b class="arrow">←</b> W</span>
+  </div>
+<div class="cell mid">
+      <div class="rose">
+        <span class="rose-n">N</span><span class="rose-e">E</span><span class="rose-s">S</span><span class="rose-w">W</span>
+        <span class="rose-dot"></span>
+      </div>
+      <p class="mid-cap">8-WAY<br>FACING</p>
+    </div>
+<div class="cell side right">
+    <span class="side-tag">RIGHT</span>
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3hero_east.png" alt="Red Sentinel facing E"></div>
+    <span class="dir-label"><b class="arrow">→</b> E</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3hero_south-west.png" alt="Red Sentinel facing SW"></div>
+    <span class="dir-label"><b class="arrow">↙</b> SW</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3hero_south.png" alt="Red Sentinel facing S (toward you)"></div>
+    <span class="dir-label"><b class="arrow">↓</b> S (toward you)</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3hero_south-east.png" alt="Red Sentinel facing SE"></div>
+    <span class="dir-label"><b class="arrow">↘</b> SE</span>
+  </div></div>
+    <div class="strip-wrap">
+      <p class="strip-title">All eight, in order — <span class="hi">West = faces LEFT</span>, <span class="hi2">East = faces RIGHT</span></p>
+      <div class="strip"><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3hero_south.png" alt="south"></div>
+      <figcaption>S</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3hero_south-west.png" alt="south-west"></div>
+      <figcaption>SW</figcaption>
+    </figure><figure class="frame lr">
+      <div class="ftile"><img class="sprite" src="sprites/v3hero_west.png" alt="west"></div>
+      <figcaption>W · LEFT</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3hero_north-west.png" alt="north-west"></div>
+      <figcaption>NW</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3hero_north.png" alt="north"></div>
+      <figcaption>N</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3hero_north-east.png" alt="north-east"></div>
+      <figcaption>NE</figcaption>
+    </figure><figure class="frame lr">
+      <div class="ftile"><img class="sprite" src="sprites/v3hero_east.png" alt="east"></div>
+      <figcaption>E · RIGHT</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3hero_south-east.png" alt="south-east"></div>
+      <figcaption>SE</figcaption>
+    </figure></div>
+    </div>
+  </section>
+<section class="char" data-char="surge" hidden>
+    <div class="char-head">
+      <div><h2>Surge</h2><p class="role">LSW · Energy Blaster</p></div>
+      <p class="src">PixelLab v3 · 8 true rotations · low top-down · 128px native</p>
+    </div>
+    <div class="compass"><div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3surge_north-west.png" alt="Surge facing NW"></div>
+    <span class="dir-label"><b class="arrow">↖</b> NW</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3surge_north.png" alt="Surge facing N (away)"></div>
+    <span class="dir-label"><b class="arrow">↑</b> N (away)</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3surge_north-east.png" alt="Surge facing NE"></div>
+    <span class="dir-label"><b class="arrow">↗</b> NE</span>
+  </div>
+<div class="cell side left">
+    <span class="side-tag">LEFT</span>
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3surge_west.png" alt="Surge facing W"></div>
+    <span class="dir-label"><b class="arrow">←</b> W</span>
+  </div>
+<div class="cell mid">
+      <div class="rose">
+        <span class="rose-n">N</span><span class="rose-e">E</span><span class="rose-s">S</span><span class="rose-w">W</span>
+        <span class="rose-dot"></span>
+      </div>
+      <p class="mid-cap">8-WAY<br>FACING</p>
+    </div>
+<div class="cell side right">
+    <span class="side-tag">RIGHT</span>
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3surge_east.png" alt="Surge facing E"></div>
+    <span class="dir-label"><b class="arrow">→</b> E</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3surge_south-west.png" alt="Surge facing SW"></div>
+    <span class="dir-label"><b class="arrow">↙</b> SW</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3surge_south.png" alt="Surge facing S (toward you)"></div>
+    <span class="dir-label"><b class="arrow">↓</b> S (toward you)</span>
+  </div>
+<div class="cell">
+    
+    <div class="tile"><div class="shadow"></div><img class="sprite" src="sprites/v3surge_south-east.png" alt="Surge facing SE"></div>
+    <span class="dir-label"><b class="arrow">↘</b> SE</span>
+  </div></div>
+    <div class="strip-wrap">
+      <p class="strip-title">All eight, in order — <span class="hi">West = faces LEFT</span>, <span class="hi2">East = faces RIGHT</span></p>
+      <div class="strip"><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3surge_south.png" alt="south"></div>
+      <figcaption>S</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3surge_south-west.png" alt="south-west"></div>
+      <figcaption>SW</figcaption>
+    </figure><figure class="frame lr">
+      <div class="ftile"><img class="sprite" src="sprites/v3surge_west.png" alt="west"></div>
+      <figcaption>W · LEFT</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3surge_north-west.png" alt="north-west"></div>
+      <figcaption>NW</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3surge_north.png" alt="north"></div>
+      <figcaption>N</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3surge_north-east.png" alt="north-east"></div>
+      <figcaption>NE</figcaption>
+    </figure><figure class="frame lr">
+      <div class="ftile"><img class="sprite" src="sprites/v3surge_east.png" alt="east"></div>
+      <figcaption>E · RIGHT</figcaption>
+    </figure><figure class="frame">
+      <div class="ftile"><img class="sprite" src="sprites/v3surge_south-east.png" alt="south-east"></div>
+      <figcaption>SE</figcaption>
+    </figure></div>
+    </div>
+  </section>
+  
+
+  <div class="foot">
+    <span><b>Pipeline:</b> PixelLab v3 · low top-down · 128px native pixel art · 8 rotations · ~3 gens/character</span>
+    <span><b>Next:</b> palette-locked poses (fly / blast) + drop-in to the combat grid</span>
+  </div>
+</div>
+
+<script>
+  const tabs=[...document.querySelectorAll('.tab')];
+  const secs=[...document.querySelectorAll('.char')];
+  tabs.forEach(t=>t.addEventListener('click',()=>{
+    tabs.forEach(x=>x.classList.toggle('on',x===t));
+    const id=t.dataset.tab;
+    secs.forEach(s=>s.hidden = s.dataset.char!==id);
+  }));
+</script>

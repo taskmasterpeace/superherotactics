@@ -78,8 +78,28 @@ export class PreloadScene extends Phaser.Scene {
       this.load.image(`soldier_${id}`, `assets/character_token/sprite_${id}.png`);
     }
 
+    // Load AI-generated roster tokens (PixelLab pipeline). Any character added
+    // via scripts/asset-pipeline auto-loads here with no code change — keys are
+    // `gen_<id>` (default South billboard) and `gen_<id>_<DIR>` (8-way facing).
+    this.loadGeneratedRoster();
+
     // Load grenade sprites
     this.loadGrenadeSprites();
+  }
+
+  private loadGeneratedRoster(): void {
+    this.load.json('generated-roster', 'assets/generated-manifest.json');
+    this.load.once('filecomplete-json-generated-roster', (_key: string, _type: string, data: any) => {
+      const chars = data?.characters;
+      if (!Array.isArray(chars)) return;
+      for (const c of chars) {
+        if (c?.token) this.load.image(`gen_${c.id}`, c.token);        // default facing (South)
+        for (const [dir, rel] of Object.entries(c?.directions || {})) {
+          this.load.image(`gen_${c.id}_${dir}`, rel as string);       // 8-way facing
+        }
+      }
+    });
+    // A missing manifest (no roster yet) just no-ops via loaderror — harmless.
   }
 
   private loadGrenadeSprites(): void {

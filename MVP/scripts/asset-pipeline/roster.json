@@ -1,0 +1,32 @@
+{
+  "$comment": "Define WHO to generate. Each entry = one character. Edit this list, then generate. The 'description' is the ONLY creative input you write per character — the style contract handles the rest, so every entry comes out cohesive. 'rawPrefix' points the importer at already-downloaded rotations (from an MCP generation) named <rawPrefix>_<direction>.png.",
+  "characters": [
+    {
+      "id": "merc",
+      "name": "Grizzled Merc",
+      "faction": "mercenary",
+      "origin": 1,
+      "description": "grizzled tactical mercenary in dark tactical body armor holding a rifle",
+      "pixellabId": "e120ac83-72c3-46b1-b163-42d0f3964070",
+      "rawPrefix": "v3merc"
+    },
+    {
+      "id": "red_sentinel",
+      "name": "Red Sentinel",
+      "faction": "hero",
+      "origin": 2,
+      "description": "heroic superhero in a red and gold armored suit with a short cape, confident stance",
+      "pixellabId": "b2e2811d-008f-4272-b9ff-35a5d9279ffa",
+      "rawPrefix": "v3hero"
+    },
+    {
+      "id": "surge",
+      "name": "Surge",
+      "faction": "hero",
+      "origin": 2,
+      "description": "female energy hero in a teal and black bodysuit with glowing forearm gauntlets, athletic build",
+      "pixellabId": "230f1b44-5549-4e45-bf3e-1708c954f124",
+      "rawPrefix": "v3surge"
+    }
+  ]
+}

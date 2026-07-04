@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "generated": "run-stamp",
+  "tokenHeight": 166,
+  "characters": [
+    {
+      "id": "merc",
+      "name": "Grizzled Merc",
+      "faction": "mercenary",
+      "origin": 1,
+      "token": "assets/character_token/generated/merc/S.png",
+      "directions": {
+        "S": "assets/character_token/generated/merc/S.png",
+        "SE": "assets/character_token/generated/merc/SE.png",
+        "E": "assets/character_token/generated/merc/E.png",
+        "NE": "assets/character_token/generated/merc/NE.png",
+        "N": "assets/character_token/generated/merc/N.png",
+        "NW": "assets/character_token/generated/merc/NW.png",
+        "W": "assets/character_token/generated/merc/W.png",
+        "SW": "assets/character_token/generated/merc/SW.png"
+      }
+    },
+    {
+      "id": "red_sentinel",
+      "name": "Red Sentinel",
+      "faction": "hero",
+      "origin": 2,
+      "token": "assets/character_token/generated/red_sentinel/S.png",
+      "directions": {
+        "S": "assets/character_token/generated/red_sentinel/S.png",
+        "SE": "assets/character_token/generated/red_sentinel/SE.png",
+        "E": "assets/character_token/generated/red_sentinel/E.png",
+        "NE": "assets/character_token/generated/red_sentinel/NE.png",
+        "N": "assets/character_token/generated/red_sentinel/N.png",
+        "NW": "assets/character_token/generated/red_sentinel/NW.png",
+        "W": "assets/character_token/generated/red_sentinel/W.png",
+        "SW": "assets/character_token/generated/red_sentinel/SW.png"
+      }
+    },
+    {
+      "id": "surge",
+      "name": "Surge",
+      "faction": "hero",
+      "origin": 2,
+      "token": "assets/character_token/generated/surge/S.png",
+      "directions": {
+        "S": "assets/character_token/generated/surge/S.png",
+        "SE": "assets/character_token/generated/surge/SE.png",
+        "E": "assets/character_token/generated/surge/E.png",
+        "NE": "assets/character_token/generated/surge/NE.png",
+        "N": "assets/character_token/generated/surge/N.png",
+        "NW": "assets/character_token/generated/surge/NW.png",
+        "W": "assets/character_token/generated/surge/W.png",
+        "SW": "assets/character_token/generated/surge/SW.png"
+      }
+    }
+  ]
+}

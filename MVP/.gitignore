@@ -1,0 +1,4 @@
+
+# Local secrets (PixelLab / AutoSprite API keys) — never commit
+.env.local
+.env*.local

@@ -1,0 +1,39 @@
+{
+  "$comment": "THE STYLE CONTRACT — the single source of truth that makes every SHT character look like it belongs in the same game. Change it here, once, and every future generation inherits it. This is what buys us consistency across any character we bring in.",
+  "version": 1,
+  "engine": "pixellab",
+  "character": {
+    "mode": "v3",
+    "$comment_mode": "v3 = PixelLab's highest-quality native pixel art. Standard mode is cheaper (1 gen) but roster-inconsistent (stylized vs realistic drift). v3 = 3 gens/char and looks like our existing tokens. Worth it.",
+    "view": "low top-down",
+    "$comment_view": "classic 3/4 iso-RPG angle. Matches the isometric combat grid. NOT 'side' (that's flat/sidescroller).",
+    "n_directions": 8,
+    "$comment_dir": "8 TRUE unique renders (S/SE/E/NE/N/NW/W/SW). Not mirrored — gear stays in the correct hand every facing. West faces LEFT, East faces RIGHT.",
+    "size": 128,
+    "$comment_size": "native character px; v3 canvas comes back ~244-248px. Downscaled to tokenHeight at import.",
+    "detail": "high detail",
+    "outline": "single color black outline",
+    "stylePrompt": "gritty modern superhero-tactics game operative, muted realistic palette, clear readable silhouette, plain transparent background",
+    "$comment_style": "APPENDED to every character description. This suffix is 90% of why the roster stays cohesive. Keep it stable; edit only when the whole game's look should shift.",
+    "negative": "no purple, no lavender, no neon glow-dump, no busy background"
+  },
+  "token": {
+    "tokenHeight": 166,
+    "$comment_tokenHeight": "matches existing character_token/sprite_XX.png (~150-166px). Import trims transparent bbox then resizes to this height, nearest-neighbour to stay crisp.",
+    "trim": true,
+    "resampleFilter": "auto",
+    "format": "png",
+    "outDir": "public/assets/character_token/generated"
+  },
+  "tiles": {
+    "$comment": "Map assets share the same contract so terrain matches characters.",
+    "iso": { "size": 48, "tile_shape": "block", "outline": "selective outline", "shading": "medium shading", "detail": "medium detail" },
+    "topdown": { "view": "high top-down", "tile_size": 32, "outline": "selective outline", "shading": "medium shading" },
+    "groundStylePrompt": "gritty modern urban, muted realistic palette"
+  },
+  "objects": {
+    "$comment": "For inventory/gadgets/vehicles later. PixelLab create_map_object / create_8_direction_object. Same palette suffix so items match the world.",
+    "itemStylePrompt": "game inventory item icon, muted realistic palette, single object on transparent background, clear silhouette",
+    "size": 64
+  }
+}
