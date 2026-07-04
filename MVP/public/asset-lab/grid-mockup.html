@@ -110,20 +110,42 @@
     status(`${sel.name} moved — now facing ${sel.dir}.`);
     render();
   };
+  // attack animations we actually generated (folder -> frame count). Only these
+  // directions exist yet — that's the per-direction generation cost in action.
+  const ATTACK = { surge:'blast', merc:'throw' };
+  const ANIM = { surge_blast_south:6, surge_blast_east:6, merc_throw_south:7 };
+  const DIRFOLDER = { S:'south', E:'east', N:'north', W:'west', SE:'south-east', SW:'south-west', NE:'north-east', NW:'north-west' };
+  function playAttack(el, key, frames, dur){
+    const img = el.querySelector('img'); const base = img.getAttribute('src');
+    let i=0; const step = dur/frames;
+    const iv = setInterval(()=>{ img.src=`anim/${key}/${i}.png`; if(++i>=frames){ clearInterval(iv); img.src=base; } }, step);
+  }
   function shoot(from,to){
     from.dir=facing(to.x-from.x, to.y-from.y);
     const color = from.id==='surge' ? '#38f0ff' : '#ffd24a';
-    const p=document.createElement('div'); p.className='proj'; p.style.color=color;
-    const sx=from.x*TILE+TILE/2, sy=from.y*TILE+TILE/2, ex=to.x*TILE+TILE/2, ey=to.y*TILE+TILE/2;
-    p.style.left=(sx-6)+'px'; p.style.top=(sy-6)+'px'; board.appendChild(p);
-    status(`${from.name} fires ${from.id==='surge'?'an energy bolt':'a round'} at ${to.name} → facing ${from.dir}.`);
     render();
-    const t0=performance.now(), dur=340;
-    (function step(t){ const k=Math.min(1,(t-t0)/dur);
-      p.style.left=(sx+(ex-sx)*k-6)+'px'; p.style.top=(sy+(ey-sy)*k-6)+'px';
-      if(k<1) requestAnimationFrame(step);
-      else { p.style.transition='opacity .15s'; p.style.opacity='0'; to.el && to.el.animate([{filter:'brightness(3)'},{filter:'brightness(1)'}],{duration:260}); setTimeout(()=>p.remove(),160); }
-    })(t0);
+    // play the real attack animation if we generated it for this facing
+    const type = ATTACK[from.id];
+    const key = type && `${from.id}_${type}_${DIRFOLDER[from.dir]}`;
+    const hasAnim = key && ANIM[key];
+    if (hasAnim) playAttack(from.el, key, ANIM[key], 480);
+    status(hasAnim
+      ? `${from.name} — ${type} animation (facing ${from.dir}) + projectile.`
+      : `${from.name} fires (facing ${from.dir}). No ${type||'attack'} animation generated for ${from.dir} yet — static token.`);
+    // projectile from the torso (not the feet)
+    const p=document.createElement('div'); p.className='proj'; p.style.color=color;
+    const torso = TILE*0.55;  // raise origin to upper body
+    const sx=from.x*TILE+TILE/2, sy=from.y*TILE+TILE/2 - torso, ex=to.x*TILE+TILE/2, ey=to.y*TILE+TILE/2 - torso;
+    const fire = () => {
+      p.style.left=(sx-6)+'px'; p.style.top=(sy-6)+'px'; board.appendChild(p);
+      const t0=performance.now(), dur=300;
+      (function step(t){ const k=Math.min(1,(t-t0)/dur);
+        p.style.left=(sx+(ex-sx)*k-6)+'px'; p.style.top=(sy+(ey-sy)*k-6)+'px';
+        if(k<1) requestAnimationFrame(step);
+        else { p.style.transition='opacity .15s'; p.style.opacity='0'; to.el && to.el.animate([{filter:'brightness(3)'},{filter:'brightness(1)'}],{duration:260}); setTimeout(()=>p.remove(),160); }
+      })(t0);
+    };
+    if (hasAnim) setTimeout(fire, 220); else fire();  // let the wind-up start first
   }
   document.getElementById('fire').onclick=()=>{ if(!sel){status('Select one of your units first.');return;} const enemy=units.find(u=>u.team==='red'); shoot(sel,enemy); };
   document.getElementById('reset').onclick=()=>{ units[0].x=1;units[0].y=2;units[0].dir='E'; units[1].x=1;units[1].y=4;units[1].dir='E'; units[2].x=8;units[2].y=3;units[2].dir='W'; sel=null; status('Reset. Select a unit.'); render(); };
