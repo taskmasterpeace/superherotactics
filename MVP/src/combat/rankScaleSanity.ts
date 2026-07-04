@@ -60,4 +60,21 @@ for (const a of atks) {
   const line = defs.map(d => `${d.label.split(' ')[0]}:${simHit(a.agl, a.int, d.agl)}%`).join('  ');
   console.log(`${a.label.padEnd(34)} -> ${line}`);
 }
+
+// Validate resolveHitOutcome: land-rate must equal the shown hit%.
+// (Mirror of CombatScene.resolveHitOutcome — module-local there.)
+function resolveHitOutcome(roll: number, hitPct: number): 'miss' | 'graze' | 'hit' | 'crit' {
+  if (roll >= hitPct) return 'miss';
+  const margin = (hitPct - roll) / Math.max(1, hitPct);
+  if (margin < 0.30) return 'graze';
+  if (margin < 0.85) return 'hit';
+  return 'crit';
+}
+console.log('\n=== resolveHitOutcome distribution (10k rolls) — land% should == hitPct ===');
+for (const hitPct of [30, 50, 62, 80]) {
+  const N = 10000; const c = { miss: 0, graze: 0, hit: 0, crit: 0 };
+  for (let i = 0; i < N; i++) c[resolveHitOutcome(Math.random() * 100, hitPct)]++;
+  const land = ((N - c.miss) / N * 100).toFixed(0);
+  console.log(`hitPct ${String(hitPct).padStart(2)} -> land ${land}%  (graze ${(c.graze/N*100).toFixed(0)}%  hit ${(c.hit/N*100).toFixed(0)}%  crit ${(c.crit/N*100).toFixed(0)}%)`);
+}
 console.log('');

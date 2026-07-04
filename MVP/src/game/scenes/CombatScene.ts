@@ -358,12 +358,19 @@ const DAMAGE_VERBS: Record<DamageType, { hit: string; crit: string; graze: strin
 // Hit result categories: MISS < 40, GRAZE 40-70, HIT 70-95, CRIT 95+
 type HitResult = 'miss' | 'graze' | 'hit' | 'crit';
 
-function getHitResult(roll: number, accuracy: number): HitResult {
-  // Roll is 0-100, accuracy modifies thresholds
-  const modifiedRoll = roll + (accuracy - 70) * 0.5; // accuracy 70 is baseline
-  if (modifiedRoll < 40) return 'miss';
-  if (modifiedRoll < 70) return 'graze';
-  if (modifiedRoll < 95) return 'hit';
+/**
+ * Probability-honest hit resolver: P(not miss) == hitPct exactly, so the number
+ * shown to the player (from calculateHitChance) IS the chance the shot lands.
+ * Landed shots split into graze / hit / crit by how far the roll beat the
+ * threshold (bigger margin = cleaner hit), preserving the graze/hit/crit texture.
+ * Replaces the old column-shift getHitResult, whose "accuracy" was NOT a
+ * probability, so the tooltip and the roll disagreed.
+ */
+function resolveHitOutcome(roll: number, hitPct: number): HitResult {
+  if (roll >= hitPct) return 'miss';
+  const margin = (hitPct - roll) / Math.max(1, hitPct); // 0..1, higher = cleaner
+  if (margin < 0.30) return 'graze';
+  if (margin < 0.85) return 'hit';
   return 'crit';
 }
 
@@ -6634,18 +6641,16 @@ export class CombatScene extends Phaser.Scene {
 
     // Fire visual effect
     this.fireVisualEffect(attacker, target, weapon, () => {
-      // Calculate hit using new verb system
-      // Roll 0-100, modified by accuracy and agility
       const roll = Math.random() * 100;
-      // Check if attacker is suppressed (-20% accuracy from suppression status)
+      // Resolve against the SAME rich hit chance shown to the player: range
+      // brackets, cover, stance, flanking, stats, dodge, skills, calling, morale
+      // and injury are all inside calculateHitChance — so cover and positioning
+      // now actually change whether a shot lands, and the tooltip is honest.
+      // Only the two action-specific factors it can't know are layered on here.
       const suppressedPenalty = attacker.statusEffects?.some(e => e.id === 'suppressed') ? -20 : 0;
-      // Strategic morale modifier (+15% ecstatic to -30% broken)
-      const moraleAccMod = attacker.moraleAccuracyMod || 0;
-      // Attacker aim (rank scale) minus the defender's Dodge Chart column-shift.
-      // This is the resolution path — keep it dodge-aware to match the shown hit%.
-      const dodgePenalty = getDodgeAccuracyPenalty(target.agl);
-      const effectiveAccuracy = weapon.accuracy + statMod(attacker.agl) - dodgePenalty + fireModeConfig.accuracyPenalty + suppressedPenalty + moraleAccMod;
-      const hitResult = getHitResult(roll, effectiveAccuracy);
+      const hitPct = Math.max(5, Math.min(95,
+        this.calculateHitChance(attacker, target) + fireModeConfig.accuracyPenalty + suppressedPenalty));
+      const hitResult = resolveHitOutcome(roll, hitPct);
 
       // Get full damage definition from damage system
       const damageSystemTypeId = getDamageSystemType(attacker.weapon);
