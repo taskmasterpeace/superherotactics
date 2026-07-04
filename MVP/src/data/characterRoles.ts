@@ -11,6 +11,7 @@
  */
 
 import type { CharacterRole, EducationField } from './countryProfiles';
+import { rankNorm } from './rankSystem';
 
 export type RoleDomain = 'combat' | 'investigation' | 'tech' | 'medical' | 'social' | 'support';
 
@@ -70,8 +71,11 @@ interface RoleCharacter {
 }
 
 function statAvg(stats: Record<string, number> | undefined, names: string[]): number {
-  if (!stats) return 40;
-  const vals = names.map(n => stats[n] ?? stats[n.toLowerCase()] ?? 40);
+  if (!stats) return 45;
+  // Rank-normalize each stat so a maxed-out human reads as clearly capable
+  // (~70) and superhumans push above — keeps role bars meaningful now that
+  // humans live in 1-39 and LSWs at 40+.
+  const vals = names.map(n => rankNorm(stats[n] ?? stats[n.toLowerCase()] ?? 20));
   return vals.reduce((a, b) => a + b, 0) / vals.length;
 }
 

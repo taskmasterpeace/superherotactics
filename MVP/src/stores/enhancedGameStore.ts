@@ -94,6 +94,7 @@ import {
   canAfford,
 } from '../data/economySystem'
 import { diagnoseInjuries } from '../data/injuryEngine'
+import { rankNorm } from '../data/rankSystem'
 import { getMoraleLevel } from '../data/characterSheet'
 import { generateCheckInCall, nextNode, PhoneCall, CallChoice, CallEffect } from '../data/phoneCallSystem'
 import { generateStatusText, TextEvent } from '../data/characterTexts'
@@ -756,7 +757,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       id: 'soldier-001',
       name: 'Alpha Squad Leader',
       realName: 'Marcus Kane',
-      stats: { MEL: 60, AGL: 55, STR: 58, STA: 65, INT: 50, INS: 52, CON: 60 },
+      stats: { MEL: 33, AGL: 30, STR: 32, STA: 36, INT: 28, INS: 29, CON: 33, PSI: 33 },
       threatLevel: 'THREAT_2',
       origin: 'Trained Soldier',
       // Baseline human — NOT an LSW. Training is a skill, not a power.
@@ -786,7 +787,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       id: 'soldier-002',
       name: 'Bravo Heavy Gunner',
       realName: 'Sarah Rodriguez',
-      stats: { MEL: 45, AGL: 40, STR: 70, STA: 68, INT: 45, INS: 48, CON: 65 },
+      stats: { MEL: 25, AGL: 22, STR: 38, STA: 37, INT: 25, INS: 26, CON: 36, PSI: 36 },
       threatLevel: 'THREAT_2',
       origin: 'Military Veteran',
       powers: [],
@@ -815,7 +816,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       id: 'soldier-003',
       name: 'Charlie Sniper',
       realName: 'Jin Park',
-      stats: { MEL: 48, AGL: 72, STR: 42, STA: 55, INT: 68, INS: 75, CON: 50 },
+      stats: { MEL: 26, AGL: 39, STR: 23, STA: 30, INT: 37, INS: 39, CON: 28, PSI: 28 },
       threatLevel: 'THREAT_2',
       origin: 'Elite Marksman',
       powers: [],
@@ -844,7 +845,7 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       id: 'soldier-004',
       name: 'Delta Demolitions',
       realName: 'Ivan Volkov',
-      stats: { MEL: 52, AGL: 50, STR: 62, STA: 60, INT: 72, INS: 55, CON: 58 },
+      stats: { MEL: 29, AGL: 28, STR: 34, STA: 33, INT: 39, INS: 30, CON: 32, PSI: 32 },
       threatLevel: 'THREAT_3',
       origin: 'Explosives Expert',
       powers: [],
@@ -3735,14 +3736,15 @@ export const useGameStore = create<EnhancedGameStore>((set, get) => ({
       }
     }
 
-    // Detective rank = Instinct + Intellect (spec 09). The BEST-rated assigned
-    // investigator sets the pace — rank 100 (50/50) is neutral, 200 gives +25%,
-    // 0 gives -25%.
-    const rankOf = (c: any) => (c?.stats?.INT ?? 50) + (c?.stats?.INS ?? 50)
+    // Detective rank = Instinct + Intellect (spec 09), rank-normalized so it
+    // works across the human/superhuman divide. The BEST-rated assigned
+    // investigator sets the pace; a competent human pair (~90 normed) is
+    // neutral, a superhuman one strongly positive.
+    const rankOf = (c: any) => rankNorm(c?.stats?.INT ?? 25) + rankNorm(c?.stats?.INS ?? 25)
     const assignedRanks = investigation.assignedCharacters
       .map(id => rankOf(state.characters.find(c => c.id === id)))
     const detectiveRank = Math.max(rankOf(character), ...assignedRanks, 0)
-    result.progressGained = Math.round(result.progressGained * (1 + (detectiveRank - 100) / 400))
+    result.progressGained = Math.round(result.progressGained * (1 + (detectiveRank - 90) / 400))
 
     // Cold case: evidence goes stale. After 3 game days a lead loses 3% progress
     // efficiency per day, capped at -40%.

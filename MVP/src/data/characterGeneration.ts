@@ -262,22 +262,40 @@ function generateCityFamiliarities(
 }
 
 /**
- * Generate random primary stats
+ * Generate primary stats on the owner RANK SCALE (rankSystem.ts). Baseline
+ * humans — origin 1 (Skilled Human) and 9 (Trained Soldier) — land inside the
+ * HUMAN band (1-39, elites near 39). LSW origins (2-8) are SUPERHUMAN (40+),
+ * scaled by threat, with high threats reaching cosmic. This makes the rank
+ * table real and matches the LSW rule (skilled humans are not superhuman).
+ * CON is mirrored to PSI (Psionic) per the spec — same value, spec-facing key.
  */
-function generateStats(threatLevel: number = 2): { MEL: number; AGL: number; STR: number; STA: number; INT: number; INS: number; CON: number } {
-  // Base stats depend on threat level
-  const baseMin = 20 + (threatLevel * 5);
-  const baseMax = 40 + (threatLevel * 10);
+function generateStats(threatLevel: number = 2, origin: number = 1): { MEL: number; AGL: number; STR: number; STA: number; INT: number; INS: number; CON: number; PSI: number } {
+  const isLSW = origin >= 2 && origin <= 8;
+  let baseMin: number, baseMax: number;
+  if (isLSW) {
+    baseMin = 40 + threatLevel * 2;          // never below Low Superhuman
+    baseMax = 45 + threatLevel * 10;         // high threats reach cosmic (100+)
+  } else {
+    baseMin = Math.min(34, 5 + threatLevel * 3);  // human floor scales with elite-ness
+    baseMax = Math.min(39, 15 + threatLevel * 6);  // hard human ceiling = 39
+  }
+  const roll = () => randomInt(baseMin, baseMax);
+  const CON = roll();
+  return { MEL: roll(), AGL: roll(), STR: roll(), STA: roll(), INT: roll(), INS: roll(), CON, PSI: CON };
+}
 
-  return {
-    MEL: randomInt(baseMin, baseMax),
-    AGL: randomInt(baseMin, baseMax),
-    STR: randomInt(baseMin, baseMax),
-    STA: randomInt(baseMin, baseMax),
-    INT: randomInt(baseMin, baseMax),
-    INS: randomInt(baseMin, baseMax),
-    CON: randomInt(baseMin, baseMax),
-  };
+/** Keep a stat block inside its origin's rank band (humans <= 39) after any
+ *  country/tendency modifiers; re-mirror PSI to CON. */
+function clampStatsToOrigin<T extends Record<string, number>>(stats: T, origin: number): T {
+  const isLSW = origin >= 2 && origin <= 8;
+  const lo = isLSW ? 40 : 1;
+  const hi = isLSW ? 5000 : 39;
+  const out: any = { ...stats };
+  for (const k of ['MEL', 'AGL', 'STR', 'STA', 'INT', 'INS', 'CON']) {
+    if (typeof out[k] === 'number') out[k] = Math.max(lo, Math.min(hi, Math.round(out[k])));
+  }
+  out.PSI = out.CON;
+  return out;
 }
 
 /**
@@ -566,10 +584,13 @@ export function generateCharacter(options: CharacterGenerationOptions = {}): Gam
     { value: 9, weight: 0.2 },
   ]);
 
-  // Generate stats
-  const stats = generateStats(threatLevel);
+  // Origin first — it decides the stat band (human 1-39 vs superhuman 40+)
+  const origin = options.origin ?? generateOrigin();
 
-  // Calculate health from stats (MEL + AGL + STA + STR = ~60 HP for average human)
+  // Generate stats on the rank scale for this origin
+  const stats = clampStatsToOrigin(generateStats(threatLevel, origin), origin);
+
+  // Calculate health from stats (MEL + AGL + STA + STR)
   const maxHealth = stats.MEL + stats.AGL + stats.STA + stats.STR;
 
   // Get country info
@@ -592,8 +613,7 @@ export function generateCharacter(options: CharacterGenerationOptions = {}): Gam
   const realName = options.realName ?? (cultureName?.fullName ?? `Agent ${randomInt(100, 999)}`);
   const codeName = options.name ?? (cultureName?.fullName ?? `${birthCity.country.slice(0, 3).toUpperCase()}-${randomInt(10, 99)}`);
 
-  // Generate origin and career first (needed for secret identity)
-  const origin = options.origin ?? generateOrigin();
+  // Career + secret identity (origin was resolved above, before stats)
   const career = generateCareer();
   const secretIdentity = generateSecretIdentity(origin, career);
 
@@ -830,11 +850,18 @@ export function generateCharacterWithProfile(
     { value: 9, weight: 0.2 },
   ]);
 
-  // Generate base stats then apply country tendencies
-  let stats = generateStats(threatLevel);
+  // Origin first — it decides the stat band (human 1-39 vs superhuman 40+)
+  const origin = options.origin ?? (profile
+    ? generateOriginFromProfile(profile)
+    : generateOrigin());
+
+  // Generate stats on the rank scale for this origin, apply country tendencies,
+  // then re-clamp so tendencies can't push a human out of the human band.
+  let stats: any = generateStats(threatLevel, origin);
   if (profile) {
     stats = applyStatTendencies(stats, profile.statTendencies);
   }
+  stats = clampStatsToOrigin(stats, origin);
 
   // Calculate health from stats
   const maxHealth = stats.MEL + stats.AGL + stats.STA + stats.STR;
@@ -852,11 +879,6 @@ export function generateCharacterWithProfile(
   const cultureName = generateName(birthCity.cultureCode, gender);
   const realName = options.realName ?? (cultureName?.fullName ?? `Agent ${randomInt(100, 999)}`);
   const codeName = options.name ?? (cultureName?.fullName ?? `${birthCity.country.slice(0, 3).toUpperCase()}-${randomInt(10, 99)}`);
-
-  // Generate origin using country profile weights
-  const origin = options.origin ?? (profile
-    ? generateOriginFromProfile(profile)
-    : generateOrigin());
 
   // Generate education fields based on country profile
   const education = profile
@@ -1077,7 +1099,9 @@ export function computeSigningCost(char: ProfiledCharacter): number {
     char.stats.MEL + char.stats.AGL + char.stats.STR + char.stats.STA +
     char.stats.INT + char.stats.INS + char.stats.CON;
 
-  const statCost = Math.max(0, statTotal - 200) * 16; // ~0-3500 for human ranges
+  // Rank scale: human sums ~60-250, LSW sums ~290+. Cheap weak humans, pricey
+  // elite humans, expensive superhumans.
+  const statCost = Math.max(0, statTotal - 80) * 12;
   const eduCost = char.education.length * 350;         // 350-1050
 
   const raw = 500 + statCost + eduCost;

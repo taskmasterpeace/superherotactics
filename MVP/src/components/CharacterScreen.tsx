@@ -12,6 +12,7 @@ import {
 import { generateCharacter } from '../data/characterGeneration'
 import PsycheTab from './PsycheTab'
 import { isLSW } from '../data/lswSystem'
+import { getRankTier, rankNorm } from '../data/rankSystem'
 
 // Full Character Interface based on Character_Schema_Complete.md
 interface FullCharacter {
@@ -652,7 +653,7 @@ function StatsTab({ character, displayMode }: { character: FullCharacter; displa
     { key: 'STA', label: 'Stamina', desc: 'Endurance, health', icon: <Heart size={16} /> },
     { key: 'INT', label: 'Intelligence', desc: 'Reasoning, tech', icon: <Brain size={16} /> },
     { key: 'INS', label: 'Instinct', desc: 'Intuition, awareness', icon: <Eye size={16} /> },
-    { key: 'CON', label: 'Concentration', desc: 'Willpower, focus', icon: <Target size={16} /> }
+    { key: 'CON', label: 'Psionic', desc: 'Willpower, psychic resilience', icon: <Target size={16} /> }
   ]
 
   return (
@@ -666,30 +667,29 @@ function StatsTab({ character, displayMode }: { character: FullCharacter; displa
         <div className="space-y-4">
           {primaryStats.map(stat => {
             const value = character.stats[stat.key as keyof typeof character.stats] || 0
+            const tier = getRankTier(value)
             return (
               <div key={stat.key} className="space-y-1">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-gray-400">{stat.icon}</span>
                     <span className="font-semibold text-white">{stat.label}</span>
-                    <span className="text-xs text-gray-500">({stat.key})</span>
+                    <span className="text-xs text-gray-500">({stat.key === 'CON' ? 'PSI' : stat.key})</span>
                   </div>
                   <div className="flex items-center gap-3">
                     {displayMode === 'stars' ? (
                       <span className="text-yellow-400 font-mono">{getStars(value)}</span>
                     ) : (
                       <>
-                        <span className="text-sm text-gray-400">{getStatRank(value)}</span>
-                        <span className="text-lg font-bold text-cyan-400 w-12 text-right">{value}</span>
+                        <span className="text-xs font-semibold" style={{ color: tier.color }}>{tier.label}</span>
+                        <span className="text-lg font-bold w-12 text-right" style={{ color: tier.color }}>{value}</span>
                       </>
                     )}
                   </div>
                 </div>
+                {/* Rank-normalized bar: max human fills ~70%, superhuman pushes higher */}
                 <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-cyan-600 to-blue-500 transition-all"
-                    style={{ width: `${Math.min(value, 100)}%` }}
-                  />
+                  <div className="h-full transition-all" style={{ width: `${rankNorm(value)}%`, background: tier.color }} />
                 </div>
               </div>
             )
@@ -707,7 +707,7 @@ function StatsTab({ character, displayMode }: { character: FullCharacter; displa
           <DerivedStatCard
             label="Health"
             value={character.health.maximum}
-            formula="(STA×2) + STR"
+            formula="MEL + AGL + STA + STR"
             icon={<Heart className="text-red-400" size={20} />}
           />
           <DerivedStatCard
