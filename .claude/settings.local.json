@@ -5,7 +5,8 @@
       "mcp__claude-flow@alpha",
       "mcp__flow-nexus",
       "Bash(npm run build:*)",
-      "Bash(pushd:*)"
+      "Bash(pushd:*)",
+      "Bash(npx tsc *)"
     ],
     "deny": []
   }
