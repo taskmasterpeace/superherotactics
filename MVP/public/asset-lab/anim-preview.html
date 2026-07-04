@@ -1,0 +1,85 @@
+<title>SHT — Motion Test</title>
+<style>
+  :root{
+    --bg:#12100d;--panel:#1c1813;--panel2:#221d16;--line:#2e2820;
+    --gold:#f5b21a;--cyan:#38bdf8;--bone:#e8e0d2;--muted:#8a8172;--dim:#5f5849;
+    --mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1000px 460px at 50% -10%,#1e1a13,var(--bg) 60%),var(--bg);
+    color:var(--bone);font-family:var(--mono);line-height:1.5}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 20px 64px}
+  .eyebrow{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin:0 0 8px}
+  h1{font-family:system-ui,sans-serif;font-weight:800;font-size:clamp(24px,4vw,36px);margin:0;letter-spacing:-.01em}
+  .lede{color:var(--muted);font-family:system-ui,sans-serif;max-width:62ch;margin:12px 0 0}
+  .lede b{color:var(--bone)}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+  .card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);
+    border-radius:14px;padding:16px 12px 12px;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .stage{position:relative;width:100%;aspect-ratio:1/1;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+  .stage .floor{position:absolute;bottom:16px;width:58%;height:16px;border-radius:50%;
+    background:radial-gradient(ellipse at center,rgba(0,0,0,.55),transparent 70%)}
+  .stage img{image-rendering:pixelated;height:94%;width:auto;position:relative;z-index:1;filter:drop-shadow(0 2px 0 rgba(0,0,0,.3))}
+  .name{font-family:system-ui,sans-serif;font-weight:700;font-size:15px}
+  .act{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .dir{font-size:10px;letter-spacing:.1em;color:var(--cyan);text-transform:uppercase}
+  .meta{display:flex;gap:8px;align-items:center;font-size:10px;color:var(--dim);letter-spacing:.06em}
+  .controls{display:flex;gap:10px;align-items:center;margin-top:22px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .controls button{font-family:var(--mono);font-size:12px;background:var(--panel);color:var(--bone);
+    border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+  .controls button:hover{border-color:#443c30}
+  input[type=range]{accent-color:var(--gold)}
+  .foot{margin-top:34px;border-top:1px solid var(--line);padding-top:16px;color:var(--dim);font-size:12px;font-family:system-ui,sans-serif}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+</style>
+<div class="wrap">
+  <p class="eyebrow">SuperHero Tactics · Motion Test</p>
+  <h1>They act now.</h1>
+  <p class="lede">Same PixelLab v3 characters — <b>animated</b>. Surge fires an energy blast (two facings, so you see it works per-direction), and the merc throws a grenade. These are the exact frames the combat engine will cycle. <b>4 directions per attack</b> is all we generate; movement/idle get all 8.</p>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="controls">
+    <button id="toggle">⏸ Pause</button>
+    <label>Speed <input id="fps" type="range" min="3" max="16" value="9"></label>
+    <span id="fpsval">9 fps</span>
+  </div>
+
+  <p class="foot">Cost: 4 generations (2 actions × 2 directions). Full P0 action set per character ≈ 10–14. Preview served from the repo — no chat needed.</p>
+</div>
+<script>
+  const ANIMS = [
+    { name:'Surge',      act:'Energy Blast', dir:'facing South', dirn:'S', dirp:'surge_blast_south', frames:6 },
+    { name:'Surge',      act:'Energy Blast', dir:'facing East',  dirn:'E', dirp:'surge_blast_east',  frames:6 },
+    { name:'Grizzled Merc', act:'Throw Grenade', dir:'facing South', dirn:'S', dirp:'merc_throw_south', frames:7 },
+  ];
+  const grid = document.getElementById('grid');
+  const players = [];
+  for (const a of ANIMS){
+    const imgs = [];
+    for (let i=0;i<a.frames;i++){ const im=new Image(); im.src=`anim/${a.dirp}/${i}.png`; imgs.push(im); }
+    const card = document.createElement('div'); card.className='card';
+    card.innerHTML = `<div class="stage"><div class="floor"></div><img></div>
+      <div class="name">${a.name}</div><div class="act">${a.act}</div><div class="dir">▸ ${a.dir}</div>
+      <div class="meta">${a.frames} frames · 128px</div>`;
+    grid.appendChild(card);
+    players.push({ el: card.querySelector('img'), imgs, i:0 });
+  }
+  let fps = 9, playing = true, acc = 0, last = 0;
+  function loop(t){
+    if (!last) last = t;
+    const dt = t - last; last = t;
+    if (playing){ acc += dt; const step = 1000/fps;
+      while (acc >= step){ acc -= step;
+        for (const p of players){ p.i = (p.i+1) % p.imgs.length; p.el.src = p.imgs[p.i].src; }
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+  // seed first frame
+  for (const p of players) p.el.src = p.imgs[0].src;
+  requestAnimationFrame(loop);
+  document.getElementById('toggle').onclick = (e)=>{ playing=!playing; e.target.textContent = playing?'⏸ Pause':'▶ Play'; };
+  const fpsEl = document.getElementById('fps'), fpsVal = document.getElementById('fpsval');
+  fpsEl.oninput = ()=>{ fps = +fpsEl.value; fpsVal.textContent = fps+' fps'; };
+</script>

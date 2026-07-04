@@ -1,0 +1,36 @@
+{
+  "$comment": "THE ACTION VOCABULARY — the finite set of things a combat unit DOES. This is what tells the generator WHICH animations to make per character, and what the combat engine selects from at runtime. Every action maps to a PixelLab template (preferred) or a custom v3 action_description, plus how many of the 8 facings it needs. Generate P0 first; P1/P2 as the roster matures. dirs: 8 = all facings, 4 = cardinals (N/E/S/W), 1 = south only.",
+  "version": 1,
+  "directionSets": {
+    "8": ["S", "SE", "E", "NE", "N", "NW", "W", "SW"],
+    "4": ["S", "E", "N", "W"],
+    "1": ["S"]
+  },
+  "actions": [
+    { "id": "idle",        "priority": "P0", "template": "breathing-idle",            "dirs": 8, "loop": true,  "trigger": "turn-start / stance render" },
+    { "id": "move",        "priority": "P0", "template": "walking-6-frames",          "dirs": 8, "loop": true,  "trigger": "tryMoveUnit (CombatScene ~7923)" },
+    { "id": "ranged",      "priority": "P0", "custom": "aiming and firing a weapon",  "dirs": 4, "loop": false, "trigger": "tryAttackUnit (CombatScene ~3927)" },
+    { "id": "throw",       "priority": "P0", "template": "throw-object",              "dirs": 4, "loop": false, "trigger": "start-grenade-throw (CombatScene ~1695)" },
+    { "id": "melee",       "priority": "P0", "template": "cross-punch",               "dirs": 4, "loop": false, "trigger": "tryMeleeAttack (CombatScene ~4740)" },
+    { "id": "cast",        "priority": "P0", "template": "fireball",                  "dirs": 4, "loop": false, "trigger": "activate-power (CombatScene ~1656)" },
+    { "id": "take_hit",    "priority": "P0", "template": "taking-punch",              "dirs": 1, "loop": false, "trigger": "applyDamage (CombatScene ~5034)" },
+    { "id": "death",       "priority": "P0", "template": "falling-back-death",        "dirs": 1, "loop": false, "trigger": "HP<=0 (CombatScene ~6300)" },
+
+    { "id": "fly_hover",   "priority": "P1", "custom": "hovering in the air, gentle bob, feet off ground", "dirs": 8, "loop": true,  "trigger": "flight/altitude state" },
+    { "id": "fly_move",    "priority": "P1", "custom": "flying forward through the air, body leaning",      "dirs": 8, "loop": true,  "trigger": "flight move" },
+    { "id": "teleport",    "priority": "P1", "custom": "vanishing in a flash",         "dirs": 1, "loop": false, "trigger": "teleportUnit (CombatScene ~6341)" },
+    { "id": "overwatch",   "priority": "P1", "template": "crouching",                 "dirs": 8, "loop": true,  "trigger": "overwatch stance (setActionMode ~1539)" },
+    { "id": "knockdown",   "priority": "P1", "template": "falling-back-death",        "dirs": 1, "loop": false, "trigger": "knockback >= 3 tiles (CombatScene ~6209)" },
+
+    { "id": "getup",       "priority": "P2", "template": "getting-up",                "dirs": 1, "loop": false, "trigger": "prone cleared (CombatScene ~4499)" },
+    { "id": "heal",        "priority": "P2", "custom": "raising hands, radiant healing gesture", "dirs": 4, "loop": false, "trigger": "heal power (CombatScene ~810)" },
+    { "id": "reload",      "priority": "P2", "custom": "reloading a firearm",         "dirs": 1, "loop": false, "trigger": "use-item / reload (EventBridge ~186)" }
+  ],
+  "powerAnimationClasses": {
+    "$comment": "Auto-pick a cast animation by power type when a hero has powers, so new powers reuse art.",
+    "beam":  { "custom": "extending an arm, firing a directed energy beam" },
+    "blast": { "template": "fireball", "note": "radial arms-up burst" },
+    "self":  { "custom": "unit-centered energy shimmer / fade", "dirs": 1 },
+    "aura":  { "custom": "in-place gesture, radiant aura at feet", "dirs": 4 }
+  }
+}
