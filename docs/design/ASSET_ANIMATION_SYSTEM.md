@@ -117,14 +117,18 @@ Scaling: +1 character (same action set) ≈ 10–14 jobs (a known, repeatable ba
 
 ---
 
-## 6. Decisions for the owner
+## 6. Decisions — APPROVED (owner sign-off 2026-07-04)
 
-| # | Decision | Recommended default |
-|---|----------|---------------------|
-| 1 | Grid: iso or flat? | **Flat top-down** (~40 lines, makes 8-dir + projectiles free) |
-| 2 | Character sprite size? | **48–64px on 64px tiles** |
-| 3 | Attack directions at launch? | **4-dir attacks / 8-dir move+idle** |
-| 4 | First hero P1 actions? | **Fly + teleport** now; grapple/techniques next |
-| 5 | Map theme for the slice? | **Modern plaza + alleys, concrete/steel, daytime** |
-| 6 | FX fidelity now? | **13-sprite demo pack now**, particles stay procedural |
-| 7 | Verify-before-scale gate? | **Yes** — 1 char + 1 map + FX proven in-engine first |
+| # | Decision | Call |
+|---|----------|------|
+| 1 | Grid | ✅ **Flat top-down** (~40 lines; see mockup `MVP/public/asset-lab/grid-mockup.html`) |
+| 2 | Character sprite size | ✅ 48–64px on 64px tiles |
+| 3 | Attack directions | ✅ 4-dir attacks / 8-dir move+idle |
+| 4 | First hero P1 actions | ✅ **Fly + teleport**. **Flight is REQUIRED dual-mode: `fly_hover` + `fly_move` (forward) both exist for any flying unit** (owner). |
+| 5 | Map theme | ✅ Modern plaza + alleys, concrete/steel, daytime |
+| 6 | FX pack | ✅ ~13-sprite demo pack; particles stay procedural |
+| 7 | Verify-before-scale | ✅ Yes — one char + one map + FX proven in-engine before roster |
+
+**Front-end is intentionally swappable.** The asset layer is renderer-agnostic: `generated-manifest.json` + tokens/animations feed the current Phaser 2D scene, but could just as well feed a future **three.js / low-poly** front end without regenerating art (and AutoSprite's 3D-model export is a bridge if we go that way). Flat top-down maps cleanly onto a future top-down 3D camera too. So the flat-grid decision is low-commitment — the game's depth lives in the systems, not the renderer.
+
+**Grid-switch status:** designed + mocked, NOT yet implemented in `CombatScene`. Next build = flip the grid + one full vertical slice (Surge fully actioned on a textured map with projectiles).
