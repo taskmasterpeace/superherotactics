@@ -2,37 +2,40 @@
 
 Interactive version: `MVP/public/asset-lab/cost-calculator.html`. Bottom line up front: **money is not the constraint** — a full launch roster fits inside one month of the plan you already pay for. The real costs are generation *time* (batchable) and *engine wiring*.
 
-## The unit: a "generation"
-PixelLab bills in **generations**. Your plan = **~2,000 generations/month** (Tier 1, ~$9–22/mo). Overflow = credits (~$1/gen). So **inside the monthly allowance, the marginal cost of a character is effectively $0.**
-- 8-direction character token (v3 art): **3 gens**
-- One animation = **1 gen per direction**
+## The unit: a "generation" — and the template/custom split (important)
+PixelLab bills in **generations**. Your plan = **~2,000/month** (Tier 1, ~$9–22/mo); overflow = credits (~$1/gen). Inside the allowance, marginal cost per character ≈ **$0**.
+- 8-direction token (v3 art): **3 gens**
+- **Template animation** (the 49 presets: walk, run, punch, kick, throw-object, fireball, taking-punch, falling-back-death, crouch, get-up…): **1 gen / direction** — cheap.
+- **Custom animation** (anything not a preset — **gun-fire, energy beams, flight, teleport**): **~1 gen per FRAME per direction** (frames usually 8) → **~8 gens/direction**. *Measured live: a custom rifle-fire in 2 directions cost 16 gens.*
+
+**This is the #1 cost lever.** Reuse a template whenever possible; for the unavoidable customs (guns/beams/flight), keep them to **few directions and fewer frames** (a 4-frame custom = 4 gens/dir vs 8).
 
 ## Cost per animation
-| Action | Directions | Gens |
-|--------|-----------|------|
-| One aimed attack (ranged/throw/melee/cast) | 4 (cardinal) | **4** |
-| Same attack, 8-dir | 8 | 8 |
-| Idle / walk | 8 | 8 |
-| Take-hit / death | 1 | 1 |
-
-A single "shoot his gun, all four cardinal directions" = **4 generations** ≈ pennies.
+| Animation | Gens |
+|-----------|------|
+| Template action, 4-dir (throw/melee/cast) | **4** |
+| Template action, 8-dir (idle/walk) | **8** |
+| Template, 1-dir (hit/death) | **1** |
+| **Custom action (gun-fire/beam), 4-dir × 8 frames** | **32** |
+| Custom, 4-dir × 4 frames (cheaper) | 16 |
 
 ## Cost per character (three depths)
 | Depth | What's animated | Gens (incl. 3 art) |
 |-------|-----------------|--------------------|
-| **MVP** | idle(4) · walk(4) · ranged(4) · death(1) | **~16** |
-| **Full P0** | idle(8) · walk(8) · ranged/throw/melee/cast(4 ea) · hit(1) · death(1) | **~37** |
-| **Rich** | Full P0 + fly-hover(8) · fly-forward(8) · teleport(1) · overwatch(8) | **~62** |
+| **MVP** (all template) | idle(4) · walk(4) · melee/throw(4) · death(1) | **~16** |
+| **Full P0** | idle(8)·walk(8) template + throw/melee/cast(4) template + hit/death(1) + **ranged gun-fire (custom 4-dir×8f = 32)** | **~65** |
+| **Rich** | Full P0 + overwatch(8, template) + **fly-hover/fly-forward/teleport (custom)** | **~145** (or ~93 with 4-frame customs) |
+
+The single custom action (gun-fire) is ~half a Full-P0 character's cost. A **melee/thrown-only** unit (no gun, no powers) skips it → **~33 gens**. Flight is the expensive tier (two more customs).
 
 ## Roster math (against 2,000 gens/month)
-| Roster | MVP (~16) | Full P0 (~37) | Rich (~62) |
-|--------|-----------|---------------|-----------|
-| 10 | 160 | 370 | 620 |
-| 30 | 480 | 1,110 | 1,860 |
-| 50 | 800 | 1,850 | 3,100 (~1.5 mo) |
-| 100 | 1,600 | 3,700 (~2 mo) | 6,200 (~3 mo) |
+| Roster | MVP (~16) | Full P0 (~65) | Rich (~145) |
+|--------|-----------|---------------|-------------|
+| 10 | 160 | 650 | 1,450 |
+| 30 | 480 | 1,950 (~1 mo) | 4,350 (~2 mo) |
+| 50 | 800 | 3,250 (~1.6 mo) | 7,250 (~3.6 mo) |
 
-Your monthly plan ≈ **125 MVP / 54 Full-P0 / 32 Rich** characters. A realistic launch roster (20–40 fully-animated) = **one month, in-budget.**
+Your plan ≈ **125 MVP / ~30 Full-P0 / ~14 Rich** characters per month. A launch roster of **20–30 fully-animated** heroes = **~1 month, in-budget**. Still cheap — but customs (guns/beams/flight) are where the gens go, so pick them deliberately.
 
 ## Maps & FX
 - Map: 1 top-down tileset + ~3 style-matched props = **~4 gens/map** (theme's tileset reuses across many maps).

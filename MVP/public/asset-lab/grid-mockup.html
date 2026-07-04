@@ -38,6 +38,8 @@
   .hud button:hover{border-color:#443c30}
   .hud button.fire{background:var(--gold);color:#151109;border-color:var(--gold);font-weight:700}
   .hud .status{color:var(--bone)}
+  .hud label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+  .hud input[type=range]{accent-color:var(--gold);width:110px}
   .legend{margin-top:16px;display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:var(--dim);letter-spacing:.05em}
   .legend b{color:var(--muted)}
   .foot{margin-top:24px;border-top:1px solid var(--line);padding-top:16px;color:var(--dim);font-size:12px;font-family:system-ui,sans-serif}
@@ -53,6 +55,11 @@
     <button class="fire" id="fire">🔫 Fire at enemy</button>
     <button id="reset">↺ Reset</button>
     <span class="status" id="status">Select a unit (gold-ringed).</span>
+  </div>
+  <div class="hud" style="margin-top:10px;gap:18px">
+    <label>Speed <input id="fps" type="range" min="3" max="12" value="6"> <span id="fpsv">6 fps</span></label>
+    <label>Projectile release frame <input id="rel" type="range" min="0" max="8" value="4"> <span id="relv">auto</span></label>
+    <span class="sub" style="color:var(--dim);font-size:11px">← tune the timing, then Fire. This is the "builder" knob.</span>
   </div>
   <div class="legend">
     <span><b>cyan ring</b> = your squad</span><span><b>red ring</b> = enemy</span>
@@ -110,44 +117,55 @@
     status(`${sel.name} moved — now facing ${sel.dir}.`);
     render();
   };
-  // attack animations we actually generated (folder -> frame count). Only these
-  // directions exist yet — that's the per-direction generation cost in action.
-  const ATTACK = { surge:'blast', merc:'throw' };
-  const ANIM = { surge_blast_south:6, surge_blast_east:6, merc_throw_south:7 };
+  // Per-unit attack clip: folder = <id>_<type>_<dir>. `frames` = frame count,
+  // `release` = the frame the projectile LEAVES on (the "trigger frame"). Only
+  // the directions listed were generated — the per-direction cost in action.
+  const ATTACKS = {
+    surge: { type:'blast', frames:6, release:4, dirs:['south','east'] },   // template fireball, 1 gen/dir
+    merc:  { type:'fire',  frames:9, release:3, dirs:['south','east'] },   // custom rifle-fire, ~8 gen/dir
+  };
   const DIRFOLDER = { S:'south', E:'east', N:'north', W:'west', SE:'south-east', SW:'south-west', NE:'north-east', NW:'north-west' };
-  function playAttack(el, key, frames, dur){
+  let FPS = 6;                 // owner decision: 6 fps default (tunable)
+  let RELEASE_OVERRIDE = null; // tuner: override the trigger frame live
+  function playAttack(el, key, frames){
     const img = el.querySelector('img'); const base = img.getAttribute('src');
-    let i=0; const step = dur/frames;
-    const iv = setInterval(()=>{ img.src=`anim/${key}/${i}.png`; if(++i>=frames){ clearInterval(iv); img.src=base; } }, step);
+    let i=0; const stepMs = 1000/FPS;
+    const iv = setInterval(()=>{ img.src=`anim/${key}/${i}.png`; if(++i>=frames){ clearInterval(iv); img.src=base; } }, stepMs);
+  }
+  function launch(from,to,color){
+    const p=document.createElement('div'); p.className='proj'; p.style.color=color;
+    const torso = TILE*0.55; // upper-body origin, not the feet
+    const sx=from.x*TILE+TILE/2, sy=from.y*TILE+TILE/2 - torso, ex=to.x*TILE+TILE/2, ey=to.y*TILE+TILE/2 - torso;
+    p.style.left=(sx-6)+'px'; p.style.top=(sy-6)+'px'; board.appendChild(p);
+    const t0=performance.now(), dur=300;
+    (function step(t){ const k=Math.min(1,(t-t0)/dur);
+      p.style.left=(sx+(ex-sx)*k-6)+'px'; p.style.top=(sy+(ey-sy)*k-6)+'px';
+      if(k<1) requestAnimationFrame(step);
+      else { p.style.transition='opacity .15s'; p.style.opacity='0'; to.el && to.el.animate([{filter:'brightness(3)'},{filter:'brightness(1)'}],{duration:260}); setTimeout(()=>p.remove(),160); }
+    })(t0);
   }
   function shoot(from,to){
     from.dir=facing(to.x-from.x, to.y-from.y);
     const color = from.id==='surge' ? '#38f0ff' : '#ffd24a';
     render();
-    // play the real attack animation if we generated it for this facing
-    const type = ATTACK[from.id];
-    const key = type && `${from.id}_${type}_${DIRFOLDER[from.dir]}`;
-    const hasAnim = key && ANIM[key];
-    if (hasAnim) playAttack(from.el, key, ANIM[key], 480);
-    status(hasAnim
-      ? `${from.name} — ${type} animation (facing ${from.dir}) + projectile.`
-      : `${from.name} fires (facing ${from.dir}). No ${type||'attack'} animation generated for ${from.dir} yet — static token.`);
-    // projectile from the torso (not the feet)
-    const p=document.createElement('div'); p.className='proj'; p.style.color=color;
-    const torso = TILE*0.55;  // raise origin to upper body
-    const sx=from.x*TILE+TILE/2, sy=from.y*TILE+TILE/2 - torso, ex=to.x*TILE+TILE/2, ey=to.y*TILE+TILE/2 - torso;
-    const fire = () => {
-      p.style.left=(sx-6)+'px'; p.style.top=(sy-6)+'px'; board.appendChild(p);
-      const t0=performance.now(), dur=300;
-      (function step(t){ const k=Math.min(1,(t-t0)/dur);
-        p.style.left=(sx+(ex-sx)*k-6)+'px'; p.style.top=(sy+(ey-sy)*k-6)+'px';
-        if(k<1) requestAnimationFrame(step);
-        else { p.style.transition='opacity .15s'; p.style.opacity='0'; to.el && to.el.animate([{filter:'brightness(3)'},{filter:'brightness(1)'}],{duration:260}); setTimeout(()=>p.remove(),160); }
-      })(t0);
-    };
-    if (hasAnim) setTimeout(fire, 220); else fire();  // let the wind-up start first
+    const cfg = ATTACKS[from.id];
+    const dir = DIRFOLDER[from.dir];
+    const hasAnim = cfg && cfg.dirs.includes(dir);
+    if (hasAnim){
+      const frameMs = 1000/FPS;
+      const release = RELEASE_OVERRIDE!=null ? Math.min(RELEASE_OVERRIDE, cfg.frames-1) : cfg.release;
+      playAttack(from.el, `${from.id}_${cfg.type}_${dir}`, cfg.frames);
+      status(`${from.name}: ${cfg.type} · ${FPS} fps · projectile releases on frame ${release}/${cfg.frames}.`);
+      setTimeout(()=>launch(from,to,color), release*frameMs); // fire ON the release frame
+    } else {
+      status(`${from.name} fires (facing ${from.dir}). No ${cfg?cfg.type:'attack'} clip generated for ${from.dir} yet — static token.`);
+      launch(from,to,color);
+    }
   }
   document.getElementById('fire').onclick=()=>{ if(!sel){status('Select one of your units first.');return;} const enemy=units.find(u=>u.team==='red'); shoot(sel,enemy); };
+  const fpsEl=document.getElementById('fps'), relEl=document.getElementById('rel');
+  fpsEl.oninput=()=>{ FPS=+fpsEl.value; document.getElementById('fpsv').textContent=FPS+' fps'; };
+  relEl.oninput=()=>{ RELEASE_OVERRIDE=+relEl.value; document.getElementById('relv').textContent='frame '+RELEASE_OVERRIDE; };
   document.getElementById('reset').onclick=()=>{ units[0].x=1;units[0].y=2;units[0].dir='E'; units[1].x=1;units[1].y=4;units[1].dir='E'; units[2].x=8;units[2].y=3;units[2].dir='W'; sel=null; status('Reset. Select a unit.'); render(); };
   function status(s){ document.getElementById('status').textContent=s; }
   render();
