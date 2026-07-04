@@ -5,6 +5,7 @@
 
 import { GrappleState, MartialArtsStyleId, GrappleInteraction } from '../EventBridge';
 import martialArtsData from '../../data/martial-arts.json';
+import { getDodgeColumnShift } from '../../data/dodgeSystem';
 
 export interface CharacterMartialArtsTraining {
   styleId: MartialArtsStyleId;
@@ -107,8 +108,11 @@ export function calculateTechniqueHitChance(
     case 'MEL': primaryBonus = attackerMEL / 4; break;
   }
 
-  // Base hit chance
-  const baseChance = attackerMEL + beltBonus + primaryBonus - (defenderAGL / 3) + 30;
+  // Base hit chance. Defender evasion comes from the owner's Dodge Chart
+  // (column-shift), scaled ×3 to preserve the prior human-range feel while
+  // compressing cosmic agility (raw AGL/3 would give a deity −300).
+  const dodge = Math.abs(getDodgeColumnShift(defenderAGL)) * 3;
+  const baseChance = attackerMEL + beltBonus + primaryBonus - dodge + 30;
 
   return Math.max(5, Math.min(95, baseChance));
 }

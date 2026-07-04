@@ -47,10 +47,13 @@ export function getDodgeColumnShift(agility: number): number {
 
 /**
  * Convert the dodge column-shift into a flat to-hit penalty percentage for the
- * current hit-roll model. One column shift ≈ 8% (matches the existing
- * cover/flanking step in the combat core). Clamp keeps cosmic evasion sane.
+ * current hit-roll model. One column shift = 5%: an ordinary human (−2/−3 CS)
+ * shaves ~10–15% off a shot (you can't truly "dodge" a bullet, only make it
+ * harder), while superhuman/cosmic agility ramps toward untouchable
+ * (−7 → 35%, −14 → 70%). Tuned so a competent shooter still lands ~60% on an
+ * average person but a superhuman evader is clearly hard to hit.
  */
-export const COLUMN_SHIFT_PCT = 8;
+export const COLUMN_SHIFT_PCT = 5;
 export function getDodgeAccuracyPenalty(agility: number): number {
   return Math.abs(getDodgeColumnShift(agility)) * COLUMN_SHIFT_PCT;
 }

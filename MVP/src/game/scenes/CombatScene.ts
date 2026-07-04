@@ -77,7 +77,10 @@ import {
   PROJECTILE_FORCES,
   KnockbackResult,
 } from '../../data/knockbackSystem';
-import { getCharacterWeight } from '../../data/strengthSystem';
+import { getCharacterWeight, getStrengthDamageBonus } from '../../data/strengthSystem';
+import { statMod, statBonus, statStep } from '../../data/combatStatScaling';
+import { getDodgeAccuracyPenalty } from '../../data/dodgeSystem';
+import { rankNorm } from '../../data/rankSystem';
 import { MORALE_EFFECTS, getMoraleLevel } from '../../data/characterSheet';
 import { getWeaponByName, getWeaponById } from '../../data/weapons';
 // Escalation system imports
@@ -1992,7 +1995,7 @@ export class CombatScene extends Phaser.Scene {
       shieldRegen?: number;
       dr?: number;
       stoppingPower?: number;
-      stats?: { AGI?: number; STR?: number; INT?: number; WIL?: number; PER?: number; CON?: number; MEL?: number; RNG?: number; SPD?: number };
+      stats?: { MEL?: number; AGL?: number; STR?: number; STA?: number; INT?: number; INS?: number; CON?: number; PSI?: number };
       powers?: string[];
       equipment?: string[];
       threatLevel?: string;
@@ -2006,7 +2009,7 @@ export class CombatScene extends Phaser.Scene {
     const weaponData = getWeaponData(weaponKey);
 
     // Map CombatCharacter stats to Unit flat properties
-    // CombatCharacter uses: AGI, STR, INT, WIL, PER, CON, MEL, RNG, SPD
+    // CombatCharacter uses the canonical rank-scale keys: MEL, AGL, STR, STA, INT, INS, CON (PSI mirrors CON)
     // Unit uses: str, agl, int, sta, ins, con, mel, evasion
     const stats = characterData.stats || {};
 
@@ -2016,23 +2019,23 @@ export class CombatScene extends Phaser.Scene {
       team: characterData.team,
       hp: characterData.health,
       maxHp: characterData.health,
-      ap: 6 + Math.floor((stats.SPD || 50) / 25), // SPD affects AP (50 = 6 AP, 100 = 10 AP)
-      maxAp: 6 + Math.floor((stats.SPD || 50) / 25),
+      ap: 6 + statStep(stats.AGL ?? 20, 15, 3), // AGL grants a small AP ramp (rank scale)
+      maxAp: 6 + statStep(stats.AGL ?? 20, 15, 3),
       position,
       facing: characterData.team === 'blue' ? 90 : 270, // Face enemy side
       statusEffects: [],
       weapon: weaponKey as WeaponType,
       fireMode: 'single' as FireMode,
       personality: 'tactical',
-      // Map stats from character sheet to combat unit
-      str: stats.STR || 50,
-      agl: stats.AGI || 50,
-      int: stats.INT || 50,
-      sta: stats.CON || 50, // CON -> stamina for recovery
-      ins: stats.PER || 50, // PER -> instinct for detection
-      con: stats.WIL || 50, // WIL -> concentration for fear resistance
-      mel: stats.MEL || 50,
-      evasion: Math.floor((stats.AGI || 50) / 2) + 10, // AGI-based evasion
+      // Map stats from character sheet to combat unit (rank scale: human default 20, NOT 50=superhuman)
+      str: stats.STR ?? 20,
+      agl: stats.AGL ?? 20,
+      int: stats.INT ?? 20,
+      sta: stats.STA ?? 20, // stamina drives recovery
+      ins: stats.INS ?? 20, // instinct drives detection
+      con: stats.CON ?? 20, // constitution drives fear resistance / stability
+      mel: stats.MEL ?? 20,
+      evasion: 10 + statBonus(stats.AGL ?? 20) * 2, // AGL-based evasion (rank scale)
       dr: characterData.dr || 0,
       stoppingPower: characterData.stoppingPower || 0,
       shieldHp: characterData.shield || 0,
@@ -2555,9 +2558,9 @@ export class CombatScene extends Phaser.Scene {
       const personality = this.determinePersonality(char.stats, char.powers);
 
       // Calculate HP from STA stat (base 50 + STA)
-      const maxHp = 50 + char.stats.STA;
+      const maxHp = 50 + rankNorm(char.stats.STA); // STA is rank scale (1-39 human); rankNorm keeps the old 50-120 HP band
       // Calculate AP from AGL stat (base 4 + AGL/20)
-      const maxAp = Math.min(8, 4 + Math.floor(char.stats.AGL / 20));
+      const maxAp = Math.min(8, 4 + statStep(char.stats.AGL, 12, 4)); // AGL AP ramp (rank scale)
 
       // Assign a random soldier sprite (1-32)
       const spriteNum = ((index * 7 + 1) % 32) + 1; // Deterministic but varied
@@ -2619,8 +2622,8 @@ export class CombatScene extends Phaser.Scene {
       const weapon = this.mapEquipmentToWeapon(char.equipment, char.powers);
       const personality = this.determinePersonality(char.stats, char.powers);
 
-      const maxHp = 50 + char.stats.STA;
-      const maxAp = Math.min(8, 4 + Math.floor(char.stats.AGL / 20));
+      const maxHp = 50 + rankNorm(char.stats.STA); // STA is rank scale (1-39 human); rankNorm keeps the old 50-120 HP band
+      const maxAp = Math.min(8, 4 + statStep(char.stats.AGL, 12, 4)); // AGL AP ramp (rank scale)
 
       // Assign a different soldier sprite for enemies (offset by 16)
       const spriteNum = ((index * 5 + 17) % 32) + 1; // Different pattern than blue team
@@ -2701,14 +2704,15 @@ export class CombatScene extends Phaser.Scene {
       weapon: unitData.weapon ?? 'rifle',
       fireMode: (unitData as any).fireMode ?? 'single',
       personality: unitData.personality ?? 'tactical',
-      str: unitData.str ?? 50,
-      agl: unitData.agl ?? 50,
-      int: unitData.int ?? 50,  // Intelligence for accuracy
-      sta: unitData.sta ?? 50,  // Stamina for recovery
-      ins: unitData.ins ?? 50,  // Instinct for detection
-      con: unitData.con ?? 50,  // Concentration for fear resistance
-      mel: unitData.mel ?? 50,  // Melee skill
-      evasion: unitData.evasion ?? 30,
+      // Rank scale: default a stat-less spawn to an ordinary human (20), NOT 50 (=superhuman)
+      str: unitData.str ?? 20,
+      agl: unitData.agl ?? 20,
+      int: unitData.int ?? 20,  // Intelligence for accuracy
+      sta: unitData.sta ?? 20,  // Stamina for recovery
+      ins: unitData.ins ?? 20,  // Instinct for detection
+      con: unitData.con ?? 20,  // Concentration for fear resistance
+      mel: unitData.mel ?? 20,  // Melee skill
+      evasion: unitData.evasion ?? 15,
       dr: unitData.dr ?? 0,
       stoppingPower: unitData.stoppingPower ?? 0, // Default no armor
       armorFlammability: (unitData as any).armorFlammability ?? UNARMORED_FLAMMABILITY,
@@ -2732,7 +2736,7 @@ export class CombatScene extends Phaser.Scene {
       vision: unitData.vision ?? {
         facing: unitData.facing ?? 90,
         angle: 120,   // Human field of view
-        range: 12 + Math.floor((unitData.ins ?? 50) / 10),  // INS improves detection range
+        range: 12 + statStep(unitData.ins ?? 20),  // INS improves detection range (rank scale)
       },
     };
     // Convert grid position to isometric screen position
@@ -3222,7 +3226,7 @@ export class CombatScene extends Phaser.Scene {
 
       // Check for saving throw based on CON
       if (stunEffect.savingThrow) {
-        const conMod = (target.con - 50) * 0.5; // CON 50 is baseline
+        const conMod = statMod(target.con) * 2; // rank-scale stun resistance (higher CON = harder to stun)
         const stunRoll = Math.random() * 100 + conMod;
 
         if (stunRoll < 50) {
@@ -3616,8 +3620,9 @@ export class CombatScene extends Phaser.Scene {
     confidence: 'likely' | 'possible' | 'unlikely';
     unconsciousThreshold: number;
   } {
-    // Calculate expected damage (using average hit result)
-    const baseDamage = weapon.damage + Math.floor(attacker.str / 10);
+    // Calculate expected damage (using average hit result).
+    // Must mirror the resolution path's STR bonus exactly so predicted == dealt.
+    const baseDamage = weapon.damage + getStrengthDamageBonus(attacker.str);
     const avgDamageMultiplier = 0.85; // Weighted average: 25% graze (0.5) + 60% hit (1.0) + 15% crit (1.5)
     const expectedDamage = Math.floor(baseDamage * avgDamageMultiplier);
 
@@ -4502,7 +4507,7 @@ export class CombatScene extends Phaser.Scene {
       }
 
       // Deal grapple damage (more for super strength, plus belt bonus)
-      const baseDamage = Math.floor(attacker.str / 10) + 5 + Math.floor(attackerBeltBonus / 2);
+      const baseDamage = getStrengthDamageBonus(attacker.str) + 5 + Math.floor(attackerBeltBonus / 2);
       const damage = isSuperStrength ? baseDamage * 2 : baseDamage;
       target.hp -= damage;
       this.updateHealthBar(target);
@@ -5241,17 +5246,22 @@ export class CombatScene extends Phaser.Scene {
       }
     }
 
-    // AGL bonus for attacker (every 5 AGL above 50 = +1%)
-    hitChance += Math.floor((attacker.agl - 50) / 5);
+    // AGL bonus for attacker — steadier, faster aim (rank scale: 0 at trained-human baseline)
+    hitChance += statMod(attacker.agl);
 
-    // INT bonus for attacker (every 5 INT above 50 = +1% precision)
-    // Intelligence helps with aiming, calculating trajectories
-    hitChance += Math.floor((attacker.int - 50) / 5);
+    // INT bonus for attacker — aiming, trajectory calculation (rank scale)
+    hitChance += statMod(attacker.int);
+
+    // === DODGE CHART (defender AGL → attacker column-shift penalty) ===
+    // The owner's Dodge Chart: an agile target is harder to hit. Zero for an
+    // ordinary human, ramping to near-untouchable at cosmic agility. This is the
+    // defender-side evasion that ranged to-hit was missing entirely.
+    hitChance -= getDodgeAccuracyPenalty(target.agl);
 
     // INS bonus for attacker when target is flanked or in blindspot
     // High instinct = better at exploiting enemy vulnerabilities
     if (this.getFlankingBonusForUnits(attacker, target) > 0) {
-      hitChance += Math.floor((attacker.ins - 50) / 10); // Smaller bonus
+      hitChance += statBonus(attacker.ins); // one-sided, flanking-only
     }
 
     // Injury penalty (from crippled arm, concussion, etc.)
@@ -5264,12 +5274,9 @@ export class CombatScene extends Phaser.Scene {
       hitChance += attacker.moraleAccuracyMod;
     }
 
-    // CON bonus for stability under fire (reduces suppression/fear effects)
-    // High constitution = steady hands, better focus despite chaos
-    // Every 10 CON above 50 = +2% accuracy (max +10% at CON 100)
-    if (attacker.con > 50) {
-      hitChance += Math.floor((attacker.con - 50) / 10) * 2;
-    }
+    // CON bonus for stability under fire — steady hands despite chaos.
+    // statBonus is one-sided (0 at/below the human baseline), so no >50 gate.
+    hitChance += statBonus(attacker.con);
 
     // === FLANKING BONUS ===
     // Attack angle relative to target's facing direction
@@ -5560,7 +5567,7 @@ export class CombatScene extends Phaser.Scene {
           // Calculate base vision range (8 tiles default)
           // INS bonus: every 10 INS above 50 = +1 tile range (max +5 at INS 100)
           const baseVisionRange = 8;
-          const insBonus = friendly.ins > 50 ? Math.floor((friendly.ins - 50) / 10) : 0;
+          const insBonus = statStep(friendly.ins);
           const visionRange = baseVisionRange + insBonus;
 
           // Calculate distance to enemy
@@ -6634,7 +6641,10 @@ export class CombatScene extends Phaser.Scene {
       const suppressedPenalty = attacker.statusEffects?.some(e => e.id === 'suppressed') ? -20 : 0;
       // Strategic morale modifier (+15% ecstatic to -30% broken)
       const moraleAccMod = attacker.moraleAccuracyMod || 0;
-      const effectiveAccuracy = weapon.accuracy + (attacker.agl - 50) * 0.3 + fireModeConfig.accuracyPenalty + suppressedPenalty + moraleAccMod;
+      // Attacker aim (rank scale) minus the defender's Dodge Chart column-shift.
+      // This is the resolution path — keep it dodge-aware to match the shown hit%.
+      const dodgePenalty = getDodgeAccuracyPenalty(target.agl);
+      const effectiveAccuracy = weapon.accuracy + statMod(attacker.agl) - dodgePenalty + fireModeConfig.accuracyPenalty + suppressedPenalty + moraleAccMod;
       const hitResult = getHitResult(roll, effectiveAccuracy);
 
       // Get full damage definition from damage system
@@ -6664,13 +6674,13 @@ export class CombatScene extends Phaser.Scene {
       // Calculate damage based on hit result
       let damage = 0;
       // Fire mode: shots × damage per shot multiplier
-      let baseDamage = Math.floor((weapon.damage + Math.floor(attacker.str / 10)) * fireModeConfig.damagePerShot * fireModeConfig.shotsPerAttack);
+      let baseDamage = Math.floor((weapon.damage + getStrengthDamageBonus(attacker.str)) * fireModeConfig.damagePerShot * fireModeConfig.shotsPerAttack);
 
       // MEL bonus for melee weapons (fist, super_punch, knives, etc.)
-      // Melee skill adds damage: every 10 MEL above 50 = +2 damage (max +10 at MEL 100)
+      // Melee skill adds damage on the rank scale (statBonus is 0 below the human baseline).
       const isMeleeWeapon = weapon.visual?.type === 'melee' || weapon.range <= 2;
-      if (isMeleeWeapon && attacker.mel > 50) {
-        baseDamage += Math.floor((attacker.mel - 50) / 10) * 2;
+      if (isMeleeWeapon) {
+        baseDamage += statBonus(attacker.mel);
       }
 
       // Strategic morale damage modifier (+10% ecstatic to -15% broken)
@@ -8039,12 +8049,8 @@ export class CombatScene extends Phaser.Scene {
         // Base AP from maxAp
         unit.ap = unit.maxAp;
 
-        // STA bonus: High stamina = more endurance = bonus AP
-        // Every 25 STA above 50 = +1 AP (max +2 at STA 100)
-        if (unit.sta > 50) {
-          const staBonus = Math.floor((unit.sta - 50) / 25);
-          unit.ap += staBonus;
-        }
+        // STA bonus: high stamina = more endurance = bonus AP (rank scale, capped +2)
+        unit.ap += statStep(unit.sta, 20, 2);
 
         // Apply AP penalty from injuries (broken bone, winded)
         if (unit.apPenalty && unit.apPenalty > 0) {
