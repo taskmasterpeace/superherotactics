@@ -10,6 +10,7 @@ import { getMood } from '../../data/moodSystem';
 import { getPhysicalState } from '../../data/injuryEngine';
 import { ALL_WEAPONS } from '../../data/weapons';
 import { VEHICLES as ALL_VEHICLE_TEMPLATES, getVehicleCost } from '../../data/vehicleSystem';
+import { getCityNameBySector } from '../../data/cities';
 // TC-004: Territory display imports
 import {
   getSectorControl,
@@ -503,14 +504,24 @@ const MessagesPanel: React.FC<{
                         <div className="flex items-center gap-1.5 text-[10px]">
                           <span style={{ color: mood.color }} title="Mood">{mood.emoji} {mood.label}</span>
                           <span className="text-muted-foreground">·</span>
-                          <span className="text-muted-foreground uppercase">{char.status}</span>
+                          {/* Activity/status with detail (e.g. "TRAINING · Martial Arts") */}
+                          <span className="text-muted-foreground uppercase" title="Current activity">
+                            {String(char.status || 'ready').replace(/_/g, ' ')}
+                            {char.statusDetail ? ` · ${char.statusDetail}` : ''}
+                          </span>
                         </div>
                         <p className="text-[10px] text-muted-foreground truncate" title="Equipped weapon">
                           {weapon ? `${weapon.emoji || '🔫'} ${weapon.name}` : '— unarmed —'}
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                        <p className="text-primary font-mono font-bold text-sm">{char.sector || 'HQ'}</p>
+                        {/* Location: city name (primary) + sector code (secondary) */}
+                        <div className="text-right leading-tight">
+                          <p className="text-primary font-bold text-[11px] truncate max-w-[90px]">
+                            {getCityNameBySector(char.sector) || (char.location?.city) || 'HQ'}
+                          </p>
+                          <p className="text-muted-foreground font-mono text-[9px]">{char.sector || '—'}</p>
+                        </div>
                         <button
                           onClick={(e) => { e.stopPropagation(); onCharacterClick?.(char); }}
                           title={`Open ${char.name}'s sheet`}
@@ -529,16 +540,31 @@ const MessagesPanel: React.FC<{
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setCtxMenu(null)} onContextMenu={(e) => { e.preventDefault(); setCtxMenu(null); }} />
                   <div
-                    className="fixed z-50 w-44 rounded-lg border-2 border-black bg-card p-1 shadow-xl"
-                    style={{ left: Math.min(ctxMenu.x, window.innerWidth - 190), top: Math.min(ctxMenu.y, window.innerHeight - 200) }}
+                    className="fixed z-50 w-52 rounded-lg border-2 border-black bg-card p-1 shadow-xl max-h-[80vh] overflow-y-auto"
+                    style={{ left: Math.min(ctxMenu.x, window.innerWidth - 220), top: Math.min(ctxMenu.y, window.innerHeight - 380) }}
                   >
                     {[
-                      { label: '🚨 Patrol this city', act: () => useGameStore.getState().setCharacterStatus(ctxMenu.charId, 'patrol') },
-                      { label: '💼 Work day job', act: () => useGameStore.getState().setCharacterStatus(ctxMenu.charId, 'personal_life') },
+                      { group: 'MOVEMENT' },
+                      { label: '✈️ Travel…', act: () => { onCharacterSelect(ctxMenu.charId, false); setActiveTab('character'); } },
+                      { label: '🚗 Assign vehicle', act: () => setActiveTab('vehicles') },
+                      { group: 'ACTIVITIES' },
+                      { label: '🔍 Investigate', act: () => useGameStore.getState().setCurrentView('investigation') },
+                      { label: '🚨 Patrol here', act: () => useGameStore.getState().setCharacterStatus(ctxMenu.charId, 'patrol') },
+                      { label: '🎓 Train', act: () => useGameStore.getState().setCurrentView('training') },
+                      { label: '🧪 Research', act: () => useGameStore.getState().setCurrentView('engineering') },
+                      { label: '🔧 Engineer', act: () => { useGameStore.getState().setCharacterStatus(ctxMenu.charId, 'engineering'); useGameStore.getState().setCurrentView('engineering'); } },
+                      { label: '💼 Day job', act: () => useGameStore.getState().setCharacterStatus(ctxMenu.charId, 'personal_life') },
+                      { label: '📵 Off the grid', act: () => useGameStore.getState().setCharacterStatus(ctxMenu.charId, 'off_the_grid') },
+                      { group: 'SUPPORT' },
+                      { label: '🏥 Hospital', act: () => useGameStore.getState().setCurrentView('hospital') },
                       { label: '🟢 Recall to ready', act: () => useGameStore.getState().setCharacterStatus(ctxMenu.charId, 'ready') },
                       { label: '📞 Call them', act: () => useGameStore.getState().startCharacterCall(ctxMenu.charId) },
                       { label: '👤 Open sheet', act: () => useGameStore.getState().openCharacterSheet(ctxMenu.charId) },
-                    ].map(item => (
+                    ].map((item: any, i) => item.group ? (
+                      <div key={`g${i}`} className="px-2 pt-1.5 pb-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground border-t border-black/10 first:border-0">
+                        {item.group}
+                      </div>
+                    ) : (
                       <button
                         key={item.label}
                         onClick={() => { item.act(); setCtxMenu(null); }}

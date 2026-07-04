@@ -100,6 +100,25 @@ export function getCitiesByCountry(country: string): City[] {
   return cities.filter(c => c.country.toLowerCase() === country.toLowerCase() || c.countryIso === country.toUpperCase());
 }
 
+// Sector → representative city name (largest city in the sector). Memoized.
+let _sectorCityIndex: Map<string, string> | null = null;
+export function getCityNameBySector(sector: string | undefined | null): string | null {
+  if (!sector) return null;
+  if (!_sectorCityIndex) {
+    _sectorCityIndex = new Map();
+    const bestPop: Record<string, number> = {};
+    for (const c of cities) {
+      if (!c.sector) continue;
+      const pop = (c as any).population || 0;
+      if (!(c.sector in bestPop) || pop > bestPop[c.sector]) {
+        bestPop[c.sector] = pop;
+        _sectorCityIndex.set(c.sector, c.name);
+      }
+    }
+  }
+  return _sectorCityIndex.get(sector) || null;
+}
+
 export function getCitiesByType(type: string): City[] {
   return cities.filter(c =>
     c.cityType1 === type ||
