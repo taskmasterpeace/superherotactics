@@ -1,0 +1,135 @@
+<title>SHT — Asset Cost Calculator</title>
+<style>
+  :root{
+    --bg:#12100d;--panel:#1c1813;--panel2:#221d16;--line:#2e2820;--gold:#f5b21a;--cyan:#38bdf8;
+    --green:#7fd17f;--red:#e0603a;--bone:#e8e0d2;--muted:#8a8172;--dim:#5f5849;
+    --mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1000px 460px at 50% -10%,#1e1a13,var(--bg) 60%),var(--bg);
+    color:var(--bone);font-family:var(--mono);line-height:1.5}
+  .wrap{max-width:840px;margin:0 auto;padding:30px 20px 60px}
+  .eyebrow{font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin:0 0 8px}
+  h1{font-family:system-ui,sans-serif;font-weight:800;font-size:clamp(23px,4vw,34px);margin:0}
+  .lede{color:var(--muted);font-family:system-ui,sans-serif;max-width:64ch;margin:10px 0 0}
+  .lede b{color:var(--bone)}
+  .panel{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:22px}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0}
+  label.q{font-size:13px;color:var(--bone)}
+  .sub{font-size:11px;color:var(--dim)}
+  input[type=range]{accent-color:var(--gold);width:260px;max-width:55vw}
+  .seg{display:flex;gap:6px}
+  .seg button{font-family:var(--mono);font-size:12px;background:var(--panel);color:var(--muted);border:1px solid var(--line);border-radius:7px;padding:7px 11px;cursor:pointer}
+  .seg button.on{background:var(--gold);color:#151109;border-color:var(--gold);font-weight:700}
+  .big{font-family:system-ui,sans-serif;font-weight:800;font-size:clamp(28px,6vw,46px);letter-spacing:-.02em;color:var(--gold);font-variant-numeric:tabular-nums}
+  .out{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px}
+  .stat{background:#0f0d09;border:1px solid var(--line);border-radius:11px;padding:14px 16px}
+  .stat .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .stat .v{font-family:system-ui,sans-serif;font-weight:800;font-size:26px;margin-top:4px;font-variant-numeric:tabular-nums}
+  .stat .n{font-size:11px;color:var(--dim);margin-top:2px}
+  .v.good{color:var(--green)} .v.warn{color:var(--gold)} .v.hot{color:var(--red)}
+  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
+  th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;letter-spacing:.06em} td{color:var(--bone)}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .verdict{margin-top:22px;padding:16px 18px;border-radius:12px;border:1px solid #2c4a30;background:rgba(127,209,127,.06);font-family:system-ui,sans-serif}
+  .verdict b{color:var(--green)}
+  .foot{margin-top:26px;border-top:1px solid var(--line);padding-top:16px;color:var(--dim);font-size:12px;font-family:system-ui,sans-serif}
+  h3{font-family:system-ui,sans-serif;font-size:14px;margin:0 0 4px}
+</style>
+<div class="wrap">
+  <p class="eyebrow">SuperHero Tactics · Asset Cost Calculator</p>
+  <h1>What does the art actually cost?</h1>
+  <p class="lede">PixelLab bills in <b>generations</b>. A character's 8-direction token = <b>3 gens</b>. Each animation is <b>1 gen per direction</b>. Your plan gives <b>~2,000 generations/month</b>. Dial a roster below and see the real cost in gens, dollars, and wall-clock time.</p>
+
+  <div class="panel">
+    <div class="row">
+      <label class="q">Roster size <span class="sub" id="rlabel">— 30 characters</span></label>
+      <input id="roster" type="range" min="1" max="150" value="30">
+    </div>
+    <div class="row">
+      <label class="q">Animation depth per character</label>
+      <div class="seg" id="tier">
+        <button data-t="mvp">MVP (16)</button>
+        <button data-t="full" class="on">Full P0 (37)</button>
+        <button data-t="rich">Rich +hero (62)</button>
+      </div>
+    </div>
+    <div class="row">
+      <label class="q">Attack directions <span class="sub">move/idle are always 8</span></label>
+      <div class="seg" id="atk">
+        <button data-a="4" class="on">4-dir (cheaper)</button>
+        <button data-a="8">8-dir</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="row" style="margin:0"><h3>Per character</h3><div class="big" id="perchar">37</div></div>
+    <div class="sub" id="percharBreak"></div>
+    <div class="out" style="margin-top:16px">
+      <div class="stat"><div class="k">Total generations</div><div class="v" id="totGen">1,110</div><div class="n" id="totGenN"></div></div>
+      <div class="stat"><div class="k">Months of your plan</div><div class="v" id="months">0.6</div><div class="n">at ~2,000 gens / month</div></div>
+      <div class="stat"><div class="k">Dollar cost</div><div class="v" id="dollars">$15</div><div class="n" id="dollarsN">flat monthly sub · marginal ≈ $0 in-plan</div></div>
+      <div class="stat"><div class="k">Generation time</div><div class="v" id="time">~12 h</div><div class="n">~5 min/gen · 8 running at once · batchable overnight</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Per-character breakdown (Full P0, 4-dir attacks)</h3>
+    <table>
+      <tr><th>Item</th><th>Directions</th><th class="num">Gens</th></tr>
+      <tr><td>8-direction token (art)</td><td>8</td><td class="num">3</td></tr>
+      <tr><td>Idle · Walk</td><td>8 each</td><td class="num">16</td></tr>
+      <tr><td>Ranged · Throw · Melee · Cast</td><td>4 each</td><td class="num">16</td></tr>
+      <tr><td>Take-hit · Death</td><td>1 each</td><td class="num">2</td></tr>
+      <tr><td><b>Full P0 total</b></td><td></td><td class="num"><b>37</b></td></tr>
+      <tr><td>Map (tileset + ~3 props)</td><td>—</td><td class="num">~4</td></tr>
+      <tr><td>FX pack (bullets/beams/impacts)</td><td>—</td><td class="num">~13</td></tr>
+    </table>
+  </div>
+
+  <div class="verdict" id="verdict"></div>
+
+  <p class="foot">Playback speed locked to <b>6 fps</b> (your call). Money is not the constraint — your monthly plan covers a launch roster many times over. The real costs are <b>generation time</b> (batchable) and <b>engine wiring</b> (grid refactor + animation anchoring). Numbers are gens; $ assumes a flat ~$15/mo Tier-1/2 sub with ~2,000 gens included (marginal cost ≈ $0 until you exhaust the month, then ~$1/gen in credits).</p>
+</div>
+<script>
+  const TIERS = {
+    mvp:  { base:3, fixed:{idle:4, move:4, hit:0, death:1}, atk:{ranged:1} },
+    full: { base:3, fixed:{idle:8, move:8, hit:1, death:1}, atk:{ranged:1, throw:1, melee:1, cast:1} },
+    rich: { base:3, fixed:{idle:8, move:8, hit:1, death:1, fly_hover:8, fly_move:8, teleport:1, overwatch:8}, atk:{ranged:1, throw:1, melee:1, cast:1} },
+  };
+  const PLAN=2000, MIN_PER_GEN=5, CONCURRENCY=8, SUB=15;
+  let roster=30, tier='full', atk=4;
+  const $=id=>document.getElementById(id);
+  function perChar(){
+    const T=TIERS[tier]; let g=T.base;
+    for(const v of Object.values(T.fixed)) g+=v;
+    for(const k of Object.keys(T.atk)) g+=atk;
+    return g;
+  }
+  function fmt(n){ return n.toLocaleString('en-US'); }
+  function calc(){
+    const pc=perChar(), tot=pc*roster;
+    const months=tot/PLAN, hours=(tot*MIN_PER_GEN/CONCURRENCY)/60;
+    const inPlan = tot<=PLAN;
+    const dollars = inPlan ? SUB : Math.ceil(months)*SUB;
+    $('rlabel').textContent = `— ${roster} character${roster>1?'s':''}`;
+    $('perchar').textContent = pc;
+    $('percharBreak').textContent = `${TIERS[tier].base} art + ${pc-TIERS[tier].base} animation gens · ${atk}-dir attacks`;
+    $('totGen').textContent = fmt(tot);
+    $('totGenN').textContent = `${pc} gens × ${roster}`;
+    const mEl=$('months'); mEl.textContent = months<1? months.toFixed(2) : months.toFixed(1);
+    mEl.className = 'v ' + (months<=1?'good':months<=2?'warn':'hot');
+    $('dollars').textContent = '$'+fmt(dollars);
+    $('dollarsN').textContent = inPlan? 'covered by 1 month of your sub' : `~${Math.ceil(months)} months of sub (or credits for overflow)`;
+    $('time').textContent = hours<1? `~${Math.round(hours*60)} min` : hours<48? `~${hours.toFixed(0)} h` : `~${(hours/24).toFixed(1)} days`;
+    const v=$('verdict');
+    if(inPlan) v.innerHTML = `<b>✅ Easily doable.</b> A <b>${roster}-character</b> roster at this depth = <b>${fmt(tot)} generations</b> — that fits inside <b>one month</b> of your current plan (${months.toFixed(2)}×). Effectively the price of the subscription you already pay. The gating factor is generation time (~${hours<48?hours.toFixed(0)+'h':(hours/24).toFixed(1)+' days'}, batchable), not money.`;
+    else v.innerHTML = `<b style="color:var(--gold)">Doable over ~${Math.ceil(months)} months</b> (or buy credits). <b>${fmt(tot)} gens</b> exceeds one month's 2,000 — but you almost never need this many at once. A launch roster of 20–40 fully-animated characters is a single month, well in budget.`;
+  }
+  $('roster').oninput=e=>{ roster=+e.target.value; calc(); };
+  for(const b of document.querySelectorAll('#tier button')) b.onclick=()=>{ tier=b.dataset.t; document.querySelectorAll('#tier button').forEach(x=>x.classList.toggle('on',x===b)); calc(); };
+  for(const b of document.querySelectorAll('#atk button')) b.onclick=()=>{ atk=+b.dataset.a; document.querySelectorAll('#atk button').forEach(x=>x.classList.toggle('on',x===b)); calc(); };
+  calc();
+</script>
