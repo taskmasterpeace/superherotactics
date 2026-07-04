@@ -121,7 +121,8 @@
   // `release` = the frame the projectile LEAVES on (the "trigger frame"). Only
   // the directions listed were generated — the per-direction cost in action.
   const ATTACKS = {
-    surge: { type:'blast', frames:6, release:4, dirs:['south','east'] },   // template fireball, 1 gen/dir
+    // owner-tuned @ 6 fps. Surge releases on her final blast frame (set 8 → clamps to last of 6 = the discharge).
+    surge: { type:'blast', frames:6, release:8, dirs:['south','east'] },   // template fireball, 1 gen/dir
     merc:  { type:'fire',  frames:9, release:3, dirs:['south','east'] },   // custom rifle-fire, ~8 gen/dir
   };
   const DIRFOLDER = { S:'south', E:'east', N:'north', W:'west', SE:'south-east', SW:'south-west', NE:'north-east', NW:'north-west' };
@@ -153,7 +154,8 @@
     const hasAnim = cfg && cfg.dirs.includes(dir);
     if (hasAnim){
       const frameMs = 1000/FPS;
-      const release = RELEASE_OVERRIDE!=null ? Math.min(RELEASE_OVERRIDE, cfg.frames-1) : cfg.release;
+      // release clamps to the clip's last frame (a value like 8 on a 6-frame blast = "on the final/discharge frame")
+      const release = Math.min(RELEASE_OVERRIDE!=null ? RELEASE_OVERRIDE : cfg.release, cfg.frames-1);
       playAttack(from.el, `${from.id}_${cfg.type}_${dir}`, cfg.frames);
       status(`${from.name}: ${cfg.type} · ${FPS} fps · projectile releases on frame ${release}/${cfg.frames}.`);
       setTimeout(()=>launch(from,to,color), release*frameMs); // fire ON the release frame

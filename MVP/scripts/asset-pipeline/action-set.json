@@ -2,9 +2,13 @@
   "$comment": "THE ACTION VOCABULARY — the finite set of things a combat unit DOES. This is what tells the generator WHICH animations to make per character, and what the combat engine selects from at runtime. Every action maps to a PixelLab template (preferred) or a custom v3 action_description, plus how many of the 8 facings it needs. Generate P0 first; P1/P2 as the roster matures. dirs: 8 = all facings, 4 = cardinals (N/E/S/W), 1 = south only.",
   "version": 1,
   "playback": {
-    "$comment": "OWNER DECISION: default animation playback = 6 fps. Per-action overrides allowed (reactions can be snappier). Challenge #5: each imported animation should also record frameCount + triggerFrame (the frame that spawns the projectile / applies the hit).",
+    "$comment": "OWNER DECISION: default animation playback = 6 fps. Per-action overrides allowed (reactions can be snappier). Challenge #5: each imported animation records frameCount + triggerFrame (the frame that spawns the projectile / applies the hit). Rule: a value beyond the clip length clamps to the FINAL frame.",
     "defaultFps": 6,
-    "overrides": { "idle": 4, "take_hit": 8, "death": 6 }
+    "overrides": { "idle": 4, "take_hit": 8, "death": 6 },
+    "triggerFrame": {
+      "$comment": "which frame the projectile/hit fires on, per action. cast/ranged = late (on discharge); throw = mid-late; melee = mid. Owner-tuned: Surge blast fires on its FINAL frame (set 8 → clamped to last of 6).",
+      "cast": "last", "ranged": 3, "throw": "last-1", "melee": "mid"
+    }
   },
   "directionSets": {
     "8": ["S", "SE", "E", "NE", "N", "NW", "W", "SW"],
