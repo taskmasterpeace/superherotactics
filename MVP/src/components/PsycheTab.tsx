@@ -4,6 +4,8 @@ import { getMood } from '../data/moodSystem';
 import { getRoleEffectiveness, DOMAIN_LABEL, DOMAIN_ICON, RoleDomain } from '../data/characterRoles';
 import { getCharacterDayJob } from '../data/educationSystem';
 import { getFamiliarityTierInfo } from '../data/characterLifeCycle';
+import { getFear, getRespect, getPopularity, getFlight, getBreatheAir, getTeamPlayer, getSecretId } from '../data/secondaryStats';
+import { getThreatDesignation } from '../data/rankSystem';
 
 /**
  * PSYCHE TAB — the hidden/emotional layer, surfaced (plan C2).
@@ -41,8 +43,47 @@ export const PsycheTab: React.FC<{ character: any }> = ({ character: c }) => {
   const degrees: any[] = c.completedDegrees || [];
   const calling = c.calling?.name || c.calling || c.motivation_text;
 
+  const fear = getFear(c), respect = getRespect(c), popularity = getPopularity(c);
+  const stats = c.stats || c.currentStats || {};
+  const peak = Math.max(0, ...(['MEL', 'AGL', 'STR', 'STA', 'INT', 'INS', 'CON', 'PSI'].map(k => stats[k] || 0)));
+  const threat = getThreatDesignation(peak);
+  const traits: { label: string; on: boolean; icon: string }[] = [
+    { label: 'Flight', on: getFlight(c), icon: '🕊️' },
+    { label: 'Breathes air', on: getBreatheAir(c), icon: '🫁' },
+    { label: 'Team player', on: getTeamPlayer(c), icon: '🤝' },
+    { label: 'Secret ID', on: getSecretId(c), icon: '🎭' },
+  ];
+
   return (
     <div className="space-y-4">
+      {/* Standing & traits — fear/respect/popularity + threat designation + trait flags */}
+      <Section icon={<Flame size={16} />} title="Standing & Traits">
+        {peak > 29 && (
+          <div className="mb-3 inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1 text-sm font-bold" style={{ borderColor: '#f97316', color: '#f97316' }}>
+            ⚠ {threat.label} <span className="text-[10px] text-gray-500">(peak stat {peak})</span>
+          </div>
+        )}
+        <div className="grid grid-cols-3 gap-3 mb-3">
+          {[
+            { label: 'Fear', v: fear, color: '#ef4444', hint: 'How much people fear them (Batman/Hulk)' },
+            { label: 'Respect', v: respect, color: '#38bdf8', hint: 'How much people respect/love them (Superman/Cap)' },
+            { label: 'Popularity', v: popularity, color: '#facc15', hint: 'Fans & following' },
+          ].map(s => (
+            <div key={s.label} title={s.hint} className="rounded-lg bg-gray-800/60 border border-gray-700 p-2 text-center">
+              <div className="text-[10px] uppercase tracking-wide text-gray-400">{s.label}</div>
+              <div className="text-lg font-black" style={{ color: s.color }}>{s.v}</div>
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {traits.map(t => (
+            <span key={t.label} className={`rounded-md border px-2 py-0.5 text-[10px] font-semibold ${t.on ? 'border-emerald-600 bg-emerald-900/30 text-emerald-300' : 'border-gray-700 bg-gray-800 text-gray-600 line-through'}`}>
+              {t.icon} {t.label}
+            </span>
+          ))}
+        </div>
+      </Section>
+
       {/* Current state of mind */}
       <Section icon={<Brain size={16} />} title="State of Mind">
         <div className="flex items-center gap-4">

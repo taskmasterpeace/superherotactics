@@ -30,6 +30,7 @@ import {
 } from './personalitySystem';
 import { CallingId, generateCallingForBackground } from './callingSystem';
 import { generatePowersForOrigin } from './lswSystem';
+import { seedSocialStats } from './secondaryStats';
 
 // Country-specific generation profiles
 import {
@@ -986,6 +987,9 @@ export function generateCharacterWithProfile(
     countryProfile: profile?.countryCode,
     culturalTraits: profile?.culturalTraits,
   };
+
+  // Seed social stats (fear/respect/popularity) + trait flags (flight/breatheAir/teamPlayer)
+  seedSocialStats(character as any);
 
   return character;
 }
