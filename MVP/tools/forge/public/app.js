@@ -25,8 +25,10 @@ async function boot(){
     const h = await api('/api/health');
     CONTRACT = await api('/api/contract');
     const bal = await api('/api/balance');
+    const conv = (await api('/api/conventions')).conventions;
     $('healthchip').innerHTML = `llm <b>${h.llmProvider}</b> · art <b>${h.art}</b> · ` +
-      (bal.mock ? `pixellab <b>mock</b>` : `credits <b>${bal.usd ?? bal.credits ?? '?'}</b>`);
+      (bal.mock ? `pixellab <b>mock</b>` : `credits <b>${bal.usd ?? bal.credits ?? '?'}</b>`) +
+      (conv?.sampleSize ? ` · 🧠 learned from <b>${conv.sampleSize}</b>` : '');
     const os = $('f-origin');
     os.innerHTML = Object.entries(CONTRACT.origins).map(([k,v])=>`<option value="${k}">${k} — ${v}</option>`).join('');
     $('f-role').innerHTML = CONTRACT.roles.map(r=>`<option>${r}</option>`).join('');

@@ -1,0 +1,72 @@
+{
+  "updatedAt": "2026-07-07T15:40:43.838Z",
+  "sampleSize": 2,
+  "fps": 6,
+  "perAnim": {
+    "idle": {
+      "fps": 4
+    },
+    "walk": {
+      "fps": 6
+    },
+    "ranged": {
+      "fps": 8,
+      "releaseFrame": 3,
+      "sound": "combat.gunshot_rifle",
+      "emitter": {
+        "type": "projectile",
+        "sprite": "bolt",
+        "color": "#ffd24a",
+        "speed": 320
+      },
+      "muzzle": {
+        "x": 0.62,
+        "y": 0.45
+      }
+    },
+    "throw": {
+      "fps": 6,
+      "releaseFrame": "last-1",
+      "sound": "combat.explosion_small",
+      "emitter": {
+        "type": "projectile",
+        "sprite": "grenade",
+        "color": "#9aa065",
+        "speed": 220,
+        "arc": true
+      },
+      "muzzle": {
+        "x": 0.55,
+        "y": 0.4
+      }
+    },
+    "melee": {
+      "fps": 6,
+      "sound": "combat.impact_punch",
+      "emitter": {
+        "type": "none"
+      }
+    },
+    "take_hit": {
+      "fps": 8
+    },
+    "death": {
+      "fps": 6
+    },
+    "cast": {
+      "fps": 6,
+      "releaseFrame": "last",
+      "sound": "combat.energy_blast",
+      "emitter": {
+        "type": "beam_big",
+        "color": "#ffe14a",
+        "width": 0.6,
+        "area": true
+      },
+      "muzzle": {
+        "x": 0.5,
+        "y": 0.42
+      }
+    }
+  }
+}

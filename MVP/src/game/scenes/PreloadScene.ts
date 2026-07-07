@@ -88,17 +88,22 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   private loadGeneratedRoster(): void {
-    this.load.json('generated-roster', 'assets/generated-manifest.json');
-    this.load.once('filecomplete-json-generated-roster', (_key: string, _type: string, data: any) => {
-      const chars = data?.characters;
-      if (!Array.isArray(chars)) return;
-      for (const c of chars) {
-        if (c?.token) this.load.image(`gen_${c.id}`, c.token);        // default facing (South)
-        for (const [dir, rel] of Object.entries(c?.directions || {})) {
-          this.load.image(`gen_${c.id}_${dir}`, rel as string);       // 8-way facing
+    // Two manifests, one shape: the asset pipeline's roster and the SHT Forge
+    // roster (exported by the forge on every save, tuning included).
+    for (const [key, file] of [['generated-roster', 'assets/generated-manifest.json'],
+                               ['forge-roster', 'assets/forge-manifest.json']] as const) {
+      this.load.json(key, file);
+      this.load.once(`filecomplete-json-${key}`, (_key: string, _type: string, data: any) => {
+        const chars = data?.characters;
+        if (!Array.isArray(chars)) return;
+        for (const c of chars) {
+          if (c?.token) this.load.image(`gen_${c.id}`, c.token);        // default facing (South)
+          for (const [dir, rel] of Object.entries(c?.directions || {})) {
+            this.load.image(`gen_${c.id}_${dir}`, rel as string);       // 8-way facing
+          }
         }
-      }
-    });
+      });
+    }
     // A missing manifest (no roster yet) just no-ops via loaderror — harmless.
   }
 

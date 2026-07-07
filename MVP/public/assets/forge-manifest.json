@@ -1,0 +1,217 @@
+{
+  "version": 1,
+  "generated": "2026-07-07T15:40:43.839Z",
+  "source": "sht-forge",
+  "characters": [
+    {
+      "id": "voltmatic_339",
+      "name": "Voltmatic",
+      "faction": "hero",
+      "origin": 4,
+      "forge": true,
+      "token": "assets/character_token/generated/surge/S.png",
+      "directions": {
+        "S": "assets/character_token/generated/surge/S.png",
+        "SE": "assets/character_token/generated/surge/SE.png",
+        "E": "assets/character_token/generated/surge/E.png",
+        "NE": "assets/character_token/generated/surge/NE.png",
+        "N": "assets/character_token/generated/surge/N.png",
+        "NW": "assets/character_token/generated/surge/NW.png",
+        "W": "assets/character_token/generated/surge/W.png",
+        "SW": "assets/character_token/generated/surge/SW.png"
+      },
+      "portrait": "assets/portraits/surge.png",
+      "stats": {
+        "MEL": 76,
+        "AGL": 48,
+        "STR": 65,
+        "STA": 42,
+        "INT": 54,
+        "INS": 48,
+        "CON": 62,
+        "PSI": 62
+      },
+      "powers": [
+        "Electrokinesis",
+        "Storm Call"
+      ],
+      "tuning": {
+        "fps": 6,
+        "animations": {
+          "idle": {
+            "fps": 4,
+            "loop": true
+          },
+          "walk": {
+            "fps": 6,
+            "loop": true
+          },
+          "ranged": {
+            "fps": 8,
+            "releaseFrame": 3,
+            "muzzle": {
+              "x": 0.62,
+              "y": 0.45
+            },
+            "emitter": {
+              "type": "projectile",
+              "sprite": "bolt",
+              "color": "#ffd24a",
+              "speed": 320
+            },
+            "sound": "combat.gunshot_rifle"
+          },
+          "throw": {
+            "fps": 6,
+            "releaseFrame": "last-1",
+            "muzzle": {
+              "x": 0.55,
+              "y": 0.4
+            },
+            "emitter": {
+              "type": "projectile",
+              "sprite": "grenade",
+              "color": "#9aa065",
+              "speed": 220,
+              "arc": true
+            },
+            "sound": "combat.explosion_small"
+          },
+          "melee": {
+            "fps": 6,
+            "emitter": {
+              "type": "none"
+            },
+            "sound": "combat.impact_punch"
+          },
+          "take_hit": {
+            "fps": 8
+          },
+          "death": {
+            "fps": 6
+          },
+          "cast": {
+            "fps": 6,
+            "releaseFrame": "last",
+            "muzzle": {
+              "x": 0.5,
+              "y": 0.42
+            },
+            "emitter": {
+              "type": "beam_big",
+              "color": "#ffe14a",
+              "width": 0.6,
+              "area": true
+            },
+            "sound": "combat.energy_blast"
+          }
+        }
+      }
+    },
+    {
+      "id": "cinder_449",
+      "name": "Cinder",
+      "faction": "hero",
+      "origin": 8,
+      "forge": true,
+      "token": "assets/character_token/generated/merc/S.png",
+      "directions": {
+        "S": "assets/character_token/generated/merc/S.png",
+        "SE": "assets/character_token/generated/merc/SE.png",
+        "E": "assets/character_token/generated/merc/E.png",
+        "NE": "assets/character_token/generated/merc/NE.png",
+        "N": "assets/character_token/generated/merc/N.png",
+        "NW": "assets/character_token/generated/merc/NW.png",
+        "W": "assets/character_token/generated/merc/W.png",
+        "SW": "assets/character_token/generated/merc/SW.png"
+      },
+      "portrait": "assets/portraits/merc.png",
+      "stats": {
+        "MEL": 70,
+        "AGL": 59,
+        "STR": 60,
+        "STA": 46,
+        "INT": 77,
+        "INS": 68,
+        "CON": 70,
+        "PSI": 70
+      },
+      "powers": [
+        "Fire Generation",
+        "Heat Aura"
+      ],
+      "tuning": {
+        "fps": 6,
+        "animations": {
+          "idle": {
+            "fps": 4,
+            "loop": true
+          },
+          "walk": {
+            "fps": 6,
+            "loop": true
+          },
+          "ranged": {
+            "fps": 8,
+            "releaseFrame": 3,
+            "muzzle": {
+              "x": 0.62,
+              "y": 0.45
+            },
+            "emitter": {
+              "type": "projectile",
+              "sprite": "bolt",
+              "color": "#ffd24a",
+              "speed": 320
+            },
+            "sound": "combat.gunshot_rifle"
+          },
+          "throw": {
+            "fps": 6,
+            "releaseFrame": "last-1",
+            "muzzle": {
+              "x": 0.55,
+              "y": 0.4
+            },
+            "emitter": {
+              "type": "projectile",
+              "sprite": "grenade",
+              "color": "#9aa065",
+              "speed": 220,
+              "arc": true
+            },
+            "sound": "combat.explosion_small"
+          },
+          "melee": {
+            "fps": 6,
+            "emitter": {
+              "type": "none"
+            },
+            "sound": "combat.impact_punch"
+          },
+          "take_hit": {
+            "fps": 8
+          },
+          "death": {
+            "fps": 6
+          },
+          "cast": {
+            "fps": 6,
+            "releaseFrame": "last",
+            "muzzle": {
+              "x": 0.5,
+              "y": 0.42
+            },
+            "emitter": {
+              "type": "beam_big",
+              "color": "#ff7a3a",
+              "width": 0.6,
+              "area": true
+            },
+            "sound": "combat.energy_blast"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -19,13 +19,15 @@ Copy `.env.example` → `.env.local` (gitignored) and set what you use:
 - `LLM_PROVIDER=ollama` (+ `OLLAMA_URL`/`OLLAMA_MODEL`) — the local LAN box; or `anthropic` + `ANTHROPIC_API_KEY`.
 - `PIXELLAB_API_KEY` — real 8-direction v3 tokens (rendered to `MVP/public/asset-lab/forge/<id>/`, served at `/game/asset-lab/forge/...`).
 
-## What the UI does today (P1 + P3 tuner)
+## What the UI does today (P1 + P3 tuner + P4 learn/bridge)
 
 - **Forge** a character from a prompt (or **bulk**, one concept per line — bulk auto-saves).
 - **Refine** everything inline: name, origin (LSW badge follows the 2–8 rule), role, faction, stats (rank-tier bars recolor live; PSI mirrors CON; health = MEL+AGL+STA+STR), powers, backstory.
 - Contract violations from the LLM are auto-fixed and flagged (⚑ notes).
 - **Save to roster** → `data/characters.json` (owner content, committed on purpose). Gallery loads any saved character back for editing.
-- **Tune** any animation live: click a tuning chip → the tuner opens with a playing preview (real frames on mock stand-ins, token pulse otherwise). Controls: character default fps + per-animation fps, loop, **release frame** (when the emitter fires), **muzzle point** (sliders or click the stage), **emitter** (projectile count/speed · thin beam · big beam width · melee) with color, and a **sound picker** over the full 381-SFX catalog (`/api/sounds`) with instant playback. Every tweak writes into the record's `tuning` — Save persists it; that data is what the **learning brain** (P4, next) learns your taste from, then the **bridge** exports into the game.
+- **Tune** any animation live: click a tuning chip → the tuner opens with a playing preview (real frames on mock stand-ins, token pulse otherwise). Controls: character default fps + per-animation fps, loop, **release frame** (when the emitter fires), **muzzle point** (sliders or click the stage), **emitter** (projectile count/speed · thin beam · big beam width · melee) with color, and a **sound picker** over the full 381-SFX catalog (`/api/sounds`) with instant playback. Every tweak writes into the record's `tuning` — Save persists it.
+- **Learn**: on every save the brain distills the roster into `data/conventions.json` + `data/TUNING_CONVENTIONS.md` (median fps, modal emitter/sound/release per animation). New characters **pre-fill from your demonstrated taste** — the contract still owns structure (which animations exist); conventions tune the values. Header shows 🧠 learned-from count; `GET /api/conventions`.
+- **Bridge**: every save also exports `MVP/public/assets/forge-manifest.json` — the game's `PreloadScene` loads it exactly like the asset-pipeline manifest, so every forged character is available in-game as `gen_<id>` / `gen_<id>_<DIR>` textures with tuning riding along. The roster in the forge IS the roster in the game.
 
 ## API
 

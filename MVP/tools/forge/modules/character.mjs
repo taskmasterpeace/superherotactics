@@ -9,7 +9,8 @@ import path from 'node:path';
 import { forgeSpec } from '../lib/generators/llm.mjs';
 import * as pixellab from '../lib/generators/pixellab.mjs';
 import { DEFAULT_FPS, FPS_OVERRIDES } from '../lib/contract.mjs';
-import { config, artMode, MVP_DIR } from '../lib/env.mjs';
+import { applyConventions, loadConventions } from '../lib/learn.mjs';
+import { config, artMode, MVP_DIR, DATA_DIR } from '../lib/env.mjs';
 
 const DIRKEYS = ['S', 'SE', 'E', 'NE', 'N', 'NW', 'W', 'SW'];
 const MOCK_ART = ['surge', 'red_sentinel', 'merc'];
@@ -46,7 +47,8 @@ function defaultTuning(spec) {
     t.animations.fly_hover = { fps: DEFAULT_FPS, loop: true };
     t.animations.fly_move  = { fps: DEFAULT_FPS, loop: true };
   }
-  return t;
+  // the learning brain: pre-fill from the owner's demonstrated taste
+  return applyConventions(t, loadConventions(DATA_DIR));
 }
 
 /** Mock art: reuse the proven test sprites so the whole loop runs keyless. */

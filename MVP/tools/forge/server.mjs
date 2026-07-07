@@ -10,6 +10,17 @@ import { config, artMode, FORGE_DIR, MVP_DIR, DATA_DIR } from './lib/env.mjs';
 import { ROLES, ORIGINS, STYLE_SUFFIX, rankTier, normalizeSpec, health as calcHealth } from './lib/contract.mjs';
 import * as pixellab from './lib/generators/pixellab.mjs';
 import { forgeCharacter, loadAll, saveOne, deleteOne } from './modules/character.mjs';
+import { relearn, loadConventions } from './lib/learn.mjs';
+import { exportRoster } from './lib/bridge.mjs';
+
+// every save/delete: relearn conventions from the roster + re-export into the game
+function afterRosterChange() {
+  const all = loadAll(DATA_DIR);
+  const conv = relearn(DATA_DIR, all);
+  exportRoster(MVP_DIR, all);
+  console.log(`[learn] conventions from ${conv.sampleSize} record(s) · [bridge] forge-manifest.json exported`);
+  return conv;
+}
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
   '.png': 'image/png', '.webp': 'image/webp', '.wav': 'audio/wav', '.svg': 'image/svg+xml' };
@@ -94,11 +105,17 @@ const server = http.createServer(async (req, res) => {
       normalizeSpec(record);                       // re-validate owner edits against the contract
       record.derived = { health: calcHealth(record.stats) };
       const count = saveOne(DATA_DIR, record);
-      return send(res, 200, { ok: true, count });
+      const conv = afterRosterChange();
+      return send(res, 200, { ok: true, count, learned: conv.sampleSize });
     }
     if (p === '/api/characters/delete' && req.method === 'POST') {
       const { id } = await readBody(req);
-      return send(res, 200, { ok: true, count: deleteOne(DATA_DIR, id) });
+      const count = deleteOne(DATA_DIR, id);
+      afterRosterChange();
+      return send(res, 200, { ok: true, count });
+    }
+    if (p === '/api/conventions') {
+      return send(res, 200, { conventions: loadConventions(DATA_DIR) || { sampleSize: 0 } });
     }
 
     // ---------- static ----------
