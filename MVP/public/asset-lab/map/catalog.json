@@ -1,40 +1,235 @@
 {
   "$comment": "SHT MAP TILE/PROP CATALOG — everything generated for map-building (PixelLab, high top-down, style-contract palette). Sizes in px; tile = 44px in the playable slice, 32px native for Wang tilesets. IMPORTANT: PixelLab map-objects auto-delete server-side after 8h — this folder IS the source of truth once downloaded.",
-  "version": 2,
+  "version": 3,
   "ground_tiles": [
-    { "file": "grass.png",   "desc": "green grass base tile (sliced from grass→concrete tileset)" },
-    { "file": "concrete.png","desc": "gray concrete floor slab base tile" },
-    { "file": "tileset_sheet.png", "desc": "full 16-tile Wang autotile sheet: grass→concrete (32px)", "meta": "tileset.json" },
-    { "file": "tileset_grass_dirt.png", "desc": "16-tile Wang autotile sheet: grass→packed dirt path (32px) — roads/trails" }
+    {
+      "file": "grass.png",
+      "desc": "green grass base tile (sliced from grass→concrete tileset)"
+    },
+    {
+      "file": "concrete.png",
+      "desc": "gray concrete floor slab base tile"
+    },
+    {
+      "file": "tileset_sheet.png",
+      "desc": "full 16-tile Wang autotile sheet: grass→concrete (32px)",
+      "meta": "tileset.json"
+    },
+    {
+      "file": "tileset_grass_dirt.png",
+      "desc": "16-tile Wang autotile sheet: grass→packed dirt path (32px) — roads/trails"
+    },
+    {
+      "file": "asphalt.png",
+      "desc": "asphalt road base tile (sliced from asphalt→sidewalk Wang set) — city streets"
+    },
+    {
+      "file": "tileset_road.png",
+      "desc": "16-tile Wang autotile sheet: asphalt→concrete sidewalk w/ curb (32px)"
+    }
   ],
   "vegetation": [
-    { "file": "tree_oak.png",  "px": [120,120], "tiles": 2.7, "blocks": "trunk tile only, canopy overlaps (z above units)" },
-    { "file": "tree_pine.png", "px": [88,88],   "tiles": 2.0, "blocks": "trunk tile only" },
-    { "file": "bush.png",      "px": [52,52],   "tiles": 1.2, "blocks": "none (concealment candidate)" },
-    { "file": "rock.png",      "px": [64,56],   "tiles": 1.4, "blocks": "footprint (cover candidate)" },
-    { "file": "plant.png",     "px": [40,40],   "tiles": 0.9, "blocks": "none (indoor decor)" }
+    {
+      "file": "tree_oak.png",
+      "px": [
+        120,
+        120
+      ],
+      "tiles": 2.7,
+      "blocks": "trunk tile only, canopy overlaps (z above units)"
+    },
+    {
+      "file": "tree_pine.png",
+      "px": [
+        88,
+        88
+      ],
+      "tiles": 2,
+      "blocks": "trunk tile only"
+    },
+    {
+      "file": "bush.png",
+      "px": [
+        52,
+        52
+      ],
+      "tiles": 1.2,
+      "blocks": "none (concealment candidate)"
+    },
+    {
+      "file": "rock.png",
+      "px": [
+        64,
+        56
+      ],
+      "tiles": 1.4,
+      "blocks": "footprint (cover candidate)"
+    },
+    {
+      "file": "plant.png",
+      "px": [
+        40,
+        40
+      ],
+      "tiles": 0.9,
+      "blocks": "none (indoor decor)"
+    }
   ],
   "urban_props": [
-    { "file": "car_sedan.png",  "px": [120,64], "tiles": [2.7,1.45], "blocks": "footprint (tall cover)" },
-    { "file": "dumpster.png",   "px": [84,56],  "blocks": "footprint (tall cover)" },
-    { "file": "streetlamp.png", "px": [48,64],  "blocks": "base tile" },
-    { "file": "crate_stack.png","px": [76,76],  "blocks": "footprint (cover + searchable)" }
+    {
+      "file": "car_sedan.png",
+      "px": [
+        120,
+        64
+      ],
+      "tiles": [
+        2.7,
+        1.45
+      ],
+      "blocks": "footprint (tall cover)"
+    },
+    {
+      "file": "dumpster.png",
+      "px": [
+        84,
+        56
+      ],
+      "blocks": "footprint (tall cover)"
+    },
+    {
+      "file": "streetlamp.png",
+      "px": [
+        48,
+        64
+      ],
+      "blocks": "base tile"
+    },
+    {
+      "file": "crate_stack.png",
+      "px": [
+        76,
+        76
+      ],
+      "blocks": "footprint (cover + searchable)"
+    },
+    {
+      "file": "park_bench.png",
+      "px": [
+        72,
+        44
+      ],
+      "blocks": "footprint (low cover)"
+    },
+    {
+      "file": "fire_hydrant.png",
+      "px": [
+        36,
+        44
+      ],
+      "blocks": "base tile"
+    },
+    {
+      "file": "bus_stop.png",
+      "px": [
+        96,
+        60
+      ],
+      "blocks": "footprint (cover)"
+    },
+    {
+      "file": "traffic_light.png",
+      "px": [
+        40,
+        64
+      ],
+      "blocks": "base tile"
+    },
+    {
+      "file": "vending_machine.png",
+      "px": [
+        40,
+        56
+      ],
+      "blocks": "footprint (cover)"
+    },
+    {
+      "file": "school_bus.png",
+      "px": [
+        160,
+        72
+      ],
+      "blocks": "large footprint (hard cover)"
+    }
   ],
   "interior_props": [
-    { "file": "desk.png" }, { "file": "chair.png" }, { "file": "cabinet.png" },
-    { "file": "server_rack.png" }, { "file": "cot.png" }, { "file": "crate.png", "note": "searchable container" },
-    { "file": "blast_door.png", "note": "stateful door: open/locked/kick — see map-proto doors[]" }
+    {
+      "file": "desk.png"
+    },
+    {
+      "file": "chair.png"
+    },
+    {
+      "file": "cabinet.png"
+    },
+    {
+      "file": "server_rack.png"
+    },
+    {
+      "file": "cot.png"
+    },
+    {
+      "file": "crate.png",
+      "note": "searchable container"
+    },
+    {
+      "file": "blast_door.png",
+      "note": "stateful door: open/locked/kick — see map-proto doors[]"
+    },
+    {
+      "file": "lockers.png",
+      "px": [
+        72,
+        40
+      ],
+      "blocks": "footprint (cover)"
+    },
+    {
+      "file": "chalkboard.png",
+      "px": [
+        88,
+        36
+      ],
+      "blocks": "none (wall decor)"
+    }
   ],
   "still_needed": [
     "WALL TILESET (real art for the CSS walls: concrete/brick sides + corners + damaged variants)",
     "chain-link fence sprite set (posts + runs + gate) to replace CSS fence",
-    "road/asphalt tileset (grass→asphalt with curb) for city streets",
     "interior floor variants (wood, tile, carpet) via base-tile chaining",
     "door variants (wooden interior, glass storefront) + open-state art",
     "water tileset (grass→water) + shoreline",
     "second vehicle (pickup/van/police) + wrecked variant",
     "roof tiles / multi-floor stairs & elevation markers (for multi-story maps)",
-    "rubble & crater decals (destructible aftermath)",
-    "civilian props: bench, bus stop, vending machine, traffic light"
+    "rubble & crater decals (destructible aftermath)"
+  ],
+  "rural_props": [
+    {
+      "file": "hay_bale.png",
+      "px": [
+        52,
+        52
+      ],
+      "blocks": "footprint (cover)"
+    }
+  ],
+  "characters": [
+    {
+      "note": "civilian pedestrians (8-dir v3, low top-down 64px) — combat-slice.html actors",
+      "files": [
+        "civ_businessman",
+        "civ_woman",
+        "civ_student"
+      ]
+    }
   ]
 }
