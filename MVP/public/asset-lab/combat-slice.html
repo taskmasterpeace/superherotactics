@@ -68,7 +68,7 @@
   .ritem:hover .rlb{color:var(--gold)}
   /* actors */
   .unit{position:absolute;z-index:6;display:flex;align-items:flex-end;justify-content:center;transition:left 150ms linear, top 150ms linear;cursor:pointer}
-  .unit .art{height:150%;display:flex;align-items:flex-end;transition:transform .25s ease;will-change:transform}
+  .unit .art{height:100%;display:flex;align-items:flex-end;transition:transform .25s ease;will-change:transform}
   .unit img{image-rendering:pixelated;height:100%;width:auto;filter:drop-shadow(0 3px 3px rgba(0,0,0,.6));pointer-events:none}
   .unit.flying{z-index:8}
   .fshadow{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:62%;height:13px;border-radius:50%;
@@ -86,7 +86,7 @@
   .civ{position:absolute;z-index:6;transition:left 400ms linear, top 400ms linear;pointer-events:auto;cursor:help}
   .civ .body{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:15px;height:22px;border-radius:6px 6px 3px 3px}
   .civ .head{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);width:11px;height:11px;border-radius:50%;background:#d9b79a;border:1px solid #00000055}
-  .civ img{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);height:150%;width:auto;image-rendering:pixelated;
+  .civ img{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);height:100%;width:auto;image-rendering:pixelated;
     filter:drop-shadow(0 2px 2px rgba(0,0,0,.55))}
   .civ .panic{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);font-size:12px;opacity:0;transition:opacity .2s}
   .civ.fleeing{transition:left 260ms linear, top 260ms linear}
@@ -138,7 +138,8 @@
   // tile codes: 0 grass · 1 floor/concrete · 2 wall · 3 fence · 4 tall(elev2) ·
   //             5 rubble · 6 road/asphalt · 7 water
   let grid, walls, doors, props, blocked, crates, units, civs, sel;
-  let conePaths, pline;
+  let conePaths, pline, zones, smokes, aiTimer;
+  const wallName=w=>`${w.name?w.name+' ':''}${MATS[w.mat].label.toLowerCase()}`;
 
   const inB=(x,y)=>x>=0&&x<COLS&&y>=0&&y<ROWS;
   const wallAt=(x,y)=>walls.get(x+','+y);
@@ -156,14 +157,20 @@
 
   // ============================================================= WEAPON MODES
   const SND='../assets/sounds/';
+  // silent: no panic/alert · knock: knockback tiles (walls in the way get slammed) · range: overrides SHOOT_RANGE
   const MODES={
-    pistol:  { icon:'🔫', label:'Pistol',      dmg:[8,14],  struct:0.15, emitter:{type:'projectile',count:1,color:'#ffd24a',dur:0.8}, snd:SND+'combat/gunshot_pistol_01.wav' },
-    dual:    { icon:'⚔️', label:'Dual Pistols',dmg:[6,10],  struct:0.15, emitter:{type:'projectile',count:2,color:'#ffd24a',dur:0.8,stagger:130}, snd:SND+'combat/gunshot_pistol_01.wav' },
-    blast:   { icon:'💥', label:'Energy Blast',dmg:[16,26], struct:1.2,  emitter:{type:'projectile',count:1,color:'#38f0ff',dur:1.1}, snd:SND+'combat/energy_blast_01.wav' },
+    pistol:  { icon:'🔫', label:'Pistol',      dmg:[8,14],  struct:0.15, emitter:{type:'projectile',count:1,color:'#ffd24a',dur:0.8}, snd:SND+'firearms/gun_pistol_01.wav' },
+    dual:    { icon:'⚔️', label:'Dual Pistols',dmg:[6,10],  struct:0.15, emitter:{type:'projectile',count:2,color:'#ffd24a',dur:0.8,stagger:130}, snd:SND+'firearms/gun_pistol_01.wav' },
+    smg:     { icon:'🔫', label:'SMG',         dmg:[5,9],   struct:0.15, emitter:{type:'projectile',count:3,color:'#ffd24a',dur:0.7,stagger:90}, snd:SND+'firearms/gun_smg_01.wav' },
+    shotgun: { icon:'🔫', label:'Shotgun',     dmg:[14,22], struct:0.5, range:4, knock:1, emitter:{type:'projectile',count:2,color:'#ffb24a',dur:0.6,stagger:40}, snd:SND+'firearms/gun_shotgun_01.wav' },
+    sniper:  { icon:'🎯', label:'Sniper',      dmg:[18,28], struct:0.3, range:12, emitter:{type:'projectile',count:1,color:'#fff0a0',dur:0.5}, snd:SND+'firearms/gun_sniper_01.wav' },
+    silenced:{ icon:'🤫', label:'Silenced 9mm',dmg:[7,12],  struct:0.1, silent:true, emitter:{type:'projectile',count:1,color:'#c9d2da',dur:0.8}, snd:SND+'firearms/gun_pistol_silenced_01.wav' },
+    blast:   { icon:'💥', label:'Energy Blast',dmg:[16,26], struct:1.2, knock:1, emitter:{type:'projectile',count:1,color:'#38f0ff',dur:1.1}, snd:SND+'combat/energy_blast_01.wav' },
     beam:    { icon:'⚡', label:'Ion Beam',    dmg:[12,20], struct:0.5,  emitter:{type:'beam_thin',color:'#ff5c5c'}, snd:SND+'combat/laser_fire_01.wav' },
     goldbeam:{ icon:'☀️', label:'Solar Lance', dmg:[14,22], struct:0.6,  emitter:{type:'beam_thin',color:'#f5b21a'}, snd:SND+'combat/laser_fire_01.wav' },
-    haymaker:{ icon:'👊', label:'Haymaker',    dmg:[20,30], struct:6, melee:true, emitter:{type:'melee',color:'#f5b21a'}, snd:SND+'combat/impact_punch_01.wav' },
-    rifle:   { icon:'🎯', label:'Rifle',       dmg:[8,15],  struct:0.2,  emitter:{type:'projectile',count:1,color:'#ffd24a',dur:0.9}, snd:SND+'combat/gunshot_rifle_01.wav' },
+    haymaker:{ icon:'👊', label:'Haymaker',    dmg:[20,30], struct:6, melee:true, knock:2, emitter:{type:'melee',color:'#f5b21a'}, snd:SND+'combat/impact_punch_01.wav' },
+    takedown:{ icon:'🥋', label:'Takedown',    dmg:[10,16], struct:0, melee:true, silent:true, stealth:true, emitter:{type:'melee',color:'#c9d2da'}, snd:SND+'powers/claws_slash_01.wav' },
+    rifle:   { icon:'🎯', label:'Rifle',       dmg:[8,15],  struct:0.2,  emitter:{type:'projectile',count:1,color:'#ffd24a',dur:0.9}, snd:SND+'firearms/gun_rifle_01.wav' },
   };
   const impactSnd=SND+'combat/bullet_impact_01.wav';
   function play(url){ try{ const a=new Audio(url); a.volume=.32; a.play().catch(()=>{});}catch(e){} }
@@ -194,6 +201,7 @@
     hline(x,y,w,v){ for(let i=x;i<x+w;i++)this.set(i,y,v); },
     vline(x,y,h,v){ for(let j=y;j<y+h;j++)this.set(x,j,v); },
     prop(name,x,y,extra){ props.push(Object.assign({name,x,y},PROP_META[name]||{w:1,h:1},extra||{})); },
+    zone(x,y,w,h,name){ zones.push({x,y,w,h,name}); },   // names the walls inside (status callouts)
     door(x,y,o){ doors.push(Object.assign({x,y,open:false,locked:false,name:'Door'},o||{})); },
     unit(u){ units.push(u); },
     civ(x,y,kind){ civs.push({x,y,kind:kind||CIV_KINDS[(Math.random()*CIV_KINDS.length)|0],dir:'S',state:'wander',hp:1}); },
@@ -217,10 +225,10 @@
         a.rect(11,0,5,ROWS,6);                           // road
         for(let y=0;y<ROWS;y++) grid[y][13]===6 && (grid[y][13]=61); // 61 = lane-marked road center
         // storefront buildings left & right (brick, breachable) with glass doors
-        a.rect(2,1,5,4,1); a.ring(2,1,5,4,2); a.door(4,4,{name:'Shop door',mat:'brick'});
-        a.rect(2,10,6,5,1); a.ring(2,10,6,5,2); a.door(4,14,{name:'Deli door'});
-        a.rect(19,1,6,5,1); a.ring(19,1,6,5,2); a.door(21,5,{name:'Bank door',locked:true,mat:'concrete'});
-        a.rect(20,10,5,4,1); a.ring(20,10,5,4,2); a.door(22,10,{name:'Office door'});
+        a.rect(2,1,5,4,1); a.ring(2,1,5,4,2); a.door(4,4,{name:'Shop door',mat:'brick'}); a.zone(2,1,5,4,'pawn shop');
+        a.rect(2,10,6,5,1); a.ring(2,10,6,5,2); a.door(4,14,{name:'Deli door'}); a.zone(2,10,6,5,'deli');
+        a.rect(19,1,6,5,1); a.ring(19,1,6,5,2); a.door(21,5,{name:'Bank door',locked:true,mat:'concrete'}); a.zone(19,1,6,5,'bank');
+        a.rect(20,10,5,4,1); a.ring(20,10,5,4,2); a.door(22,10,{name:'Office door'}); a.zone(20,10,5,4,'office');
         // street furniture
         a.prop('car_sedan',11.1,3,{blk:1}); a.prop('car_sedan',12.2,9.5,{blk:1});
         a.prop('bus_stop',7.5,7); a.prop('park_bench',8.4,3.2); a.prop('park_bench',8.4,12.2);
@@ -242,7 +250,7 @@
         for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++) if(grid[y][x]===6){ grid[y][x]=62; } // 62 = dirt (grass-tint road)
         // wooden perimeter fences (partial), a barn made of walls, scattered nature cover
         a.hline(0,0,COLS,3); a.hline(0,ROWS-1,COLS,3); a.vline(0,0,ROWS,3); a.vline(COLS-1,0,ROWS,3);
-        a.rect(3,10,5,4,1); a.ring(3,10,5,4,2); a.door(5,10,{name:'Barn door',mat:'brick'});   // barn
+        a.rect(3,10,5,4,1); a.ring(3,10,5,4,2); a.door(5,10,{name:'Barn door',mat:'brick'}); a.zone(3,10,5,4,'barn');
         for(const [x,y] of [[6,2],[9,3],[20,2],[22,4],[18,12],[8,13]]) a.prop('tree_pine',x,y,{canopy:1});
         for(const [x,y] of [[11,4],[14,11],[7,7],[19,8]]) a.prop('tree_oak',x,y,{canopy:1});
         for(const [x,y] of [[13,2],[16,5],[10,9],[21,11],[15,13]]) a.prop('bush',x,y);
@@ -257,7 +265,7 @@
       intel:{ place:'C22 · LINCOLN HIGH, SUBURBS', populace:'CROWDED — students everywhere', threat:'gunmen inside the building' },
       build(a){
         a.rect(0,0,COLS,ROWS,0);                        // grass yard
-        a.rect(1,1,COLS-2,7,1); a.ring(1,1,COLS-2,7,2); // the school building (top), brick-red
+        a.rect(1,1,COLS-2,7,1); a.ring(1,1,COLS-2,7,2); a.zone(1,1,COLS-2,7,'schoolhouse'); // the school building (top), brick-red
         // interior classroom partitions + hallway
         a.hline(1,4,COLS-2,2); for(let x=6;x<COLS-2;x+=6) a.set(x,4,1); // hallway doorways
         a.vline(9,1,3,2); a.vline(16,1,3,2); a.vline(9,5,3,2); a.vline(16,5,3,2);
@@ -280,7 +288,7 @@
       intel:{ place:'D15 · SAM SITE, WOODS', populace:'none — restricted military zone', threat:'guarded bunker' },
       build(a){
         a.rect(0,0,COLS,ROWS,0); a.ring(0,0,COLS,ROWS,3);
-        const BX=9,BY=2,BW=14,BH=11; a.rect(BX,BY,BW,BH,1); a.ring(BX,BY,BW,BH,2);
+        const BX=9,BY=2,BW=14,BH=11; a.rect(BX,BY,BW,BH,1); a.ring(BX,BY,BW,BH,2); a.zone(BX,BY,BW,BH,'bunker');
         for(let i=BX+1;i<BX+7;i++) a.set(i,BY+4,2);
         for(let j=BY+1;j<BY+4;j++) a.set(BX+7,j,2); for(let j=BY+5;j<BY+BH-1;j++) a.set(BX+7,j,2);
         for(let i=BX+8;i<BX+BW-1;i++){ a.set(i,BY+3,2); a.set(i,BY+7,2); }
@@ -298,9 +306,9 @@
 
   // id = unique DOM key; tok = art-token folder (many hostiles share one token)
   function hero(id,x,y){ const base={ id, tok:id, x, y, dir:'S', hp:100, team:'blue' };
-    if(id==='surge') return {...base, nm:'SURGE', loadout:['pistol','dual','blast','beam'], mode:'blast',
+    if(id==='surge') return {...base, nm:'SURGE', canSwap:true, loadout:['silenced','takedown','blast','beam','smg'], mode:'blast',
       clips:{ blast:{S:{key:'surge_blast_south',frames:6,release:5},E:{key:'surge_blast_east',frames:6,release:5},W:{key:'surge_blast_east',frames:6,release:5,flip:true}} } };
-    return {...base, nm:'RED SENTINEL', canFly:true, loadout:['goldbeam','haymaker','pistol'], mode:'goldbeam', clips:{} }; }
+    return {...base, nm:'RED SENTINEL', canFly:true, loadout:['goldbeam','haymaker','shotgun','sniper'], mode:'goldbeam', clips:{} }; }
   function hostile(tok,x,y,id){ return { id:id||tok, tok, nm:'HOSTILE', x, y, dir:'W', hp:100, team:'red',
     loadout:['rifle'], mode:'rifle',
     clips:{ fire:{S:{key:'merc_fire_south',frames:9,release:3},E:{key:'merc_fire_east',frames:9,release:3},W:{key:'merc_fire_east',frames:9,release:3,flip:true}} } }; }
@@ -313,7 +321,8 @@
       if(t===2){ const d=document.createElement('div'); d.className='wall'; d.style.left=(x*T)+'px'; d.style.top=(y*T)+'px';
         const mat=wallMat(x,y); if(MATS[mat].tint) d.style.filter=MATS[mat].tint;
         const cr=document.createElement('div'); cr.className='cracks'; d.appendChild(cr);
-        board.appendChild(d); walls.set(x+','+y,{x,y,mat,hp:MATS[mat].hp,maxHp:MATS[mat].hp,el:d,crackEl:cr}); continue; }
+        const z=zones.find(z=>x>=z.x&&x<z.x+z.w&&y>=z.y&&y<z.y+z.h);
+        board.appendChild(d); walls.set(x+','+y,{x,y,mat,name:z?.name,hp:MATS[mat].hp,maxHp:MATS[mat].hp,el:d,crackEl:cr}); continue; }
       if(t===3){ const d=document.createElement('div'); d.className='fence'; d.style.left=(x*T)+'px'; d.style.top=(y*T)+'px'; board.appendChild(d); }
       if(t===7){ const d=document.createElement('div'); d.className='cell water'; d.style.left=(x*T)+'px'; d.style.top=(y*T)+'px'; board.appendChild(d); continue; }
       const g=document.createElement('div'); const kind=GROUND[t]||'grass';
@@ -364,11 +373,52 @@
   }
 
   // ============================================================= LOS / VISION
+  const smokeAt=(x,y)=>smokes.some(s=>Math.abs(x-s.x)<=1&&Math.abs(y-s.y)<=1);
   function losClear(ax,ay,bx,by){ let x0=ax,y0=ay; const x1=bx,y1=by;
     const dx=Math.abs(x1-x0),dy=Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1; let err=dx-dy;
     for(;;){ if(!(x0===ax&&y0===ay)&&!(x0===x1&&y0===y1)){ const tt=grid[y0]&&grid[y0][x0];
-        if(tt===2||tt===4||tt===7) return false; const dd=doorAt(x0,y0); if(dd&&!dd.open) return false; }
+        if(tt===2||tt===4||tt===7) return false; if(smokeAt(x0,y0)) return false;
+        const dd=doorAt(x0,y0); if(dd&&!dd.open) return false; }
       if(x0===x1&&y0===y1) break; const e2=2*err; if(e2>-dy){err-=dy;x0+=sx;} if(e2<dx){err+=dx;y0+=sy;} } return true; }
+  // ---------- SMOKE: vision denial (blocks LOS + cones for ~12s; flyers see over it) ----------
+  function throwSmoke(a,x,y){
+    if(Math.hypot(x-a.x,y-a.y)>6){ status('Smoke — within 6 tiles.'); return; }
+    const el=document.createElement('div');
+    el.style.cssText=`position:absolute;z-index:6;pointer-events:none;left:${(x-1)*T}px;top:${(y-1)*T}px;`+
+      `width:${T*3}px;height:${T*3}px;border-radius:50%;`+
+      `background:radial-gradient(circle,rgba(200,198,190,.92),rgba(150,148,140,.75) 55%,transparent 74%);`+
+      `animation:dust 12.5s ease-out forwards`;
+    board.appendChild(el);
+    const s={x,y,el}; smokes.push(s); play(SND+'combat/explosion_small_01.wav');
+    for(const u of units) updateCone(u);
+    status(`💨 ${a.nm} pops smoke — sightlines through it are CUT.`);
+    setTimeout(()=>{ smokes.splice(smokes.indexOf(s),1); el.remove(); for(const u of units) updateCone(u); },12000);
+  }
+  // ---------- TELEPORT SWAP: trade places with anyone you can SEE ----------
+  function swapUnits(a,t){
+    if(!canSee(a,t)){ status('Swap needs eyes on the target.'); return; }
+    if(Math.hypot(t.x-a.x,t.y-a.y)>7){ status('Swap — within 7 tiles.'); return; }
+    play(SND+'powers/teleport_away_01.wav');
+    const ax=a.x, ay=a.y; a.x=t.x; a.y=t.y; t.x=ax; t.y=ay;
+    place(a); place(t); setTimeout(()=>play(SND+'powers/teleport_arrive_01.wav'),160);
+    status(`🌀 SWAP — ${a.nm} trades places with ${t.nm}. Cover means nothing.`);
+  }
+  // ---------- AIR DROP: a grenade from altitude (or a throw from the ground) ----------
+  function dropGrenade(a,x,y){
+    const rng=a.flying?7:5;
+    if(Math.hypot(x-a.x,y-a.y)>rng){ status(`Grenade — within ${rng} tiles.`); return; }
+    play(SND+'combat/explosion_medium_01.wav'); panic(x,y,9);
+    const du=document.createElement('div'); du.className='dust';
+    du.style.left=((x-1.2)*T)+'px'; du.style.top=((y-1.2)*T)+'px'; du.style.width=(T*3.4)+'px'; du.style.height=(T*3.4)+'px';
+    board.appendChild(du); setTimeout(()=>du.remove(),850);
+    for(const u of units){ if(u.hp<=0) continue; const d=Math.hypot(u.x-x,u.y-y);
+      if(d<=1.6){ const dm=18+((Math.random()*13)|0); u.hp-=dm; hpbar(u);
+        u.el.animate([{filter:'brightness(3)'},{filter:'brightness(1)'}],{duration:240});
+        if(u.hp<=0) die(u); } }
+    for(const c of civs){ if(c.hp>0&&Math.hypot(c.x-x,c.y-y)<=1.6) civHit(c); }
+    for(const w of walls.values()){ if(w.hp>0&&Math.hypot(w.x-x,w.y-y)<=1.6) damageWall(a,w,{dmg:[20,30],struct:2,emitter:{color:'#ff7a3a'}}); }
+    status(a.flying?`💣 ${a.nm} drops a grenade from altitude!`:`💣 Frag out!`);
+  }
   function canSee(a,b){ const dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy); if(dist>VIS_TILES) return false;
     if(!(a.flying||b.flying)&&!losClear(a.x,a.y,b.x,b.y)) return false;
     const want=Math.atan2(dy,dx),have=DIR_ANG[a.dir]??0,diff=Math.atan2(Math.sin(want-have),Math.cos(want-have));
@@ -377,14 +427,15 @@
     const cx=u.x*T+T/2,cy=u.y*T+T/2,base=DIR_ANG[u.dir]??0,step=T/3,pts=[];
     for(let i=0;i<=RAYS;i++){ const ang=base-HALF+(2*HALF)*(i/RAYS),ca=Math.cos(ang),sa=Math.sin(ang); let r=step;
       for(;r<=VIS_R;r+=step){ const tx=Math.floor((cx+ca*r)/T),ty=Math.floor((cy+sa*r)/T);
-        if(tx<0||ty<0||tx>=COLS||ty>=ROWS){r-=step;break;} if(!u.flying&&(grid[ty][tx]===2||grid[ty][tx]===4)){r-=step;break;} }
+        if(tx<0||ty<0||tx>=COLS||ty>=ROWS){r-=step;break;} if(!u.flying&&(grid[ty][tx]===2||grid[ty][tx]===4||smokeAt(tx,ty))){r-=step;break;} }
       if(r>VIS_R) r=VIS_R; pts.push((cx+ca*r).toFixed(1)+','+(cy+sa*r).toFixed(1)); }
     u.conePath.setAttribute('d',`M${cx},${cy} L${pts.join(' L')} Z`); }
 
   // ============================================================= UNITS RENDER
   function paintUnits(){
     for(const u of units){ const el=document.createElement('div'); el.className='unit';
-      el.style.width=T+'px'; el.style.height=(T*1.6)+'px';
+      // WORLD SCALE: a human is ONE tile — sprite ~1.4 tiles tall, feet dead-center on the tile
+      el.style.width=T+'px'; el.style.height=(T*1.4)+'px';
       el.innerHTML=`<div class="ring ${u.team==='red'?'red':'cyan'}"></div><div class="fshadow"></div><div class="art"><img src="${TOK(u.tok||u.id)}/${u.dir}.png" alt="${u.nm}"></div>`;
       board.appendChild(el); u.el=el; u.img=el.querySelector('img'); u.ringEl=el.querySelector('.ring'); u.artEl=el.querySelector('.art');
       const cp=document.createElementNS('http://www.w3.org/2000/svg','path');
@@ -397,7 +448,7 @@
   const STORY=22, CLEAR=24;
   function elevAt(x,y){ const t=grid[y]&&grid[y][x]; return t===2?1:t===4?2:0; }
   function applyAlt(u){ const a=u.flying?CLEAR+STORY*elevAt(u.x,u.y):0; if(u.artEl) u.artEl.style.transform=`translateY(${-a}px)`; u.el.classList.toggle('flying',!!u.flying); }
-  function place(u){ u.el.style.left=(u.x*T)+'px'; u.el.style.top=(u.y*T-T*0.6)+'px'; applyAlt(u); updateCone(u); }
+  function place(u){ u.el.style.left=(u.x*T)+'px'; u.el.style.top=(u.y*T-T*0.4)+'px'; applyAlt(u); updateCone(u); }
   function face(u,dir){ if(!dir) return; u.dir=dir; u.img.style.transform=''; u.img.src=`${TOK(u.tok||u.id)}/${dir}.png`; updateCone(u); }
   function select(u){ sel=u; for(const v of units) if(v.team==='blue') v.ringEl.className='ring '+(v===sel?'gold':'cyan');
     document.querySelectorAll('.slot').forEach(s=>s.classList.toggle('sel',s.dataset.id===u.id)); status(`${u.nm} selected — move, or click a hostile to fire.`); }
@@ -407,7 +458,7 @@
 
   // ============================================================= CIVILIANS
   function paintCivs(){
-    for(const c of civs){ const el=document.createElement('div'); el.className='civ'; el.style.width=T+'px'; el.style.height=(T*1.4)+'px';
+    for(const c of civs){ const el=document.createElement('div'); el.className='civ'; el.style.width=T+'px'; el.style.height=(T*1.25)+'px';
       const tint=CIV_TINT[c.kind]||'#888';
       el.innerHTML=`<div class="panic">❗</div><img alt="civilian" style="display:none">`+
         `<div class="head"></div><div class="body" style="background:${tint}"></div>`;
@@ -416,14 +467,14 @@
       img.onerror=()=>{ img.remove(); };   // no token yet → CSS person
       board.appendChild(el); c.el=el; placeCiv(c); }
   }
-  function placeCiv(c){ c.el.style.left=(c.x*T)+'px'; c.el.style.top=(c.y*T-T*0.4)+'px';
+  function placeCiv(c){ c.el.style.left=(c.x*T)+'px'; c.el.style.top=(c.y*T-T*0.25)+'px';
     const img=c.el.querySelector('img'); if(img&&img.style.display!=='none'){ img.src=`${TOK(c.kind)}/${c.dir}.png`; } }
   function civPassable(x,y){ if(!inB(x,y)) return false; const t=grid[y][x]; if(t===2||t===3||t===4||t===7) return false;
     if(blocked.has(x+','+y)) return false; const dd=doorAt(x,y); if(dd&&!dd.open) return false;
     if(units.some(u=>u.hp>0&&u.x===x&&u.y===y)) return false; if(civs.some(o=>o!==this&&o.hp>0&&o.x===x&&o.y===y)) return false; return true; }
   let civTimer=null;
-  function startCivLife(){ stopCivLife(); civTimer=setInterval(civTick, 620); }
-  function stopCivLife(){ if(civTimer){ clearInterval(civTimer); civTimer=null; } }
+  function startCivLife(){ stopCivLife(); civTimer=setInterval(civTick, 620); aiTimer=setInterval(hostileAdvance, 3000); }
+  function stopCivLife(){ if(civTimer){ clearInterval(civTimer); civTimer=null; } if(aiTimer){ clearInterval(aiTimer); aiTimer=null; } }
   function civTick(){
     for(const c of civs){ if(c.hp<=0) continue;
       if(c.state==='flee'){
@@ -469,23 +520,48 @@
   function drawPath(cells){ if(!cells||cells.length<2){ pline.setAttribute('d',''); pline.removeAttribute('marker-end'); return; }
     pline.setAttribute('d','M'+cells.map(([x,y])=>(x*T+T/2)+','+(y*T+T/2)).join(' L')); pline.setAttribute('marker-end','url(#ah)'); }
   function walk(u,path){ if(u.walkT) clearTimeout(u.walkT); if(!path||path.length<2){ drawPath(null); return; }
-    drawPath(path); let i=1; const stepMs=()=>u.flying?115:155;
+    drawPath(path); let i=1; const stepMs=()=>u.flying?115:(u.legHit?265:155);   // a shot leg slows you down
     const step=()=>{ if(u.hp<=0){ drawPath(null); return; } const [nx,ny]=path[i]; face(u,DIRS[(nx-u.x)+','+(ny-u.y)]); u.x=nx; u.y=ny; place(u); i++;
-      if(u.team==='blue') for(const e of units) if(e.team==='red'&&e.hp>0&&!e.shooting&&Date.now()-(e.lastShot||0)>2200&&canSee(e,u)){ shoot(e,u); status(`⚠ SPOTTED — ${e.nm} opens fire!`); }
+      // reaction fire: hostiles auto-engage, and ANY unit on overwatch takes its held shot
+      for(const e of units){ if(e.hp<=0||e.team===u.team||e.shooting) continue;
+        const auto=e.team==='red'&&Date.now()-(e.lastShot||0)>2200;
+        if((e.overwatch||auto)&&canSee(e,u)){
+          if(e.overwatch){ e.overwatch=false; status(`👁️ OVERWATCH — ${e.nm} takes the held shot!`); }
+          else status(`⚠ SPOTTED — ${e.nm} opens fire!`);
+          shoot(e,u); } }
       if(i<path.length){ drawPath(path.slice(i-1)); u.walkT=setTimeout(step,stepMs()); }
       else { drawPath(null); u.walkT=null; status(u.flying?`${u.nm} holds — hovering.`:`${u.nm} in position.`); } };
     step(); }
+  // hostiles push toward the last place they want to be — gives overwatch something to catch
+  function hostileAdvance(){
+    for(const e of units){ if(e.team!=='red'||e.hp<=0||e.shooting||e.walkT) continue;
+      const targets=units.filter(u=>u.team==='blue'&&u.hp>0); if(!targets.length) return;
+      targets.sort((p,q)=>Math.hypot(p.x-e.x,p.y-e.y)-Math.hypot(q.x-e.x,q.y-e.y));
+      if(canSee(e,targets[0])) continue;                 // has a shot — holds position
+      const p=findPath(e,targets[0].x,targets[0].y);
+      if(p&&p.length>2) walk(e,p.slice(0,4)); }
+  }
 
   // ============================================================= COMBAT
   function dirTo(a,b){ return DIRS[Math.sign(b.x-a.x)+','+Math.sign(b.y-a.y)]||a.dir; }
   function shoot(a,t){ if(a.shooting||a.walkT||a.hp<=0||t.hp<=0) return;
-    const dist=Math.hypot(t.x-a.x,t.y-a.y),m=MODES[a.mode],rng=m.melee?1.6:SHOOT_RANGE;
-    if(dist>rng){ if(a.team==='blue') status(m.melee?'Melee — get adjacent.':`Out of range (${SHOOT_RANGE} tiles).`); return; }
-    const seeThru=a.flying||t.flying; if(!seeThru&&!m.melee&&!losClear(a.x,a.y,t.x,t.y)){ face(a,dirTo(a,t)); if(a.team==='blue') status('No line of sight — a wall blocks the shot.'); return; }
+    const dist=Math.hypot(t.x-a.x,t.y-a.y),m=MODES[a.mode],rng=m.melee?1.6:(m.range||SHOOT_RANGE);
+    if(dist>rng){ if(a.team==='blue') status(m.melee?'Melee — get adjacent.':`Out of range (${rng} tiles).`); return; }
+    let via=null;                                        // beam bank-shot: one bounce off a wall
+    const seeThru=a.flying||t.flying;
+    if(!seeThru&&!m.melee&&!losClear(a.x,a.y,t.x,t.y)){
+      if(m.emitter.type==='beam_thin') via=bounceVia(a,t);
+      if(!via){ face(a,dirTo(a,t)); if(a.team==='blue') status('No line of sight — a wall blocks the shot.'); return; }
+    }
+    t._unaware = !canSee(t,a);                           // for silent takedowns
     a.shooting=true; a._justFired=true; setTimeout(()=>a._justFired=false,900); if(a.team==='red') a.lastShot=Date.now();
     const dir=dirTo(a,t),clip=m.clip&&a.clips[m.clip]?a.clips[m.clip][dir]:null; play(m.snd);
-    panic(a.x,a.y,7);                                   // GUNFIRE: civilians nearby bolt
-    const fire=()=>emit(a,t,m);
+    if(!m.silent) panic(a.x,a.y,7);                      // GUNFIRE: civilians nearby bolt (silenced weapons don't)
+    if(a.armHit && Math.random()<0.35 && !m.melee){      // a winged arm throws shots wide
+      face(a,dir); emit(a,{x:t.x+(Math.random()<.5?1:-1),y:t.y-1},m,()=>{});
+      status(`${a.nm}'s wounded arm throws the shot WIDE!`); setTimeout(()=>a.shooting=false,400); return;
+    }
+    const fire=()=> via ? bankShot(a,via,t,m) : emit(a,t,m);
     if(clip){ const fps=6; let f=0; face(a,dir); if(clip.flip) a.img.style.transform='scaleX(-1)';
       const iv=setInterval(()=>{ a.img.src=`anim/${clip.key}/${f}.png`; if(f===Math.min(clip.release,clip.frames-1)) fire();
         if(++f>=clip.frames){ clearInterval(iv); a.img.style.transform=''; face(a,dir); a.shooting=false; } },1000/fps); }
@@ -511,11 +587,53 @@
     let flick=0; const iv=setInterval(()=>{ b.style.opacity=(flick++%2)?1:.55; },55);
     setTimeout(()=>{ clearInterval(iv); b.style.transition='opacity .12s'; g.style.transition='opacity .12s'; b.style.opacity=0; g.style.opacity=0; setTimeout(()=>{b.remove();g.remove();},140); },240);
     onHit(a,t,m); }
-  function hit(a,t,m){ if(t.hp<=0) return; play(impactSnd); const [lo,hi]=m.dmg,d=lo+Math.floor(Math.random()*(hi-lo+1)); t.hp-=d; hpbar(t);
+  function hit(a,t,m){ if(t.hp<=0) return; play(impactSnd);
+    let [lo,hi]=m.dmg, d=lo+Math.floor(Math.random()*(hi-lo+1));
+    if(m.stealth && t._unaware){ d=999; status(`🥋 SILENT TAKEDOWN — ${t.nm} never saw it coming.`); }
+    t.hp-=d; hpbar(t);
     t.el.animate([{filter:'brightness(3)'},{filter:'brightness(1)'}],{duration:240});
-    const dm=document.createElement('div'); dm.className='dmg'; dm.textContent='-'+d; dm.style.color=m.emitter.color; dm.style.left=(t.x*T+T/2-8)+'px'; dm.style.top=(t.y*T-T*0.7)+'px'; board.appendChild(dm); setTimeout(()=>dm.remove(),950);
-    if(t.hp<=0){ die(t); status(`${t.nm} is DOWN.`); return; }
+    const dm=document.createElement('div'); dm.className='dmg'; dm.textContent='-'+Math.min(d,99); dm.style.color=m.emitter.color; dm.style.left=(t.x*T+T/2-8)+'px'; dm.style.top=(t.y*T-T*0.7)+'px'; board.appendChild(dm); setTimeout(()=>dm.remove(),950);
+    if(t.hp<=0){ die(t); if(!m.stealth) status(`${t.nm} is DOWN.`); return; }
+    if(m.knock) knockThrough(a,t,m.knock);               // knockback — walls in the flight path get slammed
     if(t.team==='red'&&!t._rf){ t._rf=true; setTimeout(()=>{ t._rf=false; returnFire(t); },650); } }
+
+  // ---------- KNOCKBACK: bodies through walls ----------
+  function knockThrough(a,t,n){
+    const dx=Math.sign(t.x-a.x), dy=Math.sign(t.y-a.y); if(!dx&&!dy) return;
+    let steps=0;
+    (function stepK(){
+      if(steps>=n||t.hp<=0) return;
+      const nx=t.x+dx, ny=t.y+dy; if(!inB(nx,ny)) return;
+      const w=wallAt(nx,ny);
+      if(w&&w.hp>0){                                     // SLAM into a wall — it takes structural damage
+        damageWall(a,w,{dmg:[25,40],struct:3,emitter:{color:'#f5b21a'}});
+        t.hp-=8; hpbar(t); play(SND+'firearms/bullet_metal_01.wav');
+        if(w.hp<=0){ t.x=nx; t.y=ny; place(t); status(`💥 ${t.nm} goes THROUGH the ${wallName(w)} into the rubble!`); }
+        else status(`${t.nm} SLAMS into the ${wallName(w)}.`);
+        if(t.hp<=0) die(t);
+        return;
+      }
+      const tt=grid[ny][nx]; if(tt===2||tt===3||tt===4||tt===7) return;
+      if(units.some(u=>u!==t&&u.hp>0&&u.x===nx&&u.y===ny)) return;
+      t.x=nx; t.y=ny; place(t); steps++; setTimeout(stepK,90);
+    })();
+  }
+  // beam bank-shot: find a wall both shooter and target can see, bounce off it
+  function bounceVia(a,t){
+    let best=null,bd=99;
+    for(const w of walls.values()){ if(w.hp<=0) continue;
+      const d1=Math.hypot(w.x-a.x,w.y-a.y), d2=Math.hypot(w.x-t.x,w.y-t.y);
+      if(d1>SHOOT_RANGE||d2>SHOOT_RANGE) continue;
+      if(!losClear(a.x,a.y,w.x,w.y)||!losClear(w.x,w.y,t.x,t.y)) continue;
+      if(d1+d2<bd){ bd=d1+d2; best=w; } }
+    return best;
+  }
+  function bankShot(a,via,t,m){
+    beamThin(a,{x:via.x,y:via.y},m,()=>{});
+    setTimeout(()=>{ play(SND+'firearms/bullet_ricochet_01.wav');
+      beamThin({x:via.x,y:via.y},t,m,(/*_*/)=>hit(a,t,m));
+      status(`⚡ BANK SHOT — off the ${wallName(via)}!`); },180);
+  }
   function returnFire(e){ if(e.hp<=0) return; const ts=units.filter(u=>u.team==='blue'&&u.hp>0); if(!ts.length) return; ts.sort((p,q)=>Math.hypot(p.x-e.x,p.y-e.y)-Math.hypot(q.x-e.x,q.y-e.y)); shoot(e,ts[0]); }
   function die(u){ u.hp=0; u.flying=false; applyAlt(u); u.el.classList.add('dead'); hpbar(u); updateCone(u); if(sel===u) sel=null; }
 
@@ -528,10 +646,10 @@
   function damageWall(a,w,m){ if(w.hp<=0) return; const [lo,hi]=m.dmg,base=lo+Math.floor(Math.random()*(hi-lo+1)),d=Math.max(1,Math.round(base*(m.struct??0.15))); w.hp-=d; play(impactSnd);
     const dm=document.createElement('div'); dm.className='dmg'; dm.textContent='-'+d; dm.style.color=(m.struct??0)>=1?m.emitter.color:'#8d8d94'; dm.style.left=(w.x*T+T/2-8)+'px'; dm.style.top=(w.y*T-6)+'px'; board.appendChild(dm); setTimeout(()=>dm.remove(),950);
     const k=w.hp/w.maxHp; if(k>0.66){ w.crackEl.style.opacity=0; } else { w.crackEl.style.backgroundImage=k>0.33?CRACK1:CRACK2; w.crackEl.style.opacity=1; }
-    if(w.hp<=0){ collapseWall(w); return; } status(`${MATS[w.mat].label} at ${Math.round(k*100)}% — ${(m.struct??0)<0.3?'small arms barely chip it.':'cracking.'}`); }
+    if(w.hp<=0){ collapseWall(w); return; } status(`${wallName(w)} at ${Math.round(k*100)}% — ${(m.struct??0)<0.3?'small arms barely chip it.':'cracking.'}`); }
   function collapseWall(w){ w.hp=0; grid[w.y][w.x]=5; w.el.className='rubble'; w.el.style.filter=''; w.crackEl.remove(); play(SND+'combat/explosion_small_01.wav');
     const du=document.createElement('div'); du.className='dust'; du.style.left=(w.x*T-T*0.4)+'px'; du.style.top=(w.y*T-T*0.4)+'px'; du.style.width=(T*1.8)+'px'; du.style.height=(T*1.8)+'px'; board.appendChild(du); setTimeout(()=>du.remove(),850);
-    panic(w.x,w.y,8); for(const u of units) updateCone(u); status(`💥 The ${MATS[w.mat].label.toLowerCase()} COLLAPSES — rubble, a fresh breach, and it was LOUD.`); }
+    panic(w.x,w.y,8); for(const u of units) updateCone(u); status(`💥 The ${wallName(w)} COLLAPSES — rubble, a fresh breach, and it was LOUD.`); }
 
   // ============================================================= RADIAL
   let radialEl=null;
@@ -556,15 +674,53 @@
     items.push({ icon:'👁️', label:'Examine', act:()=>status(`${d.name} — ${d.open?'open':d.locked?'locked':'closed'}.`) }); return items; }
   function wallOptions(w){ const pct=Math.round(w.hp/w.maxHp*100); return [
     { icon:'🎯', label:'Attack', disabled:!sel||sel.hp<=0, act:()=>attackWall(sel,w) },
-    { icon:'👁️', label:'Examine', act:()=>status(`${MATS[w.mat].label} — integrity ${pct}%. ${w.mat==='brick'||w.mat==='brickred'?'Energy or a haymaker breaches it fast.':w.mat==='concrete'?'Bring energy or muscle.':'Vault-grade.'}`) } ]; }
+    { icon:'👁️', label:'Examine', act:()=>status(`${wallName(w)} — integrity ${pct}%. ${w.mat==='brick'||w.mat==='brickred'?'Energy or a haymaker breaches it fast.':w.mat==='concrete'?'Bring energy or muscle.':'Vault-grade.'}`) } ]; }
+  // CALLED SHOTS: pick the body part — each has its own odds and its own consequence
+  function calledOptions(t){ const parts=[
+      { key:'head', icon:'🎯', label:'Head 55%', acc:.55, f:1.9 },
+      { key:'arm',  icon:'💪', label:'Arm 70%',  acc:.7,  f:.6 },
+      { key:'leg',  icon:'🦵', label:'Leg 70%',  acc:.7,  f:.8 } ];
+    return parts.map(p=>({ icon:p.icon, label:p.label, disabled:!sel||sel.hp<=0, act:()=>calledShot(sel,t,p) })); }
+  function calledShot(a,t,p){
+    const m=MODES[a.mode];
+    if(m.melee){ status('Called shots need a ranged weapon.'); return; }
+    if(a.shooting||a.hp<=0||t.hp<=0) return;
+    const rng=m.range||SHOOT_RANGE;
+    if(Math.hypot(t.x-a.x,t.y-a.y)>rng){ status(`Out of range (${rng}).`); return; }
+    if(!(a.flying||t.flying)&&!losClear(a.x,a.y,t.x,t.y)){ status('No line of sight.'); return; }
+    a.shooting=true; face(a,dirTo(a,t)); play(m.snd); if(!m.silent) panic(a.x,a.y,7);
+    emit(a,t,m,()=>{
+      if(Math.random()>=p.acc){ play(SND+'firearms/bullet_wall_01.wav');
+        const dm=document.createElement('div'); dm.className='dmg'; dm.textContent='MISS'; dm.style.color='#8d8d94';
+        dm.style.left=(t.x*T+T/2-16)+'px'; dm.style.top=(t.y*T-T*0.7)+'px'; board.appendChild(dm); setTimeout(()=>dm.remove(),950);
+        status(`${p.key.toUpperCase()} shot goes wide.`); return; }
+      const [lo,hi]=m.dmg, d=Math.max(1,Math.round((lo+Math.floor(Math.random()*(hi-lo+1)))*p.f));
+      t.hp-=d; hpbar(t); play(impactSnd);
+      t.el.animate([{filter:'brightness(3)'},{filter:'brightness(1)'}],{duration:240});
+      const dm=document.createElement('div'); dm.className='dmg'; dm.textContent=`${p.key.toUpperCase()} -${d}`; dm.style.color='#f5b21a';
+      dm.style.left=(t.x*T+T/2-20)+'px'; dm.style.top=(t.y*T-T*0.7)+'px'; board.appendChild(dm); setTimeout(()=>dm.remove(),950);
+      if(t.hp<=0){ die(t); status(`${p.key.toUpperCase()} SHOT — ${t.nm} drops.`); return; }
+      if(p.key==='arm'){ t.armHit=true; status(`💪 Winged — ${t.nm}'s shots will spray wide.`); }
+      if(p.key==='leg'){ t.legHit=true; status(`🦵 Hobbled — ${t.nm} moves at half speed.`); }
+      if(p.key==='head') status(`🎯 HEADSHOT on ${t.nm}!`);
+    });
+    setTimeout(()=>a.shooting=false,700);
+  }
+  const isHidden=u=>!units.some(e=>e.team!==u.team&&e.hp>0&&canSee(e,u));
   function unitOptions(u){ if(u.team==='red') return [
       { icon:'🎯', label:'Attack', disabled:!sel||sel.hp<=0, act:()=>shoot(sel,u) },
-      { icon:'👁️', label:'Examine', act:()=>status(`${u.nm}: ${u.hp} HP, facing ${u.dir}. ${canSee(u,sel||u)?'HE SEES YOU.':'Unaware.'}`) } ];
+      { icon:'🩻', label:'Called shot', disabled:!sel||sel.hp<=0, act:()=>openRadial(u.x*T+T/2,u.y*T,'CALLED SHOT',calledOptions(u)) },
+      { icon:'🌀', label:'Swap', disabled:!sel||!sel.canSwap||sel.hp<=0, act:()=>swapUnits(sel,u) },
+      { icon:'👁️', label:'Examine', act:()=>status(`${u.nm}: ${u.hp} HP, facing ${u.dir}${u.legHit?', hobbled':''}${u.armHit?', winged':''}. ${canSee(u,sel||u)?'HE SEES YOU.':'Unaware.'}`) } ];
     const items=u.loadout.map(mid=>{ const m=MODES[mid]; return { icon:m.icon, label:(u.mode===mid?'✓ ':'')+m.label, act:()=>{ select(u); setMode(u,mid); } }; });
     if(u.canFly) items.unshift({ icon:u.flying?'🛬':'🛫', label:u.flying?'Land':'Take off', act:()=>{ select(u); toggleFly(u); } });
-    items.push({ icon:'👁️', label:'Examine', act:()=>status(`${u.nm}: ${u.hp} HP, ${MODES[u.mode].label}, ${u.flying?'AIRBORNE':'on foot'}.`) }); return items; }
+    items.unshift({ icon:'👁️', label:u.overwatch?'✓ Overwatch':'Overwatch', act:()=>{ select(u); u.overwatch=!u.overwatch;
+      status(u.overwatch?`👁️ ${u.nm} holds fire — first hostile crossing the cone eats a reaction shot.`:`${u.nm} stands down.`); } });
+    items.push({ icon:'ℹ️', label:'Examine', act:()=>status(`${u.nm}: ${u.hp} HP, ${MODES[u.mode].label}, ${u.flying?'AIRBORNE':'on foot'}${isHidden(u)?' · UNSEEN':''}.`) }); return items; }
   function groundOptions(x,y){ return [
     { icon:'🚶', label:'Move here', disabled:!sel||sel.hp<=0, act:()=>{ const p=findPath(sel,x,y); if(p) walk(sel,p); else status('No path there.'); } },
+    { icon:'💨', label:'Smoke', disabled:!sel||sel.hp<=0, act:()=>throwSmoke(sel,x,y) },
+    { icon:'💣', label:'Grenade', disabled:!sel||sel.hp<=0, act:()=>dropGrenade(sel,x,y) },
     { icon:'👁️', label:'Face this way', disabled:!sel||sel.hp<=0, act:()=>{ face(sel,dirTo(sel,{x,y})); status(`${sel.nm} watches ${sel.dir}.`); } } ]; }
   function setMode(u,mid){ if(!u.loadout.includes(mid)) return; u.mode=mid; refreshWpn(u); status(`${u.nm} readies ${MODES[mid].label}.`); }
   function refreshWpn(u){ const el=document.getElementById('wpn-'+u.id); if(el) el.textContent=`${MODES[u.mode].icon} ${MODES[u.mode].label}`; }
@@ -588,7 +744,7 @@
     stopCivLife(); closeRadial(); sel=null;
     board.innerHTML=''; board.style.width=(COLS*T)+'px'; board.style.height=(ROWS*T)+'px';
     grid=Array.from({length:ROWS},()=>Array(COLS).fill(0));
-    walls=new Map(); doors=[]; props=[]; blocked=new Set(); crates=[]; units=[]; civs=[];
+    walls=new Map(); doors=[]; props=[]; blocked=new Set(); crates=[]; units=[]; civs=[]; zones=[]; smokes=[];
     // svg layers
     conesvg=document.createElementNS('http://www.w3.org/2000/svg','svg'); conesvg.id='conesvg'; conesvg.setAttribute('width',COLS*T); conesvg.setAttribute('height',ROWS*T);
     const psvg=document.createElementNS('http://www.w3.org/2000/svg','svg'); psvg.id='pathsvg'; psvg.setAttribute('width',COLS*T); psvg.setAttribute('height',ROWS*T);
@@ -612,7 +768,7 @@
   board.addEventListener('contextmenu',e=>{ e.preventDefault(); const r=board.getBoundingClientRect(); const px=e.clientX-r.left,py=e.clientY-r.top,x=Math.floor(px/T),y=Math.floor(py/T);
     const d=doorAt(x,y); if(d) return openRadial(d.x*T+T/2,d.y*T+T/2,(d.name||'DOOR').toUpperCase(),doorOptions(d));
     const u=units.find(v=>v.hp>0&&v.x===x&&v.y===y); if(u) return openRadial(u.x*T+T/2,u.y*T,u.nm,unitOptions(u));
-    const w=wallAt(x,y); if(w&&w.hp>0) return openRadial(w.x*T+T/2,w.y*T+T/2,MATS[w.mat].label.toUpperCase(),wallOptions(w));
+    const w=wallAt(x,y); if(w&&w.hp>0) return openRadial(w.x*T+T/2,w.y*T+T/2,wallName(w).toUpperCase(),wallOptions(w));
     openRadial(px,py,`${x},${y}`,groundOptions(x,y)); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeRadial(); sel=null; for(const v of units) if(v.team==='blue') v.ringEl.className='ring cyan'; document.querySelectorAll('.slot').forEach(s=>s.classList.remove('sel')); drawPath(null); status('Deselected.'); }
     const n=Number(e.key); if(n>=1&&n<=9&&sel&&sel.hp>0&&sel.loadout[n-1]) setMode(sel,sel.loadout[n-1]);
@@ -621,7 +777,8 @@
   // QA hooks
   window.__slice={ get loc(){return currentLoc}, loadLocation, LOCATIONS, get grid(){return grid}, get units(){return units}, get civs(){return civs},
     get walls(){return walls}, wallAt, doorAt, findPath, walk, shoot, canSee, losClear, panic, attackWall, damageWall, place, face, select,
-    get sel(){return sel}, get radial(){return radialEl}, unit:id=>units.find(u=>u.id===id), tick:civTick };
+    throwSmoke, swapUnits, dropGrenade, calledShot, isHidden, knockThrough, bounceVia, hostileAdvance, MODES,
+    get smokes(){return smokes}, get sel(){return sel}, get radial(){return radialEl}, unit:id=>units.find(u=>u.id===id), tick:civTick };
 
   loadLocation('street');
 })();
