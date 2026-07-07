@@ -17,6 +17,20 @@
   .wall{position:absolute;width:var(--tile);height:var(--tile);z-index:3;
     background:linear-gradient(180deg,var(--wall-top) 0%,var(--wall) 34%,var(--wall) 78%,var(--wall-dark) 100%);
     border:1px solid #3f3f44;box-shadow:inset 0 2px 0 rgba(255,255,255,.18), inset 0 -3px 4px rgba(0,0,0,.4)}
+  .wall .cracks{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .2s}
+  .rubble{position:absolute;width:var(--tile);height:var(--tile);z-index:2;border:none;
+    background-color:#17130c;
+    background-image:
+      radial-gradient(circle at 26% 38%, #56565c 0 6px, transparent 7px),
+      radial-gradient(circle at 62% 62%, #47474d 0 8px, transparent 9px),
+      radial-gradient(circle at 78% 28%, #3c3c42 0 5px, transparent 6px),
+      radial-gradient(circle at 42% 76%, #50505a 0 6px, transparent 7px),
+      radial-gradient(circle at 14% 72%, #33333a 0 4px, transparent 5px);
+    box-shadow:inset 0 0 10px rgba(0,0,0,.6)}
+  @keyframes dust{from{opacity:.85;transform:scale(.5)}to{opacity:0;transform:scale(1.9)}}
+  .dust{position:absolute;z-index:9;pointer-events:none;border-radius:50%;
+    background:radial-gradient(circle,rgba(190,180,160,.75),rgba(120,112,98,.35) 55%,transparent 75%);
+    animation:dust .8s ease-out forwards}
   .fence{position:absolute;width:var(--tile);height:var(--tile);z-index:2;
     background:repeating-linear-gradient(45deg,rgba(150,150,160,.55) 0 2px,transparent 2px 6px),
                repeating-linear-gradient(-45deg,rgba(150,150,160,.55) 0 2px,transparent 2px 6px)}
@@ -83,7 +97,7 @@
 <div class="wrap">
   <p class="eyebrow">SuperHero Tactics · Playable Slice</p>
   <h1>Walk the compound. Take the shot.</h1>
-  <p class="lede"><b>Click a hero, click a tile to move; right-click anything</b> for the JA2 radial (doors open/lockpick/<b>kick</b>, crates loot, weapons swap — Surge carries Pistol/Dual/Blast/Beam on keys <b>1–4</b>). <b>NEW — FLIGHT:</b> select the <b>Red Sentinel</b> and press <b>F</b> (or radial → 🛫 Take off). He hovers with the classic <b>ground shadow</b> beneath, bobbing in place; click anywhere and he <b>flies straight over fences, walls and both buildings</b> — and his altitude rides the terrain: low over grass, higher over the compound walls, highest over the <b>2F rooftop tower</b> (southwest). Airborne he sees <i>over</i> walls (watch his cone) — but the whole map can see him too. <b>F</b> again to land (needs clear ground).</p>
+  <p class="lede"><b>Click a hero, click a tile to move; right-click anything</b> for the JA2 radial (doors open/lockpick/<b>kick</b>, crates loot, weapons swap — Surge carries Pistol/Dual/Blast/Beam on keys <b>1–4</b>). <b>NEW — FLIGHT:</b> select the <b>Red Sentinel</b> and press <b>F</b> (or radial → 🛫 Take off). He hovers with the classic <b>ground shadow</b> beneath, bobbing in place; click anywhere and he <b>flies straight over fences, walls and both buildings</b> — and his altitude rides the terrain: low over grass, higher over the compound walls, highest over the <b>2F rooftop tower</b> (southwest). Airborne he sees <i>over</i> walls (watch his cone) — but the whole map can see him too. <b>F</b> again to land (needs clear ground). <b>NEW — STRUCTURAL DAMAGE:</b> right-click any wall → <b>Attack</b>. Walls have material HP (<b style="color:#c88a6a">brick 80</b> · <b>concrete 150</b> · <b style="color:#8a97a8">reinforced 300</b>): bullets chip, energy bites, and the Sentinel's <b>👊 Haymaker</b> (key <b>2</b>, adjacent) punches straight through. Cracks show at 66% and 33%; at 0 the wall <b>collapses into walkable rubble</b> — new path, new sightlines, and the noise turns every hostile head.</p>
 
   <div class="stage"><div id="board"></div></div>
 
@@ -117,9 +131,30 @@
   const TX=2, TY=10, TW=5, TH=5;
   rect(TX,TY,TW,TH,4); ring(TX,TY,TW,TH,2);
 
+  // ---------- STRUCTURAL DAMAGE: walls are stateful objects with material HP ----------
+  const MATS={
+    brick:     { hp:80,  label:'Brick partition',  tint:'sepia(.45) hue-rotate(-24deg) saturate(1.6) brightness(.92)' },
+    concrete:  { hp:150, label:'Concrete wall',    tint:'' },
+    reinforced:{ hp:300, label:'Reinforced wall',  tint:'brightness(.72) saturate(.55) hue-rotate(12deg)' },
+  };
+  const CRACK1='repeating-linear-gradient(37deg,transparent 0 9px,rgba(0,0,0,.45) 9px 10px,transparent 10px 23px)';
+  const CRACK2=CRACK1+',repeating-linear-gradient(-53deg,transparent 0 7px,rgba(0,0,0,.55) 7px 9px,transparent 9px 17px)';
+  const walls=new Map();
+  const wallAt=(x,y)=>walls.get(x+','+y);
+
   for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
     const t=grid[y][x];
-    if(t===2){ const d=document.createElement('div'); d.className='wall'; d.style.left=(x*T)+'px'; d.style.top=(y*T)+'px'; board.appendChild(d); continue; }
+    if(t===2){
+      const d=document.createElement('div'); d.className='wall'; d.style.left=(x*T)+'px'; d.style.top=(y*T)+'px';
+      const inTower=x>=TX&&x<TX+TW&&y>=TY&&y<TY+TH;
+      const onRing=(x>=BX&&x<BX+BW&&y>=BY&&y<BY+BH)&&(x===BX||x===BX+BW-1||y===BY||y===BY+BH-1);
+      const mat=inTower?'reinforced':onRing?'concrete':'brick';
+      if(MATS[mat].tint) d.style.filter=MATS[mat].tint;
+      const cr=document.createElement('div'); cr.className='cracks'; d.appendChild(cr);
+      board.appendChild(d);
+      walls.set(x+','+y,{ x, y, mat, hp:MATS[mat].hp, maxHp:MATS[mat].hp, el:d, crackEl:cr });
+      continue;
+    }
     if(t===3){ const d=document.createElement('div'); d.className='fence'; d.style.left=(x*T)+'px'; d.style.top=(y*T)+'px'; board.appendChild(d); }
     const g=document.createElement('div'); g.className='cell '+(t===1||t===4?'':'grass');
     g.style.left=(x*T)+'px'; g.style.top=(y*T)+'px';
@@ -254,26 +289,30 @@
   // hitscan beam. Each mode = emitter type + count + color + damage + sound
   // (+ optionally a real animation clip and its release frame).
   const SNDBASE='../assets/sounds/';
+  // `struct` = structural-damage factor vs walls: bullets chip, energy bites,
+  // a rank-scaled STR punch demolishes. (The superhero rule: muscle > masonry.)
   const MODES={
-    pistol:  { icon:'🔫', label:'Pistol',       dmg:[8,14],  emitter:{type:'projectile',count:1,color:'#ffd24a',dur:0.8},
+    pistol:  { icon:'🔫', label:'Pistol',       dmg:[8,14],  struct:0.15, emitter:{type:'projectile',count:1,color:'#ffd24a',dur:0.8},
                snd:SNDBASE+'combat/gunshot_pistol_01.wav' },
-    dual:    { icon:'⚔️', label:'Dual Pistols', dmg:[6,10],  emitter:{type:'projectile',count:2,color:'#ffd24a',dur:0.8,stagger:130},
+    dual:    { icon:'⚔️', label:'Dual Pistols', dmg:[6,10],  struct:0.15, emitter:{type:'projectile',count:2,color:'#ffd24a',dur:0.8,stagger:130},
                snd:SNDBASE+'combat/gunshot_pistol_01.wav' },
-    blast:   { icon:'💥', label:'Energy Blast', dmg:[16,26], emitter:{type:'projectile',count:1,color:'#38f0ff',dur:1.1},
+    blast:   { icon:'💥', label:'Energy Blast', dmg:[16,26], struct:1.2,  emitter:{type:'projectile',count:1,color:'#38f0ff',dur:1.1},
                snd:SNDBASE+'combat/energy_blast_01.wav', clip:'blast' },
-    beam:    { icon:'⚡', label:'Ion Beam',     dmg:[12,20], emitter:{type:'beam_thin',color:'#ff5c5c'},
+    beam:    { icon:'⚡', label:'Ion Beam',     dmg:[12,20], struct:0.5,  emitter:{type:'beam_thin',color:'#ff5c5c'},
                snd:SNDBASE+'combat/laser_fire_01.wav', clip:'blast' },
-    goldbeam:{ icon:'☀️', label:'Solar Lance',  dmg:[14,22], emitter:{type:'beam_thin',color:'#f5b21a'},
+    goldbeam:{ icon:'☀️', label:'Solar Lance',  dmg:[14,22], struct:0.6,  emitter:{type:'beam_thin',color:'#f5b21a'},
                snd:SNDBASE+'combat/laser_fire_01.wav' },
-    rifle:   { icon:'🎯', label:'Rifle',        dmg:[8,15],  emitter:{type:'projectile',count:1,color:'#ffd24a',dur:0.9},
+    rifle:   { icon:'🎯', label:'Rifle',        dmg:[8,15],  struct:0.2,  emitter:{type:'projectile',count:1,color:'#ffd24a',dur:0.9},
                snd:SNDBASE+'combat/gunshot_rifle_01.wav', clip:'fire' },
+    haymaker:{ icon:'👊', label:'Haymaker (STR)', dmg:[20,30], struct:6, melee:true, emitter:{type:'melee',color:'#f5b21a'},
+               snd:SNDBASE+'combat/impact_punch_01.wav' },
   };
   const units=[
     { id:'surge',        nm:'SURGE',        team:'blue', x:BX+2, y:BY+7, dir:'S', hp:100,
       loadout:['pistol','dual','blast','beam'], mode:'blast',
       clips:{ blast:{S:{key:'surge_blast_south',frames:6,release:5},E:{key:'surge_blast_east',frames:6,release:5},W:{key:'surge_blast_east',frames:6,release:5,flip:true}} } },
     { id:'red_sentinel', nm:'RED SENTINEL', team:'blue', x:BX+9, y:BY+9, dir:'S', hp:100,
-      canFly:true, loadout:['goldbeam','pistol'], mode:'goldbeam', clips:{} },
+      canFly:true, loadout:['goldbeam','haymaker','pistol'], mode:'goldbeam', clips:{} },
     { id:'merc',         nm:'HOSTILE MERC', team:'red',  x:6,    y:7,    dir:'E', hp:100,
       loadout:['rifle'], mode:'rifle',
       clips:{ fire:{S:{key:'merc_fire_south',frames:9,release:3},E:{key:'merc_fire_east',frames:9,release:3},W:{key:'merc_fire_east',frames:9,release:3,flip:true}} } },
@@ -390,7 +429,8 @@
   function dirTo(a,b){ const dx=Math.sign(b.x-a.x), dy=Math.sign(b.y-a.y); return DIRS[dx+','+dy]||a.dir; }
   function shoot(a,t){ if(a.shooting||a.walkT||a.hp<=0||t.hp<=0) return;
     const distT=Math.hypot(t.x-a.x,t.y-a.y);
-    if(distT>SHOOT_RANGE){ if(a.team==='blue') status(`Out of range — get within ${SHOOT_RANGE} tiles.`); return; }
+    const rngT=MODES[a.mode].melee?1.6:SHOOT_RANGE;
+    if(distT>rngT){ if(a.team==='blue') status(MODES[a.mode].melee?'Melee — get adjacent to swing.':`Out of range — get within ${SHOOT_RANGE} tiles.`); return; }
     const seeThru = a.flying || t.flying;                 // air shots clear the walls
     if(!seeThru && !losClear(a.x,a.y,t.x,t.y)){ face(a,dirTo(a,t));
       if(a.team==='blue') status('No line of sight — a wall blocks the shot.'); return; }
@@ -412,14 +452,18 @@
   function anchors(a,t){ const off=T*0.55;
     return { sx:a.x*T+T/2, sy:a.y*T+T/2-off, ex:t.x*T+T/2, ey:t.y*T+T/2-off }; }
 
-  /** EMITTER DISPATCH — projectile (1..n, staggered) or hitscan thin beam. */
-  function emit(a,t,m){
+  /** EMITTER DISPATCH — projectile (1..n, staggered), hitscan thin beam, or melee lunge. */
+  function emit(a,t,m,onHit=hit){
     const e=m.emitter||{type:'projectile',count:1,color:'#fff'};
-    if(e.type==='beam_thin') return beamThin(a,t,m);
+    if(e.type==='melee'){
+      a.el.animate([{transform:'translate(0,0)'},{transform:`translate(${Math.sign(t.x-a.x)*8}px,${Math.sign(t.y-a.y)*8}px)`},{transform:'translate(0,0)'}],{duration:220});
+      setTimeout(()=>onHit(a,t,m),110); return;
+    }
+    if(e.type==='beam_thin') return beamThin(a,t,m,onHit);
     const n=e.count||1;
-    for(let i=0;i<n;i++) setTimeout(()=>{ if(i>0) play(m.snd); projectile(a,t,m,i); }, i*(e.stagger||0));
+    for(let i=0;i<n;i++) setTimeout(()=>{ if(i>0) play(m.snd); projectile(a,t,m,i,onHit); }, i*(e.stagger||0));
   }
-  function projectile(a,t,m,idx=0){
+  function projectile(a,t,m,idx=0,onHit=hit){
     const e=m.emitter, {sx,sy,ex,ey}=anchors(a,t);
     // dual wield: offset each barrel perpendicular to the shot line
     const dx=ex-sx, dy=ey-sy, L=Math.hypot(dx,dy)||1;
@@ -429,9 +473,9 @@
     const t0=performance.now(), dur=Math.max(160,L*(e.dur??0.9));
     (function stepFn(now){ const k=Math.min(1,(now-t0)/dur);
       p.style.left=(sx+ox+dx*k-6)+'px'; p.style.top=(sy+oy+dy*k-6)+'px';
-      if(k<1) requestAnimationFrame(stepFn); else { p.remove(); hit(a,t,m); } })(t0);
+      if(k<1) requestAnimationFrame(stepFn); else { p.remove(); onHit(a,t,m); } })(t0);
   }
-  function beamThin(a,t,m){
+  function beamThin(a,t,m,onHit=hit){
     const e=m.emitter, {sx,sy,ex,ey}=anchors(a,t);
     const L=Math.hypot(ex-sx,ey-sy), ang=Math.atan2(ey-sy,ex-sx);
     const b=document.createElement('div');
@@ -447,7 +491,7 @@
     let flick=0; const iv=setInterval(()=>{ b.style.opacity=(flick++%2)?1:.55; },55);
     setTimeout(()=>{ clearInterval(iv); b.style.transition='opacity .12s'; g.style.transition='opacity .12s';
       b.style.opacity=0; g.style.opacity=0; setTimeout(()=>{b.remove();g.remove();},140); }, 240);
-    hit(a,t,m);                                          // hitscan: damage lands instantly
+    onHit(a,t,m);                                        // hitscan: damage lands instantly
   }
   function hit(a,t,m){ if(t.hp<=0) return; play(impactSnd);
     const [lo,hi]=m.dmg, d=lo+Math.floor(Math.random()*(hi-lo+1));
@@ -464,6 +508,63 @@
     shoot(e,targets[0]); }
 
   function die(u){ u.hp=0; u.flying=false; applyAlt(u); u.el.classList.add('dead'); hpbar(u); updateCone(u); if(sel===u) sel=null; }
+
+  // ---------- STRUCTURAL DAMAGE: attack, crack, collapse ----------
+  function attackWall(a,w){
+    if(a.shooting||a.walkT||a.hp<=0||w.hp<=0) return;
+    const m=MODES[a.mode];
+    const dist=Math.hypot(w.x-a.x,w.y-a.y);
+    const rng=m.melee?1.6:SHOOT_RANGE;
+    if(dist>rng){ status(m.melee?'Melee — get adjacent to the wall to swing.':`Out of range — get within ${SHOOT_RANGE} tiles.`); return; }
+    if(!m.melee && !a.flying && !losClear(a.x,a.y,w.x,w.y)){ face(a,dirTo(a,w)); status('No clear shot at that wall section.'); return; }
+    a.shooting=true; face(a,dirTo(a,w)); play(m.snd);
+    emit(a,{x:w.x,y:w.y},m,()=>damageWall(a,w,m));
+    setTimeout(()=>a.shooting=false,500);
+  }
+  function damageWall(a,w,m){
+    if(w.hp<=0) return;
+    const [lo,hi]=m.dmg, base=lo+Math.floor(Math.random()*(hi-lo+1));
+    const d=Math.max(1,Math.round(base*(m.struct??0.15)));
+    w.hp-=d; play(impactSnd);
+    const dm=document.createElement('div'); dm.className='dmg'; dm.textContent='-'+d;
+    dm.style.color=(m.struct??0)>=1?m.emitter.color:'#8d8d94';
+    dm.style.left=(w.x*T+T/2-8)+'px'; dm.style.top=(w.y*T-6)+'px'; board.appendChild(dm); setTimeout(()=>dm.remove(),950);
+    updateWallLook(w);
+    if(w.hp<=0){ collapseWall(w); return; }
+    const pct=Math.round(w.hp/w.maxHp*100);
+    status((m.struct??0)<0.3
+      ? `${MATS[w.mat].label} at ${pct}% — small arms barely chip it. Energy or muscle works faster.`
+      : `${MATS[w.mat].label} at ${pct}% — it's cracking.`);
+  }
+  function updateWallLook(w){
+    const k=w.hp/w.maxHp;
+    if(k>0.66){ w.crackEl.style.opacity=0; return; }
+    w.crackEl.style.backgroundImage = k>0.33 ? CRACK1 : CRACK2;
+    w.crackEl.style.opacity = 1;
+  }
+  function collapseWall(w){
+    w.hp=0; grid[w.y][w.x]=5;                            // 5 = rubble: walkable, see-through
+    w.el.className='rubble'; w.el.style.filter=''; w.crackEl.remove();
+    play(SNDBASE+'combat/explosion_small_01.wav');
+    const du=document.createElement('div'); du.className='dust';
+    du.style.left=(w.x*T-T*0.4)+'px'; du.style.top=(w.y*T-T*0.4)+'px';
+    du.style.width=(T*1.8)+'px'; du.style.height=(T*1.8)+'px';
+    board.appendChild(du); setTimeout(()=>du.remove(),850);
+    const m=units.find(u=>u.team==='red'&&u.hp>0);       // collapse is LOUD — hostiles turn toward it
+    if(m) face(m, DIRS[Math.sign(w.x-m.x)+','+Math.sign(w.y-m.y)] || m.dir);
+    for(const u of units) updateCone(u);                 // new sightlines through the breach
+    status(`💥 The ${MATS[w.mat].label.toLowerCase()} COLLAPSES — rubble, dust, a brand-new breach. That was LOUD.`);
+  }
+  function wallOptions(w){
+    const mt=MATS[w.mat], pct=Math.round(w.hp/w.maxHp*100);
+    return [
+      { icon:'🎯', label:'Attack', disabled:!sel||sel.hp<=0, act:()=>attackWall(sel,w) },
+      { icon:'👁️', label:'Examine', act:()=>status(`${mt.label} — integrity ${pct}%. `+(
+          w.mat==='brick'?'Energy or a haymaker breaches it fast.'
+        : w.mat==='concrete'?'Bullets chip it; bring energy weapons or muscle.'
+        : 'Vault-grade. Only serious force gets through.')) },
+    ];
+  }
 
   // ---------- JA2-style radial interaction menu ----------
   const SND2={ door:'../assets/sounds/environment/door_open_metal_01.wav',
@@ -548,6 +649,7 @@
     const x=Math.floor(px/T), y=Math.floor(py/T);
     const d=doorAt(x,y); if(d) return openRadial(d.x*T+T/2, d.y*T+T/2, d.name.toUpperCase(), doorOptions(d));
     const u=units.find(v=>v.hp>0&&v.x===x&&v.y===y); if(u) return openRadial(u.x*T+T/2, u.y*T, u.nm, unitOptions(u));
+    const w=wallAt(x,y); if(w&&w.hp>0) return openRadial(w.x*T+T/2, w.y*T+T/2, MATS[w.mat].label.toUpperCase(), wallOptions(w));
     openRadial(px,py,`${x},${y}`, groundOptions(x,y)); });
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ closeRadial(); sel=null;
     for(const v of units) if(v.team==='blue') v.ringEl.className='ring cyan';
@@ -559,6 +661,7 @@
   // QA hooks
   window.__game={ units, select, findPath, walk, shoot, losClear, canSee, place, face, updateCone,
     doors, crates, openRadial, doorOptions, MODES, setMode, unitOptions, toggleFly, elevAt,
+    walls, wallAt, attackWall, damageWall, collapseWall, MATS, grid,
     get radial(){ return radialEl; }, unit:id=>units.find(u=>u.id===id) };
 })();
 </script>
