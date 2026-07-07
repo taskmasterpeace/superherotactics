@@ -138,7 +138,7 @@
   // tile codes: 0 grass · 1 floor/concrete · 2 wall · 3 fence · 4 tall(elev2) ·
   //             5 rubble · 6 road/asphalt · 7 water
   let grid, walls, doors, props, blocked, crates, units, civs, sel;
-  let conePaths, pline, zones, smokes, aiTimer;
+  let conePaths, pline, zones, smokes, aiTimer, paused=false;
   const wallName=w=>`${w.name?w.name+' ':''}${MATS[w.mat].label.toLowerCase()}`;
 
   const inB=(x,y)=>x>=0&&x<COLS&&y>=0&&y<ROWS;
@@ -182,16 +182,34 @@
   // ============================================================= LOCATIONS
   // Each location is DATA the engine reads. build(api) paints terrain, drops
   // props, and declares spawns + civilian density + strategic context.
-  const PROP_META={ // footprint blockers get blocks:true; render art or emoji fallback
-    car_sedan:{w:2.7,h:1.45,blk:1}, dumpster:{w:1.9,h:1.3,blk:1}, streetlamp:{w:1.1,h:1.45},
-    tree_oak:{w:2.7,h:2.7,canopy:1}, tree_pine:{w:2.0,h:2.0,canopy:1}, bush:{w:1.2,h:1.2}, rock:{w:1.4,h:1.3,blk:1},
-    crate:{w:1.1,h:1.1,blk:1,loot:1}, crate_stack:{w:1.7,h:1.7,blk:1,loot:1}, plant:{w:0.9,h:0.9},
-    desk:{w:2,h:1.3,blk:1}, chair:{w:1,h:1}, cabinet:{w:1,h:1.2,blk:1}, server_rack:{w:1.4,h:1.4,blk:1}, cot:{w:1.3,h:1.9,blk:1},
-    // new (art may still be cooking → emoji fallback)
-    park_bench:{w:1.6,h:1,blk:1,fb:'🪑'}, fire_hydrant:{w:0.8,h:1,blk:1,fb:'🚱'},
-    bus_stop:{w:2.1,h:1.3,blk:1,fb:'🚏'}, traffic_light:{w:0.9,h:1.6,fb:'🚦'}, vending_machine:{w:1,h:1.4,blk:1,fb:'🥤'},
-    hay_bale:{w:1.2,h:1.2,blk:1,fb:'🌾'}, lockers:{w:1.6,h:1,blk:1,fb:'🗄️'}, school_bus:{w:3.4,h:1.6,blk:1,fb:'🚌'},
-    chalkboard:{w:2,h:0.8,fb:'📗'},
+  // Footprints in TILES, derived from each sprite's trimmed aspect × real-world size.
+  // Sprites are trimmed to content, so the render box == the visible art (no padding).
+  // A person = 1 tile; a sedan is ~3.8 tiles long so it dwarfs a pedestrian.
+  const PROP_META={
+    car_sedan:{w:3.8,h:1.86,blk:1},
+    school_bus:{w:6,h:2.54,blk:1,fb:'🚌'},
+    bus_stop:{w:2.6,h:1.73,blk:1,fb:'🚏'},
+    dumpster:{w:1.7,h:0.99,blk:1},
+    crate_stack:{w:1.22,h:1.7,blk:1,loot:1},
+    crate:{w:1.1,h:1.1,blk:1,loot:1},
+    fire_hydrant:{w:0.67,h:1.1,blk:1,fb:'🚱'},
+    vending_machine:{w:0.77,h:1.6,blk:1,fb:'🥤'},
+    park_bench:{w:2,h:1.15,blk:1,fb:'🪑'},
+    streetlamp:{w:0.43,h:2.6,tall:1},
+    traffic_light:{w:0.89,h:2.5,tall:1,fb:'🚦'},
+    tree_oak:{w:2.95,h:3.1,canopy:1},
+    tree_pine:{w:1.65,h:2.7,canopy:1},
+    bush:{w:1.3,h:1.3},
+    rock:{w:1.3,h:1.19,blk:1},
+    hay_bale:{w:1.35,h:1.46,blk:1,fb:'🌾'},
+    lockers:{w:2.2,h:0.99,blk:1,fb:'🗄️'},
+    chalkboard:{w:1.8,h:0.88,fb:'📗'},
+    desk:{w:2,h:1.75,blk:1},
+    chair:{w:0.62,h:1},
+    cabinet:{w:1.01,h:1.3,blk:1},
+    cot:{w:1.05,h:2,blk:1},
+    server_rack:{w:1.42,h:1.9,blk:1},
+    plant:{w:0.89,h:0.95},
   };
 
   const api = {
@@ -238,7 +256,7 @@
         a.prop('crate_stack',17.4,12.4,{blk:1,loot:1});
         // combatants: heroes enter from the south, hostiles behind the cars up north
         units.push(hero('surge', 8, ROWS-2)); units.push(hero('red_sentinel', 18, ROWS-2));
-        units.push(hostile('merc', 12, 4)); units.push(hostile('merc', 13, 9, 'merc2'));
+        units.push(hostile('merc', 12, 6)); units.push(hostile('merc', 15, 12, 'merc2'));  // dug in behind the cars
         a.scatterCivs(9, (x,y)=>grid[y][x]===1||grid[y][x]===0);   // pedestrians on the sidewalks
       } },
 
@@ -351,10 +369,16 @@
         el=document.createElement('img'); el.className='prop'; el.src=`${G}/${p.name}.png`;
         if(p.fb) el.onerror=()=>{ el.replaceWith(fallbackProp(p)); };  // art still cooking → emoji
       } else el=fallbackProp(p);
-      el.style.left=(p.x*T)+'px'; el.style.top=(p.y*T)+'px'; el.style.width=(p.w*T)+'px'; el.style.height=(p.h*T)+'px';
+      // tall props (poles) + tree canopies are BASE-anchored: they rise up from
+      // their placement tile instead of sprawling down from a top-left corner.
+      const baseAnchored = p.tall || p.canopy;
+      const topY = baseAnchored ? (p.y - (p.h - 1))*T : p.y*T;
+      el.style.left=(p.x*T)+'px'; el.style.top=topY+'px'; el.style.width=(p.w*T)+'px'; el.style.height=(p.h*T)+'px';
       if(p.canopy) el.style.zIndex=7;
       board.appendChild(el); p.el=el;
-      if(p.blk) for(let j=Math.floor(p.y);j<Math.ceil(p.y+p.h);j++)for(let i=Math.floor(p.x);i<Math.ceil(p.x+p.w);i++) blocked.add(i+','+j);
+      // blocking footprint: base-anchored props only block their base row; flat props block their whole box
+      if(p.blk){ const y0=baseAnchored?Math.floor(p.y):Math.floor(p.y), y1=baseAnchored?Math.floor(p.y)+1:Math.ceil(p.y+p.h);
+        for(let j=y0;j<y1;j++)for(let i=Math.floor(p.x);i<Math.ceil(p.x+p.w);i++) blocked.add(i+','+j); }
       if(p.loot){ p.looted=false; el.classList.add('interact');
         el.addEventListener('contextmenu',ev=>{ ev.preventDefault(); ev.stopPropagation(); openRadial(p.x*T+p.w*T/2,p.y*T+p.h*T/2,'CACHE',crateOptions(p)); }); }
     }
@@ -752,7 +776,7 @@
     loc.build(api);
     paintTerrain(); board.appendChild(conesvg); board.appendChild(psvg); pline=psvg.querySelector('#pline');
     paintProps(); paintDoors(); paintCivs(); paintUnits();
-    buildHud(); startCivLife(); renderPicker();
+    buildHud(); if(!paused) startCivLife(); renderPicker();
     status(`${loc.name} — ${loc.intel.threat}. ${civs.length} civilians on the field.`);
   }
   let conesvg;
@@ -760,7 +784,12 @@
   function renderPicker(){ const pick=document.getElementById('picker'); pick.innerHTML='';
     for(const [key,loc] of Object.entries(LOCATIONS)){ const el=document.createElement('div'); el.className='loc'+(key===currentLoc?' on':'');
       el.innerHTML=`<div class="lname">${loc.icon} ${loc.name}</div><div class="lsub">${loc.intel.place.split(' · ')[1]||''}</div>`;
-      el.addEventListener('click',()=>loadLocation(key)); pick.appendChild(el); } }
+      el.addEventListener('click',()=>loadLocation(key)); pick.appendChild(el); }
+    // PAUSE: freeze the whole sim (pedestrian wander + hostile advance) to study the board
+    const pz=document.createElement('div'); pz.className='loc'+(paused?' on':''); pz.style.minWidth='96px';
+    pz.innerHTML=`<div class="lname">${paused?'▶ Resume':'⏸ Pause'}</div><div class="lsub">${paused?'sim frozen':'sim live'}</div>`;
+    pz.addEventListener('click',()=>{ paused=!paused; if(paused) stopCivLife(); else startCivLife(); renderPicker(); });
+    pick.appendChild(pz); }
 
   // ============================================================= INPUT
   board.addEventListener('click',e=>{ if(radialEl){ closeRadial(); return; } if(!sel||sel.hp<=0) return;
