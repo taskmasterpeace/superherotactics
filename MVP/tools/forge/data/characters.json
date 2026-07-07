@@ -35,7 +35,7 @@
         "W": "/game/assets/character_token/generated/surge/W.png",
         "SW": "/game/assets/character_token/generated/surge/SW.png"
       },
-      "portrait": "/game/assets/character_token/generated/surge/S.png",
+      "portrait": "/game/assets/portraits/surge.png",
       "source": "mock:surge"
     },
     "tuning": {
@@ -157,7 +157,7 @@
         "W": "/game/assets/character_token/generated/merc/W.png",
         "SW": "/game/assets/character_token/generated/merc/SW.png"
       },
-      "portrait": "/game/assets/character_token/generated/merc/S.png",
+      "portrait": "/game/assets/portraits/merc.png",
       "source": "mock:merc"
     },
     "tuning": {

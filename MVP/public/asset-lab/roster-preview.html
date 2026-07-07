@@ -25,6 +25,8 @@
   .tab.on{color:#151109;background:var(--gold);border-color:var(--gold);font-weight:700}
   .tab .dot{width:9px;height:9px;border-radius:50%;background:var(--d);box-shadow:0 0 8px var(--d)}
   .tab.on .dot{box-shadow:none}
+  .pface{width:64px;height:64px;border-radius:9px;border:1px solid var(--line);image-rendering:pixelated;background:var(--panel)}
+  .hgroup{display:flex;align-items:center;gap:14px}
   .char-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
     border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:22px}
   h2{margin:0;font-family:system-ui,sans-serif;font-weight:800;font-size:24px}
@@ -86,7 +88,7 @@
   <div class="tabs"><button class="tab on" data-tab="merc"><span class="dot" style="--d:#a8a06a"></span>Grizzled Merc</button><button class="tab" data-tab="hero"><span class="dot" style="--d:#e0603a"></span>Red Sentinel</button><button class="tab" data-tab="surge"><span class="dot" style="--d:#3ac0c8"></span>Surge</button></div>
   <section class="char" data-char="merc" >
     <div class="char-head">
-      <div><h2>Grizzled Merc</h2><p class="role">Human · Rifleman</p></div>
+      <div class="hgroup"><img class="pface" src="../assets/portraits/merc.png" alt="Grizzled Merc portrait"><div><h2>Grizzled Merc</h2><p class="role">Human · Rifleman</p></div></div>
       <p class="src">PixelLab v3 · 8 true rotations · low top-down · 128px native</p>
     </div>
     <div class="compass"><div class="cell">
@@ -167,7 +169,7 @@
   </section>
 <section class="char" data-char="hero" hidden>
     <div class="char-head">
-      <div><h2>Red Sentinel</h2><p class="role">LSW · Flying Brick</p></div>
+      <div class="hgroup"><img class="pface" src="../assets/portraits/red_sentinel.png" alt="Red Sentinel portrait"><div><h2>Red Sentinel</h2><p class="role">LSW · Flying Brick</p></div></div>
       <p class="src">PixelLab v3 · 8 true rotations · low top-down · 128px native</p>
     </div>
     <div class="compass"><div class="cell">
@@ -248,7 +250,7 @@
   </section>
 <section class="char" data-char="surge" hidden>
     <div class="char-head">
-      <div><h2>Surge</h2><p class="role">LSW · Energy Blaster</p></div>
+      <div class="hgroup"><img class="pface" src="../assets/portraits/surge.png" alt="Surge portrait"><div><h2>Surge</h2><p class="role">LSW · Energy Blaster</p></div></div>
       <p class="src">PixelLab v3 · 8 true rotations · low top-down · 128px native</p>
     </div>
     <div class="compass"><div class="cell">

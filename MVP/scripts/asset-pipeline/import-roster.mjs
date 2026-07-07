@@ -58,10 +58,13 @@ for (const c of roster.characters) {
     have++;
   }
   if (have === 0) { skipped++; continue; }
+  // bust portrait rides along when one exists at public/assets/portraits/<id>.png
+  const portraitFile = path.join(MVP, 'public', 'assets', 'portraits', `${c.id}.png`);
   manifest.characters.push({
     id: c.id, name: c.name, faction: c.faction ?? null, origin: c.origin ?? null,
     token: directions.S || Object.values(directions)[0],   // default facing = South
     directions,
+    ...(fs.existsSync(portraitFile) ? { portrait: `assets/portraits/${c.id}.png` } : {}),
   });
   made++;
   console.log(`  ✓ ${c.id.padEnd(14)} ${have}/8 directions → ${c.id}/`);

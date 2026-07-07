@@ -54,7 +54,10 @@ function mockArt(seedStr) {
   const pick = MOCK_ART[hash(seedStr) % MOCK_ART.length];
   const tokens = {};
   for (const d of DIRKEYS) tokens[d] = `/game/assets/character_token/generated/${pick}/${d}.png`;
-  return { tokens, portrait: tokens.S, source: `mock:${pick}` };
+  // stand-in body gets its stand-in's real bust portrait (falls back to S token if missing)
+  const facePath = path.join(MVP_DIR, 'public', 'assets', 'portraits', `${pick}.png`);
+  const portrait = fs.existsSync(facePath) ? `/game/assets/portraits/${pick}.png` : tokens.S;
+  return { tokens, portrait, source: `mock:${pick}` };
 }
 
 /** Live art: PixelLab v3 → 8 rotations downloaded under MVP/public (served at /game/...). */
@@ -70,7 +73,16 @@ async function liveArt(id, artDescription, onStatus) {
   const local = await pixellab.downloadRotations(rotations, destDir);
   const tokens = {};
   for (const [k, p] of Object.entries(local)) tokens[k] = '/game/asset-lab/forge/' + id + '/' + path.basename(p);
-  return { tokens, portrait: tokens.S, source: `pixellab:${plId}`, pixellabId: plId };
+  // every character gets a face: convert the south sprite to a bust portrait
+  let portrait = tokens.S;
+  if (local.S) {
+    try {
+      onStatus?.('pixellab: rendering bust portrait…');
+      await pixellab.portraitFromCharacter(key, local.S, path.join(destDir, 'portrait.png'));
+      portrait = '/game/asset-lab/forge/' + id + '/portrait.png';
+    } catch (e) { onStatus?.(`portrait failed (${e.message}) — using S token`); }
+  }
+  return { tokens, portrait, source: `pixellab:${plId}`, pixellabId: plId };
 }
 
 /** The full forge: prompt → record. */

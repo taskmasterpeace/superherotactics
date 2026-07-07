@@ -18,7 +18,8 @@
         "NW": "assets/character_token/generated/merc/NW.png",
         "W": "assets/character_token/generated/merc/W.png",
         "SW": "assets/character_token/generated/merc/SW.png"
-      }
+      },
+      "portrait": "assets/portraits/merc.png"
     },
     {
       "id": "red_sentinel",
@@ -35,7 +36,8 @@
         "NW": "assets/character_token/generated/red_sentinel/NW.png",
         "W": "assets/character_token/generated/red_sentinel/W.png",
         "SW": "assets/character_token/generated/red_sentinel/SW.png"
-      }
+      },
+      "portrait": "assets/portraits/red_sentinel.png"
     },
     {
       "id": "surge",
@@ -52,7 +54,8 @@
         "NW": "assets/character_token/generated/surge/NW.png",
         "W": "assets/character_token/generated/surge/W.png",
         "SW": "assets/character_token/generated/surge/SW.png"
-      }
+      },
+      "portrait": "assets/portraits/surge.png"
     }
   ]
 }

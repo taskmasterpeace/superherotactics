@@ -100,6 +100,43 @@ export async function downloadRotations(rotations, destDir) {
   return out;
 }
 
+/**
+ * Character sprite → bust portrait (POST /portrait-character-pro, then poll
+ * /background-jobs/{id}). Writes the PNG to destPath and returns it.
+ */
+export async function portraitFromCharacter(key, spritePath, destPath,
+  { view = 'low top-down', size = 128, timeoutMs = 300000, everyMs = 5000 } = {}) {
+  const base64 = fs.readFileSync(spritePath).toString('base64');
+  const sub = await req(key, 'POST', '/portrait-character-pro', {
+    image: { type: 'base64', base64, format: 'png' },
+    direction: 'character_to_portrait', view, result_size: size,
+  });
+  const jobId = sub.background_job_id;
+  if (!jobId) throw new Error(`portrait-character-pro: no job id in ${JSON.stringify(sub).slice(0, 200)}`);
+  const start = Date.now();
+  for (;;) {
+    const j = await req(key, 'GET', `/background-jobs/${jobId}`);
+    if (j.status === 'completed') {
+      const r = j.last_response || {};
+      const img = r.image || r.portrait || (Array.isArray(r.images) && r.images[0]) || {};
+      const b64 = img.base64 || r.base64;
+      const url = img.url || r.url || r.download_url;
+      fs.mkdirSync(path.dirname(destPath), { recursive: true });
+      if (b64) { fs.writeFileSync(destPath, Buffer.from(b64, 'base64')); return destPath; }
+      if (url) {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`portrait download → ${res.status}`);
+        fs.writeFileSync(destPath, Buffer.from(await res.arrayBuffer()));
+        return destPath;
+      }
+      throw new Error(`portrait job ${jobId} completed but no image in response`);
+    }
+    if (j.status === 'failed') throw new Error(`portrait job ${jobId} failed: ${JSON.stringify(j).slice(0, 200)}`);
+    if (Date.now() - start > timeoutMs) throw new Error(`portrait job ${jobId} timed out`);
+    await new Promise(r => setTimeout(r, everyMs));
+  }
+}
+
 export const P0_ANIMATIONS = [
   { id: 'idle', templateId: 'breathing-idle' },
   { id: 'walk', templateId: 'walking-6-frames' },
