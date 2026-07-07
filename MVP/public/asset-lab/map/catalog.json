@@ -1,0 +1,40 @@
+{
+  "$comment": "SHT MAP TILE/PROP CATALOG — everything generated for map-building (PixelLab, high top-down, style-contract palette). Sizes in px; tile = 44px in the playable slice, 32px native for Wang tilesets. IMPORTANT: PixelLab map-objects auto-delete server-side after 8h — this folder IS the source of truth once downloaded.",
+  "version": 2,
+  "ground_tiles": [
+    { "file": "grass.png",   "desc": "green grass base tile (sliced from grass→concrete tileset)" },
+    { "file": "concrete.png","desc": "gray concrete floor slab base tile" },
+    { "file": "tileset_sheet.png", "desc": "full 16-tile Wang autotile sheet: grass→concrete (32px)", "meta": "tileset.json" },
+    { "file": "tileset_grass_dirt.png", "desc": "16-tile Wang autotile sheet: grass→packed dirt path (32px) — roads/trails" }
+  ],
+  "vegetation": [
+    { "file": "tree_oak.png",  "px": [120,120], "tiles": 2.7, "blocks": "trunk tile only, canopy overlaps (z above units)" },
+    { "file": "tree_pine.png", "px": [88,88],   "tiles": 2.0, "blocks": "trunk tile only" },
+    { "file": "bush.png",      "px": [52,52],   "tiles": 1.2, "blocks": "none (concealment candidate)" },
+    { "file": "rock.png",      "px": [64,56],   "tiles": 1.4, "blocks": "footprint (cover candidate)" },
+    { "file": "plant.png",     "px": [40,40],   "tiles": 0.9, "blocks": "none (indoor decor)" }
+  ],
+  "urban_props": [
+    { "file": "car_sedan.png",  "px": [120,64], "tiles": [2.7,1.45], "blocks": "footprint (tall cover)" },
+    { "file": "dumpster.png",   "px": [84,56],  "blocks": "footprint (tall cover)" },
+    { "file": "streetlamp.png", "px": [48,64],  "blocks": "base tile" },
+    { "file": "crate_stack.png","px": [76,76],  "blocks": "footprint (cover + searchable)" }
+  ],
+  "interior_props": [
+    { "file": "desk.png" }, { "file": "chair.png" }, { "file": "cabinet.png" },
+    { "file": "server_rack.png" }, { "file": "cot.png" }, { "file": "crate.png", "note": "searchable container" },
+    { "file": "blast_door.png", "note": "stateful door: open/locked/kick — see map-proto doors[]" }
+  ],
+  "still_needed": [
+    "WALL TILESET (real art for the CSS walls: concrete/brick sides + corners + damaged variants)",
+    "chain-link fence sprite set (posts + runs + gate) to replace CSS fence",
+    "road/asphalt tileset (grass→asphalt with curb) for city streets",
+    "interior floor variants (wood, tile, carpet) via base-tile chaining",
+    "door variants (wooden interior, glass storefront) + open-state art",
+    "water tileset (grass→water) + shoreline",
+    "second vehicle (pickup/van/police) + wrecked variant",
+    "roof tiles / multi-floor stairs & elevation markers (for multi-story maps)",
+    "rubble & crater decals (destructible aftermath)",
+    "civilian props: bench, bus stop, vending machine, traffic light"
+  ]
+}

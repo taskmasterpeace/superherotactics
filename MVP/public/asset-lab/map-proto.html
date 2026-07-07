@@ -22,6 +22,24 @@
                repeating-linear-gradient(-45deg,rgba(150,150,160,.55) 0 2px,transparent 2px 6px)}
   .fence::after{content:"";position:absolute;inset:0;border:1px solid rgba(120,120,130,.5)}
   .prop{position:absolute;image-rendering:pixelated;z-index:4;filter:drop-shadow(0 2px 2px rgba(0,0,0,.45));pointer-events:none}
+  .prop.interact{pointer-events:auto;cursor:pointer}
+  .prop.interact:hover{filter:drop-shadow(0 0 6px rgba(245,178,26,.8))}
+  /* JA2-style radial interaction menu */
+  .radial{position:absolute;z-index:12;width:0;height:0;animation:rpop .14s ease-out}
+  @keyframes rpop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+  .rcenter{position:absolute;left:0;top:0;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px;z-index:2}
+  .rcenter span{font-size:9.5px;letter-spacing:.14em;color:var(--gold);background:#0c0a07e6;border:1px solid #4a3c1c;border-radius:5px;padding:2px 7px;white-space:nowrap}
+  .rcenter .rx{width:26px;height:26px;border-radius:50%;border:1px solid #4a3c1c;background:#141210;color:var(--muted);font-size:11px;cursor:pointer}
+  .rcenter .rx:hover{color:var(--bone);border-color:var(--gold)}
+  .ritem{position:absolute;transform:translate(-50%,-50%);width:58px;height:58px;border-radius:50%;cursor:pointer;
+    background:radial-gradient(circle at 50% 38%, #262019, #14110d 78%);border:2px solid #4a3c1c;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+    box-shadow:0 3px 10px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07)}
+  .ritem:hover{border-color:var(--gold);background:radial-gradient(circle at 50% 38%, #33291c, #191510 78%)}
+  .ritem.off{opacity:.4;cursor:not-allowed}
+  .ritem .ric{font-size:19px;line-height:1;filter:drop-shadow(0 1px 1px #000)}
+  .ritem .rlb{font-size:8px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ritem:hover .rlb{color:var(--gold)}
   .unit{position:absolute;z-index:6;display:flex;align-items:flex-end;justify-content:center;
     transition:left 150ms linear, top 150ms linear;cursor:pointer}
   .unit img{image-rendering:pixelated;height:150%;width:auto;filter:drop-shadow(0 3px 3px rgba(0,0,0,.6));pointer-events:none}
@@ -57,7 +75,7 @@
 <div class="wrap">
   <p class="eyebrow">SuperHero Tactics · Playable Slice</p>
   <h1>Walk the compound. Take the shot.</h1>
-  <p class="lede"><b>Click a hero</b>, then <b>click anywhere to move</b> — they pathfind through doors and their facing follows the path. Every unit now has a <b>vision cone</b> (the Zomboid cone — clipped by walls) showing exactly where they're looking. <b>Walls block line of sight</b>: no LOS, no shot — for you <i>and</i> him. Cross the merc's red cone and he opens fire; <b>circle behind it</b> and he never sees you coming.</p>
+  <p class="lede"><b>Click a hero, click a tile to move.</b> <b>Right-click anything</b> for the JA2-style radial menu: <b>doors</b> can be Opened, Lockpicked, or <b>Kicked</b> (loud — the hostile turns toward the noise), <b>crates</b> Searched for loot, enemies Attacked, open ground gives Move / Face-this-way. Doors are real now: <b>closed doors block movement <i>and</i> sight</b> — the interior door is locked. Vision cones (wall-clipped) show what everyone sees; cross the red cone and he opens fire.</p>
 
   <div class="stage"><div id="board"></div></div>
 
@@ -102,15 +120,49 @@
     ['desk',BX+1,BY+6,2,1.3,1],['chair',BX+1.4,BY+7.4,1,1,0],['cabinet',BX+3.4,BY+6,1,1.2,1],['plant',BX+1,BY+BH-2.2,0.9,0.9,0],
     ['cot',BX+8.3,BY+1,1.3,1.9,1],['cot',BX+10.3,BY+1,1.3,1.9,1],['cot',BX+8.3,BY+4.1,1.3,1.9,1],['cot',BX+10.3,BY+4.1,1.3,1.9,1],
     ['crate',BX+8.4,BY+8,1.1,1.1,1],['crate',BX+9.6,BY+8.6,1.1,1.1,1],['plant',BX+11.6,BY+8.2,0.9,0.9,0],
+    // wave-1 tile library: vegetation + vehicle (canopies are decor; trunks/car block below)
+    ['tree_oak',2.2,1.6,2.7,2.7,0],['tree_oak',18.8,12.2,2.7,2.7,0],
+    ['tree_pine',5.5,1.1,2.0,2.0,0],['tree_pine',5.8,11.8,2.0,2.0,0],
+    ['bush',1.3,7.2,1.2,1.2,0],['bush',7.6,4.4,1.2,1.2,0],['bush',2.2,12.8,1.2,1.2,0],['bush',16.4,13.6,1.2,1.2,0],
+    ['car_sedan',12.6,13.4,2.7,1.45,1],
   ];
+  // tree trunks block their center tile (canopy stays walkable-under)
+  const TRUNKS=[[3,3],[20,13],[6,2],[6,13]];
   const blocked=new Set();
+  const crates=[];                                        // searchable containers
   for(const [img,cx,cy,w,h,blk] of props){
     const im=document.createElement('img'); im.className='prop'; im.src=`${G}/${img}.png`;
-    im.style.left=(cx*T)+'px'; im.style.top=(cy*T)+'px'; im.style.width=(w*T)+'px'; im.style.height=(h*T)+'px'; board.appendChild(im);
+    im.style.left=(cx*T)+'px'; im.style.top=(cy*T)+'px'; im.style.width=(w*T)+'px'; im.style.height=(h*T)+'px';
+    if(img.startsWith('tree_')) im.style.zIndex=7;   // canopy draws over units walking beneath
+    board.appendChild(im);
     if(blk) for(let j=Math.floor(cy);j<Math.ceil(cy+h);j++)for(let i=Math.floor(cx);i<Math.ceil(cx+w);i++) blocked.add(i+','+j);
+    if(img==='crate'){
+      const c={ el:im, x:cx, y:cy, looted:false, name:'Supply crate' };
+      im.classList.add('interact'); crates.push(c);
+      im.addEventListener('contextmenu',ev=>{ ev.preventDefault(); ev.stopPropagation();
+        openRadial(cx*T+(w*T)/2, cy*T+(h*T)/2, 'CRATE', crateOptions(c)); });
+    }
   }
-  [[BX+3,BY+BH-1],[BX+7,BY+9]].forEach(([x,y])=>{ const im=document.createElement('img'); im.className='prop'; im.src=`${G}/blast_door.png`;
-    im.style.left=(x*T)+'px'; im.style.top=(y*T+T*0.55)+'px'; im.style.width=T+'px'; im.style.height=(T*0.5)+'px'; im.style.zIndex=5; board.appendChild(im); });
+  for(const [tx,ty] of TRUNKS) blocked.add(tx+','+ty);
+  // ---------- doors: real stateful objects (closed = blocks movement AND sight) ----------
+  const doors=[
+    { x:BX+3, y:BY+BH-1, open:false, locked:false, name:'South door' },
+    { x:BX+7, y:BY+9,    open:false, locked:true,  name:'Interior door' },
+  ];
+  const doorAt=(x,y)=>doors.find(d=>d.x===x&&d.y===y);
+  function renderDoor(d){
+    d.el.style.opacity = d.open ? .35 : 1;
+    d.el.style.transform = d.open ? 'rotate(-64deg) translate(-8px,-4px)' : '';
+    d.el.title = `${d.name} — ${d.open?'open':d.locked?'locked':'closed'}`;
+  }
+  function setDoor(d,open){ d.open=open; renderDoor(d); for(const u of units) updateCone(u); }
+  for(const d of doors){
+    const im=document.createElement('img'); im.className='prop interact door'; im.src=`${G}/blast_door.png`;
+    im.style.left=(d.x*T)+'px'; im.style.top=(d.y*T+T*0.55)+'px'; im.style.width=T+'px'; im.style.height=(T*0.5)+'px';
+    im.style.zIndex=5; im.style.transition='transform .18s, opacity .18s'; board.appendChild(im); d.el=im; renderDoor(d);
+    im.addEventListener('contextmenu',ev=>{ ev.preventDefault(); ev.stopPropagation();
+      openRadial(d.x*T+T/2, d.y*T+T/2, d.name.toUpperCase(), doorOptions(d)); });
+  }
 
   // ---------- path svg ----------
   const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.id='pathsvg';
@@ -133,7 +185,10 @@
     const dx=Math.abs(x1-x0), dy=Math.abs(y1-y0), sx=x0<x1?1:-1, sy=y0<y1?1:-1;
     let err=dx-dy;
     for(;;){
-      if(!(x0===ax&&y0===ay) && !(x0===x1&&y0===y1)){ if(grid[y0]&&grid[y0][x0]===2) return false; }
+      if(!(x0===ax&&y0===ay) && !(x0===x1&&y0===y1)){
+        if(grid[y0]&&grid[y0][x0]===2) return false;
+        const dd=doorAt(x0,y0); if(dd && !dd.open) return false;   // closed door blocks sight
+      }
       if(x0===x1&&y0===y1) break;
       const e2=2*err;
       if(e2>-dy){ err-=dy; x0+=sx; }
@@ -198,6 +253,8 @@
     place(u); updateCone(u);
     el.addEventListener('click',(e)=>{ e.stopPropagation(); if(u.hp<=0) return;
       if(u.team==='blue'){ select(u); } else if(sel && sel.hp>0){ shoot(sel,u); } });
+    el.addEventListener('contextmenu',(e)=>{ e.preventDefault(); e.stopPropagation(); if(u.hp<=0) return;
+      openRadial(u.x*T+T/2, u.y*T, u.nm, unitOptions(u)); });
   }
   function place(u){ u.el.style.left=(u.x*T)+'px'; u.el.style.top=(u.y*T - T*0.6)+'px'; updateCone(u); }
   function face(u,dir){ if(!dir) return; u.dir=dir; u.img.style.transform=''; u.img.src=`${TOK(u.id)}/${dir}.png`; updateCone(u); }
@@ -222,6 +279,7 @@
   // ---------- pathfinding (8-dir BFS, no corner cutting) ----------
   function passable(x,y,self){ if(x<0||y<0||x>=COLS||y>=ROWS) return false;
     const t=grid[y][x]; if(t===2||t===3) return false; if(blocked.has(x+','+y)) return false;
+    const dd=doorAt(x,y); if(dd && !dd.open) return false;          // closed door blocks movement
     for(const u of units){ if(u!==self && u.hp>0 && u.x===x && u.y===y) return false; } return true; }
   function findPath(u,tx,ty){ if(!passable(tx,ty,u)) return null;
     const key=(x,y)=>x+','+y, prev=new Map(), q=[[u.x,u.y]]; prev.set(key(u.x,u.y),null);
@@ -293,17 +351,93 @@
 
   function die(u){ u.hp=0; u.el.classList.add('dead'); hpbar(u); updateCone(u); if(sel===u) sel=null; }
 
-  // ---------- board clicks = move ----------
-  board.addEventListener('click',(e)=>{ if(!sel||sel.hp<=0) return;
+  // ---------- JA2-style radial interaction menu ----------
+  const SND2={ door:'../assets/sounds/environment/door_open_metal_01.wav',
+               kick:'../assets/sounds/combat/impact_punch_01.wav',
+               loot:'../assets/sounds/ui/item_pickup_01.wav' };
+  let radialEl=null;
+  function closeRadial(){ if(radialEl){ radialEl.remove(); radialEl=null; } }
+  /** Dynamic radial: any anchor, any 2–8 options, each = symbol + label underneath. */
+  function openRadial(bx,by,title,items){
+    closeRadial();
+    const R = items.length<=4 ? 68 : 80;
+    const wrap=document.createElement('div'); wrap.className='radial';
+    wrap.style.left=Math.max(90,Math.min(COLS*T-90,bx))+'px';
+    wrap.style.top =Math.max(90,Math.min(ROWS*T-90,by))+'px';
+    items.forEach((it,i)=>{
+      const ang=-Math.PI/2 + i*(2*Math.PI/items.length);
+      const b=document.createElement('button'); b.className='ritem'+(it.disabled?' off':'');
+      b.style.left=(Math.cos(ang)*R)+'px'; b.style.top=(Math.sin(ang)*R)+'px';
+      b.innerHTML=`<span class="ric">${it.icon}</span><span class="rlb">${it.label}</span>`;
+      if(!it.disabled) b.addEventListener('click',e=>{ e.stopPropagation(); closeRadial(); it.act(); });
+      wrap.appendChild(b);
+    });
+    const c=document.createElement('div'); c.className='rcenter';
+    c.innerHTML=`<span>${title}</span><button class="rx">✕</button>`;
+    c.querySelector('.rx').addEventListener('click',e=>{ e.stopPropagation(); closeRadial(); });
+    wrap.appendChild(c);
+    board.appendChild(wrap); radialEl=wrap;
+  }
+  const LOOT=['9mm ammo ×12','a frag grenade','a field medkit','$140 in loose bills','body armor plates'];
+  function crateOptions(c){ return [
+    { icon:'🔍', label:'Search', act:()=>{ if(c.looted){ status(`${c.name}: already empty.`); return; }
+        c.looted=true; play(SND2.loot); status(`Found ${LOOT[(Math.random()*LOOT.length)|0]}.`); } },
+    { icon:'👁️', label:'Examine', act:()=>status(`${c.name} — military surplus, ${c.looted?'ransacked':'sealed'}.`) },
+  ]; }
+  function doorOptions(d){
+    const items=[];
+    if(d.open) items.push({ icon:'🚪', label:'Close', act:()=>{ setDoor(d,false); play(SND2.door); status(`${d.name} closed.`); } });
+    else items.push({ icon:'✋', label:'Open', act:()=>{
+      if(d.locked){ status(`${d.name} is LOCKED — pick it or kick it.`); return; }
+      setDoor(d,true); play(SND2.door); status(`${d.name} opened.`); } });
+    if(!d.open && d.locked) items.push({ icon:'🗝️', label:'Lockpick', act:()=>{
+      if(Math.random()<0.7){ d.locked=false; setDoor(d,true); play(SND2.door); status('Lock defeated — quietly.'); }
+      else status('The pick slips… try again.'); } });
+    if(!d.open) items.push({ icon:'🦵', label:'Kick', act:()=>{
+      d.locked=false; setDoor(d,true); play(SND2.kick);
+      const m=units.find(u=>u.team==='red'&&u.hp>0);
+      if(m) face(m, DIRS[Math.sign(d.x-m.x)+','+Math.sign(d.y-m.y)] || m.dir);
+      status('CRACK — door kicked open. That was LOUD; the hostile turned toward it.'); } });
+    items.push({ icon:'👁️', label:'Examine', act:()=>status(`${d.name}: steel blast door — ${d.open?'open':d.locked?'locked':'closed'}.`) });
+    return items;
+  }
+  function unitOptions(u){
+    if(u.team==='red') return [
+      { icon:'🎯', label:'Attack', disabled:!sel||sel.hp<=0, act:()=>shoot(sel,u) },
+      { icon:'👁️', label:'Examine', act:()=>status(`${u.nm}: hostile, ${u.hp} HP, facing ${u.dir}. ${canSee(u,sel||u)?'HE SEES YOU.':'Unaware of you.'}`) },
+    ];
+    return [
+      { icon:'✅', label:'Select', act:()=>select(u) },
+      { icon:'👁️', label:'Examine', act:()=>status(`${u.nm}: ${u.hp} HP, facing ${u.dir}.`) },
+    ];
+  }
+  function groundOptions(x,y){ return [
+    { icon:'🚶', label:'Move here', disabled:!sel||sel.hp<=0, act:()=>{ const p=findPath(sel,x,y); if(p) walk(sel,p); else status('No path there.'); } },
+    { icon:'👁️', label:'Face this way', disabled:!sel||sel.hp<=0, act:()=>{ face(sel, dirTo(sel,{x,y})); status(`${sel.nm} watches ${sel.dir} — cone swung.`); } },
+  ]; }
+
+  // ---------- board clicks ----------
+  board.addEventListener('click',(e)=>{
+    if(radialEl){ closeRadial(); return; }              // first click just dismisses the menu
+    if(!sel||sel.hp<=0) return;
     const r=board.getBoundingClientRect(); const x=Math.floor((e.clientX-r.left)/T), y=Math.floor((e.clientY-r.top)/T);
     const path=findPath(sel,x,y);
     if(path) walk(sel,path); else status('No path there.'); });
-  board.addEventListener('contextmenu',(e)=>{ e.preventDefault(); sel=null;
+  board.addEventListener('contextmenu',(e)=>{
+    e.preventDefault();
+    const r=board.getBoundingClientRect();
+    const px=e.clientX-r.left, py=e.clientY-r.top;
+    const x=Math.floor(px/T), y=Math.floor(py/T);
+    const d=doorAt(x,y); if(d) return openRadial(d.x*T+T/2, d.y*T+T/2, d.name.toUpperCase(), doorOptions(d));
+    const u=units.find(v=>v.hp>0&&v.x===x&&v.y===y); if(u) return openRadial(u.x*T+T/2, u.y*T, u.nm, unitOptions(u));
+    openRadial(px,py,`${x},${y}`, groundOptions(x,y)); });
+  document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ closeRadial(); sel=null;
     for(const v of units) if(v.team==='blue') v.ringEl.className='ring cyan';
-    document.querySelectorAll('.slot').forEach(s=>s.classList.remove('sel')); drawPath(null); status('Deselected.'); });
+    document.querySelectorAll('.slot').forEach(s=>s.classList.remove('sel')); drawPath(null); status('Deselected.'); } });
 
   // QA hooks
   window.__game={ units, select, findPath, walk, shoot, losClear, canSee, place, face, updateCone,
+    doors, crates, openRadial, doorOptions, get radial(){ return radialEl; },
     unit:id=>units.find(u=>u.id===id) };
 })();
 </script>
