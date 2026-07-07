@@ -33,14 +33,21 @@ function extractJson(t) {
 
 // ---------- providers ----------
 async function ollama(prompt) {
-  const res = await fetch(`${config.ollamaUrl}/api/chat`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: config.ollamaModel, stream: false, format: 'json',
-      messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }] }),
-  });
-  if (!res.ok) throw new Error(`ollama ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  const j = await res.json();
-  return extractJson(j.message?.content ?? '');
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 240000);   // cold model loads are slow on the LAN box
+  try {
+    const res = await fetch(`${config.ollamaUrl}/api/chat`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctrl.signal,
+      body: JSON.stringify({ model: config.ollamaModel, stream: false, format: 'json',
+        think: false,                                     // qwen3.5 is a thinking model — without this it spends the budget thinking and returns empty content
+        options: { num_predict: 900, temperature: 0.8 },
+        messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }] }),
+    });
+    if (!res.ok) throw new Error(`ollama ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    const j = await res.json();
+    const text = j.message?.content || j.message?.thinking || '';
+    return extractJson(text);
+  } finally { clearTimeout(timer); }
 }
 
 async function anthropic(prompt) {
