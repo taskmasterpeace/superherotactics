@@ -42,7 +42,15 @@
   .ritem:hover .rlb{color:var(--gold)}
   .unit{position:absolute;z-index:6;display:flex;align-items:flex-end;justify-content:center;
     transition:left 150ms linear, top 150ms linear;cursor:pointer}
-  .unit img{image-rendering:pixelated;height:150%;width:auto;filter:drop-shadow(0 3px 3px rgba(0,0,0,.6));pointer-events:none}
+  .unit .art{height:150%;display:flex;align-items:flex-end;transition:transform .25s ease;will-change:transform}
+  .unit img{image-rendering:pixelated;height:100%;width:auto;filter:drop-shadow(0 3px 3px rgba(0,0,0,.6));pointer-events:none}
+  .unit.flying{z-index:8}
+  .fshadow{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:62%;height:13px;border-radius:50%;
+    background:radial-gradient(ellipse at center,rgba(0,0,0,.6),transparent 68%);opacity:0;transition:opacity .3s;pointer-events:none}
+  .unit.flying .fshadow{opacity:.65}
+  @keyframes fbob{from{transform:translateY(0)}to{transform:translateY(-5px)}}
+  .unit.flying .art img{animation:fbob 1.5s ease-in-out infinite alternate}   /* hover: gentle bob */
+  .unit.flying.moving .art img{animation:none}                                /* regular flight: steady */
   .unit.dead{cursor:default}
   .unit.dead img{filter:grayscale(1) brightness(.55) drop-shadow(0 2px 2px rgba(0,0,0,.6));transform:rotate(78deg) translateY(-6px);opacity:.85}
   .ring{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:76%;height:20px;border-radius:50%;border:2px solid;pointer-events:none}
@@ -75,7 +83,7 @@
 <div class="wrap">
   <p class="eyebrow">SuperHero Tactics · Playable Slice</p>
   <h1>Walk the compound. Take the shot.</h1>
-  <p class="lede"><b>Click a hero, click a tile to move; right-click anything</b> for the JA2 radial (doors open/lockpick/<b>kick</b>, crates loot, ground = move/face). <b>NEW — weapons are a loadout, not an identity:</b> right-click Surge (or press <b>1–4</b>) to swap her between <b>🔫 Pistol · ⚔️ Dual Pistols · 💥 Energy Blast · ⚡ Ion Beam</b> — same body, different emitter, damage, sound and animation. The Sentinel carries a ☀️ Solar Lance. Doors still block sight, cones still betray facing, and the merc still shoots back.</p>
+  <p class="lede"><b>Click a hero, click a tile to move; right-click anything</b> for the JA2 radial (doors open/lockpick/<b>kick</b>, crates loot, weapons swap — Surge carries Pistol/Dual/Blast/Beam on keys <b>1–4</b>). <b>NEW — FLIGHT:</b> select the <b>Red Sentinel</b> and press <b>F</b> (or radial → 🛫 Take off). He hovers with the classic <b>ground shadow</b> beneath, bobbing in place; click anywhere and he <b>flies straight over fences, walls and both buildings</b> — and his altitude rides the terrain: low over grass, higher over the compound walls, highest over the <b>2F rooftop tower</b> (southwest). Airborne he sees <i>over</i> walls (watch his cone) — but the whole map can see him too. <b>F</b> again to land (needs clear ground).</p>
 
   <div class="stage"><div id="board"></div></div>
 
@@ -104,15 +112,26 @@
   [[BX+3,BY+4],[BX+7,BY+4],[BX+7,BY+9],[BX+8,BY+5],[BX+8,BY+9],[BX+3,BY+BH-1]].forEach(([x,y])=>set(x,y,1));
   set(BX+2,ROWS-1,1); set(BX+3,ROWS-1,1);
 
+  // TWO-STORY TOWER (sealed rooftop block, terrain 4): ground units can't enter
+  // or see through it; flyers cross it at +2 stories.
+  const TX=2, TY=10, TW=5, TH=5;
+  rect(TX,TY,TW,TH,4); ring(TX,TY,TW,TH,2);
+
   for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
     const t=grid[y][x];
     if(t===2){ const d=document.createElement('div'); d.className='wall'; d.style.left=(x*T)+'px'; d.style.top=(y*T)+'px'; board.appendChild(d); continue; }
     if(t===3){ const d=document.createElement('div'); d.className='fence'; d.style.left=(x*T)+'px'; d.style.top=(y*T)+'px'; board.appendChild(d); }
-    const g=document.createElement('div'); g.className='cell '+(t===1?'':'grass');
+    const g=document.createElement('div'); g.className='cell '+(t===1||t===4?'':'grass');
     g.style.left=(x*T)+'px'; g.style.top=(y*T)+'px';
-    g.style.backgroundImage=`url(${G}/${t===1?'concrete':'grass'}.png)`;
+    g.style.backgroundImage=`url(${G}/${(t===1||t===4)?'concrete':'grass'}.png)`;
+    if(t===4){ g.style.filter='brightness(.68) saturate(.85)'; g.style.boxShadow='inset 0 0 0 1px rgba(0,0,0,.35)'; }
     board.insertBefore(g, board.firstChild);
   }
+  { const lb=document.createElement('div');
+    lb.textContent='2F · ROOFTOP';
+    lb.style.cssText=`position:absolute;z-index:3;pointer-events:none;left:${(TX+TW/2)*T}px;top:${(TY+TH/2)*T}px;`+
+      `transform:translate(-50%,-50%);font-size:10px;letter-spacing:.22em;color:#9a917f;opacity:.8`;
+    board.appendChild(lb); }
 
   // ---------- props (blockers marked) ----------
   const props=[
@@ -122,12 +141,12 @@
     ['crate',BX+8.4,BY+8,1.1,1.1,1],['crate',BX+9.6,BY+8.6,1.1,1.1,1],['plant',BX+11.6,BY+8.2,0.9,0.9,0],
     // wave-1 tile library: vegetation + vehicle (canopies are decor; trunks/car block below)
     ['tree_oak',2.2,1.6,2.7,2.7,0],['tree_oak',18.8,12.2,2.7,2.7,0],
-    ['tree_pine',5.5,1.1,2.0,2.0,0],['tree_pine',5.8,11.8,2.0,2.0,0],
-    ['bush',1.3,7.2,1.2,1.2,0],['bush',7.6,4.4,1.2,1.2,0],['bush',2.2,12.8,1.2,1.2,0],['bush',16.4,13.6,1.2,1.2,0],
+    ['tree_pine',5.5,1.1,2.0,2.0,0],['tree_pine',7.0,12.6,2.0,2.0,0],
+    ['bush',1.3,7.2,1.2,1.2,0],['bush',7.6,4.4,1.2,1.2,0],['bush',7.9,9.0,1.2,1.2,0],['bush',16.4,13.6,1.2,1.2,0],
     ['car_sedan',12.6,13.4,2.7,1.45,1],
   ];
   // tree trunks block their center tile (canopy stays walkable-under)
-  const TRUNKS=[[3,3],[20,13],[6,2],[6,13]];
+  const TRUNKS=[[3,3],[20,13],[6,2],[8,13]];
   const blocked=new Set();
   const crates=[];                                        // searchable containers
   for(const [img,cx,cy,w,h,blk] of props){
@@ -186,7 +205,8 @@
     let err=dx-dy;
     for(;;){
       if(!(x0===ax&&y0===ay) && !(x0===x1&&y0===y1)){
-        if(grid[y0]&&grid[y0][x0]===2) return false;
+        const tt=grid[y0]&&grid[y0][x0];
+        if(tt===2||tt===4) return false;                            // walls + the 2F tower block sight
         const dd=doorAt(x0,y0); if(dd && !dd.open) return false;   // closed door blocks sight
       }
       if(x0===x1&&y0===y1) break;
@@ -199,7 +219,8 @@
   function canSee(a,b){
     const dx=b.x-a.x, dy=b.y-a.y, dist=Math.hypot(dx,dy);
     if(dist>VIS_TILES) return false;
-    if(!losClear(a.x,a.y,b.x,b.y)) return false;
+    // airborne sight: a flyer looks OVER walls, and anyone can see a flyer in the sky
+    if(!(a.flying||b.flying) && !losClear(a.x,a.y,b.x,b.y)) return false;
     const want=Math.atan2(dy,dx), have=DIR_ANG[a.dir]??0;
     const diff=Math.atan2(Math.sin(want-have),Math.cos(want-have));
     return Math.abs(diff)<=HALF+0.02;
@@ -219,7 +240,8 @@
       let r=step;
       for(; r<=VIS_R; r+=step){
         const tx=Math.floor((cx+ca*r)/T), ty=Math.floor((cy+sa*r)/T);
-        if(tx<0||ty<0||tx>=COLS||ty>=ROWS||grid[ty][tx]===2){ r-=step; break; }
+        if(tx<0||ty<0||tx>=COLS||ty>=ROWS){ r-=step; break; }
+        if(!u.flying && (grid[ty][tx]===2||grid[ty][tx]===4)){ r-=step; break; }  // airborne cones see over everything
       }
       if(r>VIS_R) r=VIS_R;
       pts.push((cx+ca*r).toFixed(1)+','+(cy+sa*r).toFixed(1));
@@ -251,8 +273,8 @@
       loadout:['pistol','dual','blast','beam'], mode:'blast',
       clips:{ blast:{S:{key:'surge_blast_south',frames:6,release:5},E:{key:'surge_blast_east',frames:6,release:5},W:{key:'surge_blast_east',frames:6,release:5,flip:true}} } },
     { id:'red_sentinel', nm:'RED SENTINEL', team:'blue', x:BX+9, y:BY+9, dir:'S', hp:100,
-      loadout:['goldbeam','pistol'], mode:'goldbeam', clips:{} },
-    { id:'merc',         nm:'HOSTILE MERC', team:'red',  x:5,    y:10,   dir:'E', hp:100,
+      canFly:true, loadout:['goldbeam','pistol'], mode:'goldbeam', clips:{} },
+    { id:'merc',         nm:'HOSTILE MERC', team:'red',  x:6,    y:7,    dir:'E', hp:100,
       loadout:['rifle'], mode:'rifle',
       clips:{ fire:{S:{key:'merc_fire_south',frames:9,release:3},E:{key:'merc_fire_east',frames:9,release:3},W:{key:'merc_fire_east',frames:9,release:3,flip:true}} } },
   ];
@@ -267,8 +289,10 @@
   for(const u of units){
     const el=document.createElement('div'); el.className='unit';
     el.style.width=T+'px'; el.style.height=(T*1.6)+'px';
-    el.innerHTML=`<div class="ring ${u.team==='red'?'red':'cyan'}"></div><img src="${TOK(u.id)}/${u.dir}.png" alt="${u.nm}">`;
+    el.innerHTML=`<div class="ring ${u.team==='red'?'red':'cyan'}"></div><div class="fshadow"></div>`+
+      `<div class="art"><img src="${TOK(u.id)}/${u.dir}.png" alt="${u.nm}"></div>`;
     board.appendChild(el); u.el=el; u.img=el.querySelector('img'); u.ringEl=el.querySelector('.ring');
+    u.artEl=el.querySelector('.art');
     const cp=document.createElementNS('http://www.w3.org/2000/svg','path');
     cp.setAttribute('fill', u.team==='red' ? 'rgba(224,96,58,0.16)' : 'rgba(245,178,26,0.13)');
     cp.setAttribute('stroke', u.team==='red' ? 'rgba(224,96,58,0.35)' : 'rgba(245,178,26,0.28)');
@@ -280,7 +304,29 @@
     el.addEventListener('contextmenu',(e)=>{ e.preventDefault(); e.stopPropagation(); if(u.hp<=0) return;
       openRadial(u.x*T+T/2, u.y*T, u.nm, unitOptions(u)); });
   }
-  function place(u){ u.el.style.left=(u.x*T)+'px'; u.el.style.top=(u.y*T - T*0.6)+'px'; updateCone(u); }
+  // ---------- FLIGHT: altitude is sampled from whatever is BELOW the flyer ----------
+  // elev 0 = open ground · 1 = one-story walls · 2 = the rooftop tower. A flyer
+  // always renders CLEAR px above that surface, so crossing a wall or a 2-story
+  // roof visibly lifts them while the classic shadow stays pinned to the ground.
+  const STORY=22, CLEAR=24;
+  function elevAt(x,y){ const t=grid[y]&&grid[y][x]; return t===2?1 : t===4?2 : 0; }
+  function applyAlt(u){
+    const a = u.flying ? CLEAR + STORY*elevAt(u.x,u.y) : 0;
+    if(u.artEl) u.artEl.style.transform = `translateY(${-a}px)`;
+    u.el.classList.toggle('flying', !!u.flying);
+  }
+  function toggleFly(u){
+    if(!u.canFly || u.hp<=0) return;
+    if(u.flying){
+      if(!passable(u.x,u.y,u)){ status(`${u.nm}: can't land here — no clear ground below.`); return; }
+      u.flying=false; applyAlt(u); updateCone(u); play(SNDBASE+'powers/flight_takeoff_01.wav');
+      status(`🛬 ${u.nm} touches down.`);
+    } else {
+      u.flying=true; applyAlt(u); updateCone(u); play(SNDBASE+'powers/flight_takeoff_01.wav');
+      status(`🛫 ${u.nm} lifts off — hovering. Walls, fences and rooftops are BELOW you now.`);
+    }
+  }
+  function place(u){ u.el.style.left=(u.x*T)+'px'; u.el.style.top=(u.y*T - T*0.6)+'px'; applyAlt(u); updateCone(u); }
   function face(u,dir){ if(!dir) return; u.dir=dir; u.img.style.transform=''; u.img.src=`${TOK(u.id)}/${dir}.png`; updateCone(u); }
   function select(u){ sel=u; for(const v of units){ if(v.team==='blue') v.ringEl.className='ring '+(v===sel?'gold':'cyan'); }
     document.querySelectorAll('.slot').forEach(s=>s.classList.toggle('sel', s.dataset.id===u.id)); status(`${u.nm} selected — click a tile to move, or click the hostile to fire.`); }
@@ -304,23 +350,29 @@
 
   // ---------- pathfinding (8-dir BFS, no corner cutting) ----------
   function passable(x,y,self){ if(x<0||y<0||x>=COLS||y>=ROWS) return false;
-    const t=grid[y][x]; if(t===2||t===3) return false; if(blocked.has(x+','+y)) return false;
+    const t=grid[y][x]; if(t===2||t===3||t===4) return false; if(blocked.has(x+','+y)) return false;
     const dd=doorAt(x,y); if(dd && !dd.open) return false;          // closed door blocks movement
     for(const u of units){ if(u!==self && u.hp>0 && u.x===x && u.y===y) return false; } return true; }
-  function findPath(u,tx,ty){ if(!passable(tx,ty,u)) return null;
+  // airspace: only the map edge and other units matter — terrain is beneath you
+  function passAir(x,y,self){ if(x<0||y<0||x>=COLS||y>=ROWS) return false;
+    for(const u of units){ if(u!==self && u.hp>0 && u.x===x && u.y===y) return false; } return true; }
+  function findPath(u,tx,ty){
+    const P = u.flying ? passAir : passable;
+    if(!P(tx,ty,u)) return null;
     const key=(x,y)=>x+','+y, prev=new Map(), q=[[u.x,u.y]]; prev.set(key(u.x,u.y),null);
     const D=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
     while(q.length){ const [cx,cy]=q.shift(); if(cx===tx&&cy===ty) break;
       for(const [dx,dy] of D){ const nx=cx+dx, ny=cy+dy; if(prev.has(key(nx,ny))) continue;
-        if(!passable(nx,ny,u)) continue;
-        if(dx&&dy && !(passable(cx+dx,cy,u)&&passable(cx,cy+dy,u))) continue; // no corner cut
+        if(!P(nx,ny,u)) continue;
+        if(dx&&dy && !(P(cx+dx,cy,u)&&P(cx,cy+dy,u))) continue; // no corner cut
         prev.set(key(nx,ny),[cx,cy]); q.push([nx,ny]); } }
     if(!prev.has(key(tx,ty))) return null;
     const path=[]; let cur=[tx,ty]; while(cur){ path.unshift(cur); cur=prev.get(key(cur[0],cur[1])); } return path; }
 
   function walk(u,path){ if(u.walkT) clearTimeout(u.walkT); if(!path||path.length<2){drawPath(null);return;}
-    drawPath(path); let i=1;
-    const step=()=>{ if(u.hp<=0){drawPath(null);return;}
+    drawPath(path); let i=1; u.el.classList.add('moving');
+    const stepMs=()=>u.flying?115:155;                    // regular flight is quicker than boots
+    const step=()=>{ if(u.hp<=0){drawPath(null);u.el.classList.remove('moving');return;}
       const [nx,ny]=path[i]; const dir=DIRS[(nx-u.x)+','+(ny-u.y)]; face(u,dir);
       u.x=nx; u.y=ny; place(u); i++;
       // spotted? hostiles engage the moment you cross their cone with clear LOS
@@ -329,8 +381,9 @@
           shoot(e,u); status(`⚠ SPOTTED — ${e.nm} opens fire!`);
         }
       }
-      if(i<path.length){ drawPath(path.slice(i-1)); u.walkT=setTimeout(step,155); }
-      else { drawPath(null); u.walkT=null; status(`${u.nm} in position.`); } };
+      if(i<path.length){ drawPath(path.slice(i-1)); u.walkT=setTimeout(step,stepMs()); }
+      else { drawPath(null); u.walkT=null; u.el.classList.remove('moving');
+        status(u.flying ? `${u.nm} holds position — hovering.` : `${u.nm} in position.`); } };
     step(); }
 
   // ---------- combat ----------
@@ -338,7 +391,8 @@
   function shoot(a,t){ if(a.shooting||a.walkT||a.hp<=0||t.hp<=0) return;
     const distT=Math.hypot(t.x-a.x,t.y-a.y);
     if(distT>SHOOT_RANGE){ if(a.team==='blue') status(`Out of range — get within ${SHOOT_RANGE} tiles.`); return; }
-    if(!losClear(a.x,a.y,t.x,t.y)){ face(a,dirTo(a,t));
+    const seeThru = a.flying || t.flying;                 // air shots clear the walls
+    if(!seeThru && !losClear(a.x,a.y,t.x,t.y)){ face(a,dirTo(a,t));
       if(a.team==='blue') status('No line of sight — a wall blocks the shot.'); return; }
     a.shooting=true; if(a.team==='red') a.lastShot=Date.now();
     const m=MODES[a.mode];
@@ -409,7 +463,7 @@
     targets.sort((p,q)=>Math.hypot(p.x-e.x,p.y-e.y)-Math.hypot(q.x-e.x,q.y-e.y));
     shoot(e,targets[0]); }
 
-  function die(u){ u.hp=0; u.el.classList.add('dead'); hpbar(u); updateCone(u); if(sel===u) sel=null; }
+  function die(u){ u.hp=0; u.flying=false; applyAlt(u); u.el.classList.add('dead'); hpbar(u); updateCone(u); if(sel===u) sel=null; }
 
   // ---------- JA2-style radial interaction menu ----------
   const SND2={ door:'../assets/sounds/environment/door_open_metal_01.wav',
@@ -470,7 +524,9 @@
     const items=u.loadout.map(mid=>{ const m=MODES[mid]; return {
       icon:m.icon, label:(u.mode===mid?'✓ ':'')+m.label,
       act:()=>{ select(u); setMode(u,mid); } }; });
-    items.push({ icon:'👁️', label:'Examine', act:()=>status(`${u.nm}: ${u.hp} HP, ${MODES[u.mode].label} ready, facing ${u.dir}.`) });
+    if(u.canFly) items.unshift({ icon:u.flying?'🛬':'🛫', label:u.flying?'Land':'Take off',
+      act:()=>{ select(u); toggleFly(u); } });
+    items.push({ icon:'👁️', label:'Examine', act:()=>status(`${u.nm}: ${u.hp} HP, ${MODES[u.mode].label} ready, ${u.flying?'AIRBORNE':'on foot'}, facing ${u.dir}.`) });
     return items;
   }
   function groundOptions(x,y){ return [
@@ -497,11 +553,12 @@
     for(const v of units) if(v.team==='blue') v.ringEl.className='ring cyan';
     document.querySelectorAll('.slot').forEach(s=>s.classList.remove('sel')); drawPath(null); status('Deselected.'); }
     const n=Number(e.key);                              // 1-4: swap the selected hero's weapon
-    if(n>=1 && n<=9 && sel && sel.hp>0 && sel.loadout[n-1]) setMode(sel, sel.loadout[n-1]); });
+    if(n>=1 && n<=9 && sel && sel.hp>0 && sel.loadout[n-1]) setMode(sel, sel.loadout[n-1]);
+    if((e.key==='f'||e.key==='F') && sel && sel.canFly) toggleFly(sel); });   // F = take off / land
 
   // QA hooks
   window.__game={ units, select, findPath, walk, shoot, losClear, canSee, place, face, updateCone,
-    doors, crates, openRadial, doorOptions, MODES, setMode, unitOptions, get radial(){ return radialEl; },
-    unit:id=>units.find(u=>u.id===id) };
+    doors, crates, openRadial, doorOptions, MODES, setMode, unitOptions, toggleFly, elevAt,
+    get radial(){ return radialEl; }, unit:id=>units.find(u=>u.id===id) };
 })();
 </script>
