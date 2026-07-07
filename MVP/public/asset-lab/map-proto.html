@@ -57,7 +57,7 @@
 <div class="wrap">
   <p class="eyebrow">SuperHero Tactics · Playable Slice</p>
   <h1>Walk the compound. Take the shot.</h1>
-  <p class="lede"><b>Click a hero</b> (or their HUD card), then <b>click anywhere to move</b> — they pathfind around walls, through doors, and their facing follows the path (true 8-direction tokens). <b>Click the hostile</b> to fire: Surge throws her energy blast, with the real animation, projectile timing and sound. He shoots back.</p>
+  <p class="lede"><b>Click a hero</b>, then <b>click anywhere to move</b> — they pathfind through doors and their facing follows the path. Every unit now has a <b>vision cone</b> (the Zomboid cone — clipped by walls) showing exactly where they're looking. <b>Walls block line of sight</b>: no LOS, no shot — for you <i>and</i> him. Cross the merc's red cone and he opens fire; <b>circle behind it</b> and he never sees you coming.</p>
 
   <div class="stage"><div id="board"></div></div>
 
@@ -123,6 +123,54 @@
 
   // ---------- units ----------
   const DIRS={ '1,0':'E','-1,0':'W','0,1':'S','0,-1':'N','1,1':'SE','-1,1':'SW','1,-1':'NE','-1,-1':'NW' };
+
+  // ---------- vision / line-of-sight ----------
+  const DIR_ANG={ E:0, SE:Math.PI/4, S:Math.PI/2, SW:3*Math.PI/4, W:Math.PI, NW:5*Math.PI/4, N:3*Math.PI/2, NE:7*Math.PI/4 };
+  const VIS_TILES=6.5, VIS_R=VIS_TILES*T, HALF=40*Math.PI/180, RAYS=26, SHOOT_RANGE=8;
+  // walls (2) block sight; chain-link fence (3) blocks movement but NOT sight
+  function losClear(ax,ay,bx,by){
+    let x0=ax,y0=ay; const x1=bx,y1=by;
+    const dx=Math.abs(x1-x0), dy=Math.abs(y1-y0), sx=x0<x1?1:-1, sy=y0<y1?1:-1;
+    let err=dx-dy;
+    for(;;){
+      if(!(x0===ax&&y0===ay) && !(x0===x1&&y0===y1)){ if(grid[y0]&&grid[y0][x0]===2) return false; }
+      if(x0===x1&&y0===y1) break;
+      const e2=2*err;
+      if(e2>-dy){ err-=dy; x0+=sx; }
+      if(e2<dx){ err+=dx; y0+=sy; }
+    }
+    return true;
+  }
+  function canSee(a,b){
+    const dx=b.x-a.x, dy=b.y-a.y, dist=Math.hypot(dx,dy);
+    if(dist>VIS_TILES) return false;
+    if(!losClear(a.x,a.y,b.x,b.y)) return false;
+    const want=Math.atan2(dy,dx), have=DIR_ANG[a.dir]??0;
+    const diff=Math.atan2(Math.sin(want-have),Math.cos(want-have));
+    return Math.abs(diff)<=HALF+0.02;
+  }
+  // cone layer: one wall-occluded sector path per unit (the Zomboid cone)
+  const coneSvg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  coneSvg.setAttribute('width',COLS*T); coneSvg.setAttribute('height',ROWS*T);
+  coneSvg.style.cssText='position:absolute;inset:0;z-index:2;pointer-events:none';
+  board.appendChild(coneSvg);
+  function updateCone(u){
+    if(!u.conePath) return;
+    if(u.hp<=0){ u.conePath.setAttribute('d',''); return; }
+    const cx=u.x*T+T/2, cy=u.y*T+T/2, base=DIR_ANG[u.dir]??0, step=T/3;
+    const pts=[];
+    for(let i=0;i<=RAYS;i++){
+      const ang=base-HALF+(2*HALF)*(i/RAYS), ca=Math.cos(ang), sa=Math.sin(ang);
+      let r=step;
+      for(; r<=VIS_R; r+=step){
+        const tx=Math.floor((cx+ca*r)/T), ty=Math.floor((cy+sa*r)/T);
+        if(tx<0||ty<0||tx>=COLS||ty>=ROWS||grid[ty][tx]===2){ r-=step; break; }
+      }
+      if(r>VIS_R) r=VIS_R;
+      pts.push((cx+ca*r).toFixed(1)+','+(cy+sa*r).toFixed(1));
+    }
+    u.conePath.setAttribute('d',`M${cx},${cy} L${pts.join(' L')} Z`);
+  }
   const units=[
     { id:'surge',        nm:'SURGE',        team:'blue', x:BX+2, y:BY+7, dir:'S', hp:100,
       atk:{ dmg:[16,26], color:'#38f0ff', sound:'../assets/sounds/combat/energy_blast_01.wav',
@@ -142,12 +190,17 @@
     el.style.width=T+'px'; el.style.height=(T*1.6)+'px';
     el.innerHTML=`<div class="ring ${u.team==='red'?'red':'cyan'}"></div><img src="${TOK(u.id)}/${u.dir}.png" alt="${u.nm}">`;
     board.appendChild(el); u.el=el; u.img=el.querySelector('img'); u.ringEl=el.querySelector('.ring');
-    place(u);
+    const cp=document.createElementNS('http://www.w3.org/2000/svg','path');
+    cp.setAttribute('fill', u.team==='red' ? 'rgba(224,96,58,0.16)' : 'rgba(245,178,26,0.13)');
+    cp.setAttribute('stroke', u.team==='red' ? 'rgba(224,96,58,0.35)' : 'rgba(245,178,26,0.28)');
+    cp.setAttribute('stroke-width','1');
+    coneSvg.appendChild(cp); u.conePath=cp;
+    place(u); updateCone(u);
     el.addEventListener('click',(e)=>{ e.stopPropagation(); if(u.hp<=0) return;
       if(u.team==='blue'){ select(u); } else if(sel && sel.hp>0){ shoot(sel,u); } });
   }
-  function place(u){ u.el.style.left=(u.x*T)+'px'; u.el.style.top=(u.y*T - T*0.6)+'px'; }
-  function face(u,dir){ if(!dir) return; u.dir=dir; u.img.style.transform=''; u.img.src=`${TOK(u.id)}/${dir}.png`; }
+  function place(u){ u.el.style.left=(u.x*T)+'px'; u.el.style.top=(u.y*T - T*0.6)+'px'; updateCone(u); }
+  function face(u,dir){ if(!dir) return; u.dir=dir; u.img.style.transform=''; u.img.src=`${TOK(u.id)}/${dir}.png`; updateCone(u); }
   function select(u){ sel=u; for(const v of units){ if(v.team==='blue') v.ringEl.className='ring '+(v===sel?'gold':'cyan'); }
     document.querySelectorAll('.slot').forEach(s=>s.classList.toggle('sel', s.dataset.id===u.id)); status(`${u.nm} selected — click a tile to move, or click the hostile to fire.`); }
 
@@ -186,13 +239,24 @@
     const step=()=>{ if(u.hp<=0){drawPath(null);return;}
       const [nx,ny]=path[i]; const dir=DIRS[(nx-u.x)+','+(ny-u.y)]; face(u,dir);
       u.x=nx; u.y=ny; place(u); i++;
+      // spotted? hostiles engage the moment you cross their cone with clear LOS
+      if(u.team==='blue') for(const e of units){
+        if(e.team==='red'&&e.hp>0&&!e.shooting&&Date.now()-(e.lastShot||0)>2200&&canSee(e,u)){
+          shoot(e,u); status(`⚠ SPOTTED — ${e.nm} opens fire!`);
+        }
+      }
       if(i<path.length){ drawPath(path.slice(i-1)); u.walkT=setTimeout(step,155); }
       else { drawPath(null); u.walkT=null; status(`${u.nm} in position.`); } };
     step(); }
 
   // ---------- combat ----------
   function dirTo(a,b){ const dx=Math.sign(b.x-a.x), dy=Math.sign(b.y-a.y); return DIRS[dx+','+dy]||a.dir; }
-  function shoot(a,t){ if(a.shooting||a.walkT) return; a.shooting=true;
+  function shoot(a,t){ if(a.shooting||a.walkT||a.hp<=0||t.hp<=0) return;
+    const distT=Math.hypot(t.x-a.x,t.y-a.y);
+    if(distT>SHOOT_RANGE){ if(a.team==='blue') status(`Out of range — get within ${SHOOT_RANGE} tiles.`); return; }
+    if(!losClear(a.x,a.y,t.x,t.y)){ face(a,dirTo(a,t));
+      if(a.team==='blue') status('No line of sight — a wall blocks the shot.'); return; }
+    a.shooting=true; if(a.team==='red') a.lastShot=Date.now();
     const dir=dirTo(a,t); const clip=a.atk.clips[dir];
     play(a.atk.sound);
     const fire=()=>launch(a,t);
@@ -227,7 +291,7 @@
     targets.sort((p,q)=>Math.hypot(p.x-e.x,p.y-e.y)-Math.hypot(q.x-e.x,q.y-e.y));
     shoot(e,targets[0]); }
 
-  function die(u){ u.hp=0; u.el.classList.add('dead'); hpbar(u); if(sel===u) sel=null; }
+  function die(u){ u.hp=0; u.el.classList.add('dead'); hpbar(u); updateCone(u); if(sel===u) sel=null; }
 
   // ---------- board clicks = move ----------
   board.addEventListener('click',(e)=>{ if(!sel||sel.hp<=0) return;
@@ -239,7 +303,7 @@
     document.querySelectorAll('.slot').forEach(s=>s.classList.remove('sel')); drawPath(null); status('Deselected.'); });
 
   // QA hooks
-  window.__game={ units, select, findPath, walk, shoot,
+  window.__game={ units, select, findPath, walk, shoot, losClear, canSee, place, face, updateCone,
     unit:id=>units.find(u=>u.id===id) };
 })();
 </script>
