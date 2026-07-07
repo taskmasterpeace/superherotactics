@@ -445,7 +445,7 @@
   function panic(originX,originY,radius){ let n=0;
     for(const c of civs){ if(c.hp<=0) continue; const d=Math.hypot(c.x-originX,c.y-originY);
       if(d<=radius){ if(c.state!=='flee') n++; c.state='flee'; c.fleeTicks=6; c.el.classList.add('fleeing'); } }
-    if(n) play(SND+'ambient/crowd_panic_01.wav');
+    if(n) play(SND+'character/footstep_run_01.wav');   // scatter of running feet
     return n; }
   function civHit(c){ if(c.hp<=0) return; c.hp=0; c.state='down'; c.el.classList.add('down'); c.el.classList.remove('fleeing');
     status(`⚠ A CIVILIAN IS DOWN — collateral damage. (Reputation would take a hit.)`);
