@@ -61,8 +61,30 @@
   .artcell figcaption{font-size:9.5px;color:var(--dim);letter-spacing:.08em}
   .powers input{width:100%}
   .tunechips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-  .tchip{font-size:10.5px;border:1px solid var(--line);border-radius:6px;padding:4px 8px;color:var(--muted);background:#0f0d0b}
+  .tchip{font-size:10.5px;border:1px solid var(--line);border-radius:6px;padding:4px 8px;color:var(--muted);background:#0f0d0b;cursor:pointer}
+  .tchip:hover{border-color:var(--gold);color:var(--bone)}
+  .tchip.on{border-color:var(--gold);background:#1c1509}
   .tchip b{color:var(--gold)}
+  /* ---- the tuner: refine any animation's timing / emitter / sound, live ---- */
+  #tuner{display:none;margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .tunegrid{display:grid;grid-template-columns:1.15fr 1fr;gap:18px}
+  @media(max-width:980px){.tunegrid{grid-template-columns:1fr}}
+  .tstage{position:relative;height:250px;background:
+    radial-gradient(400px 120px at 30% 100%,#191512,transparent),#0f0d0b;
+    border:1px solid #262119;border-radius:10px;overflow:hidden;cursor:crosshair}
+  #tframe{position:absolute;left:14%;bottom:14px;height:175px;image-rendering:pixelated;transform-origin:bottom center;pointer-events:none}
+  #tmuzzle{position:absolute;width:14px;height:14px;margin:-7px;pointer-events:none;z-index:4}
+  #tmuzzle::before,#tmuzzle::after{content:"";position:absolute;background:var(--gold)}
+  #tmuzzle::before{left:6px;top:0;width:2px;height:14px}
+  #tmuzzle::after{top:6px;left:0;width:14px;height:2px}
+  .ttarget{position:absolute;right:9%;bottom:52px;width:34px;height:34px;border-radius:50%;
+    border:2px dashed #5a2a1e;display:flex;align-items:center;justify-content:center;color:#f0a48a;font-size:15px}
+  .tproj{position:absolute;width:11px;height:11px;border-radius:50%;z-index:5;pointer-events:none;box-shadow:0 0 10px 3px currentColor;background:currentColor}
+  .trow{display:flex;gap:10px;align-items:center;margin-top:9px;flex-wrap:wrap}
+  .tctrl .field label{width:96px}
+  .tctrl input[type=range]{flex:1;accent-color:var(--gold)}
+  .tctrl .val{width:52px;font-size:11.5px;color:var(--gold);text-align:right}
+  .tctrl input[type=color]{width:40px;height:28px;padding:1px;background:#0f0d0b;border:1px solid var(--line);border-radius:6px}
   .notes{margin-top:8px;font-size:11px;color:#c9a15a}
   .actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center}
   .gallery{margin-top:22px}
@@ -135,10 +157,46 @@
         <h3>Art — 8 true directions</h3>
         <div class="artstrip" id="artstrip"></div>
         <div class="hint" id="artsource" style="margin-top:6px"></div>
-        <h3 style="margin-top:14px">Tuning defaults <span style="color:var(--dim);text-transform:none;letter-spacing:0">(refined in the tuner — next phase)</span></h3>
+        <h3 style="margin-top:14px">Tuning <span style="color:var(--dim);text-transform:none;letter-spacing:0">(click a chip to open the tuner)</span></h3>
         <div class="tunechips" id="tuning"></div>
       </div>
     </div>
+
+    <section id="tuner">
+      <h3>Tuner — <span id="tun-name" style="color:var(--bone)"></span>
+        <span class="hint" style="text-transform:none;letter-spacing:0;font-weight:400"> · every tweak is saved with the character — it's the data Claude learns your taste from</span></h3>
+      <div class="tunegrid">
+        <div>
+          <div class="tstage" id="tstage">
+            <img id="tframe" alt="">
+            <div id="tmuzzle"></div>
+            <div class="ttarget">🎯</div>
+          </div>
+          <div class="trow">
+            <button class="primary" id="tplay">▶ PLAY</button>
+            <span class="hint" id="tframeinfo"></span>
+            <span class="spacer"></span>
+            <span class="hint">click the stage to place the muzzle</span>
+          </div>
+        </div>
+        <div class="tctrl">
+          <div class="field"><label>Default fps</label><input type="number" id="t-deffps" min="1" max="24"><span class="hint">character-wide; below overrides per animation</span></div>
+          <div class="field"><label>Anim fps</label><input type="range" id="t-fps" min="1" max="24" step="1"><span class="val" id="t-fps-v"></span></div>
+          <div class="field"><label>Loop</label><input type="checkbox" id="t-loop"></div>
+          <div class="field"><label>Release frame</label><select id="t-release"></select><span class="hint">when the emitter fires</span></div>
+          <div class="field"><label>Muzzle X</label><input type="range" id="t-mx" min="0" max="1" step="0.01"><span class="val" id="t-mx-v"></span></div>
+          <div class="field"><label>Muzzle Y</label><input type="range" id="t-my" min="0" max="1" step="0.01"><span class="val" id="t-my-v"></span></div>
+          <div class="field"><label>Emitter</label><select id="t-etype">
+            <option value="none">none</option><option value="projectile">projectile</option>
+            <option value="beam_thin">thin beam</option><option value="beam_big">big beam</option>
+            <option value="melee">melee</option></select></div>
+          <div class="field"><label>Color</label><input type="color" id="t-color"></div>
+          <div class="field" id="t-projrow"><label>Count · Speed</label><input type="number" id="t-count" min="1" max="6" style="width:58px"><input type="number" id="t-speed" min="60" max="900" step="20" style="width:76px"><span class="hint">px/s</span></div>
+          <div class="field" id="t-widthrow"><label>Beam width</label><input type="range" id="t-width" min="0.2" max="1" step="0.05"><span class="val" id="t-width-v"></span></div>
+          <div class="field"><label>Sound</label><select id="t-sound"></select><button id="t-sndplay" style="padding:5px 10px">🔊</button></div>
+        </div>
+      </div>
+    </section>
     <div class="actions">
       <button class="primary" id="save">💾 SAVE TO ROSTER</button>
       <button id="reroll">↻ RE-FORGE SAME PROMPT</button>

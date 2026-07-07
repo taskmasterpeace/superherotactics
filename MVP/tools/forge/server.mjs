@@ -71,6 +71,22 @@ const server = http.createServer(async (req, res) => {
       }
       return send(res, 200, { records, errors });
     }
+    if (p === '/api/sounds') {
+      // catalog for the tuner: category.base ids (matching tuning records) + a playable file each
+      const root = path.join(MVP_DIR, 'public', 'assets', 'sounds');
+      const out = {};
+      for (const cat of fs.readdirSync(root, { withFileTypes: true })) {
+        if (!cat.isDirectory()) continue;
+        const seen = new Map();
+        for (const f of fs.readdirSync(path.join(root, cat.name))) {
+          if (!f.endsWith('.wav')) continue;
+          const base = f.replace(/_\d+\.wav$/, '').replace(/\.wav$/, '');
+          if (!seen.has(base)) seen.set(base, f);
+        }
+        out[cat.name] = [...seen.entries()].map(([base, file]) => ({ id: `${cat.name}.${base}`, file: `${cat.name}/${file}` }));
+      }
+      return send(res, 200, { sounds: out });
+    }
     if (p === '/api/characters' && req.method === 'GET') return send(res, 200, { characters: loadAll(DATA_DIR) });
     if (p === '/api/characters' && req.method === 'POST') {
       const { record } = await readBody(req);
