@@ -1,0 +1,246 @@
+[
+  {
+    "id": "voltmatic_339",
+    "name": "Voltmatic",
+    "realName": "Voltmatic Tanaka",
+    "origin": 4,
+    "role": "soldier",
+    "faction": "hero",
+    "stats": {
+      "MEL": 76,
+      "AGL": 48,
+      "STR": 65,
+      "STA": 42,
+      "INT": 54,
+      "INS": 48,
+      "CON": 62,
+      "PSI": 62
+    },
+    "powers": [
+      "Electrokinesis",
+      "Storm Call"
+    ],
+    "backstory": "Forged from the concept: \"a Nigerian LSW who controls lightning, cocky, streetwear over armor - codename \"Voltmatic\"\". Registered LSW; powers manifested under fire.",
+    "artDescription": "a Nigerian LSW who controls lightning, cocky, streetwear over armor - codename \"Voltmatic\"",
+    "_mock": true,
+    "isLSW": true,
+    "art": {
+      "tokens": {
+        "S": "/game/assets/character_token/generated/surge/S.png",
+        "SE": "/game/assets/character_token/generated/surge/SE.png",
+        "E": "/game/assets/character_token/generated/surge/E.png",
+        "NE": "/game/assets/character_token/generated/surge/NE.png",
+        "N": "/game/assets/character_token/generated/surge/N.png",
+        "NW": "/game/assets/character_token/generated/surge/NW.png",
+        "W": "/game/assets/character_token/generated/surge/W.png",
+        "SW": "/game/assets/character_token/generated/surge/SW.png"
+      },
+      "portrait": "/game/assets/character_token/generated/surge/S.png",
+      "source": "mock:surge"
+    },
+    "tuning": {
+      "fps": 6,
+      "animations": {
+        "idle": {
+          "fps": 4,
+          "loop": true
+        },
+        "walk": {
+          "fps": 6,
+          "loop": true
+        },
+        "ranged": {
+          "fps": 8,
+          "releaseFrame": 3,
+          "muzzle": {
+            "x": 0.62,
+            "y": 0.45
+          },
+          "emitter": {
+            "type": "projectile",
+            "sprite": "bolt",
+            "color": "#ffd24a",
+            "speed": 320
+          },
+          "sound": "combat.gunshot_rifle"
+        },
+        "throw": {
+          "fps": 6,
+          "releaseFrame": "last-1",
+          "muzzle": {
+            "x": 0.55,
+            "y": 0.4
+          },
+          "emitter": {
+            "type": "projectile",
+            "sprite": "grenade",
+            "color": "#9aa065",
+            "speed": 220,
+            "arc": true
+          },
+          "sound": "combat.explosion_small"
+        },
+        "melee": {
+          "fps": 6,
+          "emitter": {
+            "type": "none"
+          },
+          "sound": "combat.impact_punch"
+        },
+        "take_hit": {
+          "fps": 8
+        },
+        "death": {
+          "fps": 6
+        },
+        "cast": {
+          "fps": 6,
+          "releaseFrame": "last",
+          "muzzle": {
+            "x": 0.5,
+            "y": 0.42
+          },
+          "emitter": {
+            "type": "beam_big",
+            "color": "#ffe14a",
+            "width": 0.6,
+            "area": true
+          },
+          "sound": "combat.energy_blast"
+        }
+      }
+    },
+    "meta": {
+      "prompt": "a Nigerian LSW who controls lightning, cocky, streetwear over armor - codename \"Voltmatic\"",
+      "provider": "mock",
+      "artMode": "mock",
+      "notes": [],
+      "forgedAt": "2026-07-07T04:47:15.413Z"
+    },
+    "derived": {
+      "health": 231
+    }
+  },
+  {
+    "id": "cinder_449",
+    "name": "Cinder",
+    "realName": "Cinder Tanaka",
+    "origin": 8,
+    "role": "soldier",
+    "faction": "hero",
+    "stats": {
+      "MEL": 70,
+      "AGL": 59,
+      "STR": 60,
+      "STA": 46,
+      "INT": 77,
+      "INS": 68,
+      "CON": 70,
+      "PSI": 70
+    },
+    "powers": [
+      "Fire Generation",
+      "Heat Aura"
+    ],
+    "backstory": "Forged from the concept: \"a fire-wielding vigilante from Lagos, hooded jacket over scorched armor — codename \"Cinder\"\". Registered LSW; powers manifested under fire.",
+    "artDescription": "a fire-wielding vigilante from Lagos, hooded jacket over scorched armor — codename \"Cinder\"",
+    "_mock": true,
+    "isLSW": true,
+    "art": {
+      "tokens": {
+        "S": "/game/assets/character_token/generated/merc/S.png",
+        "SE": "/game/assets/character_token/generated/merc/SE.png",
+        "E": "/game/assets/character_token/generated/merc/E.png",
+        "NE": "/game/assets/character_token/generated/merc/NE.png",
+        "N": "/game/assets/character_token/generated/merc/N.png",
+        "NW": "/game/assets/character_token/generated/merc/NW.png",
+        "W": "/game/assets/character_token/generated/merc/W.png",
+        "SW": "/game/assets/character_token/generated/merc/SW.png"
+      },
+      "portrait": "/game/assets/character_token/generated/merc/S.png",
+      "source": "mock:merc"
+    },
+    "tuning": {
+      "fps": 6,
+      "animations": {
+        "idle": {
+          "fps": 4,
+          "loop": true
+        },
+        "walk": {
+          "fps": 6,
+          "loop": true
+        },
+        "ranged": {
+          "fps": 8,
+          "releaseFrame": 3,
+          "muzzle": {
+            "x": 0.62,
+            "y": 0.45
+          },
+          "emitter": {
+            "type": "projectile",
+            "sprite": "bolt",
+            "color": "#ffd24a",
+            "speed": 320
+          },
+          "sound": "combat.gunshot_rifle"
+        },
+        "throw": {
+          "fps": 6,
+          "releaseFrame": "last-1",
+          "muzzle": {
+            "x": 0.55,
+            "y": 0.4
+          },
+          "emitter": {
+            "type": "projectile",
+            "sprite": "grenade",
+            "color": "#9aa065",
+            "speed": 220,
+            "arc": true
+          },
+          "sound": "combat.explosion_small"
+        },
+        "melee": {
+          "fps": 6,
+          "emitter": {
+            "type": "none"
+          },
+          "sound": "combat.impact_punch"
+        },
+        "take_hit": {
+          "fps": 8
+        },
+        "death": {
+          "fps": 6
+        },
+        "cast": {
+          "fps": 6,
+          "releaseFrame": "last",
+          "muzzle": {
+            "x": 0.5,
+            "y": 0.42
+          },
+          "emitter": {
+            "type": "beam_big",
+            "color": "#ff7a3a",
+            "width": 0.6,
+            "area": true
+          },
+          "sound": "combat.energy_blast"
+        }
+      }
+    },
+    "meta": {
+      "prompt": "a fire-wielding vigilante from Lagos, hooded jacket over scorched armor — codename \"Cinder\"",
+      "provider": "mock",
+      "artMode": "mock",
+      "notes": [],
+      "forgedAt": "2026-07-07T04:49:36.736Z"
+    },
+    "derived": {
+      "health": 235
+    }
+  }
+]

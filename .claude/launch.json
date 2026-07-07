@@ -4,8 +4,21 @@
     {
       "name": "sht-mvp",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--prefix", "MVP"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "MVP"
+      ],
       "port": 3000
+    },
+    {
+      "name": "sht-forge",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "MVP/tools/forge/server.mjs"
+      ],
+      "port": 5174
     }
   ]
 }

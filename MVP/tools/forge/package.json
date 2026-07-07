@@ -1,0 +1,11 @@
+{
+  "name": "sht-forge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "SHT Forge — AI-native dev tool for SuperHero Tactics (zero-dependency Node).",
+  "scripts": {
+    "forge": "node server.mjs",
+    "start": "node server.mjs"
+  }
+}
