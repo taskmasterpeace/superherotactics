@@ -75,7 +75,7 @@
 <div class="wrap">
   <p class="eyebrow">SuperHero Tactics · Playable Slice</p>
   <h1>Walk the compound. Take the shot.</h1>
-  <p class="lede"><b>Click a hero, click a tile to move.</b> <b>Right-click anything</b> for the JA2-style radial menu: <b>doors</b> can be Opened, Lockpicked, or <b>Kicked</b> (loud — the hostile turns toward the noise), <b>crates</b> Searched for loot, enemies Attacked, open ground gives Move / Face-this-way. Doors are real now: <b>closed doors block movement <i>and</i> sight</b> — the interior door is locked. Vision cones (wall-clipped) show what everyone sees; cross the red cone and he opens fire.</p>
+  <p class="lede"><b>Click a hero, click a tile to move; right-click anything</b> for the JA2 radial (doors open/lockpick/<b>kick</b>, crates loot, ground = move/face). <b>NEW — weapons are a loadout, not an identity:</b> right-click Surge (or press <b>1–4</b>) to swap her between <b>🔫 Pistol · ⚔️ Dual Pistols · 💥 Energy Blast · ⚡ Ion Beam</b> — same body, different emitter, damage, sound and animation. The Sentinel carries a ☀️ Solar Lance. Doors still block sight, cones still betray facing, and the merc still shoots back.</p>
 
   <div class="stage"><div id="board"></div></div>
 
@@ -226,17 +226,41 @@
     }
     u.conePath.setAttribute('d',`M${cx},${cy} L${pts.join(' L')} Z`);
   }
+  // ---------- ATTACK MODES: the versatile weapon system ----------
+  // A character is a BODY; what it fires is DATA. Any unit can carry any mix of
+  // modes (loadout) and swap freely — pistol, dual pistols, projectile blast,
+  // hitscan beam. Each mode = emitter type + count + color + damage + sound
+  // (+ optionally a real animation clip and its release frame).
+  const SNDBASE='../assets/sounds/';
+  const MODES={
+    pistol:  { icon:'🔫', label:'Pistol',       dmg:[8,14],  emitter:{type:'projectile',count:1,color:'#ffd24a',dur:0.8},
+               snd:SNDBASE+'combat/gunshot_pistol_01.wav' },
+    dual:    { icon:'⚔️', label:'Dual Pistols', dmg:[6,10],  emitter:{type:'projectile',count:2,color:'#ffd24a',dur:0.8,stagger:130},
+               snd:SNDBASE+'combat/gunshot_pistol_01.wav' },
+    blast:   { icon:'💥', label:'Energy Blast', dmg:[16,26], emitter:{type:'projectile',count:1,color:'#38f0ff',dur:1.1},
+               snd:SNDBASE+'combat/energy_blast_01.wav', clip:'blast' },
+    beam:    { icon:'⚡', label:'Ion Beam',     dmg:[12,20], emitter:{type:'beam_thin',color:'#ff5c5c'},
+               snd:SNDBASE+'combat/laser_fire_01.wav', clip:'blast' },
+    goldbeam:{ icon:'☀️', label:'Solar Lance',  dmg:[14,22], emitter:{type:'beam_thin',color:'#f5b21a'},
+               snd:SNDBASE+'combat/laser_fire_01.wav' },
+    rifle:   { icon:'🎯', label:'Rifle',        dmg:[8,15],  emitter:{type:'projectile',count:1,color:'#ffd24a',dur:0.9},
+               snd:SNDBASE+'combat/gunshot_rifle_01.wav', clip:'fire' },
+  };
   const units=[
     { id:'surge',        nm:'SURGE',        team:'blue', x:BX+2, y:BY+7, dir:'S', hp:100,
-      atk:{ dmg:[16,26], color:'#38f0ff', sound:'../assets/sounds/combat/energy_blast_01.wav',
-            clips:{S:{key:'surge_blast_south',frames:6,release:5},E:{key:'surge_blast_east',frames:6,release:5},W:{key:'surge_blast_east',frames:6,release:5,flip:true}} } },
+      loadout:['pistol','dual','blast','beam'], mode:'blast',
+      clips:{ blast:{S:{key:'surge_blast_south',frames:6,release:5},E:{key:'surge_blast_east',frames:6,release:5},W:{key:'surge_blast_east',frames:6,release:5,flip:true}} } },
     { id:'red_sentinel', nm:'RED SENTINEL', team:'blue', x:BX+9, y:BY+9, dir:'S', hp:100,
-      atk:{ dmg:[12,20], color:'#f5b21a', sound:'../assets/sounds/combat/laser_fire_01.wav', clips:{} } },
+      loadout:['goldbeam','pistol'], mode:'goldbeam', clips:{} },
     { id:'merc',         nm:'HOSTILE MERC', team:'red',  x:5,    y:10,   dir:'E', hp:100,
-      atk:{ dmg:[8,15], color:'#ffd24a', sound:'../assets/sounds/combat/gunshot_rifle_01.wav',
-            clips:{S:{key:'merc_fire_south',frames:9,release:3},E:{key:'merc_fire_east',frames:9,release:3},W:{key:'merc_fire_east',frames:9,release:3,flip:true}} } },
+      loadout:['rifle'], mode:'rifle',
+      clips:{ fire:{S:{key:'merc_fire_south',frames:9,release:3},E:{key:'merc_fire_east',frames:9,release:3},W:{key:'merc_fire_east',frames:9,release:3,flip:true}} } },
   ];
   const impactSnd='../assets/sounds/combat/bullet_impact_01.wav';
+  function setMode(u,mid){ if(!u.loadout.includes(mid)) return; u.mode=mid;
+    refreshWpn(u); status(`${u.nm} readies ${MODES[mid].label}.`); }
+  function refreshWpn(u){ const el=document.getElementById('wpn-'+u.id);
+    if(el){ const m=MODES[u.mode]; el.textContent = `${m.icon} ${m.label}`; } }
   function play(url){ try{ const a=new Audio(url); a.volume=0.35; a.play().catch(()=>{});}catch(e){} }
 
   let sel=null;
@@ -266,13 +290,15 @@
   for(const u of units){
     const s=document.createElement('div'); s.className='slot'+(u.team==='red'?' enemy':''); s.dataset.id=u.id;
     s.innerHTML=`<div class="pic"><img src="${TOK(u.id)}/S.png"></div><div class="info"><div class="nm">${u.nm}</div>
-      <div class="bar"><i class="hp" id="hp-${u.id}" style="width:100%"></i></div></div>`;
+      <div class="bar"><i class="hp" id="hp-${u.id}" style="width:100%"></i></div>
+      ${u.team==='blue'?`<div class="wpn" id="wpn-${u.id}" style="font-size:10px;color:var(--gold);margin-top:3px;letter-spacing:.05em"></div>`:''}</div>`;
     if(u.team==='blue') s.addEventListener('click',()=>u.hp>0&&select(u));
     hud.appendChild(s);
   }
   const sp=document.createElement('div'); sp.className='spacer'; hud.appendChild(sp);
   const term=document.createElement('div'); term.className='term';
   term.innerHTML=`<span>D15 · SAM SITE, WOODS</span><span id="status">Click a hero to begin.</span>`; hud.appendChild(term);
+  for(const u of units) if(u.team==='blue') refreshWpn(u);
   function status(s){ document.getElementById('status').textContent=s; }
   function hpbar(u){ const el=document.getElementById('hp-'+u.id); if(el) el.style.width=Math.max(0,u.hp)+'%'; }
 
@@ -315,34 +341,68 @@
     if(!losClear(a.x,a.y,t.x,t.y)){ face(a,dirTo(a,t));
       if(a.team==='blue') status('No line of sight — a wall blocks the shot.'); return; }
     a.shooting=true; if(a.team==='red') a.lastShot=Date.now();
-    const dir=dirTo(a,t); const clip=a.atk.clips[dir];
-    play(a.atk.sound);
-    const fire=()=>launch(a,t);
-    if(clip){ // play real frames at 6fps, projectile on release frame
+    const m=MODES[a.mode];
+    const dir=dirTo(a,t); const clip=m.clip && a.clips[m.clip] ? a.clips[m.clip][dir] : null;
+    play(m.snd);
+    const fire=()=>emit(a,t,m);
+    if(clip){ // play real frames at 6fps, emitter fires on the release frame
       const fps=6;
       let f=0; face(a,dir); if(clip.flip) a.img.style.transform='scaleX(-1)';
       const iv=setInterval(()=>{ a.img.src=`anim/${clip.key}/${f}.png`;
         if(f===Math.min(clip.release,clip.frames-1)) fire();
         if(++f>=clip.frames){ clearInterval(iv); a.img.style.transform=''; face(a,dir); a.shooting=false; } },1000/fps);
     } else { face(a,dir); fire(); setTimeout(()=>a.shooting=false,400); }
-    status(`${a.nm} fires at ${t.nm}!`); }
+    status(`${a.nm}: ${m.label} → ${t.nm}!`); }
 
-  function launch(a,t){ const p=document.createElement('div'); p.className='proj'; p.style.color=a.atk.color;
-    const off=T*0.55, sx=a.x*T+T/2, sy=a.y*T+T/2-off, ex=t.x*T+T/2, ey=t.y*T+T/2-off;
-    p.style.left=(sx-6)+'px'; p.style.top=(sy-6)+'px'; board.appendChild(p);
-    const t0=performance.now(), dur=Math.max(160,Math.hypot(ex-sx,ey-sy)*0.9);
+  // muzzle/torso anchor points for any emitter
+  function anchors(a,t){ const off=T*0.55;
+    return { sx:a.x*T+T/2, sy:a.y*T+T/2-off, ex:t.x*T+T/2, ey:t.y*T+T/2-off }; }
+
+  /** EMITTER DISPATCH — projectile (1..n, staggered) or hitscan thin beam. */
+  function emit(a,t,m){
+    const e=m.emitter||{type:'projectile',count:1,color:'#fff'};
+    if(e.type==='beam_thin') return beamThin(a,t,m);
+    const n=e.count||1;
+    for(let i=0;i<n;i++) setTimeout(()=>{ if(i>0) play(m.snd); projectile(a,t,m,i); }, i*(e.stagger||0));
+  }
+  function projectile(a,t,m,idx=0){
+    const e=m.emitter, {sx,sy,ex,ey}=anchors(a,t);
+    // dual wield: offset each barrel perpendicular to the shot line
+    const dx=ex-sx, dy=ey-sy, L=Math.hypot(dx,dy)||1;
+    const side=(idx===0?-1:1)*(e.count>1?5:0), ox=-dy/L*side, oy=dx/L*side;
+    const p=document.createElement('div'); p.className='proj'; p.style.color=e.color;
+    p.style.left=(sx+ox-6)+'px'; p.style.top=(sy+oy-6)+'px'; board.appendChild(p);
+    const t0=performance.now(), dur=Math.max(160,L*(e.dur??0.9));
     (function stepFn(now){ const k=Math.min(1,(now-t0)/dur);
-      p.style.left=(sx+(ex-sx)*k-6)+'px'; p.style.top=(sy+(ey-sy)*k-6)+'px';
-      if(k<1) requestAnimationFrame(stepFn); else { p.remove(); hit(a,t); } })(t0); }
-
-  function hit(a,t){ if(t.hp<=0) return; play(impactSnd);
-    const [lo,hi]=a.atk.dmg, d=lo+Math.floor(Math.random()*(hi-lo+1));
+      p.style.left=(sx+ox+dx*k-6)+'px'; p.style.top=(sy+oy+dy*k-6)+'px';
+      if(k<1) requestAnimationFrame(stepFn); else { p.remove(); hit(a,t,m); } })(t0);
+  }
+  function beamThin(a,t,m){
+    const e=m.emitter, {sx,sy,ex,ey}=anchors(a,t);
+    const L=Math.hypot(ex-sx,ey-sy), ang=Math.atan2(ey-sy,ex-sx);
+    const b=document.createElement('div');
+    b.style.cssText=`position:absolute;z-index:7;pointer-events:none;height:3px;width:${L}px;`+
+      `left:${sx}px;top:${sy-1.5}px;transform-origin:0 50%;transform:rotate(${ang}rad);`+
+      `background:linear-gradient(90deg,${e.color},#fff 12%,${e.color} 55%,transparent);`+
+      `box-shadow:0 0 8px 2px ${e.color};border-radius:2px`;
+    board.appendChild(b);
+    const g=document.createElement('div');   // impact bloom
+    g.style.cssText=`position:absolute;z-index:7;pointer-events:none;width:20px;height:20px;border-radius:50%;`+
+      `left:${ex-10}px;top:${ey-10}px;background:radial-gradient(circle,#fff,${e.color} 45%,transparent 70%)`;
+    board.appendChild(g);
+    let flick=0; const iv=setInterval(()=>{ b.style.opacity=(flick++%2)?1:.55; },55);
+    setTimeout(()=>{ clearInterval(iv); b.style.transition='opacity .12s'; g.style.transition='opacity .12s';
+      b.style.opacity=0; g.style.opacity=0; setTimeout(()=>{b.remove();g.remove();},140); }, 240);
+    hit(a,t,m);                                          // hitscan: damage lands instantly
+  }
+  function hit(a,t,m){ if(t.hp<=0) return; play(impactSnd);
+    const [lo,hi]=m.dmg, d=lo+Math.floor(Math.random()*(hi-lo+1));
     t.hp-=d; hpbar(t);
     t.el.animate([{filter:'brightness(3)'},{filter:'brightness(1)'}],{duration:240});
-    const dm=document.createElement('div'); dm.className='dmg'; dm.textContent='-'+d; dm.style.color=a.atk.color;
+    const dm=document.createElement('div'); dm.className='dmg'; dm.textContent='-'+d; dm.style.color=m.emitter.color;
     dm.style.left=(t.x*T+T/2-8)+'px'; dm.style.top=(t.y*T-T*0.7)+'px'; board.appendChild(dm); setTimeout(()=>dm.remove(),950);
     if(t.hp<=0){ die(t); status(`${t.nm} is DOWN.`); return; }
-    if(t.team==='red') setTimeout(()=>returnFire(t),650); }
+    if(t.team==='red' && !t._rf){ t._rf=true; setTimeout(()=>{ t._rf=false; returnFire(t); },650); } }
 
   function returnFire(e){ if(e.hp<=0) return;
     const targets=units.filter(u=>u.team==='blue'&&u.hp>0); if(!targets.length) return;
@@ -406,10 +466,12 @@
       { icon:'🎯', label:'Attack', disabled:!sel||sel.hp<=0, act:()=>shoot(sel,u) },
       { icon:'👁️', label:'Examine', act:()=>status(`${u.nm}: hostile, ${u.hp} HP, facing ${u.dir}. ${canSee(u,sel||u)?'HE SEES YOU.':'Unaware of you.'}`) },
     ];
-    return [
-      { icon:'✅', label:'Select', act:()=>select(u) },
-      { icon:'👁️', label:'Examine', act:()=>status(`${u.nm}: ${u.hp} HP, facing ${u.dir}.`) },
-    ];
+    // heroes: the loadout IS the menu — swap to any carried weapon/power
+    const items=u.loadout.map(mid=>{ const m=MODES[mid]; return {
+      icon:m.icon, label:(u.mode===mid?'✓ ':'')+m.label,
+      act:()=>{ select(u); setMode(u,mid); } }; });
+    items.push({ icon:'👁️', label:'Examine', act:()=>status(`${u.nm}: ${u.hp} HP, ${MODES[u.mode].label} ready, facing ${u.dir}.`) });
+    return items;
   }
   function groundOptions(x,y){ return [
     { icon:'🚶', label:'Move here', disabled:!sel||sel.hp<=0, act:()=>{ const p=findPath(sel,x,y); if(p) walk(sel,p); else status('No path there.'); } },
@@ -433,11 +495,13 @@
     openRadial(px,py,`${x},${y}`, groundOptions(x,y)); });
   document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ closeRadial(); sel=null;
     for(const v of units) if(v.team==='blue') v.ringEl.className='ring cyan';
-    document.querySelectorAll('.slot').forEach(s=>s.classList.remove('sel')); drawPath(null); status('Deselected.'); } });
+    document.querySelectorAll('.slot').forEach(s=>s.classList.remove('sel')); drawPath(null); status('Deselected.'); }
+    const n=Number(e.key);                              // 1-4: swap the selected hero's weapon
+    if(n>=1 && n<=9 && sel && sel.hp>0 && sel.loadout[n-1]) setMode(sel, sel.loadout[n-1]); });
 
   // QA hooks
   window.__game={ units, select, findPath, walk, shoot, losClear, canSee, place, face, updateCone,
-    doors, crates, openRadial, doorOptions, get radial(){ return radialEl; },
+    doors, crates, openRadial, doorOptions, MODES, setMode, unitOptions, get radial(){ return radialEl; },
     unit:id=>units.find(u=>u.id===id) };
 })();
 </script>
