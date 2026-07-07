@@ -6,7 +6,10 @@
       "mcp__flow-nexus",
       "Bash(npm run build:*)",
       "Bash(pushd:*)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "WebSearch",
+      "mcp__pixellab__create_topdown_tileset",
+      "mcp__pixellab__create_map_object"
     ],
     "deny": []
   }

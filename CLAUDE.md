@@ -267,4 +267,27 @@ npm run build    # Production build
 
 ---
 
+## Hybrid: delegating to Codex (GPT worker)
+
+Opus (this agent) is the orchestrator. A local **OpenAI Codex** worker is wired in
+as the `codex` MCP tool (and available on the shell as `codex exec`). Use it to
+offload bulk/mechanical implementation so Opus can focus on planning + review.
+
+**Delegate to Codex when** a task is well-scoped and parallelizable: boilerplate,
+repetitive refactors across many files, test generation, data-file edits, ports.
+**Keep in Opus** anything needing architecture judgment, cross-system reasoning,
+or design taste.
+
+**Always review Codex's diff before accepting it** — the value of the hybrid is two
+different models cross-checking, not blind hand-off.
+
+Shell form (fallback / scripting):
+```bash
+codex exec "<precise task + target files>" --cd D:\git\sht -s workspace-write
+```
+Sandbox: `read-only` (analysis), `workspace-write` (edit files in repo, default for real work),
+`danger-full-access` (avoid). Codex auths via the existing ChatGPT login; no API key required.
+
+---
+
 *Updated: July 2026 - Phases 1-6 complete. GAME_COMPLETION_CRITERIA.md APPROVED; game is feature-complete for testing.*
