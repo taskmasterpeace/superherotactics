@@ -41,7 +41,8 @@
     "uiStylePrompt": "bold superhero yellow and black comic-book style, glossy jet black with thick vivid yellow rims, high contrast, clean bold shapes, crisp pixel art",
     "negative": "no scanlines, no decorative line texture, no rivets, no segment dividers on bars, no gear emblems, no medallions, no purple",
     "color_palette": "vivid superhero yellow, jet black, white highlight",
-    "menus": "radial — generate round icon buttons + center hub as separate pieces; engine composes the ring (see map-proto openRadial)",
+    "menus": "SQUARE word menus (owner 2026-07-10, REVERSED the earlier radial call): black panel, yellow title bar + border, uppercase word rows with small badge icons inline — see level-gen.html .cmenu. Radial kit assets kept in ui/ but retired.",
+    "action_badges": "every action pops a 16-badge icon over the actor's head (ui/badges/: pick_up, put_down, throw, loot, lockpick, kick, door_open/close, swap_weapon, reload, take_off, land, overwatch, alert, heal, punch) — one systematic language app-wide",
     "production_note": "generate BLANK buttons/plates (PixelLab letters them otherwise); text renders in-engine",
     "proven_assets": "MVP/public/asset-lab/ui/ (radial_kit + slices, status_plate_v2, icons/)"
   },
