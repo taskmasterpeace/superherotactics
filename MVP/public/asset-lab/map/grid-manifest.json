@@ -1,0 +1,308 @@
+{
+  "cellPx": 44,
+  "generated": "2026-07-10",
+  "props": {
+    "crate": {
+      "file": "grid/crate.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "crate_stack": {
+      "file": "grid/crate_stack.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        70
+      ],
+      "anchor": "bottom-center"
+    },
+    "plant": {
+      "file": "grid/plant.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        57
+      ],
+      "anchor": "bottom-center"
+    },
+    "fire_hydrant": {
+      "file": "grid/fire_hydrant.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        57
+      ],
+      "anchor": "bottom-center"
+    },
+    "vending_machine": {
+      "file": "grid/vending_machine.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        79
+      ],
+      "anchor": "bottom-center"
+    },
+    "park_bench": {
+      "file": "grid/park_bench.png",
+      "cells": [
+        2,
+        1
+      ],
+      "canvas": [
+        88,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "dumpster": {
+      "file": "grid/dumpster.png",
+      "cells": [
+        2,
+        1
+      ],
+      "canvas": [
+        88,
+        53
+      ],
+      "anchor": "bottom-center"
+    },
+    "car_sedan": {
+      "file": "grid/car_sedan.png",
+      "cells": [
+        3,
+        2
+      ],
+      "canvas": [
+        132,
+        88
+      ],
+      "anchor": "bottom-center"
+    },
+    "school_bus": {
+      "file": "grid/school_bus.png",
+      "cells": [
+        4,
+        2
+      ],
+      "canvas": [
+        176,
+        88
+      ],
+      "anchor": "bottom-center"
+    },
+    "bus_stop": {
+      "file": "grid/bus_stop.png",
+      "cells": [
+        2,
+        1
+      ],
+      "canvas": [
+        88,
+        79
+      ],
+      "anchor": "bottom-center"
+    },
+    "streetlamp": {
+      "file": "grid/streetlamp.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        106
+      ],
+      "anchor": "bottom-center"
+    },
+    "traffic_light": {
+      "file": "grid/traffic_light.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        106
+      ],
+      "anchor": "bottom-center"
+    },
+    "tree_oak": {
+      "file": "grid/tree_oak.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        88,
+        88
+      ],
+      "anchor": "bottom-center",
+      "canopy": 2
+    },
+    "tree_pine": {
+      "file": "grid/tree_pine.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        88,
+        97
+      ],
+      "anchor": "bottom-center",
+      "canopy": 2
+    },
+    "bush": {
+      "file": "grid/bush.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "rock": {
+      "file": "grid/rock.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "hay_bale": {
+      "file": "grid/hay_bale.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "lockers": {
+      "file": "grid/lockers.png",
+      "cells": [
+        2,
+        1
+      ],
+      "canvas": [
+        88,
+        70
+      ],
+      "anchor": "bottom-center"
+    },
+    "chalkboard": {
+      "file": "grid/chalkboard.png",
+      "cells": [
+        2,
+        1
+      ],
+      "canvas": [
+        88,
+        66
+      ],
+      "anchor": "bottom-center"
+    },
+    "desk": {
+      "file": "grid/desk.png",
+      "cells": [
+        2,
+        1
+      ],
+      "canvas": [
+        88,
+        48
+      ],
+      "anchor": "bottom-center"
+    },
+    "chair": {
+      "file": "grid/chair.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        53
+      ],
+      "anchor": "bottom-center"
+    },
+    "cabinet": {
+      "file": "grid/cabinet.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        70
+      ],
+      "anchor": "bottom-center"
+    },
+    "cot": {
+      "file": "grid/cot.png",
+      "cells": [
+        2,
+        1
+      ],
+      "canvas": [
+        88,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "server_rack": {
+      "file": "grid/server_rack.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        84
+      ],
+      "anchor": "bottom-center"
+    },
+    "blast_door": {
+      "file": "grid/blast_door.png",
+      "cells": [
+        2,
+        1
+      ],
+      "canvas": [
+        88,
+        62
+      ],
+      "anchor": "bottom-center"
+    }
+  }
+}

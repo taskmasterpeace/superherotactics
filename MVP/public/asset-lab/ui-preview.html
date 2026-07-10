@@ -117,6 +117,28 @@
     (16 icons per call). UI panels take text + palette hints (no image refs), but land on-style anyway.
   </div>
 
+  <h2>V2 — owner feedback round <span class="tag">radial</span> <span class="tag">yellow &amp; black</span> <span class="tag">no lines / no emblem</span></h2>
+  <div class="card">
+    <div class="row">
+      <div class="imgbox"><img class="pix" src="ui/radial_kit.png" width="256" alt="radial button kit"></div>
+      <div class="imgbox"><img class="pix" src="ui/status_plate_v2.png" width="384" alt="status plate v2"></div>
+    </div>
+    <div class="caption"><strong>Radial button kit</strong> — glossy black discs, thick yellow rims; the engine composes
+    2–8 of these in a ring (map-proto's radial already works that way; sliced pieces: <code>ui/radial_hub.png</code>,
+    <code>ui/radial_btn1–4.png</code>). <strong>Status plate v2</strong> — smooth bars, square portrait, no gear medallion,
+    no segment lines. Baked-in text is placeholder; production renders text in-engine.</div>
+  </div>
+  <div class="card big">
+    <img class="pix" src="ui/in_context_mock_v2.png" alt="v2 UI over game scene" style="width:100%; max-width:1024px;">
+    <div class="caption">V2 in context: right-click radial open on the crate, unit plate bottom-left.</div>
+  </div>
+  <div class="card">
+    <strong>Grid rule shipped alongside:</strong> every prop now occupies whole grid cells — footprints in
+    <code>prop-footprints.json</code>, art normalized by <code>normalize-props.mjs</code>, engine contract in
+    <code>grid-manifest.json</code>. See <a href="grid-preview.html" style="color:var(--amber)">grid-preview.html</a>
+    for the full set on the grid.
+  </div>
+
   <h2>Baseline — the art the UI must match</h2>
   <div class="card">
     <div class="row">
@@ -215,12 +237,14 @@
   <h2>Recommended next move</h2>
   <div class="card">
     <ol style="margin-left:1.2rem">
-      <li><strong>Approve the direction</strong> — look at the mock above: is gunmetal + amber the SHT interface language?</li>
-      <li><strong>Generate the production UI kit</strong> (one batch, ~$2–4): blank 9-slice button (normal/hover/pressed),
-        context-menu frame, unit plate + separate bar fills, AP pips, tab strip, tooltip frame, cursor set, and a matching
+      <li><strong>Direction locked by owner:</strong> yellow &amp; black superhero language, radial menus, clean shapes
+        (no scanlines, no emblems), everything grid-quantized. V1 gunmetal panels above kept for the record.</li>
+      <li><strong>Generate the production UI kit</strong> (one batch, ~$2–4, yellow/black): blank radial buttons
+        (normal/hover/pressed), blank plate + separate bar fills, AP pips, tooltip frame, cursor set, and a matching
         pixel font via <code>create_font</code>.</li>
-      <li><strong>Wire it into Phaser</strong> — replace the flat <code>Graphics</code> health bars and add the right-click command
-        menu in <code>CombatScene</code> using the kit (9-slice + bitmap text).</li>
+      <li><strong>Wire it into the engine</strong> — skin map-proto's radial with the kit discs, replace flat
+        <code>Graphics</code> health bars with the plate, snap all prop placement to integer cells using
+        <code>grid-manifest.json</code>.</li>
       <li><strong>Then the laptop layer</strong> — same language, React side, using the same kit as CSS assets.</li>
     </ol>
   </div>

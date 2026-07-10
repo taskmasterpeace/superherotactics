@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHT — Props on the Grid</title>
+<style>
+  :root { --bg:#15130e; --card:#1f1c14; --border:#3a3325; --gold:#f2c40f; --text:#e8e0d0; --muted:#a09680; --bad:#d05545; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; font-size:15px; line-height:1.55; padding:2rem 1rem 6rem; }
+  .wrap { max-width:1100px; margin:0 auto; }
+  h1 { font-family:Consolas,monospace; font-size:1.6rem; color:var(--gold); text-transform:uppercase; letter-spacing:-0.02em; }
+  .sub { color:var(--muted); margin-bottom:2rem; }
+  h2 { font-family:Consolas,monospace; font-size:1.05rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--gold); border-bottom:2px solid var(--border); padding-bottom:0.4rem; margin:2.5rem 0 1rem; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1rem; margin-bottom:0.75rem; }
+  .caption { color:var(--muted); font-size:0.85rem; margin-top:0.5rem; }
+  .pix { image-rendering:pixelated; }
+  code { background:#2a2418; border-radius:4px; padding:0.05rem 0.35rem; font-size:0.85em; color:#ffd98a; }
+  .rule { background:#241f10; border:1px solid #6b5a1a; border-radius:10px; padding:1rem 1.25rem; margin-bottom:1rem; }
+  .rule strong { color:var(--gold); }
+
+  .lineup { display:flex; flex-wrap:wrap; gap:14px; }
+  .stand { text-align:center; }
+  .stand .plate { position:relative; display:inline-block; background:#233123; }
+  .stand .plate .grid-bg { position:absolute; inset:0;
+    background-image:linear-gradient(rgba(242,196,15,.28) 1px, transparent 1px), linear-gradient(90deg, rgba(242,196,15,.28) 1px, transparent 1px);
+    background-size:44px 44px; }
+  .stand .plate .foot { position:absolute; outline:2px solid rgba(242,196,15,.8); background:rgba(242,196,15,.12); }
+  .stand .plate img { position:relative; display:block; }
+  .stand .nm { font-family:Consolas,monospace; font-size:0.68rem; color:var(--muted); margin-top:4px; }
+  .stand .nm b { color:var(--gold); font-weight:600; }
+
+  .before { display:flex; gap:24px; flex-wrap:wrap; align-items:flex-end; }
+  .before .half { text-align:center; }
+  .before .half .lbl { font-family:Consolas,monospace; font-size:0.75rem; margin-top:6px; }
+  .before .half.raw .lbl { color:var(--bad); }
+  .before .half.fixed .lbl { color:#7dc95e; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Props on the Grid</h1>
+  <div class="sub">Every item occupies whole grid cells and is sized exactly to them &middot; cell = 44px (map-proto scale) &middot; 2026-07-10</div>
+
+  <div class="rule">
+    <strong>The rule (now enforced by the pipeline):</strong> a prop declares a footprint in cells
+    (<code>prop-footprints.json</code>), <code>normalize-props.mjs</code> trims and scales its art to exactly
+    <code>cells &times; 44px</code> (tall props keep extra canvas <em>above</em>, anchored at the feet), and
+    <code>grid-manifest.json</code> tells the engine the footprint to snap, block, and render. No more 1.1-cell
+    crates or 2.7-cell cars — placement is integer cells only.
+  </div>
+
+  <h2>Before &rarr; after</h2>
+  <div class="card">
+    <div class="before">
+      <div class="half raw">
+        <img class="pix" src="map/car_sedan.png" style="width:120px">
+        <div class="lbl">RAW 60&times;35 &mdash; placed at 2.7&times;1.45 cells</div>
+      </div>
+      <div class="half fixed">
+        <div class="plate stand" style="display:inline-block; position:relative;">
+          <div class="grid-bg" style="position:absolute; inset:0; background-image:linear-gradient(rgba(242,196,15,.28) 1px, transparent 1px),linear-gradient(90deg, rgba(242,196,15,.28) 1px, transparent 1px); background-size:44px 44px;"></div>
+          <img class="pix" src="map/grid/car_sedan.png" style="position:relative; display:block;">
+        </div>
+        <div class="lbl">NORMALIZED 132&times;88 &mdash; occupies 3&times;2 cells exactly</div>
+      </div>
+      <div class="half raw">
+        <img class="pix" src="map/vending_machine.png" style="width:33px">
+        <div class="lbl">RAW 22&times;46</div>
+      </div>
+      <div class="half fixed">
+        <div class="plate stand" style="display:inline-block; position:relative;">
+          <div class="grid-bg" style="position:absolute; inset:0; background-image:linear-gradient(rgba(242,196,15,.28) 1px, transparent 1px),linear-gradient(90deg, rgba(242,196,15,.28) 1px, transparent 1px); background-size:44px 44px;"></div>
+          <img class="pix" src="map/grid/vending_machine.png" style="position:relative; display:block;">
+        </div>
+        <div class="lbl">NORMALIZED 44&times;79 &mdash; 1&times;1 footprint, tall art above</div>
+      </div>
+    </div>
+    <div class="caption">Raw PixelLab props come at arbitrary canvases; normalized ones land on cells. The highlighted
+    band at the bottom of each canvas is the blocking footprint; anything above it is visual height that overlaps the
+    tile behind (drawn over, walked behind).</div>
+  </div>
+
+  <h2>The full set on the grid</h2>
+  <div class="card">
+    <div id="lineup" class="lineup"></div>
+    <div class="caption">Gold outline = blocking footprint cells. Regenerate any time with
+    <code>node MVP/scripts/asset-pipeline/normalize-props.mjs</code> (add <code>--cell N</code> if the engine tile size
+    changes — art rescales, footprints stay).</div>
+  </div>
+
+</div>
+<script>
+const MANIFEST = {"cellPx":44,"props":{"crate":{"file":"grid/crate.png","cells":[1,1],"canvas":[44,44]},"crate_stack":{"file":"grid/crate_stack.png","cells":[1,1],"canvas":[44,70]},"plant":{"file":"grid/plant.png","cells":[1,1],"canvas":[44,57]},"fire_hydrant":{"file":"grid/fire_hydrant.png","cells":[1,1],"canvas":[44,57]},"vending_machine":{"file":"grid/vending_machine.png","cells":[1,1],"canvas":[44,79]},"park_bench":{"file":"grid/park_bench.png","cells":[2,1],"canvas":[88,44]},"dumpster":{"file":"grid/dumpster.png","cells":[2,1],"canvas":[88,53]},"car_sedan":{"file":"grid/car_sedan.png","cells":[3,2],"canvas":[132,88]},"school_bus":{"file":"grid/school_bus.png","cells":[4,2],"canvas":[176,88]},"bus_stop":{"file":"grid/bus_stop.png","cells":[2,1],"canvas":[88,79]},"streetlamp":{"file":"grid/streetlamp.png","cells":[1,1],"canvas":[44,106]},"traffic_light":{"file":"grid/traffic_light.png","cells":[1,1],"canvas":[44,106]},"tree_oak":{"file":"grid/tree_oak.png","cells":[1,1],"canvas":[88,88],"canopy":2},"tree_pine":{"file":"grid/tree_pine.png","cells":[1,1],"canvas":[88,97],"canopy":2},"bush":{"file":"grid/bush.png","cells":[1,1],"canvas":[44,44]},"rock":{"file":"grid/rock.png","cells":[1,1],"canvas":[44,44]},"hay_bale":{"file":"grid/hay_bale.png","cells":[1,1],"canvas":[44,44]},"lockers":{"file":"grid/lockers.png","cells":[2,1],"canvas":[88,70]},"chalkboard":{"file":"grid/chalkboard.png","cells":[2,1],"canvas":[88,66]},"desk":{"file":"grid/desk.png","cells":[2,1],"canvas":[88,48]},"chair":{"file":"grid/chair.png","cells":[1,1],"canvas":[44,53]},"cabinet":{"file":"grid/cabinet.png","cells":[1,1],"canvas":[44,70]},"cot":{"file":"grid/cot.png","cells":[2,1],"canvas":[88,44]},"server_rack":{"file":"grid/server_rack.png","cells":[1,1],"canvas":[44,84]},"blast_door":{"file":"grid/blast_door.png","cells":[2,1],"canvas":[88,62]}}};
+
+// live manifest wins when served over http; embedded copy covers file://
+fetch('map/grid-manifest.json').then(r => r.json()).catch(() => MANIFEST).then(render);
+
+function render(m) {
+  const T = m.cellPx;
+  const lineup = document.getElementById('lineup');
+  lineup.innerHTML = '';
+  for (const [name, p] of Object.entries(m.props)) {
+    const [cw, ch] = p.cells, [W, H] = p.canvas;
+    const footW = cw * T, footH = ch * T;
+    const stand = document.createElement('div');
+    stand.className = 'stand';
+    stand.innerHTML =
+      '<div class="plate" style="width:' + W + 'px;height:' + H + 'px">' +
+        '<div class="grid-bg"></div>' +
+        '<div class="foot" style="left:' + ((W - footW) / 2) + 'px;top:' + (H - footH) + 'px;width:' + footW + 'px;height:' + footH + 'px"></div>' +
+        '<img class="pix" src="map/' + p.file + '" width="' + W + '" height="' + H + '">' +
+      '</div>' +
+      '<div class="nm"><b>' + name + '</b> ' + cw + '×' + ch + '</div>';
+    lineup.appendChild(stand);
+  }
+}
+</script>
+</body>
+</html>

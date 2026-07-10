@@ -35,5 +35,23 @@
     "$comment": "For inventory/gadgets/vehicles later. PixelLab create_map_object / create_8_direction_object. Same palette suffix so items match the world.",
     "itemStylePrompt": "game inventory item icon, muted realistic palette, single object on transparent background, clear silhouette",
     "size": 64
+  },
+  "ui": {
+    "$comment": "OWNER-LOCKED 2026-07-10: interface language is bold superhero YELLOW & BLACK (not gunmetal/amber — that was v1, rejected). Menus are RADIAL (round composable buttons, engine arranges 2-8 in a ring). Clean bold shapes only.",
+    "uiStylePrompt": "bold superhero yellow and black comic-book style, glossy jet black with thick vivid yellow rims, high contrast, clean bold shapes, crisp pixel art",
+    "negative": "no scanlines, no decorative line texture, no rivets, no segment dividers on bars, no gear emblems, no medallions, no purple",
+    "color_palette": "vivid superhero yellow, jet black, white highlight",
+    "menus": "radial — generate round icon buttons + center hub as separate pieces; engine composes the ring (see map-proto openRadial)",
+    "production_note": "generate BLANK buttons/plates (PixelLab letters them otherwise); text renders in-engine",
+    "proven_assets": "MVP/public/asset-lab/ui/ (radial_kit + slices, status_plate_v2, icons/)"
+  },
+  "grid": {
+    "$comment": "OWNER-LOCKED 2026-07-10: grid-based combat means items ALWAYS occupy whole grid cells, sized exactly to them. No fractional placement.",
+    "cellPx": 44,
+    "$comment_cell": "matches map-proto T=44. If the engine tile size changes, re-run normalize-props.mjs --cell N; footprints stay.",
+    "footprints": "scripts/asset-pipeline/prop-footprints.json",
+    "normalizer": "scripts/asset-pipeline/normalize-props.mjs",
+    "manifest": "public/asset-lab/map/grid-manifest.json",
+    "rule": "props place at integer cells; blocking footprint = cells; tall art keeps extra canvas ABOVE, anchored bottom-center"
   }
 }
