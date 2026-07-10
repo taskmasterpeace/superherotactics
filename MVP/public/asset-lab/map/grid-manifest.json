@@ -303,6 +303,198 @@
         62
       ],
       "anchor": "bottom-center"
+    },
+    "barrel": {
+      "file": "grid/barrel.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        53
+      ],
+      "anchor": "bottom-center"
+    },
+    "propane_tank": {
+      "file": "grid/propane_tank.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        62
+      ],
+      "anchor": "bottom-center"
+    },
+    "sandbags": {
+      "file": "grid/sandbags.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "medkit": {
+      "file": "grid/medkit.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "ammo_box": {
+      "file": "grid/ammo_box.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "toolbox": {
+      "file": "grid/toolbox.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "jerry_can": {
+      "file": "grid/jerry_can.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        53
+      ],
+      "anchor": "bottom-center"
+    },
+    "tire": {
+      "file": "grid/tire.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "traffic_cone": {
+      "file": "grid/traffic_cone.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        53
+      ],
+      "anchor": "bottom-center"
+    },
+    "parcel": {
+      "file": "grid/parcel.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "garbage_bag": {
+      "file": "grid/garbage_bag.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "bricks": {
+      "file": "grid/bricks.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "pallet": {
+      "file": "grid/pallet.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "extinguisher": {
+      "file": "grid/extinguisher.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        62
+      ],
+      "anchor": "bottom-center"
+    },
+    "cinder_block": {
+      "file": "grid/cinder_block.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        44
+      ],
+      "anchor": "bottom-center"
+    },
+    "folding_chair": {
+      "file": "grid/folding_chair.png",
+      "cells": [
+        1,
+        1
+      ],
+      "canvas": [
+        44,
+        57
+      ],
+      "anchor": "bottom-center"
     }
   }
 }

@@ -26,6 +26,24 @@
     "cabinet":         { "cells": [1, 1], "tall": 1.6 },
     "cot":             { "cells": [2, 1], "tall": 1.0 },
     "server_rack":     { "cells": [1, 1], "tall": 1.9 },
-    "blast_door":      { "cells": [2, 1], "tall": 1.4 }
+    "blast_door":      { "cells": [2, 1], "tall": 1.4 },
+
+    "_comment_items": "liftable item set (2026-07-10 pack) — all 1x1, weights live in the game's ITEMS registry",
+    "barrel":          { "cells": [1, 1], "tall": 1.2 },
+    "propane_tank":    { "cells": [1, 1], "tall": 1.4 },
+    "sandbags":        { "cells": [1, 1], "tall": 1.0 },
+    "medkit":          { "cells": [1, 1], "tall": 1.0 },
+    "ammo_box":        { "cells": [1, 1], "tall": 1.0 },
+    "toolbox":         { "cells": [1, 1], "tall": 1.0 },
+    "jerry_can":       { "cells": [1, 1], "tall": 1.2 },
+    "tire":            { "cells": [1, 1], "tall": 1.0 },
+    "traffic_cone":    { "cells": [1, 1], "tall": 1.2 },
+    "parcel":          { "cells": [1, 1], "tall": 1.0 },
+    "garbage_bag":     { "cells": [1, 1], "tall": 1.0 },
+    "bricks":          { "cells": [1, 1], "tall": 1.0 },
+    "pallet":          { "cells": [1, 1], "tall": 1.0 },
+    "extinguisher":    { "cells": [1, 1], "tall": 1.4 },
+    "cinder_block":    { "cells": [1, 1], "tall": 1.0 },
+    "folding_chair":   { "cells": [1, 1], "tall": 1.3 }
   }
 }
