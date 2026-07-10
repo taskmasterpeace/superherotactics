@@ -42,3 +42,11 @@ The owner does NOT see chat images or claude.ai Artifacts. Deliver visuals into 
 PixelLab REST is `https://api.pixellab.ai/v2` (Bearer). AutoSprite is `https://www.autosprite.io/api/v1` + `/api/mcp`. Keys live in `MVP/.env.local` (gitignored) — NEVER commit or echo them. In-session, use the MCP (already authed).
 
 Grid must be flat top-down for 8-dir facing to render (see spec §2). If facing still 2-way, that refactor isn't done yet.
+
+## Make UI (panels, bars, icon sets) — proven 2026-07-10
+See `MVP/public/asset-lab/ui-preview.html` for the test battery results (menu, status plate, 16 icons, in-context mock).
+- **Panels/bars/menus**: `create_ui_asset` — `elements` (button, health_bar, avatar, window, toolbar, tab…) auto-layout, or `pieces` (rounded_rect/circle/polygon on a 512-long-side virtual grid) for exact layouts. 25 gens/panel. **No style-image param** — steer with description + `color_palette`; "gunmetal steel, amber highlights, riveted edges" lands on-style for SHT. It letters buttons on its own — for production ask for BLANK buttons and render text in-engine.
+- **Icon sets (the icon factory)**: `create_1_direction_object` with `style_images` (our own sprites, ALL ≤64px → output 64 → **16 distinct icons in one 20-gen call** via `item_descriptions`; ≤42px → 64). Review → `select_object_frames` (each becomes its own object) → download. Style grounding genuinely pulls our palette/outline.
+- **Matching font**: `create_font` outputs a real .ttf (untested yet).
+- **CRITICAL — never relay base64 through chat**: 1 flipped char per ~2KB kills the PNG ("broken data stream"). Use `MVP/scripts/asset-pipeline/pixellab-mcp.mjs call <tool> <args.json>` — an HTTP MCP client that inlines `"@file:path"` values from disk, byte-perfect. Key auto-read from env/`~/.claude.json`. Also: don't run `select_object_frames` in parallel with downloads of review-frame URLs — selection deletes them; fetch AFTER via the new object ids.
+- **Billing 2026-07-10**: subscription gens exhausted (2073/2000); runs on credit fallback now — whole 70-gen battery cost ~$0.25 of the $80 pool. Effectively unconstrained.

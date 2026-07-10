@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHT — PixelLab UI Test Battery</title>
+<style>
+  :root {
+    --bg: #17140f;
+    --card: #201c15;
+    --border: #3a3325;
+    --amber: #f5a623;
+    --amber-dim: #8f6a2a;
+    --text: #e8e0d0;
+    --muted: #a09680;
+    --good: #7dc95e;
+    --warn: #e0b040;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    padding: 2rem 1rem 6rem;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  h1 {
+    font-family: Consolas, monospace;
+    font-size: 1.6rem;
+    letter-spacing: -0.02em;
+    color: var(--amber);
+    text-transform: uppercase;
+  }
+  .sub { color: var(--muted); margin-bottom: 2rem; }
+  h2 {
+    font-family: Consolas, monospace;
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--amber);
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0.4rem;
+    margin: 2.5rem 0 1rem;
+  }
+  .verdict {
+    background: linear-gradient(135deg, #241f14, #1c1810);
+    border: 2px solid var(--amber-dim);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .verdict strong { color: var(--good); }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-start; }
+  .col { flex: 1 1 300px; }
+  .pix { image-rendering: pixelated; }
+  .imgbox {
+    background:
+      repeating-conic-gradient(#26221a 0% 25%, #1d1a13 0% 50%) 0 0 / 24px 24px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    display: inline-block;
+  }
+  .caption { color: var(--muted); font-size: 0.85rem; margin-top: 0.4rem; }
+  .tag {
+    display: inline-block;
+    font-family: Consolas, monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: #2c2517;
+    color: var(--amber);
+    border: 1px solid var(--amber-dim);
+    border-radius: 999px;
+    padding: 0.1rem 0.6rem;
+    margin-right: 0.4rem;
+  }
+  .grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .grid .cell {
+    background: #241f16;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    width: 112px;
+  }
+  .grid .cell img { width: 96px; height: 96px; }
+  .grid .cell .nm { font-size: 0.68rem; color: var(--muted); margin-top: 4px; font-family: Consolas, monospace; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+  td, th { border: 1px solid var(--border); padding: 0.45rem 0.7rem; text-align: left; }
+  th { background: #262115; color: var(--amber); font-family: Consolas, monospace; font-size: 0.78rem; text-transform: uppercase; }
+  code { background: #2a2418; border-radius: 4px; padding: 0.05rem 0.35rem; font-size: 0.85em; color: #ffd98a; }
+  .big img { max-width: 100%; height: auto; }
+  ul { margin-left: 1.2rem; }
+  li { margin-bottom: 0.35rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>PixelLab UI Test Battery</h1>
+  <div class="sub">Reference-grounded pixel UI for the tactical layer &middot; 2026-07-10 &middot; three generation tests, ~$0.30 total</div>
+
+  <div class="verdict">
+    <strong>Verdict: it works.</strong> PixelLab can generate our combat UI — right-click menus, health/status plates, and
+    style-matched icon sets — in one consistent gunmetal-and-amber pixel language that sits naturally next to our
+    existing characters and props. Icon sets can be grounded on our actual game sprites via style references
+    (16 icons per call). UI panels take text + palette hints (no image refs), but land on-style anyway.
+  </div>
+
+  <h2>Baseline — the art the UI must match</h2>
+  <div class="card">
+    <div class="row">
+      <div class="imgbox"><img class="pix" src="sprites/v3hero_south.png" width="124" alt="hero"></div>
+      <div class="imgbox"><img class="pix" src="sprites/v3merc_south.png" width="122" alt="merc"></div>
+      <div class="imgbox"><img class="pix" src="sprites/v3surge_south.png" width="124" alt="surge"></div>
+      <div class="imgbox"><img class="pix" src="map/crate.png" width="100" alt="crate"></div>
+      <div class="imgbox"><img class="pix" src="map/dumpster.png" width="120" alt="dumpster"></div>
+      <div class="imgbox"><img class="pix" src="map/vending_machine.png" width="44" alt="vending"></div>
+    </div>
+    <div class="caption">Existing roster + props (PixelLab v3, style contract). Two of these sprites were fed to the icon
+    generation as style references.</div>
+  </div>
+
+  <h2>Test A — right-click command menu <span class="tag">create_ui_asset</span> <span class="tag">25 gens</span></h2>
+  <div class="card">
+    <div class="row">
+      <div class="imgbox"><img class="pix" src="ui/context_menu.png" width="256" alt="context menu"></div>
+      <div class="imgbox"><img class="pix" src="ui/context_menu.png" width="384" alt="context menu 1.5x"></div>
+    </div>
+    <div class="caption">Prompted as a piece layout (header + 6 buttons). PixelLab styled every piece consistently —
+    riveted gunmetal, amber rims — and even lettered the buttons on its own. For production we generate <em>blank</em>
+    buttons and render labels in-engine, so one asset serves every menu.</div>
+  </div>
+
+  <h2>Test B — unit status plate <span class="tag">create_ui_asset</span> <span class="tag">25 gens</span></h2>
+  <div class="card">
+    <div class="row">
+      <div class="imgbox"><img class="pix" src="ui/status_plate.png" width="384" alt="status plate"></div>
+    </div>
+    <div class="caption">Scaffolded from named elements (<code>panel</code>, <code>avatar</code>, <code>health_bar</code>).
+    Segmented red/teal bar matches our HP + shield model. Production pattern: use the generated frame, draw the fill bar
+    programmatically so it scales with HP.</div>
+  </div>
+
+  <h2>Test C — martial arts icon set <span class="tag">create_1_direction_object</span> <span class="tag">style refs from OUR sprites</span> <span class="tag">20 gens</span></h2>
+  <div class="card">
+    <div id="icon-grid" class="grid">
+      <div class="cell"><img class="pix" src="ui/icons/jab.png" alt="jab"><div class="nm">JAB</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/uppercut.png" alt="uppercut"><div class="nm">UPPERCUT</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/hook.png" alt="hook"><div class="nm">HOOK</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/elbow.png" alt="elbow"><div class="nm">ELBOW</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/knee.png" alt="knee"><div class="nm">KNEE</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/low_kick.png" alt="low kick"><div class="nm">LOW KICK</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/foot_sweep.png" alt="foot sweep"><div class="nm">FOOT SWEEP</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/hip_throw.png" alt="hip throw"><div class="nm">HIP THROW</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/suplex.png" alt="suplex"><div class="nm">SUPLEX</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/armbar.png" alt="armbar"><div class="nm">ARMBAR</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/rear_choke.png" alt="rear naked choke"><div class="nm">REAR CHOKE</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/guillotine.png" alt="guillotine"><div class="nm">GUILLOTINE</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/palm_strike.png" alt="palm strike"><div class="nm">PALM STRIKE</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/parry.png" alt="parry"><div class="nm">PARRY</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/eye_jab.png" alt="eye jab"><div class="nm">EYE JAB</div></div>
+      <div class="cell"><img class="pix" src="ui/icons/grapple.png" alt="grapple"><div class="nm">GRAPPLE</div></div>
+    </div>
+    <div class="caption">One call, 16 technique icons (Jab, Uppercut, Hip Throw, Armbar, Guillotine&hellip; — real names from
+    <code>martial-arts.json</code>), grounded on our hero + merc sprites and two props as style references. This is the
+    repeatable "icon factory" for every future ability/action icon.</div>
+  </div>
+
+  <h2>In context — over the real combat scene</h2>
+  <div class="card big">
+    <img class="pix" src="ui/in_context_mock.png" alt="UI over game scene" style="width:100%; max-width:1024px;">
+    <div class="caption">Generated menu + plate composited over our actual map scene (mock placement). Same palette family
+    as the hero token, crate, and server rack — reads as one game.</div>
+  </div>
+
+  <h2>Facts &amp; cost</h2>
+  <div class="card">
+    <table>
+      <tr><th>Test</th><th>Tool</th><th>Cost</th><th>Time</th><th>Result</th></tr>
+      <tr><td>Context menu</td><td><code>create_ui_asset</code> (pieces)</td><td>25 gens</td><td>~90 s</td><td>On-style, usable after blank-button rerun</td></tr>
+      <tr><td>Status plate</td><td><code>create_ui_asset</code> (elements)</td><td>25 gens</td><td>~90 s</td><td>On-style frame + segmented bars</td></tr>
+      <tr><td>16 icons</td><td><code>create_1_direction_object</code> + style refs</td><td>20 gens</td><td>~8 min</td><td>See grid above</td></tr>
+    </table>
+    <div class="caption">Whole battery moved the credit balance ~$0.30. Subscription generations are exhausted (2073/2000);
+    everything now runs on the $80 credit pool — roughly 20,000 more generations at this rate.</div>
+  </div>
+
+  <h2>What we learned (the fine print)</h2>
+  <div class="card">
+    <ul>
+      <li><strong>Style refs are real and they work</strong> — on objects/icons (<code>style_images</code>, up to 8), 8-direction
+        objects, and tiles. <strong>Not</strong> on <code>create_ui_asset</code> panels — those take text + palette hints only, but
+        the "gunmetal + amber" prompt language lands on-style reliably.</li>
+      <li><strong>Base64 refs must never pass through chat</strong> — a single flipped character corrupts the PNG. New pipeline
+        script <code>MVP/scripts/asset-pipeline/pixellab-mcp.mjs</code> calls the PixelLab MCP over HTTP and inlines files
+        from disk (<code>@file:path</code>), byte-perfect. This is now the batch tool for icon/asset runs.</li>
+      <li><strong>Small canvas = multi-candidate packs</strong> — at 64 px one call yields 16 icons (each its own description),
+        at 32 px up to 64. Review &rarr; keep the good ones &rarr; each becomes its own asset.</li>
+      <li><strong>Pixel fonts exist too</strong> — <code>create_font</code> outputs a real .ttf; one call would give the laptop/combat
+        UI a matching typeface. Not yet tested (next battery).</li>
+    </ul>
+  </div>
+
+  <h2>Recommended next move</h2>
+  <div class="card">
+    <ol style="margin-left:1.2rem">
+      <li><strong>Approve the direction</strong> — look at the mock above: is gunmetal + amber the SHT interface language?</li>
+      <li><strong>Generate the production UI kit</strong> (one batch, ~$2–4): blank 9-slice button (normal/hover/pressed),
+        context-menu frame, unit plate + separate bar fills, AP pips, tab strip, tooltip frame, cursor set, and a matching
+        pixel font via <code>create_font</code>.</li>
+      <li><strong>Wire it into Phaser</strong> — replace the flat <code>Graphics</code> health bars and add the right-click command
+        menu in <code>CombatScene</code> using the kit (9-slice + bitmap text).</li>
+      <li><strong>Then the laptop layer</strong> — same language, React side, using the same kit as CSS assets.</li>
+    </ol>
+  </div>
+
+</div>
+</body>
+</html>
