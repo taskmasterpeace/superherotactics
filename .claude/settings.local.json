@@ -9,7 +9,8 @@
       "Bash(npx tsc *)",
       "WebSearch",
       "mcp__pixellab__create_topdown_tileset",
-      "mcp__pixellab__create_map_object"
+      "mcp__pixellab__create_map_object",
+      "mcp__pixellab__agent_help"
     ],
     "deny": []
   }
